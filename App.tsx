@@ -7,10 +7,14 @@ import React from 'react'
 // import ServicesScreen from './src/screens/SignAuth/Services'
 import Cart from './src/screens/SignAuth/Cart'
 import ServicesScreen from './src/screens/SignAuth/Services'
+import RootNavigator from './src/navigation/RootNavigator'
+import Booking from './src/screens/SignAuth/BookingDetails'
+import BookingDetail from './src/screens/SignAuth/BookingDetail'
+
 // import Services from './src/screens/SignAuth/Services'
 const App = () => {
   return (
-      <ServicesScreen/>
+      <RootNavigator/>
   )
 }
 

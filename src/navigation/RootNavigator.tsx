@@ -8,6 +8,8 @@ import Signin from "../screens/SignAuth/Signin";
 import HomeScreen from "../screens/home/HomeScreen";
 import SignUp from "../screens/SignAuth/SignUp";
 import VerificationScreen from "../screens/SignAuth/VerificationScreen";
+import CodeVerification from "../screens/SignAuth/CodeVerification";
+import Services from "../screens/SignAuth/Services";
 
 
 
@@ -34,6 +36,8 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
          <Stack.Screen name="SignUp" component={SignUp} />
          <Stack.Screen name="HomeScreen" component={HomeScreen} />
             <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
+             <Stack.Screen name="CodeVerification" component={CodeVerification} />
+             <Stack.Screen name="Services" component={Services} />
       </Stack.Navigator>
     </NavigationContainer>
   );

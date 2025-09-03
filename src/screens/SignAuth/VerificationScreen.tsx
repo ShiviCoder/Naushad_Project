@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native"; // ✅ Import navigation hook
 
 const OTPVerification = () => {
   const [email, setEmail] = useState("");
+  const navigation = useNavigation(); // ✅ Initialize navigation
 
   const handleSendOTP = () => {
     console.log("OTP sent to:", email);
+    navigation.navigate("CodeVerification"); // ✅ Navigate to CodeVerification screen
   };
 
   return (

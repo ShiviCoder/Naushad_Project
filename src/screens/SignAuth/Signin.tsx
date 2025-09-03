@@ -6,74 +6,62 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Alert, // Import Alert for feedback
+  Alert
 } from 'react-native';
-import React, { useState } from 'react'; // Import useState
+import React, { useState } from 'react';
 
-// Accept { navigation } as a prop to use React Navigation
 const Signin = ({ navigation }) => {
-  // State variables to hold the input values
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Function to handle the sign-in action
   const handleSignIn = () => {
-    // Basic validation
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password.');
       return;
     }
-    // In a real app, you would send this to your backend server for authentication.
-    console.log('Signing in with:', { email, password });
-    // Corrected success message to "Signed in"
-    Alert.alert('Success', `Signed in with email: ${email}`);
+    // For demo: Navigate to HomeScreen after successful sign-in
+    navigation.replace('HomeScreen');  // replace to prevent going back
   };
 
   return (
-    // Use a single root element (SafeAreaView) for the entire component
     <SafeAreaView style={styles.container}>
       <Image
         source={require('../../assets/images/logo.png')}
         style={styles.logo}
-        resizeMode="contain" // Added for better image scaling
+        resizeMode="contain"
       />
 
-      {/* Email Input */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
           placeholder="Enter your email"
           style={styles.inputtext}
           value={email}
-          onChangeText={setEmail} // Update state on change
+          onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
       </View>
 
-      {/* Password Input */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <TextInput
           placeholder="Enter your password"
           style={styles.inputtext}
           value={password}
-          onChangeText={setPassword} // Update state on change
-          secureTextEntry // Hides password characters
+          onChangeText={setPassword}
+          secureTextEntry
         />
       </View>
 
-      {/* Forgot Password */}
       <TouchableOpacity style={styles.forgotPasswordContainer}>
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
 
-      {/* Signin Button */}
       <TouchableOpacity style={styles.signupButton} onPress={handleSignIn}>
         <Text style={styles.signupButtonText}>SIGN IN</Text>
       </TouchableOpacity>
 
-      {/* "Don't have an account?" Section moved inside the root element */}
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don’t have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
@@ -92,7 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
-    paddingHorizontal: 20, // Add horizontal padding for spacing
+    paddingHorizontal: 20,
   },
   logo: {
     width: 298,
@@ -100,7 +88,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   inputContainer: {
-    width: '100%', // Use percentage for responsiveness
+    width: '100%',
     marginBottom: 15,
   },
   inputtext: {
@@ -121,11 +109,10 @@ const styles = StyleSheet.create({
   },
   forgotPasswordContainer: {
     width: '100%',
-    alignItems: 'flex-start', // Aligned to the right as is common practice
+    alignItems: 'flex-start',
     marginBottom: 20,
   },
   forgotText: {
-   
     color: '#000',
     fontSize: 14,
     fontWeight: '500',
@@ -138,8 +125,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    elevation: 2, // Subtle shadow for Android
-    shadowColor: '#000', // Shadow for iOS
+    elevation: 2,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -153,8 +140,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 50,
-    paddingBottom:20,
-  
+    paddingBottom: 20,
   },
   signupText: {
     fontSize: 14,
