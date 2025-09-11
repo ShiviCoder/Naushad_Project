@@ -12,17 +12,23 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 // Uncomment this if you're using React Navigation
- import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabsScreen } from 'react-native-screens';
 
 const HomeScreen = () => {
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
-  
+
   // Uncomment this if using React Navigation
-   const navigation = useNavigation();
+  const navigation = useNavigation();
 
   // Navigation handler function for "See all" buttons
   const handleSectionNavigation = (section: string) => {
     switch (section) {
+
+      case 'products':
+        navigation.navigate('OurProducts')
+        break;
+
       case 'offers':
         // navigation.navigate('SpecialOffersScreen');
         console.log('Navigate to Special Offers Screen');
@@ -32,10 +38,7 @@ const HomeScreen = () => {
         // console.log('Navigate to Services');
         navigation.navigate('Services')
         break;
-      case 'products':
-        // navigation.navigate('ProductsScreen');
-        console.log('Navigate to Products Screen');
-        break;
+
       case 'videos':
         // navigation.navigate('VideosScreen');
         console.log('Navigate to Videos Screen');
@@ -45,13 +48,15 @@ const HomeScreen = () => {
         console.log('Navigate to Certificates Screen');
         break;
       case 'packages':
-        // navigation.navigate('PackagesScreen');
+        navigation.navigate('OurPackages');
         console.log('Navigate to Packages Screen');
         break;
       case 'productPackages':
-        // navigation.navigate('ProductPackagesScreen');
+        navigation.navigate('ProductPackageScreen');
         console.log('Navigate to Product Packages Screen');
         break;
+
+
       default:
         console.log('Unknown section');
     }
@@ -158,9 +163,9 @@ const HomeScreen = () => {
         </View>
 
         {/* Special Offers header with navigation */}
-        <SectionTitle 
-          title="Special Offers" 
-          onPress={() => handleSectionNavigation('offers')}
+        <SectionTitle
+          title="Special Offers"
+
         />
 
         {/* Special Offer split card */}
@@ -169,7 +174,7 @@ const HomeScreen = () => {
             <Text style={styles.offerBig}>Haircut</Text>
             <Text style={styles.offerSmall}>20% off</Text>
             <Text style={styles.offerDate}>July 16–July 24</Text>
-            <TouchableOpacity style={styles.offerBtn}>
+            <TouchableOpacity onPress={() => navigation.navigate('OfferScreen')} style={styles.offerBtn}>
               <Text style={styles.offerBtnText}>Offer now</Text>
             </TouchableOpacity>
           </View>
@@ -177,8 +182,8 @@ const HomeScreen = () => {
         </View>
 
         {/* Services Section with navigation */}
-        <SectionTitle 
-          title="Our services" 
+        <SectionTitle
+          title="Our services"
           onPress={() => handleSectionNavigation('services')}
         />
         <FlatList
@@ -216,8 +221,8 @@ const HomeScreen = () => {
         </ImageBackground>
 
         {/* Products Section with navigation */}
-        <SectionTitle 
-          title="Get our products" 
+        <SectionTitle
+          title="Get our products"
           onPress={() => handleSectionNavigation('products')}
         />
         <FlatList
@@ -249,8 +254,8 @@ const HomeScreen = () => {
         />
 
         {/* Videos with navigation */}
-        <SectionTitle 
-          title="Videos" 
+        <SectionTitle
+          title="Videos"
           onPress={() => handleSectionNavigation('videos')}
         />
         <FlatList
@@ -270,8 +275,8 @@ const HomeScreen = () => {
         />
 
         {/* Certificates with navigation */}
-        <SectionTitle 
-          title="Our Certificates" 
+        <SectionTitle
+          title="Our Certificates"
           onPress={() => handleSectionNavigation('certificates')}
         />
         <View style={styles.certStrip}>
@@ -284,8 +289,8 @@ const HomeScreen = () => {
         </View>
 
         {/* About our salon - No "See all" button needed */}
-        <SectionTitle 
-          title="About our salon" 
+        <SectionTitle
+          title="About our salon"
           showSeeAll={false}
         />
         <View style={styles.aboutContainer}>
@@ -307,8 +312,8 @@ const HomeScreen = () => {
         </View>
 
         {/* Our Packages (2-up grid) with navigation */}
-        <SectionTitle 
-          title="Our Packages" 
+        <SectionTitle
+          title="Our Packages"
           onPress={() => handleSectionNavigation('packages')}
         />
         <View style={styles.packageGrid}>
@@ -330,9 +335,9 @@ const HomeScreen = () => {
         </View>
 
         {/* Product Packages (horizontal small cards) with navigation */}
-        <SectionTitle 
-          title="Product Packages" 
-          onPress={() => handleSectionNavigation('productPackages')}
+        <SectionTitle
+          title="Product Packages"
+          onPress={() => handleSectionNavigation('ProductPackageScreen')}
         />
         <FlatList
           data={productPackages}
@@ -369,16 +374,17 @@ const HomeScreen = () => {
         </View>
       </View>
     </View>
+
   );
 };
 
 // Updated SectionTitle component with navigation support
-const SectionTitle = ({ 
-  title, 
+const SectionTitle = ({
+  title,
   onPress,
-  showSeeAll = true 
-}: { 
-  title: string; 
+  showSeeAll = true
+}: {
+  title: string;
   onPress?: () => void;
   showSeeAll?: boolean;
 }) => (
@@ -784,6 +790,7 @@ const styles = StyleSheet.create({
   smallPackBtnText: { color: '#333', fontWeight: '700' },
 
   bottomBarWrap: {
+  
     position: 'absolute',
     left: 0,
     right: 0,
