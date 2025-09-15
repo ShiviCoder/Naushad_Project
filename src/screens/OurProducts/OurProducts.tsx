@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity, } from 'react-native'
 import React from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FlatListComp from './FlatListComp'
 import Icon from 'react-native-vector-icons/Ionicons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import Head from '../../components/Head';
 type RootStackParamList = {
   HomeScreen: undefined;
   OurProducts: undefined;
@@ -15,29 +17,21 @@ type OurProductsProps = {
 
 const OurProducts = ({ navigation }: OurProductsProps) => {
   return (
-    <View>
-      <View style={styles.HeadingContain}>
-        <TouchableOpacity style={styles.touchStyle} onPress={() => navigation.navigate('HomeScreen')} >
-          <Image source={require('../../assets/OurProduct/LeftArrow.png')} />
-        </TouchableOpacity>
-        <Text style={styles.HeadingStyle}>Our Products</Text>
-        <View style={styles.LikeImgContain}>
-          <Image source={require('../../assets/OurProduct/Like.png')} />
-        </View>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} >
+     <Head title="Our Products" ></Head>
       <FlatListComp />
       <View style={styles.bottomBarWrap}>
         <View style={styles.bottomNav}>
-          <Icon name="home" size={22} color="#fff" />
-          <Icon name="document-text-outline" size={22} color="#fff" />
+          <Icon name="home" size={wp('6%')} color="#fff" />
+          <Icon name="document-text-outline" size={wp('6%')} color="#fff" />
           <View style={styles.fabCircle}>
-            <Icon name="add" size={26} color="#000" />
+            <Icon name="add" size={wp('6%')} color="#000" />
           </View>
-          <Icon name="hand-left-outline" size={22} color="#fff" />
-          <Icon name="person-outline" size={22} color="#fff" />
+          <Icon name="hand-left-outline" size={wp('6%')} color="#fff" />
+          <Icon name="person-outline" size={wp('6%')} color="#fff" />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -49,50 +43,56 @@ const styles = StyleSheet.create({
     width: '90%',
     justifyContent: 'space-between',
     alignSelf: 'center',
-    marginTop: 20,
+    marginVertical: hp('2%'),
     alignItems: 'center'
   },
   HeadingStyle: {
-    fontSize: 20,
-    fontWeight: 700
+    fontSize: wp('6%'),
+    fontWeight: '700'
   },
   LikeImgContain: {
-    height: 40,
-    width: 40,
+    height: wp('10%'),
+    width: wp('10%'),
     backgroundColor: '#9387871F',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '50%'
+    borderRadius: wp('10%')
   },
   touchStyle: {
-    height: 40,
-    width: 40
+    height: wp('5%'),
+    width: wp('10%'),
+    alignItems : 'center',
+    justifyContent : 'center'
+  },
+  iconImage : {
+    height : '70%',
+    width : '70%'
   },
   bottomBarWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 16,
+    bottom: hp('2%'),
     alignItems: 'center',
-    marginBottom: 50,
+    paddingBottom: hp('1%'),
   },
   bottomNav: {
     backgroundColor: '#111',
     width: '92%',
-    height: 54,
-    borderRadius: 28,
+    height: hp('7%'),
+    borderRadius: wp('10%'),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 10,
+    paddingHorizontal: wp('3%'),
   },
   fabCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: wp('12%'),
+    height: wp('12%'),
+    borderRadius: wp('7%'),
     backgroundColor: '#F6B745',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -14,
+  
   },
 })

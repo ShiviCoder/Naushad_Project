@@ -24,7 +24,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                 <TouchableOpacity onPress={() => navigation.navigate('OurProducts')}>  <Icon style={styles.headingIcon} name="chevron-left" size={30} color="#000" /> </TouchableOpacity>
                 <Text style={styles.headingTxt} >Our Products</Text>
             </View>
-            <Image style={styles.image} source={product.image} />
+            <Image style={styles.image} source={product.image[1]} />
             <View style={styles.detailContain}>
                 <Text style={styles.prodName} >{product.name}</Text>
                 <Text style={styles.prodName} >₹ {product.price}</Text>

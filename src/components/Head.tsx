@@ -2,13 +2,15 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-const Head:React.FC<{title: string}> = ({title}) => {
+const Head: React.FC<{ title: string }> = ({ title }) => {
   const navigation = useNavigation();
   return (
     <View style={styles.head}>
       <TouchableOpacity
         onPress={() => {
-          if (navigation.canGoBack()) navigation.goBack();
+          if (navigation.canGoBack()) {
+             navigation.goBack();
+          } 
         }}
         style={styles.backButton}
       >

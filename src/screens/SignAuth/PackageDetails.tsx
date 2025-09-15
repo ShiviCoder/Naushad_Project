@@ -2,26 +2,25 @@ import { StyleSheet, Text, View, Image } from 'react-native'
 import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { Rating } from 'react-native-ratings';
 import Head from '../../components/Head';
+import  {PackageData} from '../../components/PackageData';
 
 
 type RootStackParamList = {
     OurPackages: undefined,
-    PackageDetails: undefined
+    PackageDetails: {item: PackageData}
 }
 
-type PackageDetailsProps = {
-    navigation: NativeStackNavigationProp<RootStackParamList, 'PackageDetails'>
-}
+type PackageDetailsRouteProp = RouteProp<RootStackParamList, 'PackageDetails'>
 
-const PackageDetails = ({ navigation }: PackageDetailsProps) => {
-    const route = useRoute<any>()
+const PackageDetails = () => {
+    const route = useRoute<PackageDetailsRouteProp>()
     const { item } = route.params
     return (
         <View style={styles.container}>
-            <Head></Head>
+            <Head title='Our Packages'></Head>
             <Image style={styles.img} source={item.image} />
             <View style={styles.detail}>
                 <View style={styles.titleContain}>
