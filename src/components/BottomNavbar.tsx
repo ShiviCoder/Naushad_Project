@@ -9,84 +9,57 @@ import {
     heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-const BottomNavbar = () => {
-    const navigation = useNavigation<any>();
-    const [activeTab, setActiveTab] = useState<string>('home');
-    const route = useRoute();
-    useEffect(() => {
-        switch (route.name) {
-            case 'HomeScreen':
-                setActiveTab('home');
-                break;
-            case 'BookingScreen':
-                setActiveTab('book');
-                break;
-            case 'BookAppointmentScreen':
-                setActiveTab('add');
-                break;
-            case 'StarScreen':
-                setActiveTab('blank');
-                break;
-            case 'AccountScreen':
-                setActiveTab('account');
-                break;
-            default:
-                setActiveTab('home');
-        }
-    }, [route.name]);
-    const handlePress = (tab: string, screen: string) => {
-        setActiveTab(tab);
-        navigation.navigate(screen);
-    };
+const BottomNavbar = (props : any) => {
+     const { state, navigation } = props;
+  const handlePress = (screen: string) => {
+    navigation.navigate(screen);
+  };
 
-    return (
-        <View style={styles.bottomBarWrap}>
-            <View style={styles.bottomNav}>
-                <TouchableOpacity onPress={() => handlePress('home', 'HomeScreen')}>
-                    <View style={[styles.iconWrapper, activeTab === 'home' && styles.activeWrapper]}>
-                        <Icon
-                            name="home"
-                            size={wp('7%')}
-                            color={activeTab === 'home' ? '#F6B745' : '#fff'}
-                        />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('book', 'BookingScreen')}>
-                    <View style={[styles.iconWrapper, activeTab === 'book' && styles.activeWrapper]}>
-                        <MySvgIcon
-                            width={wp('7%')}
-                            height={hp('3%')}
-                            fill={activeTab === 'book' ? '#F6B745' : '#fff'}
-                        />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('add', 'BookAppointmentScreen')}>
-                    <View style={styles.fabCircle}>
-                        <Icon name="add" size={wp('7%')} color="#000" />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('blank', 'BlankScreen')}>
-                    <View style={[styles.iconWrapper, activeTab === 'star' && styles.activeWrapper]}>
-                        <StarSvgIcon
-                            width={hp('5%')}
-                            height={hp('3%')}
-                            fill={activeTab === 'blank' ? '#F6B745' : 'white'}
-                        />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('account', 'AccountScreen')}>
-                    <View style={[styles.iconWrapper, activeTab === 'account' && styles.activeWrapper]}>
-                        <Icon
-                            name="person-outline"
-                            size={wp('7%')}
-                            color={activeTab === 'account' ? '#F6B745' : '#fff'}
-                        />
-                    </View>
-                </TouchableOpacity>
-            </View>
+  // Fixed order of tabs
+  const tabs = [
+    { name: 'HomeScreen', icon: <Icon name="home" /> },
+    { name: 'BookingScreen', icon: <MySvgIcon /> },
+    { name: 'BookAppointmentScreen', icon: (
+        <View style={styles.fabCircle}>
+          <Icon name="add" size={wp('7%')} color="#000" />
         </View>
-    )
-}
+      ) },
+    { name: 'BlankScreen', icon: <StarSvgIcon />},
+    { name: 'AccountScreen', icon: <Icon name="person-outline" /> },
+  ];
+
+  return (
+    <View style={styles.bottomBarWrap}>
+      <View style={styles.bottomNav}>
+        {tabs.map((tab, index) => {
+          const isActive = state.routes[state.index].name === tab.name;
+          let iconElement = tab.icon;
+
+          // Set dynamic color for icons except FAB
+          if (tab.name !== 'BookAppointmentScreen') {
+            if (tab.name === 'HomeScreen') {
+              iconElement = <Icon name="home" size={wp('7%')} color={isActive ? '#F6B745' : '#fff'} />;
+            } else if (tab.name === 'BookingScreen') {
+              iconElement = <MySvgIcon width={wp('7%')} height={hp('3%')} fill={isActive ? '#F6B745' : '#fff'} />;
+            } else if (tab.name === 'BlankScreen') {
+              iconElement = <StarSvgIcon width={hp('5%')} height={hp('3%')} fill={isActive ? '#F6B745' : '#fff'} />;
+            } else if (tab.name === 'AccountScreen') {
+              iconElement = <Icon name="person-outline" size={wp('7%')} color={isActive ? '#F6B745' : '#fff'} />;
+            }
+          }
+
+          return (
+            <TouchableOpacity key={tab.name} onPress={() => handlePress(tab.name)}>
+              <View style={[styles.iconWrapper, isActive && tab.name !== 'BookAppointmentScreen' ? styles.activeWrapper : {}]}>
+                {iconElement}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
     bottomBarWrap: {

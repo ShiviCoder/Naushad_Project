@@ -26,11 +26,15 @@ const AccountScreen = () => {
   const backgroundColor = theme === 'Dark' ? '#121212' : '#fff';
   const textColor = theme === 'Dark' ? '#fff' : '#333';
   const subTextColor = theme === 'Dark' ? '#bbb' : '#757575BA';
+  const textPrimary = theme === 'Dark' ? '#fff' : '#000'
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {/* Header */}
-      <Head title="Account"></Head>
+      <View style={styles.headContainer}>
+           
+            <Text style={[styles.headText, { color: textPrimary}]}>Account</Text>
+          </View>
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View style={styles.con}>
@@ -42,7 +46,7 @@ const AccountScreen = () => {
             />
           </View>
           <View style={styles.profileText}>
-            <Text style={[styles.name, { color: textColor }]}>Anchal Jain</Text>
+            <Text style={[styles.name, { color: textColor }]}>Aanchal Jain</Text>
             <Text style={[styles.email, { color: subTextColor }]}>
               aachalsethi38881@gmail.com
             </Text>
@@ -63,7 +67,8 @@ const AccountScreen = () => {
       <FlatList
         data={settingData}
         style={styles.detailsContainer}
-        contentContainerStyle={{ margin: wp('2%'),    paddingBottom: hp('12%')  }}
+        contentContainerStyle={{ margin: wp('2%'),    
+        paddingBottom: hp('12%')  }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           return (
@@ -122,7 +127,7 @@ const AccountScreen = () => {
         }}
       />
 
-     <BottomNavbar/>
+    
     </View>
 
     
@@ -134,24 +139,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: hp('1.5%'),
   },
-  headContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingHorizontal: wp('4%'),
-    paddingVertical: hp('1.5%'),
-    gap: wp('30%'),
-  },
-  headText: {
-    fontSize: wp('4.5%'),
-    fontFamily: 'Poppins-Medium',
-    fontWeight: '500',
-  },
-  headIcon: {
-    width: wp('5%'),
-    height: wp('5%'),
-    resizeMode: 'contain',
-  },
+   headContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: wp("5%"),
+      paddingVertical: hp("2%"),
+      justifyContent: "center",
+      
+    },
+    headText: {
+      fontSize: wp("5%"),
+      fontWeight: 'bold',
+    },
   profileSection: {
     paddingHorizontal: wp('4%'),
     flexDirection: 'row',
@@ -180,7 +179,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: wp('4.5%'),
     fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
   },
   email: {
     fontSize: wp('3%'),
@@ -215,12 +213,10 @@ const styles = StyleSheet.create({
   text: {
     fontSize: wp('5%'),
     fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
   },
   subText: {
     fontSize: wp('3%'),
     fontWeight: '400',
-    fontFamily: 'Poppins-Medium',
   },
   textCon: {
     flexDirection: 'column',

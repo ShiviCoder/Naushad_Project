@@ -219,64 +219,12 @@ const BookAppointmentScreen = ({ navigation }) => {
         <View style={styles.servicesContainer}>{services.map(renderService)}</View>
 
         {/* Select Date */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Select Date</Text>
+       
 
           {/* Date Filter Buttons */}
-          <View style={styles.dateFilters}>
-            {['Today', 'Tomorrow', 'This weekend'].map((filter) => (
-              <TouchableOpacity
-                key={filter}
-                style={[
-                  styles.filterButton,
-                  { backgroundColor: theme.card },
-                  selectedDateFilter === filter && { backgroundColor: '#F6B745' },
-                ]}
-                onPress={() => setSelectedDateFilter(filter)}
-              >
-                <Text
-                  style={[
-                    styles.filterText,
-                    { color: theme.textPrimary },
-                    selectedDateFilter === filter && { color: theme.textOnAccent },
-                  ]}
-                >
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Calendar */}
-          <View style={styles.calendar}>{dates.map((item, index) => renderDateItem(item, index))}</View>
-        </View>
-
-        {/* Select Time */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Select Time</Text>
-
-          {/* Morning */}
-          <View style={styles.timeSection}>
-            <View style={styles.timeSectionHeader}>
-              <View style={[styles.timeIndicator, { backgroundColor: theme.accent }]} />
-              <Text style={[styles.timeSectionTitle, { color: theme.textPrimary }]}>Morning</Text>
-            </View>
-            <View style={styles.timeSlots}>
-              {morningSlots.map((time) => renderTimeSlot(time, selectedTimeSlot === time))}
-            </View>
-          </View>
-
-          {/* Afternoon */}
-          <View style={styles.timeSection}>
-            <View style={styles.timeSectionHeader}>
-              <View style={[styles.timeIndicator, { backgroundColor: theme.accent }]} />
-              <Text style={[styles.timeSectionTitle, { color: theme.textPrimary }]}>Afternoon</Text>
-            </View>
-            <View style={styles.timeSlots}>
-              {afternoonSlots.map((time) => renderTimeSlot(time, selectedTimeSlot === time))}
-            </View>
-          </View>
-        </View>
+          
+        
+        
       </ScrollView>
 
       {/* Proceed Button */}

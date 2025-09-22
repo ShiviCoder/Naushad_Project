@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import SplashScreen from '../screens/SplashScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import Signin from '../screens/SignAuth/Signin';
@@ -29,6 +30,7 @@ import BookingPending from '../screens/SignAuth/BookingPending';
 import PreviousBooking from '../screens/SignAuth/PreviousBooking';
 import BookAppoinment2 from '../screens/SignAuth/BookAppoinment2';
 import ProductPakage from '../screens/SignAuth/ProductPakage'
+import BottomNavbar from '../components/BottomNavbar';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -65,20 +67,31 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator();
+ 
+
+function MainTabs(){
+  return (
+      <Tab.Navigator screenOptions={{ headerShown: false }}   tabBar={(props) => <BottomNavbar {...props} />}  initialRouteName="HomeScreen"  >
+      <Tab.Screen name="HomeScreen" component={HomeScreen} />
+      <Tab.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
+      <Tab.Screen name="BookingScreen" component={BookingScreen} />
+      <Tab.Screen name="BlankScreen" component={BlankScreen} />
+      <Tab.Screen name="AccountScreen" component={AccountScreen} />
+    </Tab.Navigator>
+  )
+}
+
 
 export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="main" component={HomeScreen} />
         <Stack.Screen name="Signin" component={Signin} />
         <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} />
-        <Stack.Screen
-          name="VerificationScreen"
-          component={VerificationScreen}
-        />
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="VerificationScreen" component={VerificationScreen}/>
         <Stack.Screen name="CodeVerification" component={CodeVerification} />
         <Stack.Screen name="Services" component={Services} />
         <Stack.Screen name="OurProducts" component={OurProducts} />
@@ -87,26 +100,17 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="OurPackages" component={OurPackages} />
         <Stack.Screen name="PackageDetails" component={PackageDetails} />
         <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
-        <Stack.Screen name="AccountScreen" component={AccountScreen} />
         <Stack.Screen name="PackagesScreen" component={PackagesScreen} />
-        <Stack.Screen
-          name="ProductPackageScreen"
-          component={ProductPackageScreen}
-        />
-        <Stack.Screen
-          name="BookAppointmentScreen"
-          component={BookAppointmentScreen}
-        />
+        <Stack.Screen name="ProductPackageScreen" component={ProductPackageScreen}/>
         <Stack.Screen name='MyProfile' component={MyProfile} />
         <Stack.Screen name='Notification' component={Notification} />
-                <Stack.Screen name='Cart' component={Cart} />
-                <Stack.Screen name='BookingScreen' component={BookingScreen} />
-                 <Stack.Screen name='BlankScreen' component={BlankScreen} />
-                   <Stack.Screen name='BookingAccepted' component={BookingAccepted} />
-                     <Stack.Screen name='BookingPending' component={BookingPending} />
-                       <Stack.Screen name='PreviousBooking' component={PreviousBooking} />
-                                    <Stack.Screen name='BookAppoinment2' component={BookAppoinment2} />
-                                    <Stack.Screen name='ProductPakage' component={ProductPakage} />
+        <Stack.Screen name='Cart' component={Cart} />
+        <Stack.Screen name='BookingScreen' component={BookingScreen} />
+        <Stack.Screen name='BookingAccepted' component={BookingAccepted} />
+        <Stack.Screen name='BookingPending' component={BookingPending} />
+        <Stack.Screen name='PreviousBooking' component={PreviousBooking} />
+        <Stack.Screen name='BookAppoinment2' component={BookAppoinment2} />
+        <Stack.Screen name='ProductPakage' component={ProductPakage} />
 
         
         {/* <Stack.Screen name="BookDetAcc" component={BookDetAcc}/> */}

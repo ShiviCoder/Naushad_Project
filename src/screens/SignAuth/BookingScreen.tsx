@@ -23,16 +23,8 @@ const BookingScreen = () => {
   return (
     <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
       <View style={styles.headContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
-            }
-          }}
-        >
-          <Icon name="chevron-back" size={wp('7%')} color={theme.textPrimary} />
-        </TouchableOpacity>
-        <Text style={[styles.headText, { color: theme.textPrimary }]}>Bookings</Text>
+       
+        <Text style={[styles.headText, { color: theme.textPrimary}]}>Bookings</Text>
       </View>
 
       {/* RadioButton component */}
@@ -67,7 +59,7 @@ const BookingScreen = () => {
           }
         }}
       />
-      <BottomNavbar/>
+    
     </View>
   );
 };
@@ -79,8 +71,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: wp("5%"),
     paddingVertical: hp("2%"),
-    justifyContent: "flex-start",
-    gap: wp('30%')
+    justifyContent: "center",
+    
   },
   headText: {
     fontSize: wp("5%"),

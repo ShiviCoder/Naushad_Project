@@ -622,7 +622,7 @@ const HomeScreen = () => {
       </ScrollView>
 
       {/* Bottom Navigation (rounded dark bar) */}
-      <BottomNavbar/>
+    
     </View>
   );
 };

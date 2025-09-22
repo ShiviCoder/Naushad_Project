@@ -23,7 +23,7 @@ const Signin = ({ navigation }) => {
       return;
     }
     // For demo: Navigate to HomeScreen after successful sign-in
-    navigation.replace('HomeScreen');  // replace to prevent going back
+    navigation.replace('MainTabs');  // replace to prevent going back
   };
 
   return (

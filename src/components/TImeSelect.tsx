@@ -1,17 +1,17 @@
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Shadow } from "react-native-shadow-2";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useTheme } from "../context/ThemeContext";
 
 const TimeSelect = () => {
   const { theme } = useTheme(); // ✅ use theme
-
+ const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const slotArray = [
     "9.00","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","18.00",
   ];
 
-  return (
+    return (
     <View style={{ paddingHorizontal: wp("2%") }}>
       <FlatList
         data={slotArray}
@@ -22,19 +22,38 @@ const TimeSelect = () => {
         }}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <Shadow
-            distance={3}
-            startColor='#F6B745' // ✅ shadow color dynamic
-            offset={[4, 0]}
-            paintInside = {false}
-            style={[styles.shadowContainer, { width: wp("18%") }]}
-          >
-            <TouchableOpacity style={[styles.slotButton, { backgroundColor: theme.cardBackground }]}>
-              <Text style={[styles.slotText, { color: theme.textPrimary }]}>{item}</Text>
-            </TouchableOpacity>
-          </Shadow>
-        )}
+        renderItem={({ item }) => {
+          const isSelected = selectedSlot === item; // ✅ check if selected
+
+          return (
+            <Shadow
+              distance={3}
+              startColor={'#F6B745'} // yellow if selected
+              offset={[4, 0]}
+              style={[styles.shadowContainer, { width: wp("18%") , height: hp("4.5%")}]}
+              paintInside={isSelected ? true : false} 
+            >
+              <TouchableOpacity
+                style={[
+                  styles.slotButton,
+                  {
+                    backgroundColor: isSelected ? '#F6B745' : theme.cardBackground, // ✅ yellow if selected
+                  },
+                ]}
+                onPress={() => setSelectedSlot(item)} // ✅ update state on press
+              >
+                <Text
+                  style={[
+                    styles.slotText,
+                    { color: isSelected ? '#000' : theme.textPrimary }, // text color contrast
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            </Shadow>
+          );
+        }}
       />
     </View>
   );
