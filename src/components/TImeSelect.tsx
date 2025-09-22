@@ -1,34 +1,19 @@
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, useWindowDimensions } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import React from "react";
 import { Shadow } from "react-native-shadow-2";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
-
-
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { useTheme } from "../context/ThemeContext";
 
 const TimeSelect = () => {
-
-
+  const { theme } = useTheme(); // ✅ use theme
 
   const slotArray = [
-    "9.00",
-    "10.00",
-    "11.00",
-    "12.00",
-    "13.00",
-    "14.00",
-    "15.00",
-    "16.00",
-    "17.00",
-    "18.00",
+    "9.00","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","18.00",
   ];
 
   return (
     <View style={{ paddingHorizontal: wp("2%") }}>
       <FlatList
-       // ✅ force re-render on column change
         data={slotArray}
         numColumns={4}
         columnWrapperStyle={{
@@ -40,12 +25,13 @@ const TimeSelect = () => {
         renderItem={({ item }) => (
           <Shadow
             distance={3}
-            startColor="#f7c744"
+            startColor='#F6B745' // ✅ shadow color dynamic
             offset={[4, 0]}
-            style={[styles.shadowContainer, { width: wp("18%") }]} // ✅ equal spacing
+            paintInside = {false}
+            style={[styles.shadowContainer, { width: wp("18%") }]}
           >
-            <TouchableOpacity style={styles.slotButton}>
-              <Text style={styles.slotText}>{item}</Text>
+            <TouchableOpacity style={[styles.slotButton, { backgroundColor: theme.cardBackground }]}>
+              <Text style={[styles.slotText, { color: theme.textPrimary }]}>{item}</Text>
             </TouchableOpacity>
           </Shadow>
         )}
@@ -62,9 +48,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   slotButton: {
-    backgroundColor: "#fff",
     borderRadius: wp("2%"),
     paddingVertical: hp("1%"),
     paddingHorizontal: wp("3%"),
@@ -72,9 +56,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-
   slotText: {
-    color: "#000",
     fontWeight: "600",
     fontSize: wp("3.5%"),
   },

@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
+import BottomNavbar from '../../components/BottomNavbar';
 type RootStackParamList = {
   HomeScreen: undefined;
   OurProducts: undefined;
@@ -17,21 +18,11 @@ type OurProductsProps = {
 
 const OurProducts = ({ navigation }: OurProductsProps) => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} >
+    <View style={{ flex: 1, backgroundColor: '#fff' }} >
      <Head title="Our Products" ></Head>
       <FlatListComp />
-      <View style={styles.bottomBarWrap}>
-        <View style={styles.bottomNav}>
-          <Icon name="home" size={wp('6%')} color="#fff" />
-          <Icon name="document-text-outline" size={wp('6%')} color="#fff" />
-          <View style={styles.fabCircle}>
-            <Icon name="add" size={wp('6%')} color="#000" />
-          </View>
-          <Icon name="hand-left-outline" size={wp('6%')} color="#fff" />
-          <Icon name="person-outline" size={wp('6%')} color="#fff" />
-        </View>
-      </View>
-    </SafeAreaView>
+      <BottomNavbar/>
+    </View>
   )
 }
 

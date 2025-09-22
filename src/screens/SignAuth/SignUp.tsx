@@ -8,6 +8,11 @@ import {
   Image,
   ScrollView,
 } from "react-native";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+
 
 export default function SignupScreen({ navigation }: any) {
   const [fullName, setFullName] = useState("");
@@ -82,7 +87,7 @@ export default function SignupScreen({ navigation }: any) {
 
       {/* Sign In Link */}
       <View style={styles.signinContainer}>
-        <Text style={styles.signinText}>Don’t have Account?</Text>
+        <Text style={styles.signinText}>Already have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Signin")}>
           <Text style={styles.signinLink}> Signin</Text>
         </TouchableOpacity>
@@ -94,58 +99,59 @@ export default function SignupScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
+    paddingHorizontal: wp("5%"),
     backgroundColor: "#fff",
     justifyContent: "center",
   },
   logo: {
-    width: 298,
-    height: 169,
+    width: wp("70%"),
+    height: hp("20%"),
     alignSelf: "center",
-    marginBottom: 40,
-    marginTop: 60,
+    marginBottom: hp("1%"),
+    marginTop: hp("10%"),
   },
   label: {
-    fontSize: 16,
+    fontSize: wp("4%"),
     fontWeight: "600",
-    marginBottom: 5,
-    marginTop: 15,
+    marginBottom: hp("1%"),
+    marginTop: hp("1%"),
     color: "#000",
   },
   input: {
-    height: 50,
+    height: hp("6%"),
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
+    borderRadius: wp("2%"),
+    paddingHorizontal: wp("4%"),
+    fontSize: wp("4%"),
     backgroundColor: "#fff",
   },
   button: {
-    backgroundColor: "#f7b731",
-    paddingVertical: 14,
-    borderRadius: 8,
+    backgroundColor: "#F6B745",
+    paddingVertical: hp("2%"),
+    borderRadius: wp("2%"),
     alignItems: "center",
-    marginTop: 30,
-    marginBottom: 25,
+    marginTop: hp("4%"),
+    marginBottom: hp("3%"),
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: wp("4.5%"),
     fontWeight: "bold",
   },
   signinContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 10,
+    marginTop: hp("1%"),
+    marginBottom: hp("3%"),
   },
   signinText: {
-    fontSize: 14,
+    fontSize: wp("3.5%"),
     color: "#000",
   },
   signinLink: {
     color: "#f7b731",
     fontWeight: "bold",
-    fontSize: 14,
+    fontSize: wp("3.5%"),
   },
 });

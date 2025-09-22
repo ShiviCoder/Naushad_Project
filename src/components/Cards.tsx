@@ -5,19 +5,30 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import { useTheme } from '../context/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 const Card = ({ item }) => {
   // dynamic sizes
   const cardWidth = wp("40%");  // each card takes ~40% of screen width
   const cardHeight = hp("20%"); // proportional height
+  const {theme} = useTheme();
+  const navigation = useNavigation();
 
   return (
     <View style={[styles.cardWrapper, { width: cardWidth, height: cardHeight }]}>
       {/* Folded top corners */}
       <Svg height={hp("12%")} width={cardWidth} style={styles.foldSvg}>
-        <Polygon points={`0,0 ${wp("5%")},0 0,${wp("5%")}`} fill="#ffffff" />
-        <Polygon points={`${cardWidth},0 ${cardWidth - wp("5%")},0 ${cardWidth},${wp("5%")}`} fill="#ffffff" />
-      </Svg>
+      <Polygon 
+  points={`0,0 ${wp("5%")},0 0,${wp("5%")}`} 
+  fill={theme.background} 
+/>
+
+<Polygon 
+  points={`${cardWidth},0 ${cardWidth - wp("5%")},0 ${cardWidth},${wp("5%")}`} 
+  fill={theme.background}  
+/>
+</Svg>
 
       <Shadow distance={2} startColor="#F6B74580" offset={[0, hp("2%")]}>
         {/* Main Card */}
@@ -43,7 +54,7 @@ const Card = ({ item }) => {
             </Text>
             <View style={styles.footerCon}>
               <Text style={styles.about}>{item.about}</Text>
-              <TouchableOpacity style={styles.bookButton}>
+              <TouchableOpacity style={styles.bookButton} onPress={()=>navigation.navigate('ProductPakage')}>
                 <Text style={styles.bookText}>Book now</Text>
               </TouchableOpacity>
             </View>

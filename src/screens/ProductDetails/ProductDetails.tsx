@@ -2,7 +2,10 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useRoute } from '@react-navigation/native';
+import Head from '../../components/Head';
+import { useTheme } from '../../context/ThemeContext';
 
 type RootStackParamList = {
     OurProducts: undefined;
@@ -17,43 +20,58 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
     const route = useRoute<any>();
     const { product } = route.params;
     const [count, setCount] = useState(1);
+    const { theme } = useTheme();
 
     return (
-        <View style={styles.container}>
-            <View style={styles.heading}>
-                <TouchableOpacity onPress={() => navigation.navigate('OurProducts')}>  <Icon style={styles.headingIcon} name="chevron-left" size={30} color="#000" /> </TouchableOpacity>
-                <Text style={styles.headingTxt} >Our Products</Text>
+       <View style={[styles.container, { backgroundColor: theme.dark ? '#121212' : '#fff' }]}>
+    <Head title='Our Products'/>
+    <Image style={styles.image} source={product.image[1]} />
+    <View style={styles.detailContain}>
+        <Text style={[styles.prodName, { color: theme.dark ? '#fff' : '#000' }]}>{product.name}</Text>
+        <Text style={[styles.prodPrice, { color: theme.dark ? '#fff' : '#000' }]}>₹ {product.price}</Text>
+        <View style={styles.ratingContain}>
+            <View style={styles.starContain}>
+                {[...Array(5)].map((_, i) => (
+                    <Icon 
+                        key={i} 
+                        name="star" 
+                        size={wp('5%')} 
+                        color={i < product.rating ? '#F6B745' : (theme.dark ? '#ACACAC' : '#555')} 
+                    />
+                ))}
             </View>
-            <Image style={styles.image} source={product.image[1]} />
-            <View style={styles.detailContain}>
-                <Text style={styles.prodName} >{product.name}</Text>
-                <Text style={styles.prodName} >₹ {product.price}</Text>
-                <View style={styles.ratingContain}>
-                    <View style={styles.starContain}>
-                        <Icon name="star" size={20} style={styles.star} ></Icon>
-                        <Icon name="star" size={20} style={styles.star} ></Icon>
-                        <Icon name="star" size={20} style={styles.star} ></Icon>
-                        <Icon name="star" size={20} style={styles.star} ></Icon>
-                        <Icon name="star" size={20} color={'#ACACAC'} ></Icon>
-                    </View>
-                    <Text style={styles.reviews}>({product.reviews} views)</Text>
-                </View>
-            </View>
-            <Text style={styles.desc}>{product.description}</Text>
-            <View style={styles.countContain}>
-                <TouchableOpacity style={styles.countBtn} onPress={() => setCount(count > 1 ? count - 1 : count)}><Text style={styles.countBtnTxt}>-</Text></TouchableOpacity>
-                <Text style={styles.countTxt}>{count}</Text>
-                <TouchableOpacity style={styles.countBtn} onPress={() => setCount(count + 1)}><Text style={styles.countBtnTxt}>+</Text></TouchableOpacity>
-            </View>
-            <View style={styles.btnContain}>
-                <TouchableOpacity style={styles.cartButton} >
-                    <Text style={styles.cartTxt}>Add to cart</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buyButton}>
-                    <Text style={styles.buyTxt}>Buy Now</Text>
-                </TouchableOpacity>
-            </View>
+            <Text style={[styles.reviews, { color: theme.dark ? '#777' : '#ccc' }]}>({product.reviews} views)</Text>
         </View>
+    </View>
+    <Text style={[styles.desc, { color: theme.dark ? '#fff' : '#000'}]}>{product.description}</Text>
+
+    <View style={[styles.countContain, { backgroundColor: theme.dark ? '#fff' : '#000' }]}>
+        <TouchableOpacity style={styles.countBtn} onPress={() => setCount(count > 1 ? count - 1 : count)}>
+            <Text style={[styles.countBtnTxt,{ color: theme.dark ? '#000' : '#fff'}]}>-</Text>
+        </TouchableOpacity>
+        <Text style={[styles.countTxt,{ color: theme.dark ? '#000' : '#fff'}]}>{count}</Text>
+        <TouchableOpacity style={styles.countBtn} onPress={() => setCount(count + 1)}>
+            <Text style={[styles.countBtnTxt,{ color: theme.dark ? '#000' : '#fff'}]}>+</Text>
+        </TouchableOpacity>
+    </View>
+
+    <View style={styles.btnContain}>
+        <TouchableOpacity 
+            style={[styles.cartButton, { borderColor:  theme.dark ? '#fff' : '#000' }]}  
+            onPress={()=>{
+                navigation.navigate('Cart',{
+                    product : {...product, qty : count, cartImage: product.image[1]}
+                });
+            }}
+        >
+            <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buyButton}>
+            <Text style={styles.buyTxt}>Buy Now</Text>
+        </TouchableOpacity>
+    </View>
+</View>
+
     )
 }
 
@@ -61,118 +79,109 @@ export default ProductDetails
 
 const styles = StyleSheet.create({
     container: {
-        gap: 40
-    },
-    heading: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        gap: 90,
-        width: '85%',
-        alignItems: 'center',
-        marginTop: 40,
-        alignSelf: 'center'
-    },
-    headingIcon: {
-
-    },
-    headingTxt: {
-        fontSize: 20,
-        fontWeight: 700
+        flex: 1,
+        paddingVertical: hp('2%'),
+        paddingHorizontal: wp('4%')
     },
     image: {
+        width: wp('90%'),
+        height: hp('28%'),
+        borderRadius: wp('4%'),
         alignSelf: 'center',
-        width: 350,
-        height: 189,
-        borderRadius: 10,
-        elevation: 10
+        marginBottom: hp('3%'),
+        resizeMode : 'cover'
+    },
+    detailContain: {
+        alignItems: 'flex-start',
+        marginBottom: hp('2%'),
+        gap : hp('1%'),
+        paddingHorizontal : wp('3%')
+    },
+    prodName: {
+        fontSize: wp('7%'),
+        fontWeight: '600',
+        textAlign: 'center'
+    },
+    prodPrice: {
+        fontSize: wp('6%'),
+        fontWeight: '700'
     },
     ratingContain: {
         flexDirection: 'row',
-        width: '80%',
-        justifyContent: 'flex-start',
-        alignSelf: 'center',
-        gap: 10,
-        alignItems: 'center'
-    },
-    detailContain: {
-        gap: 10
-    },
-    prodName: {
-        alignSelf: 'center',
-        width: '80%',
-        fontSize: 24,
-        fontWeight: 500
+        alignItems: 'flex-start',
+        gap: wp('3%'),
+        marginTop: hp('1%')
     },
     starContain: {
         flexDirection: 'row',
     },
-    star: {
-        color: '#F6B745'
-    },
     reviews: {
-        fontSize: 15,
-        color: '#0000006E'
+        fontSize: wp('3.5%')
     },
     desc: {
-        width: '80%',
-        alignSelf: 'center',
-        fontWeight: 500,
-        fontSize: 16
+        width: '90%',
+        alignSelf: 'flex-start',
+        fontSize: wp('5%'),
+        fontWeight: '400',
+        marginBottom: hp('2%'),
+        paddingHorizontal : wp('3%')
+    },
+    countContain: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        borderRadius: wp('3%'),
+        paddingHorizontal : wp('3%'),
+        paddingVertical: hp('1%'),
+        width: wp('35%'),
+        alignSelf: 'flex-start',
+        marginBottom: hp('10%'),
+    },
+    countBtn: {
+        paddingHorizontal: wp('2%'),
+        borderRadius: wp('2%'),
+    },
+    countBtnTxt: {
+        color: "#fff",
+        fontSize: wp('4%'),
+        fontWeight: "bold",
+    },
+    countTxt: {
+        fontSize: wp('4%'),
+        fontWeight: "600",
+        color: "#fff",
+        minWidth: wp('10%'),
+        textAlign: "center",
     },
     btnContain: {
-        width: '80%',
+        width: '100%',
         alignSelf: 'center',
-        gap: 20
+        gap: hp('2%'),
+        paddingHorizontal : wp('3%')
     },
     cartButton: {
-        width: 350,
-        height: 41,
-        borderWidth: 2,
-        borderRadius: 15,
+        width: '100%',
+        height: hp('6%'),
+        borderWidth: 1,
+        borderRadius: wp('4%'),
         justifyContent: 'center',
         alignItems: 'center'
     },
     buyButton: {
-        width: 350,
-        height: 41,
+        width: '100%',
+        height: hp('6%'),
         backgroundColor: '#F6B745',
-        borderRadius: 15,
+        borderRadius: wp('4%'),
         justifyContent: 'center',
         alignItems: 'center'
     },
     cartTxt: {
-
+        fontSize: wp('4%'),
+        fontWeight: '500'
     },
     buyTxt: {
-
-    },
-    countContain: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#000",
-        borderRadius: 12,
-        paddingHorizontal: 5,
-        paddingVertical: 5,
-        width: '30%',
-        marginLeft: 40
-    },
-    countBtn: {
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderRadius: 8,
-        marginHorizontal: 5,
-    },
-    countBtnTxt: {
-        color: "#fff",
-        fontSize: 15,
-        fontWeight: "bold",
-    },
-    countTxt: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#ffffffff",
-        minWidth: 40,
-        textAlign: "center",
+        fontSize: wp('4%'),
+        fontWeight: '600',
+        color : '#fff'
     },
 })

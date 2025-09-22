@@ -5,10 +5,13 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   Alert
 } from 'react-native';
 import React, { useState } from 'react';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -24,7 +27,7 @@ const Signin = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Image
         source={require('../../assets/images/logo.png')}
         style={styles.logo}
@@ -68,7 +71,7 @@ const Signin = ({ navigation }) => {
           <Text style={styles.signupLink}> Signup</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -80,75 +83,78 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
-    paddingHorizontal: 20,
+    paddingHorizontal: wp('5%'),
   },
-  logo: {
-    width: 298,
-    height: 169,
-    marginBottom: 40,
+ logo: {
+    width: wp("70%"),
+    height: hp("20%"),
+    alignSelf: "center",
+    marginBottom: hp("1%"),
+    marginTop: hp("10%"),
   },
   inputContainer: {
-    width: '100%',
-    marginBottom: 15,
+    width: '95%',
+    marginBottom: hp('2%'),
   },
   inputtext: {
     width: '100%',
-    height: 50,
+    height: hp('6.5%'),
     backgroundColor: '#f7f7f7',
-    borderWidth: 1,
+    borderWidth: wp('0.2%'),
     borderColor: '#ddd',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
+    borderRadius: wp('2%'),
+    paddingHorizontal: wp('4%'),
+    fontSize: wp('4%'),
   },
   label: {
-    fontSize: 16,
+    fontSize: wp('4%'),
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: hp('1%'),
     color: '#333',
   },
   forgotPasswordContainer: {
     width: '100%',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: hp('3%'),
+    paddingHorizontal: wp('3%'),
   },
   forgotText: {
     color: '#000',
-    fontSize: 14,
+    fontSize: wp('3.8%'),
     fontWeight: '500',
   },
   signupButton: {
     width: '100%',
-    height: 50,
+    height: hp('6.5%'),
     backgroundColor: '#F6B745',
-    borderRadius: 10,
+    borderRadius: wp('3%'),
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: hp('1.5%'),
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp('0.3%') },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: wp('1%'),
   },
   signupButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: wp('4.5%'),
     fontWeight: 'bold',
   },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 50,
-    paddingBottom: 20,
+    marginTop: hp('6%'),
+    paddingBottom: hp('2%'),
   },
   signupText: {
-    fontSize: 14,
+    fontSize: wp('3.8%'),
     color: '#000',
   },
   signupLink: {
     color: '#f7b731',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: wp('3.8%'),
   },
 });

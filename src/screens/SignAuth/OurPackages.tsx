@@ -11,6 +11,8 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Head from '../../components/Head';
+import { useTheme } from '../../context/ThemeContext';
 
 type Package = {
   id: string;
@@ -100,6 +102,8 @@ const packagesData: Package[] = [
   },
 ];
 const OurPackagesScreen = () => {
+  const { theme } = useTheme(); // ✅ get current theme
+    
   const handleBackPress = () => {
     navigation.goBack();
   };
@@ -112,42 +116,62 @@ const OurPackagesScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const renderPackageItem = ({ item }: { item: Package }) => (
-    <View style={styles.packageCard}>
-      <View style={styles.cardContent}>
-        <View style={styles.textContent}>
-          <Text style={styles.packageTitle}>{item.title}</Text>
-          <Text style={styles.packagePrice}>{item.price}</Text>
-          <View style={styles.servicesRow}>
-            <Text style={styles.servicesLabel}>Services:-</Text>
-            <Text style={styles.servicesText}>{item.services}</Text>
-          </View>
-          <View style={styles.aboutRow}>
-            <Text style={styles.aboutLabel}>About:-</Text>
-            <Text style={styles.aboutText}>{item.about}</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.bookButton}
-            onPress={() => navigation.navigate('PackageDetails', { item })}
-          >
-            <Text style={styles.bookButtonText}>Book now</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.imageContainer}>
-          <Image source={item.image} style={styles.packageImage} />
-        </View>
+   <View
+  style={[
+    styles.packageCard,
+    { backgroundColor: theme.dark ? '#111' : '#fff' }, // card bg
+  ]}
+>
+  <View style={styles.cardContent}>
+    <View style={styles.textContent}>
+      <Text style={[styles.packageTitle, { color: theme.dark ? '#fff' : '#000' }]}>
+        {item.title}
+      </Text>
+      <Text style={[styles.packagePrice, { color: theme.dark ? '#F6B745' : '#FFA726' }]}>
+        {item.price}
+      </Text>
+
+      <View style={styles.servicesRow}>
+        <Text style={[styles.servicesLabel, { color: theme.dark ? '#4CAF50' : '#4CAF50' }]}>
+          Services:-
+        </Text>
+        <Text style={[styles.servicesText, { color: theme.dark ? '#ddd' : '#333' }]}>
+          {item.services}
+        </Text>
       </View>
+
+      <View style={styles.aboutRow}>
+        <Text style={[styles.aboutLabel, { color: theme.dark ? '#4CAF50' : '#4CAF50' }]}>
+          About:-
+        </Text>
+        <Text style={[styles.aboutText, { color: theme.dark ? '#ddd' : '#333' }]}>
+          {item.about}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[
+          styles.bookButton,
+          { backgroundColor: theme.dark ? '#F6B745' : '#FFA726' },
+        ]}
+        onPress={() => navigation.navigate('PackageDetails', { item })}
+      >
+        <Text style={[styles.bookButtonText, { color: theme.dark ? '#000' : '#fff' }]}>
+          Book now
+        </Text>
+      </TouchableOpacity>
     </View>
+
+    <View style={styles.imageContainer}>
+      <Image source={item.image} style={styles.packageImage} />
+    </View>
+  </View>
+</View>
   );
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container,{backgroundColor: theme.dark ? '#000' : '#fff'}]}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-          <Icon name="arrow-back" size={28} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Our Packages</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <Head title = 'Our Packages'/>
       {/* Packages List */}
       <FlatList
         data={packagesData}
@@ -157,19 +181,18 @@ const OurPackagesScreen = () => {
         showsVerticalScrollIndicator={false}
       />
       {/* Bottom Navigation */}
-    </SafeAreaView>
+    </View>
   );
 };
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+   
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },

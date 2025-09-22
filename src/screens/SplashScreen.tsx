@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { View, Image, StyleSheet } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/RootNavigator";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, "Splash">;
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F6B745",
   },
   logo: {
-    width: 298,
-    height: 169,
+    width: wp('60%'),
+    height: hp('20%'),
   },
 });

@@ -13,13 +13,14 @@ type RootStackParamList = {
   PackagesScreen: undefined;
   PackageDetails: {item: PackageData}
 }
-
+import { useTheme } from '../../context/ThemeContext';
 
 
 const PackagesScreen = () => {
+  const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor : theme.background}]}>
       {/* Header */}
      <Head title="Our Packages" ></Head>
 

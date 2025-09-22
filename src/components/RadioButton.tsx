@@ -1,152 +1,68 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Animated, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { useTheme } from "../context/ThemeContext";
 
 const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
+  const { theme, toggleTheme } = useTheme();
+
   // ✅ Status toggle (Accepted / Pending)
-  if (type === "status") {
-    const [isAccepted, setIsAccepted] = useState(false);
-    const [isPending, setIsPending] = useState(false);
+ if (type === "status") {
+  const [isAccepted, setIsAccepted] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
-    const AcceptedOffset = useState(new Animated.Value(0))[0];
-    const PendingOffset = useState(new Animated.Value(0))[0];
+  const AcceptedOffset = useState(new Animated.Value(0))[0];
+  const PendingOffset = useState(new Animated.Value(0))[0];
 
-    const thumbSize = wp("3.5%");
-    const trackWidth = wp("12%");
-    const trackHeight = hp("3%");
-    const padding = wp("1.5%");
+  const thumbSize = wp("3.5%");
+  const trackWidth = wp("12%");
+  const trackHeight = hp("3%");
+  const padding = wp("1.5%");
 
-    const acceptTranslateX = AcceptedOffset.interpolate({
-      inputRange: [0, 1],
-      outputRange: [padding, trackWidth - thumbSize - padding],
-    });
+  const acceptTranslateX = AcceptedOffset.interpolate({
+    inputRange: [0, 1],
+    outputRange: [padding, trackWidth - thumbSize - padding],
+  });
 
-    const pendingTranslateX = PendingOffset.interpolate({
-      inputRange: [0, 1],
-      outputRange: [padding, trackWidth - thumbSize - padding],
-    });
+  const pendingTranslateX = PendingOffset.interpolate({
+    inputRange: [0, 1],
+    outputRange: [padding, trackWidth - thumbSize - padding],
+  });
 
-    const toggleSwitchAccepted = () => {
-      Animated.timing(AcceptedOffset, {
-        toValue: isAccepted ? 0 : 1,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-      setIsAccepted(!isAccepted);
-    };
+  const toggleSwitchAccepted = () => {
+    Animated.timing(AcceptedOffset, {
+      toValue: isAccepted ? 0 : 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+    setIsAccepted(!isAccepted);
+  };
 
-    const toggleSwitchPending = () => {
-      Animated.timing(PendingOffset, {
-        toValue: isPending ? 0 : 1,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-      setIsPending(!isPending);
-    };
+  const toggleSwitchPending = () => {
+    Animated.timing(PendingOffset, {
+      toValue: isPending ? 0 : 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+    setIsPending(!isPending);
+  };
 
-    return (
-      <View style={styles.checkContainer}>
-        {/* Accepted */}
-        <View style={styles.checkBox}>
-          <Text style={{ fontSize: wp("3.5%") }}>Accepted</Text>
-          <TouchableOpacity activeOpacity={1} onPress={toggleSwitchAccepted}>
-            <View
-              style={[
-                styles.track,
-                {
-                  width: trackWidth,
-                  height: trackHeight,
-                  backgroundColor: isAccepted ? "#2196F3" : "#ccc",
-                },
-              ]}
-            >
-              <Animated.View
-                style={[
-                  styles.thumb,
-                  {
-                    width: thumbSize,
-                    height: thumbSize,
-                    borderRadius: thumbSize / 2,
-                    transform: [{ translateX: acceptTranslateX }],
-                  },
-                ]}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
+  // 🔹 Colors according to theme
+  const inactiveColor = theme.background === "#fff" ? "#000" : "#fff"; // black in light, white in dark
+  const activeColor = theme.primary; // green
 
-        {/* Pending */}
-        <View style={styles.checkBox}>
-          <Text style={{ fontSize: wp("3.5%") }}>Pending</Text>
-          <TouchableOpacity activeOpacity={1} onPress={toggleSwitchPending}>
-            <View
-              style={[
-                styles.track,
-                {
-                  width: trackWidth,
-                  height: trackHeight,
-                  backgroundColor: isPending ? "#2196F3" : "#ccc",
-                },
-              ]}
-            >
-              <Animated.View
-                style={[
-                  styles.thumb,
-                  {
-                    width: thumbSize,
-                    height: thumbSize,
-                    borderRadius: thumbSize / 2,
-                    transform: [{ translateX: pendingTranslateX }],
-                  },
-                ]}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  // ✅ Theme toggle (Light / Dark)
-  if (type === "toggle") {
-    const [isOn, setIsOn] = useState(selected === "Dark");
-
-    const Offset = useState(new Animated.Value(isOn ? 1 : 0))[0];
-    const thumbSize = wp("3%");
-    const trackWidth = wp("10%");
-    const trackHeight = hp("3%");
-    const padding = wp("1.5%");
-
-    const translateX = Offset.interpolate({
-      inputRange: [0, 1],
-      outputRange: [padding, trackWidth - thumbSize - padding],
-    });
-
-    const toggleSwitch = () => {
-      Animated.timing(Offset, {
-        toValue: isOn ? 0 : 1,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-      const newValue = !isOn;
-      setIsOn(newValue);
-      if (onSelect) onSelect(newValue); // true = Dark, false = Light
-    };
-
-    return (
-      <View style={styles.toggleContainer}>
-        <Text style={[styles.toggleLabel, { fontSize: wp("3.5%") }]}>{labels[0] || "Off"}</Text>
-        <TouchableOpacity activeOpacity={1} onPress={toggleSwitch}>
+  return (
+    <View style={styles.checkContainer}>
+      <View style={styles.checkBox}>
+        <Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>Accepted</Text>
+        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchAccepted}>
           <View
             style={[
               styles.track,
               {
                 width: trackWidth,
                 height: trackHeight,
-                backgroundColor: isOn ? "#2196F3" : "#ccc",
+                backgroundColor: isAccepted ? activeColor : inactiveColor,
               },
             ]}
           >
@@ -157,16 +73,112 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
                   width: thumbSize,
                   height: thumbSize,
                   borderRadius: thumbSize / 2,
-                  transform: [{ translateX }],
+                  transform: [{ translateX: acceptTranslateX }],
+                  backgroundColor: theme.background,
                 },
               ]}
             />
           </View>
         </TouchableOpacity>
-        <Text style={[styles.toggleLabel, { fontSize: wp("3.5%") }]}>{labels[1] || "On"}</Text>
       </View>
-    );
-  }
+
+      <View style={styles.checkBox}>
+        <Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>Pending</Text>
+        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchPending}>
+          <View
+            style={[
+              styles.track,
+              {
+                width: trackWidth,
+                height: trackHeight,
+                backgroundColor: isPending ? activeColor : inactiveColor,
+              },
+            ]}
+          >
+            <Animated.View
+              style={[
+                styles.thumb,
+                {
+                  width: thumbSize,
+                  height: thumbSize,
+                  borderRadius: thumbSize / 2,
+                  transform: [{ translateX: pendingTranslateX }],
+                  backgroundColor: theme.background,
+                },
+              ]}
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+  // ✅ Theme toggle (Light / Dark)
+ if (type === "toggle") {
+  const [isOn, setIsOn] = useState(selected === "Dark");
+  const Offset = useState(new Animated.Value(isOn ? 1 : 0))[0];
+
+  const thumbSize = wp("3%");
+  const trackWidth = wp("10%");
+  const trackHeight = hp("3%");
+  const padding = wp("1.5%");
+
+  const translateX = Offset.interpolate({
+    inputRange: [0, 1],
+    outputRange: [padding, trackWidth - thumbSize - padding],
+  });
+
+  const toggleSwitch = () => {
+    const newValue = !isOn;
+    setIsOn(newValue);
+
+    Animated.timing(Offset, {
+      toValue: newValue ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+
+    toggleTheme(newValue ? "Dark" : "Light");
+    if (onSelect) onSelect(newValue); // true = Dark, false = Light
+  };
+
+  // 🔹 Updated colors
+  const inactiveColor = theme.background === "#fff" ? "#000" : "#fff"; // black in light, white in dark
+  const activeColor = theme.primary; // green
+
+  return (
+    <View style={styles.toggleContainer}>
+      <Text style={{ color: inactiveColor }}>{labels[0] || "Light"}</Text>
+      <TouchableOpacity activeOpacity={1} onPress={toggleSwitch}>
+        <View
+          style={[
+            styles.track,
+            {
+              width: trackWidth,
+              height: trackHeight,
+              backgroundColor: isOn ? activeColor : inactiveColor,
+            },
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.thumb,
+              {
+                width: thumbSize,
+                height: thumbSize,
+                borderRadius: thumbSize / 2,
+                transform: [{ translateX }],
+                backgroundColor: theme.background,
+              },
+            ]}
+          />
+        </View>
+      </TouchableOpacity>
+      <Text style={{ color: inactiveColor }}>{labels[1] || "Dark"}</Text>
+    </View>
+  );
+}
 
   return null;
 };
@@ -188,7 +200,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   thumb: {
-    backgroundColor: "#fff",
     elevation: 3,
     shadowColor: "#000",
     shadowOpacity: 0.2,
@@ -200,10 +211,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: wp("2%"),
     marginTop: hp("1%"),
-  },
-  toggleLabel: {
-    fontWeight: "500",
-    color: "#333",
   },
 });
 

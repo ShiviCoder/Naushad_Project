@@ -14,9 +14,15 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { MySvgIcon } from '../../components/Svg';
+import { StarSvgIcon } from '../../components/Svg';
+import BottomNavbar from '../../components/BottomNavbar';
 
 const AccountScreen = () => {
   const [theme, setTheme] = useState('Light'); // track selected theme
+  const navigation = useNavigation<any>()
   const backgroundColor = theme === 'Dark' ? '#121212' : '#fff';
   const textColor = theme === 'Dark' ? '#fff' : '#333';
   const subTextColor = theme === 'Dark' ? '#bbb' : '#757575BA';
@@ -30,7 +36,7 @@ const AccountScreen = () => {
         <View style={styles.con}>
           <View style={styles.imgSection}>
             <Image
-              source={require('../../assets/user-img.png')}
+              source={require('../../assets/images/user-img.png')}
               style={styles.userImg}
               resizeMode="contain"
             />
@@ -42,7 +48,7 @@ const AccountScreen = () => {
             </Text>
           </View>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>navigation.push('MyProfile')}>
           <Image
             style={styles.edit}
             source={require('../../assets/edit.png')}
@@ -51,13 +57,13 @@ const AccountScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.separator} />
+    <View style={styles.separator} />
 
       {/* Settings List */}
       <FlatList
         data={settingData}
         style={styles.detailsContainer}
-        contentContainerStyle={{ margin: wp('2%') }}
+        contentContainerStyle={{ margin: wp('2%'),    paddingBottom: hp('12%')  }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           return (
@@ -98,20 +104,28 @@ const AccountScreen = () => {
                   </>
                 ) : (
                   <>
-                    <Text style={[styles.text, { color: textColor }]}>
+                   <TouchableOpacity>
+                     <Text style={[styles.text, { color: textColor }]}>
                       {item.title}
                     </Text>
-                    <Text style={[styles.subText, { color: subTextColor }]}>
+                   </TouchableOpacity>
+                    <TouchableOpacity>
+                      <Text style={[styles.subText, { color: subTextColor }]}>
                       {item.description}
                     </Text>
+                    </TouchableOpacity>
                   </>
                 )}
               </View>
-            </View>
+        </View>
           );
         }}
       />
+
+     <BottomNavbar/>
     </View>
+
+    
   );
 };
 
@@ -185,10 +199,11 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     paddingHorizontal: wp('5%'),
+    paddingVertical : hp('3%')
   },
   leftIcon: {
-    width: wp('7%'),
-    height: wp('7%'),
+    width: wp('6%'),
+    height: wp('6%'),
     resizeMode: 'contain',
   },
   detailsCon: {
@@ -216,6 +231,7 @@ const styles = StyleSheet.create({
     height: wp('5%'),
     resizeMode: 'contain',
   },
+ 
 });
 
 export default AccountScreen;

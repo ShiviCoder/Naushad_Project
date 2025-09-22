@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // ✅ Import navigation hook
-
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 const OTPVerification = () => {
   const [email, setEmail] = useState("");
   const navigation = useNavigation(); // ✅ Initialize navigation
@@ -46,50 +46,53 @@ const OTPVerification = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    flexGrow: 1,
+    paddingHorizontal: wp("5%"),
     backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems  :'center'
   },
-  logo: {
-    width: 180,
-    height: 80,
-    marginBottom: 30,
+ logo: {
+    width: wp("70%"),
+    height: hp("20%"),
+    alignSelf: "center",
+    marginBottom: hp("1%"),
+    marginTop: hp("7%"),
   },
   title: {
-    fontSize: 22,
+    fontSize: wp('8%'),
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: hp('2%'),
     color: "#000",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: wp('4%'),
     textAlign: "center",
-    color: "#555",
-    marginBottom: 30,
+    color: "#0a0909ff",
+    marginBottom: hp('7%'),
+    fontWeight : '400'
   },
   input: {
     width: "100%",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 6,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
+    borderWidth: wp('0.3%'),
+    borderColor: "rgba(5, 5, 5, 1)",
+    borderRadius: wp('2%'),
+    padding: wp('3%'),
+    fontSize: wp('4%'),
+    marginBottom: hp('5%'),
     backgroundColor: "#fff",
   },
   button: {
     width: "100%",
-    backgroundColor: "#F9B233",
-    paddingVertical: 14,
-    borderRadius: 6,
+    backgroundColor: "#F6B745",
+    paddingVertical: hp('2%'),
+    borderRadius: wp('2%'),
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight : '500'
   },
 });
 

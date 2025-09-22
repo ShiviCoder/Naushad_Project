@@ -12,14 +12,21 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { s } from 'react-native-size-matters';
+import { s } from 'react-native-size-matters'
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { Shadow } from 'react-native-shadow-2';
+import Svg, { Polygon } from 'react-native-svg';
+import BottomNavbar from '../../components/BottomNavbar';
+import { useTheme } from "../../context/ThemeContext";
+
 const HomeScreen = () => {
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
   const navigation = useNavigation();
+    const { theme } = useTheme(); // ✅ get current theme
+  
 
   // Fixed Navigation handler function
   const handleSectionNavigation = (section: string) => {
@@ -43,7 +50,7 @@ const HomeScreen = () => {
         navigation.navigate('PackagesScreen');
         break;
       case 'productPackages':
-         navigation.navigate('ProductPackageScreen');
+        navigation.navigate('ProductPackageScreen');
         console.log('Navigate to Product Packages Screen');
         break;
       default:
@@ -179,10 +186,10 @@ const HomeScreen = () => {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor : theme.background}]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: hp('10%') }}
       >
         {/* Fixed Header */}
         <View style={styles.header}>
@@ -191,25 +198,29 @@ const HomeScreen = () => {
               <TouchableOpacity>
                 <Image
                   source={require('../../assets/location.png')}
-                  style={styles.locationbtn}
+                  style={[styles.locationbtn,{ tintColor: theme.textPrimary }]}
                 />
               </TouchableOpacity>
             </View>
           </View>
-          <View style={{ flexDirection: 'column', marginLeft: s(4) }}>
-            <Text style={styles.welcomeText}>Hi Aanchal !</Text>
-            <Text style={styles.locationText}>Indore</Text>
-          </View>
+         <View style={{ flexDirection: 'column' }}>
+        <Text style={[styles.welcomeText, { color: theme.textPrimary }]}>
+          Hi Aanchal !
+        </Text>
+        <Text style={[styles.locationText, { color: theme.textPrimary }]}>
+          Indore
+        </Text>
+      </View>
           <Image
             source={require('../../assets/images/logo.png')}
-            style={styles.logo}
+            style={[styles.logo,{ tintColor: theme.textPrimary }]}
           />
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
               <Image
                 source={require('../../assets/cart2.png')}
-                style={{ marginLeft: 20, width: 24, height: 24 }}
+                style={{ marginLeft: wp('5%'), width: wp('7%'), height: wp('7%'), }}
               />
             </TouchableOpacity>
 
@@ -218,45 +229,43 @@ const HomeScreen = () => {
             >
               <Image
                 source={require('../../assets/notification3.png')}
-                style={{ marginLeft: 15, width: 24, height: 24 }}
+                style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%'), }}
               />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Gender Selection (radio-like) */}
         <View style={styles.genderSelection}>
-          {['Male', 'Female'].map(g => (
-            <TouchableOpacity
-              key={g}
-              onPress={() => setGender(g as 'Male' | 'Female')}
-              style={[styles.genderBtn, gender === g && styles.genderBtnActive]}
-              activeOpacity={0.8}
-            >
-              <View
-                style={[
-                  styles.radioOuter,
-                  gender === g && styles.radioOuterActive,
-                ]}
-              >
-                {gender === g ? <View style={styles.radioInner} /> : null}
-              </View>
-              <Text
-                style={[
-                  styles.genderText,
-                  gender === g && styles.genderTextActive,
-                ]}
-              >
-                {g}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+  {['Male', 'Female'].map(g => (
+    <TouchableOpacity
+      key={g}
+      onPress={() => setGender(g as 'Male' | 'Female')}
+      style={[styles.genderBtn, gender === g && styles.genderBtnActive]}
+    >
+      {/* Radio outer circle */}
+      <View
+        style={[
+          styles.radioOuter,
+          gender === g && styles.radioOuterActive,
+          { borderColor: theme.textPrimary } // circle color dynamic
+        ]}
+      >
+        {/* Radio inner circle if selected */}
+        {gender === g && <View style={styles.radioInner} />}
+      </View>
+
+      {/* Text */}
+      <Text style={{ ...styles.genderText, color: theme.textPrimary }}>
+        {g}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
 
         {/* Search Bar with filter */}
         <View style={styles.searchFilContain}>
           <View style={styles.searchBar}>
-            <Icon name="search" size={18} color="#9E9E9E" />
+            <Icon name="search" size={wp('5%')} color="#9E9E9E" />
             <TextInput
               placeholder="Search"
               placeholderTextColor="#9E9E9E"
@@ -267,17 +276,14 @@ const HomeScreen = () => {
             <TouchableOpacity style={styles.filterIconBtn}>
               <Image
                 source={require('../../assets/filter.png')}
-                style={{ width: 40, height: 40 }}
+                style={{ width: wp('13%'), height: wp('13%'), }}
               />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Special Offers header with navigation */}
-        <SectionTitle
-          title="Special Offers"
-          onPress={() => handleSectionNavigation('offers')}
-        />
+       <SectionTitle title="Special Offers" showSeeAll={false} color={theme.textPrimary} />
 
         {/* Special Offer split card */}
         <View style={styles.offerCard}>
@@ -305,7 +311,7 @@ const HomeScreen = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingHorizontal: 15 }}
+          contentContainerStyle={{ paddingHorizontal: wp('4%') }}
           renderItem={({ item }) => (
             <View style={styles.serviceCard}>
               <Image source={item.image} style={styles.serviceImage} />
@@ -323,17 +329,19 @@ const HomeScreen = () => {
 
         {/* Appointment Banner */}
         <ImageBackground
+          resizeMode='cover'
           source={require('../../assets/images/image1.jpg')}
           style={styles.appointmentBanner}
-          imageStyle={{ borderRadius: 12 }}
+
         >
           <View style={styles.overlay}>
             <Text style={styles.bannerText}>Book your appointment today</Text>
             <Text style={styles.bannerText}>
               and take your look to the next level
             </Text>
-            <TouchableOpacity onPress={()=>navigation.navigate('BookAppointmentScreen')} style={styles.bookNowBtn}>
-              <Text style={styles.bookBtnText}>Book Appointment</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen") }
+ style={styles.bookNowBtn}>
+              <Text style={[styles.bookBtnText, { color: '#111' }]}>Book Appointment</Text>
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -348,7 +356,7 @@ const HomeScreen = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
+          contentContainerStyle={{ paddingHorizontal: wp('4%') }}
           renderItem={({ item }) => (
             <View style={styles.productCard}>
               <Image source={item.image} style={styles.productImage} />
@@ -364,13 +372,13 @@ const HomeScreen = () => {
               <View
                 style={{
                   flexDirection: 'row',
-                  gap: 6,
-                  marginTop: 4,
+                  gap: wp('2%'),
+                  marginTop: hp('1%'),
                   flexWrap: 'wrap',
                 }}
               >
                 <View style={styles.pill}>
-                  <Icon name="star" size={12} color="#29A244" />
+                  <Icon name="star" size={wp('3%')} color="#29A244" />
                   <Text style={styles.pillText}>{item.rating}</Text>
                 </View>
                 <View style={[styles.pill, { backgroundColor: '#E8F6EF' }]}>
@@ -396,12 +404,12 @@ const HomeScreen = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
+          contentContainerStyle={{ paddingHorizontal: wp('3%') }}
           renderItem={({ item }) => (
             <View style={styles.videoCard}>
               <Image source={item.thumb} style={styles.videoImage} />
               <View style={styles.playOverlay}>
-                <Icon name="play" size={24} color="#fff" />
+                <Icon name="play" size={wp('6%')} color="#fff" />
               </View>
             </View>
           )}
@@ -424,57 +432,82 @@ const HomeScreen = () => {
         </View>
 
         {/* About our salon - No "See all" button needed */}
-        <SectionTitle title="About our salon" showSeeAll={false} />
-        <View style={styles.aboutContainer}>
-          <View style={styles.aboutBox}>
-            <Icon name="calendar-outline" size={20} color="#333" />
-            <Text style={styles.aboutTop}>Founded Year</Text>
-            <Text style={styles.aboutBottom}>2002</Text>
-          </View>
-          <View style={styles.aboutBox}>
-            <Icon name="people-outline" size={20} color="#333" />
-            <Text style={styles.aboutTop}>Employees</Text>
-            <Text style={styles.aboutBottom}>12</Text>
-          </View>
-          <View style={styles.aboutBox}>
-            <Icon name="shield-checkmark-outline" size={20} color="#333" />
-            <Text style={styles.aboutTop}>Hygiene</Text>
-            <Text style={styles.aboutBottom}>98%</Text>
-          </View>
+       <SectionTitle title="About our salon" showSeeAll={false} />
+
+      <View style={[styles.aboutContainer, { backgroundColor: theme.background }]}>
+        <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
+          <Image
+            source={require("../../assets/images/calender9.png")}
+            style={{ width: wp("5%"), height: wp("5%") }}
+          />
+          <Text style={[styles.aboutTop, { color: theme.background }]}>
+            Founded Year
+          </Text>
+          <Text style={[styles.aboutBottom, { color: theme.background }]}>
+            2002
+          </Text>
         </View>
+
+        <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary  }]}>
+          <Image
+            source={require("../../assets/people.png")}
+            style={{ width: wp("5%"), height: wp("5%"),  }}
+          />
+          <Text style={[styles.aboutTop, { color: theme.background}]}>
+            Employees
+          </Text>
+          <Text style={[styles.aboutBottom, { color: theme.background}]}>
+            12
+          </Text>
+        </View>
+
+        <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary  }]}>
+          <Image
+            source={require("../../assets/sheild.png")}
+            style={{ width: wp("5%"), height: wp("5%"), }}
+          />
+          <Text style={[styles.aboutTop, { color: theme.background }]}>
+            Hygiene
+          </Text>
+          <Text style={[styles.aboutBottom, { color: theme.background }]}>
+            98%
+          </Text>
+        </View>
+      </View>
+    
 
         {/* Our Packages (2-up grid) with navigation */}
         <SectionTitle
           title="Our Packages"
           onPress={() => handleSectionNavigation('packages')}
         />
-        <View style={styles.packageGrid}>
-          {packages.map(p => (
-            <View key={p.id} style={styles.packageCard}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Text style={styles.packageTitle}>{p.title}</Text>
-                <Text style={styles.packagePrice}>{p.price}</Text>
+        <FlatList data={packages}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingHorizontal: wp('4%') }}
+          renderItem={({ item }) => (
+            <View style={styles.packageCard}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Text style={styles.packageTitle} numberOfLines={2}>{item.title}</Text>
+                <Text style={styles.packagePrice}>{item.price}</Text>
               </View>
-              <View style={{ marginTop: 6 }}>
+              <View style={{ marginTop: hp('2%') }}>
                 <Text style={styles.packageLabel}>
-                  Services:-{' '}
-                  <Text style={styles.packageValue}>{p.services}</Text>
+                  <Text style={styles.packageLabelText}>Services:- </Text>
+                  <Text style={styles.packageValue}>{item.services}</Text>
                 </Text>
-                <Text style={[styles.packageLabel, { marginTop: 2 }]}>
-                  About:- <Text style={styles.packageValue}>{p.about}</Text>
+                <Text style={[styles.packageLabel, { marginTop: 4 }]}>
+                  <Text style={styles.packageLabelText}>About:- </Text>
+                  <Text style={styles.packageValue}>{item.about}</Text>
                 </Text>
               </View>
               <TouchableOpacity style={styles.packageBtn}>
                 <Text style={styles.packageBtnText}>Book now</Text>
               </TouchableOpacity>
             </View>
-          ))}
-        </View>
+          )}
+        />
 
         {/* Product Packages (horizontal small cards) with navigation */}
         <SectionTitle
@@ -488,41 +521,108 @@ const HomeScreen = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 10 }}
           renderItem={({ item }) => (
-            <View style={styles.smallPackCard}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginBottom: 4,
-                }}
+            <View style={{ marginHorizontal: wp("2%"), paddingVertical: hp('4%') }}>
+              <Shadow
+                distance={3}
+                startColor="#F6B74540"
+                offset={[0, 13]}
+                style={{ borderRadius: wp("4%") }}
               >
-                <Text style={styles.smallPackTitle}>{item.title}</Text>
-                <Text style={styles.smallPackRate}>{item.rate}</Text>
-              </View>
-              <Text style={styles.smallPackLine}>{item.line1}</Text>
-              <Text style={styles.smallPackTag}>{item.tag}</Text>
-              <TouchableOpacity style={styles.smallPackBtn}>
-                <Text style={styles.smallPackBtnText}>See more</Text>
-              </TouchableOpacity>
+                <View
+                  style={{
+                    width: wp("35%"),
+                    height: hp("23%"),
+                    backgroundColor: "#EDEDED",
+                    borderRadius: wp("4%"),
+                    overflow: "hidden",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* === Folded Top Corners === */}
+                  <Svg
+                    height={hp("25%")}
+                    width={wp("35%")}
+                    style={{ position: "absolute", top: 0, left: 0 }}
+                  >
+                    {/* Left Fold */}
+                    <Polygon
+                      points={`0,0 ${wp("6%")},0 0,${wp("6%")}`}
+                     fill={theme.background}
+                    />
+                    {/* Right Fold */}
+                    <Polygon
+                      points={`${wp("35%")},0 ${wp("35%") - wp("6%")},0 ${wp("35%")},${wp("6%")}`}
+                     fill={theme.background}
+                    />
+                    
+                  </Svg>
+
+                  {/* === Header Hexagon === */}
+                  <View style={{ position: "absolute", top: 0, alignItems: "center" }}>
+                    <Svg height={hp("6%")} width={wp("22%")}>
+                      <Polygon
+                        points={`0,0 ${wp("22%")},0 ${wp("22%")},${hp("3%")} ${wp("11%")},${hp("6%")} 0,${hp("3%")}`}
+                        fill="#F6B745"
+                      />
+                    </Svg>
+                    <Text
+                      style={{
+                        position: "absolute",
+                        top: hp("1%"),
+                        color: "white",
+                        fontWeight: "600",
+                        fontSize: hp("1.1%"),
+                        alignSelf: 'center'
+                      }}
+                    >
+                      {item.title}
+                    </Text>
+                  </View>
+
+                  {/* === Content === */}
+                  <View style={{ marginTop: hp("8%"), width: "85%" }}>
+                    <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
+                      Rate:- <Text style={{ fontWeight: "700" }}>₹ {item.rate}</Text>
+                    </Text>
+                    <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
+                      Products:- <Text style={{ fontWeight: "700" }}>{item.line1}</Text>
+                    </Text>
+                    <Text
+                      style={{
+                        marginTop: hp("1%"),
+                        fontStyle: "italic",
+                        fontSize: hp("1.3%"),
+                        color: "#d19a33",
+                        textAlign: "center",
+                      }}
+                    >
+                      {item.tag}
+                    </Text>
+                  </View>
+
+                  {/* === Button === */}
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#F6B745",
+                      paddingVertical: hp("0.8%"),
+                      paddingHorizontal: wp("5%"),
+                      borderRadius: wp("5%"),
+                      marginTop: hp("1.5%"),
+                    }}
+                  >
+                    <Text style={{ color: "white", fontWeight: "600", fontSize: hp("1.3%") }}>
+                      Book now
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </Shadow>
             </View>
           )}
         />
       </ScrollView>
 
       {/* Bottom Navigation (rounded dark bar) */}
-      <View style={styles.bottomBarWrap}>
-        <View style={styles.bottomNav}>
-          <Icon name="home" size={22} color="#fff" />
-          <Icon name="document-text-outline" size={22} color="#fff" />
-          <View style={styles.fabCircle}>
-            <Icon name="add" size={26} color="#000" />
-          </View>
-          <Icon name="hand-left-outline" size={22} color="#fff" />
-          <TouchableOpacity onPress={()=>navigation.navigate('AccountScreen')}>
-            <Icon name="person-outline" size={22} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <BottomNavbar/>
     </View>
   );
 };
@@ -536,75 +636,86 @@ const SectionTitle = ({
   title: string;
   onPress?: () => void;
   showSeeAll?: boolean;
-}) => (
-  <View style={styles.sectionHeader}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    {showSeeAll && (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-        <Text style={styles.seeAll}>See all</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-);
+}) => {
+  const { theme } = useTheme(); // ✅ get current theme
+
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+        {title}
+      </Text>
+      {showSeeAll && (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+          <Text style={[styles.seeAll, { color: theme.textSecondary }]}>
+            See all
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
 
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', paddingBottom: hp('1%') },
 
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: s(15),
-    paddingTop: s(30), // Add proper top padding
+    paddingHorizontal: wp('3%'),
+    paddingVertical: hp('1%'), // Add proper top padding
   },
   welcomeText: {
-    fontSize: s(11), // ↓ slightly smaller
-    fontWeight: '700', // bolder to match mock
-    color: '#8E8E93', // primary text colour
-    lineHeight: s(13),
+    fontSize: wp('3%'),         // ↓ slightly smaller
+    fontWeight: '700',       // bolder to match mock
+    color: '#8E8E93',
   },
-
+  headerstyle: {
+    alignSelf: 'center'
+  },
   locationText: {
-    fontSize: s(14), // ↓ smaller than name
-    fontWeight: '500', // regular weight
-    color: '#090909ff', // lighter grey (#8E8E93 ≈ iOS system grey)
+    fontSize: wp('4%'),         // ↓ smaller than name
+    fontWeight: '500',       // regular weight
+    color: '#090909ff',        // lighter grey (#8E8E93 ≈ iOS system grey)
   },
   locationbtn: {
-    width: s(19),
-    height: s(26),
+    width: wp('7%'),
+    height: wp('7%'),
     tintColor: '#7575759C',
+
   },
 
-  cart: {
-    width: 24,
-    height: 24,
-    marginLeft: 40,
+  topRightCont: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   logo: {
-    width: s(154), // Reduced from 154
-    height: s(87), // Reduced from 87
+    width: wp('40%'), // Reduced from 154
+    height: hp('10%'),  // Reduced from 87
     resizeMode: 'contain',
   },
-  headerIcons: { flexDirection: 'row' },
+  headerIcons: {
+    flexDirection: 'row',
+  },
 
   genderSelection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     // Increased from 6
-    paddingHorizontal: s(5),
-    gap: 20, // Increased from 16
+    paddingHorizontal: wp('1%'),
   },
   genderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: s(16), // Increased from 14
-    paddingVertical: s(10), // Increased from 8
+    paddingHorizontal: wp('3%'), // Increased from 14
+    // Increased from 8
 
-    borderColor: '#E5E5E5',
+    // borderColor: '#eee7e7ff',
     // borderRadius: 25,      // Increased from 20
-    backgroundColor: '#fff',
+    // backgroundColor: '#f7f0f0ff',
   },
   genderBtnActive: {
     // borderColor: '#fdfdfdff',
@@ -613,20 +724,21 @@ const styles = StyleSheet.create({
   genderText: {
     marginLeft: 8,
     color: '#0b0b0bff',
+
   },
   genderTextActive: {
     color: '#111',
-    fontWeight: '600',
+    fontWeight: '600'
   },
   radioOuter: {
     width: 16,
     height: 16,
     borderRadius: 8,
-    borderWidth: 1.4,
-    borderColor: '#0b0b0bff',
+    borderWidth: 1,
+    borderColor: '#9E9E9E'
   },
   radioOuterActive: {
-    borderColor: '#0e0e0eff',
+    borderColor: '#9E9E9E',
   },
   radioInner: {
     width: 8,
@@ -640,48 +752,46 @@ const styles = StyleSheet.create({
   searchFilContain: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'center',
-    
+    paddingVertical: hp('2%')
   },
-  searchBar: {
+   searchBar: {
     flexDirection: 'row',
-    marginHorizontal: 15,
-    borderRadius: 22, // Slightly less rounded
-    paddingHorizontal: 16,
-    paddingVertical: 10, // Reduced from 12
+    backgroundColor: '#ffffffff', // Slightly different gray to match image
+    marginHorizontal: wp('2%'),
+    borderRadius: wp('5%'), // Slightly less rounded
+    paddingHorizontal: wp('5%'),
+    paddingVertical: hp('1%'), // Reduced from 12
     alignItems: 'center',
-    marginBottom: 8,
-    marginTop: 8, // Add top margin
-    width: 320,
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  
-
+    marginVertical: hp('1%'),
+    width: hp('40%'),
+    height: hp('5%'),
+    borderWidth: wp('0.3%'),
+    borderColor: '#dddddd1d',
+    elevation: 1
   },
 
   searchInput: {
-    marginLeft: 10,
     flex: 1,
-    paddingVertical: 2,
-    fontSize: 15,
+    paddingVertical: hp('0.1%'),
+    fontSize: wp('4%'),
     color: '#0e0d0dff',
   },
 
-  filterIconBtn: {
-    width: 40, // Smaller than previous 34
-    height: 40, // Smaller than previous 34
-    borderRadius: 50, // Half of width/height
+
+   filterIconBtn: {
+    width: wp('7%'), // Smaller than previous 34
+    height: wp('7%'), // Smaller than previous 34
+    borderRadius: wp('10%'), // Half of width/height
     // backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: wp('2%')
     // shadowColor: '#000',
     // shadowOffset: { width: 0, height: 1 },
     // shadowOpacity: 0.1,
     // shadowRadius: 2,
     // elevation: 2,
   },
-
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -692,7 +802,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18, // Increased from 16
-    fontWeight: '700', // Increased from bold
+    fontWeight: '700' // Increased from bold
   },
   seeAll: {
     color: '#20B2A6',
@@ -700,12 +810,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
+
   // Offer split card
-  offerCard: {
-    marginHorizontal: 15,
-    marginTop: 15,
-    borderRadius: 16, // Increased from 12
-    backgroundColor: '#fff',
+   offerCard: {
+    marginHorizontal: wp('5%'),
+    marginTop: hp('2%'),
+    borderRadius: wp('4%'), // Increased from 12
+    backgroundColor: '#F6B745',
     elevation: 4, // Increased from 3
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -713,44 +824,45 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     overflow: 'hidden',
     flexDirection: 'row',
-    height: hp(22),
-    width: wp(90),
-    alignSelf: 'center'
+    height: hp('25%'),
+    width: wp('90%'),
   },
   offerLeft: {
-    flex: 1.2, // Adjusted ratio
     backgroundColor: '#F6B745',
-    padding: 18, // Increased from 14
-    justifyContent: 'center',
+    paddingHorizontal: wp('4%'), // Increased from 14
+    justifyContent: 'flex-start',
+    width: '50%'
   },
   offerBig: {
-    fontSize: 20,
+    fontSize: wp('6%'),
     fontWeight: '800',
-    color: '#fff', // Changed from #ece8e8ff
+    color: '#fff',
+    marginTop: hp('2%') // Changed from #ece8e8ff
   },
   offerSmall: {
-    fontSize: 16,
+    fontSize: wp('4%'),
     fontWeight: '700',
     color: '#fff', // Changed from #f1ececff
-    marginTop: 2,
+    marginTop: hp('0.5%')
   },
   offerDate: {
     color: '#fff', // Changed from #eae9e3ff
-    marginTop: s(8),
+    marginTop: hp('0.5%')
   },
   offerRightImage: {
-    width: s(179), // Increased from 150
-    height: s(189),
+    width: '50%', // Increased from 150
     resizeMode: 'cover',
+    height: '100%',
+    borderRadius: 0,
+
   },
   offerBtn: {
     backgroundColor: '#fff',
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 10,
-    marginRight: 10,
+    paddingVertical: hp('1.5%'),
+    borderRadius: wp('10%'),
+    marginTop: hp('4%'),
     // alignSelf: 'flex-start',
-    paddingHorizontal: 16,
+    paddingHorizontal: wp('2%'),
     // width:134.81,
     // height:32,
     alignItems: 'center',
@@ -759,25 +871,25 @@ const styles = StyleSheet.create({
   offerBtnText: { color: '#111', fontWeight: '700' },
 
   // Updated service card styles to match the design exactly
-  serviceCard: {
-    width: 140,
-    height: 180,
-    marginRight: 12,
-    marginVertical: 5,
-    borderRadius: 12,
+ serviceCard: {
+    width: wp('38%'),
+    height: hp('25%'),
+    marginHorizontal: wp('1%'),
+    marginVertical: hp('2%'),
+    borderRadius: wp('3%'),
     backgroundColor: '#fff',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
-    padding: 12,
+    padding: wp('2%'),
   },
   serviceImage: {
     width: '100%',
-    height: 80,
-    borderRadius: 8,
-    marginBottom: 8,
+    height: hp('12%'),
+    borderRadius: wp('3%'),
+    marginBottom: hp('1%'),
     resizeMode: 'cover',
   },
   nameItem: {
@@ -787,122 +899,122 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   serviceName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: wp('3.5%'),
+    fontWeight: 'bold',
+    color: '#060505ff',
     flex: 1,
   },
   servicePrice: {
-    fontSize: 11,
+    fontSize: wp('3%'),
     fontWeight: '500',
     color: '#0a0909ff',
   },
   serviceDesc: {
-    color: '#111111',
-    fontSize: 8,
-    marginBottom: 8,
-    lineHeight: 16,
+    color: '#1111118A',
+    fontSize: wp('2.5%'),
+    marginBottom: hp('0.5%'),
   },
   bookBtn: {
     backgroundColor: '#F6B745',
-    paddingVertical: 6,
-    borderRadius: 15,
+    paddingVertical: hp('0.3%'),
+    borderRadius: wp('50%'),
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 20,
-    width: 68,
-    height: 22,
+    alignSelf: 'center',
+    width: wp('20%'),
+    height: hp('3%'),
+    marginTop: hp('1%')
   },
   bookBtnText: {
     color: '#fff',
     textAlign: 'center',
-    fontWeight: '600',
-    fontSize: 8,
+    fontWeight: '500',
+    fontSize: wp('3%'),
   },
-
-  appointmentBanner: {
-    marginHorizontal: 15,
-    marginTop: 15, // Increased from 6
-    height: 202,
-    borderRadius: 16, // Increased from 12
+ appointmentBanner: {
+    marginHorizontal: wp('5%'),
+    marginVertical: hp('2%'), // Increased from 6
+    height: hp('25%'),
+    // borderRadius: 50, // Increased from 12
     overflow: 'hidden',
     justifyContent: 'center',
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: 'rgba(232, 227, 227, 0.54)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 10,
   },
   bannerText: {
-    fontSize: 16,
-    marginBottom: 3,
+    fontSize: wp('4%'),
     fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
+    color: '#0c0b0bff',
+    textAlign: 'center'
   },
   bookNowBtn: {
     backgroundColor: '#F6B745',
-    padding: 10,
-    borderRadius: 25,
-    height: 39,
-    width: 154,
-    marginTop: 10,
+    paddingHorizontal: wp('5%'),
+    borderRadius: wp('50%'),
+    marginTop: hp('5%'),
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: hp('1.5%')
   },
 
   productCard: {
-    width: 170, // Increased from 160
-    marginHorizontal: 8, // Increased from 5
-    marginVertical: 10,
-    borderRadius: 16, // Increased from 12
+    width: wp('40%'), // Increased from 160
+    marginHorizontal: wp('2%'), // Increased from 5
+    marginVertical: hp('2%'),
+    borderRadius: wp('4%'), // Increased from 12
     backgroundColor: '#fff',
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
-    padding: 12, // Increased from 10
+    paddingVertical: hp('1%'),
+    paddingHorizontal: wp('2%') // Increased from 10
   },
   productImage: {
     width: '100%',
-    height: 100, // Increased from 90
-    borderRadius: 12, // Increased from 10
+    height: hp('13%'), // Increased from 90
+    borderRadius: wp('3%') // Increased from 10
   },
   productName: {
-    marginTop: 6,
-    fontWeight: '700',
+    marginTop: hp('1%'),
+    fontWeight: '700'
   },
   productPrice: {
     color: '#777',
-    marginTop: 2,
+    marginTop: hp('0.3%')
   },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#F0F0F0',
+    paddingHorizontal: wp('2%'),
+    height: hp('3%'),
+    borderRadius: wp('3%'),
+    backgroundColor: '#F0F0F0'
   },
   pillText: {
-    fontSize: 11,
-    marginLeft: 4,
-    color: '#333',
+    fontSize: wp('3%'),
+    marginLeft: wp('1%'),
+    color: '#333'
   },
 
-  videoCard: {
-    width: 150,
-    height: 100,
-    marginVertical: 10,
-    marginHorizontal: 5,
-    borderRadius: 12,
+ videoCard: {
+    width: wp('35%'),
+    height: hp('30%'),
+    marginVertical: hp('2%'),
+    marginHorizontal: wp('2%'),
+    borderRadius: wp('3%'),
     overflow: 'hidden',
     backgroundColor: '#eee',
   },
-  videoImage: { width: '100%', height: '100%' },
+  videoImage: {
+    width: '100%',
+    height: '100%'
+  },
   playOverlay: {
     position: 'absolute',
     top: 0,
@@ -913,146 +1025,210 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.18)',
   },
-
   certStrip: {
-    marginHorizontal: 15,
-    marginTop: 15, // Increased from 10
-    backgroundColor: '#FFF4D6', // Lighter yellow
-    borderRadius: 16, // Increased from 12
-    padding: 16, // Increased from 12
+    marginHorizontal: wp('5%'),
+    marginVertical: hp('2%'), // Increased from 10
+    backgroundColor: '#F6B745', // Lighter yellow
+    borderRadius: wp('5%'), // Increased from 12
+    paddingVertical: hp('1%'), // Increased from 12
+    paddingHorizontal: wp('3%'),
     flexDirection: 'row',
     justifyContent: 'space-between',
     elevation: 2,
   },
   certItem: {
     width: '48%',
-    backgroundColor: '#fff7dd',
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
+    // backgroundColor: '#fff7dd',
+    borderRadius: wp('3%'),
+    paddingVertical: hp('1%'),
+    alignItems: 'center'
   },
   certImage: {
-    width: '100%',
-    height: 70,
+    width: wp('40%'),
+    height: hp('15%'),
     resizeMode: 'contain',
-    marginBottom: 6,
+    marginBottom: hp('1%')
   },
   certCaption: {
-    fontSize: 12,
+    fontSize: wp('3%'),
     textAlign: 'center',
-    color: '#333',
+    color: '#0d0d0dff',
+    fontStyle: 'italic',
+    fontWeight: 'bold',
   },
+
 
   aboutContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginVertical: 10,
-    paddingHorizontal: 8,
+    marginVertical: hp('1%'),
+    paddingHorizontal: wp('2%'),
   },
   aboutBox: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#F6F6F6',
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 8,
+    width: wp('28%'),
+    height: hp('15%'),
+    backgroundColor: '#0a0a0aff',
+    borderRadius: wp('5%'),
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    paddingVertical: hp('2%'),
+    paddingHorizontal: wp('3%'),
     elevation: 1,
+    flexDirection: 'column',
+    gap: hp('1%')
   },
   aboutTop: {
-    fontSize: 11,
-    color: '#666',
-    marginTop: 6,
+    fontSize: wp('3.5%'),
+    fontWeight: '800',
+    color: '#f1eaeaff',
     textAlign: 'center',
   },
   aboutBottom: {
-    fontSize: 14,
+    fontSize: wp('3.5%'),
     fontWeight: '800',
-    color: '#111',
-    marginTop: 2,
+    color: '#f4eeeeff',
   },
 
-  packageGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    paddingHorizontal: 12,
-    marginTop: 6,
-  },
   packageCard: {
-    width: '48%',
-    backgroundColor: '#fff',
+    width: wp('65%'),
+    height: hp('22%'),
+    backgroundColor: '#FFEED0',
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#E5D4B1',
+    padding: 16,
+    marginHorizontal: 8,
+    marginVertical: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    borderTopRightRadius: 2,
+    borderBottomLeftRadius: 2,
   },
-  packageTitle: { fontWeight: '800', flex: 1, marginRight: 6 },
-  packagePrice: { color: '#F6B745', fontWeight: '800' },
-  packageLabel: { color: '#777', fontSize: 12 },
-  packageValue: { color: '#333', fontWeight: '600' },
+  packageTitle: {
+    fontSize: wp('4%'),
+    fontWeight: '800',
+    flex: 1,
+    marginRight: wp('3%'),
+    color: '#333',
+    lineHeight: 20,
+  },
+  packagePrice: {
+    color: '#B07813',
+    fontWeight: '800',
+    fontSize: wp('4%'),
+  },
+  packageLabel: {
+    fontSize: wp('3.5%'),
+    lineHeight: hp('3%'),
+  },
+  packageLabelText: {
+    color: '#42BA86',
+    fontWeight: '600',
+  },
+  packageValue: {
+    color: '#060606ff',
+    fontWeight: '600',
+    width: wp('4%'),
+  },
   packageBtn: {
+    // width:57,
+    // height:21,
     alignSelf: 'flex-start',
     backgroundColor: '#F6B745',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    marginTop: 10,
+    marginTop: 12
   },
-  packageBtnText: { color: '#fff', fontWeight: '700' },
+  packageBtnText: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+ 
 
-  smallPackCard: {
-    width: 180,
-    backgroundColor: '#FFF8E5',
-    borderRadius: 12,
-    padding: 10,
-    marginVertical: 10,
-    marginHorizontal: 5,
-    elevation: 1,
-  },
-  smallPackTitle: { fontWeight: '800', flex: 1, marginRight: 6 },
-  smallPackRate: { fontWeight: '800', color: '#333' },
-  smallPackLine: { color: '#555', marginBottom: 6 },
-  smallPackTag: { fontSize: 11, color: '#9C7A00', marginBottom: 8 },
-  smallPackBtn: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
-  },
-  smallPackBtnText: { color: '#333', fontWeight: '700' },
-
-  bottomBarWrap: {
+ bottomBarWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 20, // Increased from 16
+    bottom: hp('2%'), // Increased from 16
     alignItems: 'center',
+
   },
   bottomNav: {
     backgroundColor: '#1A1A1A', // Darker
     width: '90%', // Reduced from 92%
-    height: 60, // Increased from 54
-    borderRadius: 30, // Increased from 28
+    height: hp('8%'), // Increased from 54
+    borderRadius: wp('205'), // Increased from 28
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 15, // Increased from 10
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  fabCircle: {
-    width: 50, // Increased from 44
-    height: 50, // Increased from 44
-    borderRadius: 25, // Increased from 22
+ fabCircle: {
+    width: wp('13%'),
+    height: wp('13%'),
+    borderRadius: wp('50%'),
     backgroundColor: '#F6B745',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -20, // Increased from -14
-    elevation: 4,
+    marginTop: 0, 
+ },
+  cardWrapper: {
+    // margin: wp("2%"),
+    alignItems: 'center',
+    marginHorizontal: wp('3%'),
+    overflow: 'visible',
+    justifyContent: 'space-evenly',
   },
+  foldSvg: {
+    position: 'absolute',
+    top: -1,
+    left: 0,
+    zIndex: 2,
+  },
+  headerText: {
+    position: "absolute",
+    fontSize: wp("2%"),
+    fontWeight: '500',
+    color: "#FFFFFF",
+    alignSelf : 'center',
+    marginTop : hp('1%')
+  },
+  cardContent: {
+    width: "90%",
+    justifyContent:'flex-start',
+    alignItems : 'flex-start',
+    paddingHorizontal : wp('2%')
+    
+  },
+  rate: { fontSize: wp("3%"), marginBottom: hp("0.5%") },
+  products: { fontSize: wp("2.8%"), marginBottom: hp("1%") },
+  about: {
+    fontSize: wp("2.5%"),
+    fontStyle: "italic",
+    color: "#D19B00",
+    marginBottom: hp("0.5%"),
+    textAlign: "center",
+  },
+  bookButton: {
+    backgroundColor: "#FFC107",
+    borderRadius: wp("5%"),
+    minWidth: wp("18%"),
+    paddingVertical: hp("1%"),
+    alignItems: "center",
+    justifyContent : 'center'
+  },
+  bookText: { color: "#fff", fontWeight: "bold", fontSize: wp("3%") },
+  bold: { fontWeight: "bold" },
+  footerCon: { alignSelf : 'center' },
 });

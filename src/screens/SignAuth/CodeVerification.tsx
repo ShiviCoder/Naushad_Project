@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import navigation
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 const OTPVerificationScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -66,25 +67,49 @@ const OTPVerificationScreen = () => {
       {/* OTP Inputs */}
       <View style={styles.otpContainer}>
         {otp.map((digit, index) => (
-          <TextInput
-            key={index}
-            style={styles.otpInput}
-            keyboardType="numeric"
-            maxLength={1}
-            value={digit}
-            onChangeText={(text) => handleChange(text, index)}
-            ref={(ref) => (inputRefs.current[index] = ref)}
-          />
+         <TextInput
+  key={index}
+  style={styles.otpInput}
+  keyboardType="numeric"
+  maxLength={1}
+  value={digit}
+  onChangeText={(text) => handleChange(text, index)}
+  ref={(ref) => (inputRefs.current[index] = ref)}
+  onKeyPress={({ nativeEvent }) => {
+    if (nativeEvent.key === "Backspace") {
+      const newOtp = [...otp];
+
+      if (otp[index] === "") {
+        // agar current box already empty hai -> pehle wale box pe jao
+        if (index > 0) {
+          inputRefs.current[index - 1].focus();
+          newOtp[index - 1] = "";
+        }
+      } else {
+        // agar current box me digit hai -> usi box ko clear karo
+        newOtp[index] = "";
+      }
+
+      setOtp(newOtp);
+    }
+  }}
+/>
         ))}
       </View>
 
       {/* Resend Row */}
       <View style={styles.resendRow}>
-        <Text style={styles.resendText}>Didn’t get it?</Text>
+        <View style={{flexDirection : 'row'}}>
+          <Text style={styles.resendText}>Didn’t get it?</Text>
         <TouchableOpacity onPress={handleResend}>
           <Text style={styles.resendButton}>Resend Code</Text>
         </TouchableOpacity>
+        </View>
+        
+         
+         <View>
         <Text style={styles.timer}>{`0:${timer < 10 ? `0${timer}` : timer}`}</Text>
+      </View>
       </View>
 
       {/* Verify Button */}
@@ -102,51 +127,53 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    padding: 20,
+    paddingHorizontal: wp('5%'),
     justifyContent: "center",
   },
   logo: {
-    width: 120,
-    height: 80,
-    marginBottom: 20,
+    width: wp("90%"),
+    height: hp("20%"),
+    alignSelf: "center",
+    marginBottom: hp("1%"),
+    marginTop: hp("7%"),
   },
   title: {
-    fontSize: 22,
+    fontSize: wp('9%'),
     fontWeight: "bold",
     textAlign: "center",
     color: "#000",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: wp('3%'),
     textAlign: "center",
-    color: "#555",
-    marginVertical: 10,
-    lineHeight: 20,
+    color: "#161414ff",
+    marginVertical: hp('2%'),
+    fontWeight: '500',
+    lineHeight: hp('2%'),
   },
   otpContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 20,
+    marginVertical: hp('2%'),
   },
   otpInput: {
-    width: 45,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    width: wp('12%'),
+    height: hp('6%'),
     textAlign: "center",
-    fontSize: 20,
-    borderRadius: 8,
-    marginHorizontal: 5,
-    backgroundColor: "#f9f9f9",
+    fontSize: hp('3%'),
+    borderRadius: wp('1%'),
+    marginHorizontal: wp('1%'),
+    backgroundColor: "#D9D9D975",
   },
   resendRow: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
+    width: '90%',
+    alignItems: 'flex-start',
+    marginBottom: hp('5%'),
+    justifyContent: 'space-between',
   },
   resendText: {
     color: "#555",
-    marginRight: 5,
   },
   resendButton: {
     color: "#000",
@@ -158,20 +185,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   timer: {
-    marginLeft: 10,
-    color: "#000",
+    marginLeft: wp('2%'),
+    color: "rgba(0, 0, 0, 1)",
     fontWeight: "bold",
   },
   verifyBtn: {
     backgroundColor: "#F6B93B",
-    paddingVertical: 15,
-    width: "100%",
-    borderRadius: 8,
+    paddingVertical: hp('2%'),
+    width: "92%",
+    borderRadius: wp('2%'),
     alignItems: "center",
   },
   verifyText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: wp('5%'),
   },
 });

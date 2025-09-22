@@ -8,10 +8,12 @@ import {
 import ProductData from '../../components/ProductData';
 import Card from '../../components/Cards';
 import Head from '../../components/Head';
+import { useTheme } from '../../context/ThemeContext';
 
 const ProductPackageScreen = () => {
+  const {theme} = useTheme();
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer,{backgroundColor : theme.background}]}>
       {/* Header */}
       <Head title="Product Packages"></Head>
       <FlatList
@@ -34,7 +36,6 @@ const ProductPackageScreen = () => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingHorizontal: wp('3%'),
     paddingTop: hp('2%'),
   },

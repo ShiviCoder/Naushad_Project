@@ -1,59 +1,65 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import React from 'react';
 import { Product } from "./ProductsArray";
 import { useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useTheme } from '../../context/ThemeContext';
 
 type Props = {
     product: Product;
 }
 
-
-
 const ProductCard: React.FC<Props> = ({ product }) => {
     const navigation = useNavigation<any>();
+    const { theme } = useTheme();
+
     return (
-        <View style={styles.productCard}>
+       <View
+  style={[
+    styles.productCard,
+    { backgroundColor: '#fff' },
+  ]}
+>
             <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product })}>
                 <Image
                     resizeMode='cover'
-                    source={product.image[0]} style={styles.ImageStyle} />
+                    source={product.image[0]}
+                    style={styles.ImageStyle} />
                 <Text
                     numberOfLines={1}
-                    style={styles.productName}>{product.name}</Text>
+                    style={[styles.productName, { color: '#000' }]}>{product.name}</Text>
                 <View style={styles.OuterPriceContainer}>
                     <View style={styles.InnerPriceContainer}>
-                        <Text style={styles.priceStyle}>₹{product.price}</Text>
-                        <Text style={styles.oldPriceStyle}>{product.oldPrice}</Text>
+                        <Text style={[styles.priceStyle, { color: '#000'}]}>₹{product.price}</Text>
+                        <Text style={[styles.oldPriceStyle, { color : '#ccc' }]}>{product.oldPrice}</Text>
                     </View>
-                    <Text style={styles.DiscountStyle}>{product.discount}</Text>
+                    <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>{product.discount}</Text>
                 </View>
                 <View style={styles.descContain}>
                     <Image
                         resizeMode='contain'
                         source={product.featureIcon}
                         style={styles.featureIconStyle} />
-                    <Text style={styles.DescStyle} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
+                    <Text style={[styles.DescStyle, { color:  '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
                 </View>
             </TouchableOpacity>
+
             <View style={styles.OutRatContain} >
-                <View style={styles.InnerRatContain}>
-                    <Text style={styles.ratingTextStyle}>{product.rating}</Text>
+                <View style={[styles.InnerRatContain, { backgroundColor: theme.dark ? '#0f8a43' : '#09932B' }]}>
+                    <Text style={[styles.ratingTextStyle, { color: theme.dark ? '#861919ff' : '#e6e2e2ff' }]}>{product.rating}</Text>
                     <Image
                         resizeMode='contain'
                         style={styles.starStyle}
                         source={require('../../assets/OurProduct/star1.png')} />
                 </View>
-                <Text style={styles.reviewStyle}>({product.reviews})</Text>
+                <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]} >({product.reviews})</Text>
             </View>
 
-            <TouchableOpacity style={styles.likeImgContainer}>
-
+            <TouchableOpacity style={[styles.likeImgContainer, { backgroundColor: '#928b8bff' }]}>
                 <Image
                     style={styles.iconImage}
                     resizeMode='contain'
                     source={require('../../assets/OurProduct/Like.png')} />
-
             </TouchableOpacity>
         </View>
     )
@@ -62,8 +68,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 export default ProductCard
 
 const styles = StyleSheet.create({
-    productCard: {
-        backgroundColor: "white",
+    productCard: {       
         width: wp('44%'),
         borderRadius: wp('7%'),
         alignItems: 'center',
@@ -129,7 +134,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: wp('1.5%')
     },
     ratingTextStyle: {
-        color: '#fff',
+      
         fontSize: wp('3.2%'),
         marginRight: wp('1%'),
     },
@@ -158,7 +163,7 @@ const styles = StyleSheet.create({
     reviewStyle: {
         marginLeft: wp('1%'),
         fontSize: wp('3.2%'),
-        color: '#ACACAC',
+      
     },
     iconImage: {
         height: '70%',
