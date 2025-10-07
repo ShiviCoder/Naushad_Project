@@ -10,7 +10,6 @@ import VerificationScreen from '../screens/SignAuth/VerificationScreen';
 import CodeVerification from '../screens/SignAuth/CodeVerification';
 import Services from '../screens/SignAuth/Services';
 import OurProducts from '../screens/OurProducts/OurProducts';
-import OfferScreen from '../screens/OfferScreen/OfferScreen';
 import ProductDetails from '../screens/ProductDetails/ProductDetails';
 import OurPackages from '../screens/SignAuth/OurPackages';
 import PackageDetails from '../screens/SignAuth/PackageDetails';
@@ -31,6 +30,16 @@ import PreviousBooking from '../screens/SignAuth/PreviousBooking';
 import BookAppoinment2 from '../screens/SignAuth/BookAppoinment2';
 import ProductPakage from '../screens/SignAuth/ProductPakage'
 import BottomNavbar from '../components/BottomNavbar';
+import Catelog from '../screens/SignAuth/Catelog';
+import ReferFriend from '../screens/SignAuth/ReferFriend';
+import AboutUs from '../screens/SignAuth/AboutUs';
+import PrivacyPolicy from '../screens/SignAuth/PrivacyPolicy';
+import TermsAndConditions from '../screens/SignAuth/TermsAndConditions';
+import AppVersion from '../screens/SignAuth/AppVersion';
+
+import OfferScreen from '../screens/SignAuth/OfferScreen'
+import Videos from '../screens/SignAuth/Videos';
+import Certificates from '../screens/SignAuth/Certificates';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -45,7 +54,7 @@ export type RootStackParamList = {
   CodeVerification: undefined;
   Services: undefined;
   OurProducts: undefined;
-  OfferScreen: undefined;
+ 
   ProductDetails: undefined;
   OurPackages: undefined;
   PackageDetails: undefined;
@@ -63,7 +72,17 @@ export type RootStackParamList = {
   BookingPending : undefined;
   PreviousBooking : undefined;
   BookAppoinment2 : undefined;
-  ProductPakage : undefined
+  ProductPakage : undefined;
+  Head : undefined;
+  Catelog : undefined;
+  ReferFriend : undefined;
+  AboutUs : undefined;
+  PrivacyPolicy : undefined;
+  TermsAndConditions : undefined;
+  AppVersion : undefined;
+  OfferScreen : undefined;
+  Videos : undefined;
+  Certificates : undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -111,11 +130,20 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name='PreviousBooking' component={PreviousBooking} />
         <Stack.Screen name='BookAppoinment2' component={BookAppoinment2} />
         <Stack.Screen name='ProductPakage' component={ProductPakage} />
+        <Stack.Screen name='Head' component={Head} />
+        <Stack.Screen name='Catelog' component={Catelog} />
+        <Stack.Screen name='ReferFriend' component={ReferFriend} />
+        <Stack.Screen name='AboutUs' component={AboutUs} />
+        <Stack.Screen name='PrivacyPolicy' component={PrivacyPolicy} />
+        <Stack.Screen name='TermsAndConditions' component={TermsAndConditions} />
+        <Stack.Screen name='AppVersion' component={AppVersion} />
+        <Stack.Screen name='Videos' component={Videos} />
+        <Stack.Screen name='Certificates' component={Certificates} />
 
         
         {/* <Stack.Screen name="BookDetAcc" component={BookDetAcc}/> */}
       </Stack.Navigator>
-      <Stack.Screen name='Head' component={Head} />
+    
     </NavigationContainer>
   );
 }

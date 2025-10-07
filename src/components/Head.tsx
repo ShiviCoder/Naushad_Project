@@ -3,25 +3,41 @@ import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { useTheme } from '../context/ThemeContext'; // ✅ ThemeContext import
+import { useTheme } from '../context/ThemeContext';
 
-const Head: React.FC<{ title: string }> = ({ title }) => {
+interface HeadProps {
+  title: string;
+  rightComponent?: React.ReactNode;
+  showBack?: boolean; 
+}
+
+const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true }) => {
   const navigation = useNavigation();
-  const { theme } = useTheme(); // ✅ theme now contains colors
+  const { theme } = useTheme();
 
   return (
     <View style={[styles.head, { backgroundColor: theme.background }]}>
-      <TouchableOpacity
-        onPress={() => {
-          if (navigation.canGoBack()) {
-            navigation.goBack();
-          }
-        }}
-        style={styles.backButton}
-      >
-        <Icon name="chevron-back" size={wp('7%')} color={theme.textPrimary} />
-      </TouchableOpacity>
-      <Text style={[styles.title, { color: theme.textPrimary }]}>{title}</Text>
+      {/* Left - Back button */}
+      {showBack && (
+        <TouchableOpacity
+          onPress={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            }
+          }}
+          style={styles.backButton}
+        >
+          <Icon name="chevron-back" size={wp('7%')} color={theme.textPrimary} />
+        </TouchableOpacity>
+      )}
+
+      {/* Center - Title */}
+      <Text style={[styles.title, { color: theme.textPrimary }]} numberOfLines={1}>
+        {title}
+      </Text>
+
+      {/* Right - Custom button(s) */}
+      <View style={styles.right}>{rightComponent}</View>
     </View>
   );
 };
@@ -30,18 +46,23 @@ export default Head;
 
 const styles = StyleSheet.create({
   head: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    height: hp('8%'),
     justifyContent: 'center',
-    paddingVertical: hp('2%'),
-    paddingHorizontal: wp('4%'),
+    alignItems: 'center',
   },
   title: {
-    fontSize: wp('5%'), 
+    fontSize: wp('5%'),
     fontWeight: '700',
+    textAlign: 'center',
   },
   backButton: {
-    left: wp('4%'),
     position: 'absolute',
+    left: wp('2%'),
+    padding: 5,
+  },
+  right: {
+    position: 'absolute',
+    right: wp('2%'),
   },
 });
+ 

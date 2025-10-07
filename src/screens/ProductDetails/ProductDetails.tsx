@@ -25,7 +25,8 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
     return (
        <View style={[styles.container, { backgroundColor: theme.dark ? '#121212' : '#fff' }]}>
     <Head title='Our Products'/>
-    <Image style={styles.image} source={product.image[1]} />
+   <View style={{paddingHorizontal : wp('4%')}}>
+     <Image style={styles.image} source={product.image[1]} />
     <View style={styles.detailContain}>
         <Text style={[styles.prodName, { color: theme.dark ? '#fff' : '#000' }]}>{product.name}</Text>
         <Text style={[styles.prodPrice, { color: theme.dark ? '#fff' : '#000' }]}>₹ {product.price}</Text>
@@ -70,6 +71,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
             <Text style={styles.buyTxt}>Buy Now</Text>
         </TouchableOpacity>
     </View>
+   </View>
 </View>
 
     )
@@ -80,8 +82,7 @@ export default ProductDetails
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingVertical: hp('2%'),
-        paddingHorizontal: wp('4%')
+       
     },
     image: {
         width: wp('90%'),
@@ -131,7 +132,6 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
         justifyContent: "center",
         borderRadius: wp('3%'),
-        paddingHorizontal : wp('3%'),
         paddingVertical: hp('1%'),
         width: wp('35%'),
         alignSelf: 'flex-start',

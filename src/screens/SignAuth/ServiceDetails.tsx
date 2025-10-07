@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import CheckBox from '@react-native-community/checkbox'
 import React, { useState } from 'react';
 import Head from '../../components/Head';
@@ -39,33 +39,34 @@ const ServiceDetails = () => {
 
   const route = useRoute<RouteProp<RootStackParamList, 'ServiceDetails'>>();
   const { item } = route.params;
-   
+
 
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Our Services" />
-      <Image style={styles.image} source={item.image} />
+      <View style={{gap : hp('2%')}}>
+        <Image style={styles.image} source={item.image} />
 
       <View style={styles.nameCont}>
         <Text style={[styles.name, { color: theme.textPrimary }]}>{item.name}</Text>
         <Text style={[styles.price, { color: theme.textPrimary }]}>₹ {item.price}</Text>
       </View>
 
-      <Text style={[styles.desc, { color: '#00000075' }]}>"{item.desc}"</Text>
+      <Text style={[styles.desc, { color: theme.subtext }]}>"{item.desc}"</Text>
 
       <View style={styles.highlightCont}>
         <Text style={[styles.hightlightHead, { color: theme.textPrimary }]}>Highlights</Text>
         {item.highlights?.map((element, index) => (
           <View key={index} style={styles.highInCon}>
             <View style={[styles.circle, { backgroundColor: '#F6B745' }]} />
-            <Text style={[styles.highlightTxt, { color: theme.textSecondary }]}>{element}</Text>
+            <Text style={[styles.highlightTxt, { color: theme.subtext }]}>{element}</Text>
           </View>
         ))}
       </View>
 
       <View style={styles.extra}>
-        <Text style={[styles.extraHead, { color: theme.textPrimary }]}>Extra</Text>
+        <Text style={[styles.extraHead, { color: theme === 'Dark' ? '#fff' : theme.textPrimary }]}>Extra</Text>
         {item.extras?.map((extraItem, index) => (
           <View style={styles.extraItemContain} key={index}>
             <View style={styles.extraItemSubCon}>
@@ -84,12 +85,16 @@ const ServiceDetails = () => {
       <TouchableOpacity
         style={[styles.BookAppointBtn, { backgroundColor: '#F6B745' }]}
         onPress={() => {
-          navigation.navigate("BookAppointmentScreen", { image: item.image });
+          navigation.navigate('MainTabs', {
+            screen: 'BookAppointmentScreen',
+            params: { image: item.image }
+          });
         }}
       >
         <Text style={[styles.BookAppointBtnTxt, { color: theme.background }]}>Book Appointment</Text>
       </TouchableOpacity>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -100,37 +105,44 @@ const styles = StyleSheet.create({
     gap: hp("4%"),
   },
   image: {
-    width: wp("90%"), // 90% of screen width
+    width: '90%', // 90% of screen width
     height: hp("25%"), // 25% of screen height
     alignSelf: "center",
     borderRadius: wp("3%"),
   },
   nameCont: {
     flexDirection: "row",
-    width: wp("85%"),
+    width: "90%",
     alignItems: "center",
     justifyContent: "space-between",
     alignSelf: "center",
+    marginTop : hp('2%')
   },
   name: {
     fontSize: hp("3%"),
-    fontWeight: "500",
+    fontWeight: "700",
+    fontFamily: 'Poppins-Medium'
+
+
   },
   price: {
     fontSize: hp("2.2%"),
     fontWeight: "500",
+    fontFamily: 'Poppins-Medium'
+
   },
   desc: {
     fontSize: hp("1.8%"),
     fontWeight: "500",
     color: "#00000075",
-    width: wp("85%"),
+    width: '90%',
     alignSelf: "center",
     textAlign: "justify",
+    fontFamily: 'Poppins-Medium'
   },
   highlightCont: {
     gap: hp("1.5%"),
-    width: wp("85%"),
+    width: "90%",
     alignSelf: "center",
   },
   highInCon: {
@@ -148,10 +160,12 @@ const styles = StyleSheet.create({
     color: "#00000075",
     fontSize: hp("1.6%"),
     fontWeight: "500",
+    fontFamily: 'Poppins-Medium'
   },
   hightlightHead: {
     fontSize: hp("2.2%"),
-    fontWeight: "500",
+    fontWeight: "700",
+    fontFamily: 'Poppins-Medium'
   },
   extraItemContain: {
     flexDirection: "row",
@@ -163,15 +177,17 @@ const styles = StyleSheet.create({
   extraHead: {
     fontSize: hp("3%"),
     fontWeight: "500",
+    fontFamily: 'Poppins-Medium'
   },
   extra: {
-    width: wp("85%"),
+    width: '90%',
     alignSelf: "center",
     gap: hp("1%"),
   },
   extraTxt: {
     fontSize: hp("1.9%"),
     fontWeight: "500",
+    fontFamily: 'Poppins-Medium'
   },
   extraItemSubCon: {
     flexDirection: "row",
@@ -179,7 +195,7 @@ const styles = StyleSheet.create({
     gap: wp("3%"),
   },
   BookAppointBtn: {
-    width: wp("85%"),
+    width: '90%',
     paddingVertical: hp("2%"),
     backgroundColor: "#F6B745",
     borderRadius: wp("3%"),
@@ -191,5 +207,6 @@ const styles = StyleSheet.create({
     fontSize: hp("2%"),
     fontWeight: "600",
     color: "#fff",
+    fontFamily: 'Poppins-Medium'
   },
 });

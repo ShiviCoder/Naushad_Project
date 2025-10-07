@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
 import Head from "../../components/Head";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -15,9 +15,9 @@ export default function BookingAccepted() {
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Head title="Booking Details" />
 
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         {/* Status Section */}
-        <View style={[styles.statusCard, { backgroundColor: theme.card }]}>
+        <View style={[styles.statusCard, { backgroundColor: theme.background }]}>
           <Text style={[styles.statusText, { color: theme.textPrimary }]}>Premium Haircut</Text>
 
           <View style={styles.dateRow}>
@@ -37,7 +37,7 @@ export default function BookingAccepted() {
         </View>
 
         {/* User Info */}
-        <View style={[styles.userCard, { backgroundColor: theme.card }]}>
+        <View style={[styles.userCard, { backgroundColor: theme.background }]}>
           <Image
             source={require("../../assets/images/bookUser.png")}
             style={styles.userImg}
@@ -62,13 +62,15 @@ export default function BookingAccepted() {
             <Text style={[styles.actionText, { color: '#D33333' }]}>Cancel Booking</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
+  screen: { flex: 1,
+ 
+   },
   container: { padding: wp("4%") },
 
   // Status Card
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
   locationText: { fontSize: wp("4.5%"), marginLeft: wp("2%") },
 
   // Action Buttons
-  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginTop: hp('4%') },
+  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginVertical: hp('4%')},
   actionBtn: {
     paddingVertical: hp("1.2%"),
     paddingHorizontal: wp("6%"),

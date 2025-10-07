@@ -66,7 +66,7 @@ const CartScreen = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 180 }}
+        contentContainerStyle={{ paddingBottom: 180, paddingHorizontal: 20 }}
       >
         {cartItems.length === 0 ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
@@ -81,7 +81,7 @@ const CartScreen = () => {
               style={[
                 styles.card,
                 {
-                  backgroundColor: theme.dark ? '#e8e5e5ff' : '#333',
+                  backgroundColor: '#dadada',
                   borderColor: theme.dark ? '#F6B745' : '#F6B745',
                 },
               ]}
@@ -92,13 +92,13 @@ const CartScreen = () => {
               />
               <View style={styles.itemDetails}>
                 <Text style={[styles.itemName, { color: '#000' }]}>
-                  {item.name}
+                  {item.name || item.title}
                 </Text>
                 <View style={styles.priceRow}>
                   <Text style={[styles.price, { color: '#000' }]}>
                     ₹{item.price}
                   </Text>
-                  <Text style={[styles.oldPrice, { color:  '#888' }]}>
+                  <Text style={[styles.oldPrice, { color: '#888' }]}>
                     ₹{item.oldPrice}
                   </Text>
                   <Text style={[styles.discount, { color: '#42BA86' }]}>
@@ -136,19 +136,19 @@ const CartScreen = () => {
         )}
 
         <View style={styles.summary}>
-  <View style={styles.summaryRow}>
-    <Text style={[styles.summaryText, { color: theme.dark ? '#000' : '#fff' }]}>Subtotal</Text>
-    <Text style={[styles.summaryText, {  color: theme.dark ? '#000' : '#fff' }]}>₹{subtotal}</Text>
-  </View>
-  <View style={styles.summaryRow}>
-    <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>Discount</Text>
-    <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>₹{discount}</Text>
-  </View>
-  <View style={styles.summaryRow}>
-    <Text style={[styles.gstText, {  color: theme.dark ? '#000' : '#fff' }]}>GST (10%)</Text>
-    <Text style={[styles.gstText, { color: theme.dark ? '#000' : '#fff' }]}>₹{gst}</Text>
-  </View>
-</View>
+          <View style={styles.summaryRow}>
+            <Text style={[styles.summaryText, { color: theme.dark ? '#fff' : '#000' }]}>Subtotal</Text>
+            <Text style={[styles.summaryText, { color: theme.dark ? '#fff' : '#000' }]}>₹{subtotal}</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>Discount</Text>
+            <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>₹{discount}</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={[styles.gstText, { color: theme.dark ? '#fff' : '#000' }]}>GST (10%)</Text>
+            <Text style={[styles.gstText, { color: theme.dark ? '#fff' : '#000' }]}>₹{gst}</Text>
+          </View>
+        </View>
       </ScrollView>
 
       {/* Sticky Total + Checkout */}
@@ -160,19 +160,21 @@ const CartScreen = () => {
       >
         <View style={styles.totalRow}>
           <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>Total</Text>
-          <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000'  }]}>₹{total}</Text>
+          <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>₹{total}</Text>
         </View>
         <TouchableOpacity
-          style={[styles.checkoutBtn, { backgroundColor:'#F6B745' }]}
+          style={[styles.checkoutBtn, { backgroundColor: '#F6B745' }]}
         >
-          <Text style={[styles.checkoutText, { color:  '#fff' }]}>Checkout</Text>
+          <Text style={[styles.checkoutText, { color: '#fff' }]}>Checkout</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: wp('4%') },
+  container: {
+    flex: 1,
+  },
   card: {
     flexDirection: "row",
     padding: wp('3%'),
@@ -182,16 +184,23 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   image: { width: wp('32%'), height: hp('15%'), borderRadius: wp('3%'), marginRight: wp('3%') },
-  itemDetails: { flex: 1, justifyContent: "center", alignItems: "center" },
-  itemName: { fontSize: wp('4%'), fontWeight: "600" },
-  priceRow: { flexDirection: "row", alignItems: "center", marginTop: hp('0.5%') },
-  price: { fontWeight: "bold", fontSize: wp('3.5%') },
+  itemDetails: {
+    flex: 1, justifyContent: "center", alignItems: "center", fontFamily: "Poppins-Medium"
+  },
+  itemName: { fontSize: wp('4%'), fontWeight: "600", fontFamily: "Poppins-Medium" },
+  priceRow: { flexDirection: "row", alignItems: "center", marginTop: hp('0.5%'), fontFamily: "Poppins-Medium" },
+  price: { fontWeight: "bold", fontSize: wp('3.5%'), fontFamily: "Poppins-Medium" },
   oldPrice: {
     textDecorationLine: "line-through",
     fontSize: wp('3%'),
     marginLeft: wp('2%'),
+    fontFamily: "Poppins-Medium"
   },
-  discount: { marginLeft: wp('2%'), fontSize: wp('3%') },
+  discount: { 
+    marginLeft: wp('2%'), 
+    fontSize: wp('3%'), 
+    fontFamily: "Poppins-Medium" 
+  },
   qtyRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -206,24 +215,39 @@ const styles = StyleSheet.create({
     fontSize: wp('5%'),
     fontWeight: "bold",
     paddingHorizontal: wp('2%'),
-    color: '#fff'
+    color: '#fff',
+    fontFamily: "Poppins-Medium"
   },
   qtyValue: {
     fontSize: wp('4%'),
     fontWeight: "bold",
     textAlign: "center",
     minWidth: wp('6%'),
-    color: '#fff'
+    color: '#fff',
+    fontFamily: "Poppins-Medium"
   },
-  removeRow: { flexDirection: "row", alignItems: "center", marginTop: hp('0.5%') },
-  removeText: { color: "red", fontSize: wp('3%'), fontWeight: "500" },
+  removeRow: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginTop: hp('0.5%') 
+  },
+  removeText: { 
+    color: "red", 
+    fontSize: wp('3%'), 
+    fontWeight: "500", 
+    fontFamily: "Poppins-Medium" 
+  },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: hp('1%'),
     paddingTop: hp('0.5%'),
   },
-  totalText: { fontSize: wp('4%'), fontWeight: "bold" },
+  totalText: { 
+    fontSize: wp('4%'), 
+    fontWeight: "bold", 
+    fontFamily: "Poppins-Medium" 
+  },
   stickyFooter: {
     position: "absolute",
     bottom: 0,
@@ -238,8 +262,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: hp('1%'),
   },
-  checkoutText: { fontSize: wp('4%'), fontWeight: "bold", letterSpacing: 1 },
-  summary: { marginTop: hp('2%') },
+  checkoutText: { 
+    fontSize: wp('4%'), 
+    fontWeight: "bold", 
+    letterSpacing: 1, 
+    fontFamily: "Poppins-Medium" 
+  },
+  summary: { 
+    marginTop: hp('2%') 
+  },
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",

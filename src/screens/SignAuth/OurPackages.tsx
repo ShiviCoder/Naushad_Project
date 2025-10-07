@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     color: '#000',
     flex: 1,
     textAlign: 'center',
-    margin: 20
+    margin: 20,
   },
   headerSpacer: {
     width: 36,

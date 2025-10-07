@@ -26,6 +26,7 @@ export default function Calender() {
         onDayPress={(day) => setSelected(day.dateString)}
         hideExtraDays={true}
         monthFormat={"MMMM"}
+        minDate={new Date().toISOString().split("T")[0]}
         renderArrow={(direction) =>
           direction === "left" ? (
             <Icon name="chevron-back" size={wp("6%")} color={theme.textPrimary} />
@@ -38,14 +39,20 @@ export default function Calender() {
 
           const isSelected = selected === date.dateString;
           const today = new Date();
+          const currentDate = new Date(date.year , date.month - 1, date.day);
           const isToday =
             today.getFullYear() === date.year &&
             today.getMonth() + 1 === date.month &&
             today.getDate() === date.day;
 
+            const isPast = currentDate < new Date(new Date().setHours(0,0,0,0));
+
           return (
             <TouchableOpacity
-              onPress={() => setSelected(date.dateString)}
+            disabled={isPast}
+               onPress={() =>
+        setSelected(isSelected ? "" : date.dateString) // ✅ toggle selection
+      }
               activeOpacity={0.7}
               style={{
                 justifyContent: "center",
@@ -59,8 +66,14 @@ export default function Calender() {
             >
               <Text
                 style={{
-                  color: isSelected ? theme.textPrimary : isToday ? 'green' : theme.textSecondary,
-                  fontWeight: isSelected || isToday ? "700" : "400",
+                  color: isPast
+            ? "#dadada" // past date color
+            : isSelected
+            ? theme.textPrimary
+            : isToday
+            ? "orange"
+            : theme.textSecondary,
+                  fontWeight: isSelected || isToday ? "700" : "600",
                   fontSize: wp("3.5%"),
                 }}
               >
@@ -99,6 +112,8 @@ export default function Calender() {
               fontSize: wp("4%"),
               fontWeight: "600",
               color: theme.textPrimary,
+                  fontFamily: "Poppins-Medium",
+
             },
             dayHeader: {
               marginTop: 2,
@@ -107,6 +122,8 @@ export default function Calender() {
               textAlign: "center",
               fontSize: wp("3.2%"),
               color: theme.textSecondary,
+                  fontFamily: "Poppins-Medium",
+
             },
           },
         }}

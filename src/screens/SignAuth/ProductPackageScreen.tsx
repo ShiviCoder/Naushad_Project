@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, FlatList, Dimensions } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -12,15 +12,31 @@ import { useTheme } from '../../context/ThemeContext';
 
 const ProductPackageScreen = () => {
   const {theme} = useTheme();
+  const [numColumns , setNumColumns] = useState(2);
+  
+  useEffect(() => {
+    const updateOrientation = () => {
+      const { width, height } = Dimensions.get('window');
+      setNumColumns(width > height ? 4 : 2); // landscape → 5, portrait → 2
+    };
+
+    updateOrientation(); // initial check
+    const subscription = Dimensions.addEventListener('change', updateOrientation);
+
+    return () => subscription?.remove();
+  }, []);
+
   return (
     <View style={[styles.mainContainer,{backgroundColor : theme.background}]}>
       {/* Header */}
       <Head title="Product Packages"></Head>
-      <FlatList
+      <View style={{paddingHorizontal : wp('3.5%')}}>
+        <FlatList
         data={ProductData}
-        numColumns={2}
+        numColumns={numColumns}
+          key={numColumns}
         showsVerticalScrollIndicator={false}
-        columnWrapperStyle={{ justifyContent: 'flex-start' }}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
         contentContainerStyle={{
           paddingBottom: hp('10%'),
           paddingTop: hp('2%'),
@@ -28,7 +44,8 @@ const ProductPackageScreen = () => {
         renderItem={({ item }) => <Card item={item} />}
         keyExtractor={(item, index) => index.toString()}
         ItemSeparatorComponent={() => <View style={{ height: hp('4%') }} />}
-      />
+      /> 
+      </View>
     </View>
   );
 };
@@ -36,8 +53,8 @@ const ProductPackageScreen = () => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    paddingHorizontal: wp('3%'),
-    paddingTop: hp('2%'),
+    paddingBottom : hp('4%')
+  
   },
   headContainer: {
     flexDirection: 'row',

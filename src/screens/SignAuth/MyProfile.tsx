@@ -1,16 +1,20 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Modal} from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Modal, ScrollView} from 'react-native'
 import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from "../../context/ThemeContext"; // ✅ import theme
+import Head from '../../components/Head';
+
 
 
 const MyProfile = () => {
-    const [gender, setGender] = useState('male')
+    const [gender, setGender] = useState('')
     const [filePath, setFilePath] = useState({});
     const [modal , setModal] = useState(false);
-        const navigation = useNavigation<any>()
+    const navigation = useNavigation<any>();
+    const {theme} = useTheme();
     
     const chooseFile = () => {
         let options = {
@@ -31,20 +35,11 @@ const MyProfile = () => {
         });
     };
     return (
-        <View style={styles.container}>
-            <View style={styles.headContainer}>
-                <TouchableOpacity onPress={()=>
-                    {
-                        navigation.goBack()
-                    }
-                }>
-                    <Icon name='chevron-back' size={wp('7%')} color="#0e0d0dff" />
-                </TouchableOpacity>
-                <Text style={styles.headText} >My Profile</Text>
-                <TouchableOpacity>
-                    <Text style={styles.saveText}>Save</Text>
-                </TouchableOpacity>
-            </View>
+        <ScrollView style={[styles.container,{backgroundColor : theme.background}]}>
+            <Head title='My Profile' rightComponent={  <TouchableOpacity>
+                    <Text style={[styles.saveText,{color:theme.textPrimary}]}>Save</Text>
+                </TouchableOpacity>}/>
+            
 
             <View style={styles.photoContainer}>
                <TouchableOpacity onPress={()=>setModal(true)}>
@@ -71,29 +66,29 @@ const MyProfile = () => {
       </Modal>
 
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer,{backgroundColor : theme.background}]}>
 
-                <Text style={styles.label}>Full Name</Text>
-                <TextInput placeholder='' style={styles.input} />
+                <Text style={[styles.label,{color: theme.textPrimary}]}>Full Name</Text>
+                <TextInput placeholder='' style={[styles.input,{color : theme.textPrimary}]} />
 
-                <Text style={styles.label}>Email</Text>
-                <TextInput placeholder='' style={styles.input} keyboardType='email-address' />
+                <Text style={[styles.label,{color: theme.textPrimary}]}>Email</Text>
+                <TextInput placeholder='' style={[styles.input,{color : theme.textPrimary}]} keyboardType='email-address' />
 
-                <Text style={styles.label}>Phone Number</Text>
-                <TextInput placeholder='' style={styles.input} keyboardType='phone-pad' />
+                <Text style={[styles.label,{color: theme.textPrimary}]}>Phone Number</Text>
+                <TextInput placeholder='' style={[styles.input,{color : theme.textPrimary}]} keyboardType='phone-pad' />
 
-                <Text style={styles.label}>Date of Birth</Text>
-                <TextInput placeholder='' style={styles.input} />
+                <Text style={[styles.label,{color: theme.textPrimary}]}>Date of Birth</Text>
+                <TextInput placeholder='' style={[styles.input,{color : theme.textPrimary}]} />
 
-                <Text style={styles.label}>Address</Text>
-                <TextInput placeholder='' style={styles.input} multiline />
+                <Text style={[styles.label,{color: theme.textPrimary}]}>Address</Text>
+                <TextInput placeholder='' style={[styles.input,{color : theme.textPrimary}]} multiline />
 
-                <Text style={styles.label}>Gender</Text>
+                <Text style={[styles.label,{color: theme.textPrimary}]}>Gender</Text>
                 <View style={styles.radioContainer}>
                     {['male', 'female', 'other'].map((option) => (
                         <TouchableOpacity
                             key={option}
-                            style={styles.radioOption}
+                            style={[styles.radioOption]}
                             onPress={() => setGender(option)}
                         >
                             <View
@@ -103,14 +98,14 @@ const MyProfile = () => {
                                 ]}
                             >
                             </View>
-                            <Text>
+                            <Text style={{color : theme.textPrimary}}>
                                 {option.charAt(0).toUpperCase() + option.slice(1)}
                             </Text>
                         </TouchableOpacity>
                     ))}
                 </View>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
@@ -118,8 +113,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        paddingHorizontal: wp("4%"),
-        paddingTop: hp("2%"),
     },
     headContainer: {
         flexDirection: "row",

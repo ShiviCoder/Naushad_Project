@@ -13,7 +13,8 @@ export const ThemeProvider = ({ children }) => {
       card: "#9387870A",
       primary: "#42BA86",
       secondary: "#3b82f6",
-      white  :'#fff'
+      white  :'#fff',
+      subtext : '#00000075'
     },
     Dark: {
       background: "#121212",
@@ -22,7 +23,8 @@ export const ThemeProvider = ({ children }) => {
       card: "#464343ff",
       primary: "#42BA86",
       secondary: "#3b82f6",
-      dark : '#111'
+      dark : '#111',
+      subtext : '#fff'
     },
   };
 

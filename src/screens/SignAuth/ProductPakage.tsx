@@ -8,15 +8,17 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { widthPercentageToDP  as wp,
-  heightPercentageToDP as hp, } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import Head from '../../components/Head';
 
 
 const ProductPackages = ({ navigation }) => {
   const [quantity, setQuantity] = useState(1);
-const { theme } = useTheme(); 
+  const { theme } = useTheme();
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
   };
@@ -46,7 +48,7 @@ const { theme } = useTheme();
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-    <Head title="Product Package"/>
+      <Head title="Product Package" />
       <ScrollView style={styles.scrollView}>
         {/* Product Image */}
         <View style={styles.imageContainer}>
@@ -84,7 +86,7 @@ const { theme } = useTheme();
           {/* Offer */}
           <View style={styles.offerContainer}>
             <Text style={[styles.offerText, { color: theme.textPrimary }]}>
-             🔖 Save ₹300 on combo purchase
+              🔖 Save ₹300 on combo purchase
             </Text>
           </View>
         </View>
@@ -97,7 +99,7 @@ const { theme } = useTheme();
           <View style={styles.itemsList}>
             {['✅ Shampoo (250ml)', '✅ Conditioner (250ml)', '✅ Hair Mask (200g)', '✅ Hair Serum (50ml)'].map((item, i) => (
               <View style={styles.itemRow} key={i}>
-                
+
                 <Text style={[styles.itemText, { color: theme.textSecondary }]}>
                   {item}
                 </Text>
@@ -160,6 +162,19 @@ const { theme } = useTheme();
               borderColor: theme.textPrimary,
             },
           ]}
+          onPress={() => {
+            const product = {
+              id: 1,
+              name: "Luxury hair care kit",
+              price: 1499,
+              oldPrice: 7888,
+              discount: Math.round(((7888 - 1499) / 7888) * 100),
+              image: require("../../assets/newPic.png")
+            };
+            navigation.navigate('Cart', {
+              product: { ...product, qty: quantity  }
+            });
+          }}
         >
           <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>
             Add to cart
@@ -178,7 +193,7 @@ const { theme } = useTheme();
 };
 
 const styles = StyleSheet.create({
-   container: {
+  container: {
     flex: 1,
     backgroundColor: '#fff',
   },
@@ -209,7 +224,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   productImage: {
-    width: wp('97.22%'),
+    width: '97.22%',
     height: hp('22.75%'),
   },
   productInfo: {
@@ -223,8 +238,8 @@ const styles = StyleSheet.create({
     marginBottom: hp('1%'),
   },
   productTitle: {
-    width:wp('52.5%'),
-    height:hp('3.75%'),
+    width: wp('52.5%'),
+    height: hp('3.75%'),
     fontSize: hp('2.5%'),
     fontWeight: '500',
     color: '#000',
@@ -253,7 +268,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: hp('1.875%'),
-    fontWeight:'500',
+    fontWeight: '500',
     color: '#00000075',
     marginBottom: hp('1.5%'),
   },
@@ -304,7 +319,7 @@ const styles = StyleSheet.create({
     borderRadius: wp('1.67%'),
     width: wp('14.61%'),
     height: hp('3.125%'),
-    
+
   },
   quantityButton: {
     flex: 1,
@@ -338,7 +353,7 @@ const styles = StyleSheet.create({
   },
   addToCartButton: {
     flex: 1,
-    width:wp('97.22%'),
+    width: wp('97.22%'),
     height: hp('5.125%'),
     borderRadius: wp('3.33%'),
     borderWidth: wp('0.28%'),
@@ -355,7 +370,7 @@ const styles = StyleSheet.create({
   buyNowButton: {
     flex: 1,
     // height: 56,
-    width:wp('97.22%'),
+    width: wp('97.22%'),
     height: hp('5.125%'),
     backgroundColor: '#F6B745',
     borderRadius: wp('3.33%'),

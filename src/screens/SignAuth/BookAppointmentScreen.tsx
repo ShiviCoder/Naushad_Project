@@ -75,7 +75,9 @@ export default function BookAppointmentScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: { flex: 1 },
+  mainContainer: { 
+    flex: 1 
+  },
   headContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -83,7 +85,10 @@ const styles = StyleSheet.create({
     paddingVertical: hp("2%"),
     justifyContent: "center",
   },
-  headText: { fontSize: wp("5%"), fontWeight: 'bold' },
+  headText: { 
+    fontSize: wp("5%"), 
+    fontWeight: 'bold' 
+  },
   img: {
     width: wp("85%"),
     height: hp("20%"),
@@ -96,12 +101,13 @@ const styles = StyleSheet.create({
     fontSize: wp("4%"),
     paddingVertical: hp("0.2%"),
     paddingHorizontal: wp("2%"),
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins-Medium",
     fontWeight: "800",
   },
   calenderContainer: { marginHorizontal: wp("2%"), marginBottom: hp("0.5%") },
   timeContainer: { marginHorizontal: wp("1%"), marginBottom: hp("1%") },
   nxt: { marginHorizontal: wp("4%"), alignItems: "flex-end", marginTop: hp("2%") },
   nxtButton: { paddingVertical: hp("1%"), paddingHorizontal: wp("4%"), borderRadius: wp("2%") },
-  nxtText: { fontSize: wp("4%"), fontWeight: "500" },
+  nxtText: { fontSize: wp("4%"), fontWeight: "500" ,    fontFamily: "Poppins-Medium",
+},
 });

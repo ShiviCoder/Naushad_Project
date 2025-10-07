@@ -6,16 +6,16 @@ const settingData = [
     icon: "pencil",
     image: require('../assets/round-edit.png')
   },
-  {
-    id: 2,
-    title: "Theme",
-    description: "Switch between light and dark appearance",
-    icon: "palette",
-    image : require('../assets/theme.png'),
-    options: ["Dark", "Light"],
-    type: "radio",
-    selected: "Light"
-  },
+  // {
+  //   id: 2,
+  //   title: "Theme",
+  //   description: "Switch between light and dark appearance",
+  //   icon: "palette",
+  //   image : require('../assets/theme.png'),
+  //   options: ["Dark", "Light"],
+  //   type: "radio",
+  //   selected: "Light"
+  // },
   {
     id: 3,
     title: "Cart",

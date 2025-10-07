@@ -11,7 +11,7 @@ export default function BlankScreen() {
    const navigation = useNavigation();
     const { theme } = useTheme();
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer,{backgroundColor : theme.background}]}>
         <View style={styles.headContainer}>
              
               <Text style={[styles.headText, { color: theme.textPrimary}]}>Blank Screen</Text>

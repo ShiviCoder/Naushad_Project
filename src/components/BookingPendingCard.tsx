@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     backgroundColor: '#ACACAC8A', // ✅ unchanged
-    width: wp('90%'),
+    width: '90%',
     minHeight: hp('20%'),
     marginVertical: hp('1.5%'),
     alignSelf: 'center',

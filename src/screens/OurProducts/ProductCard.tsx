@@ -1,37 +1,41 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { Product } from "./ProductsArray";
 import { useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 type Props = {
     product: Product;
+    liked : boolean;
+    onToggleLike : () => void;
 }
 
-const ProductCard: React.FC<Props> = ({ product }) => {
+const ProductCard: React.FC<Props> = ({ product , liked , onToggleLike }) => {
     const navigation = useNavigation<any>();
     const { theme } = useTheme();
 
+
     return (
-       <View
-  style={[
-    styles.productCard,
-    { backgroundColor: '#fff' },
-  ]}
->
+        <View
+            style={[
+                styles.productCard,
+                { backgroundColor: '#fff' },
+            ]}
+        >
             <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product })}>
                 <Image
                     resizeMode='cover'
-                    source={product.image[0]}
+                    source={product.image?.[0]}
                     style={styles.ImageStyle} />
                 <Text
                     numberOfLines={1}
                     style={[styles.productName, { color: '#000' }]}>{product.name}</Text>
-                <View style={styles.OuterPriceContainer}>
+                <View style={styles.OurterPriceContainer}>
                     <View style={styles.InnerPriceContainer}>
-                        <Text style={[styles.priceStyle, { color: '#000'}]}>₹{product.price}</Text>
-                        <Text style={[styles.oldPriceStyle, { color : '#ccc' }]}>{product.oldPrice}</Text>
+                        <Text style={[styles.priceStyle, { color: '#000' }]}>₹{product.price}</Text>
+                        <Text style={[styles.oldPriceStyle, { color: '#ccc' }]}>{product.oldPrice}</Text>
                     </View>
                     <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>{product.discount}</Text>
                 </View>
@@ -40,7 +44,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                         resizeMode='contain'
                         source={product.featureIcon}
                         style={styles.featureIconStyle} />
-                    <Text style={[styles.DescStyle, { color:  '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
+                    <Text style={[styles.DescStyle, { color: '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
                 </View>
             </TouchableOpacity>
 
@@ -55,12 +59,19 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                 <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]} >({product.reviews})</Text>
             </View>
 
-            <TouchableOpacity style={[styles.likeImgContainer, { backgroundColor: '#928b8bff' }]}>
-                <Image
-                    style={styles.iconImage}
-                    resizeMode='contain'
-                    source={require('../../assets/OurProduct/Like.png')} />
-            </TouchableOpacity>
+            <TouchableOpacity
+      style={[
+        styles.likeImgContainer,
+        { backgroundColor: '#f5eeeeff', alignItems: 'center' }
+      ]}
+      onPress={onToggleLike} // ✅ toggle state
+    >
+        <Icon
+        name={liked ? "heart" : "heart-outline"}
+        size={wp('6%')}
+        color={liked ? "red" : "gray"}
+      />
+    </TouchableOpacity>
         </View>
     )
 }
@@ -68,7 +79,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 export default ProductCard
 
 const styles = StyleSheet.create({
-    productCard: {       
+    productCard: {
         width: wp('44%'),
         borderRadius: wp('7%'),
         alignItems: 'center',
@@ -134,7 +145,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: wp('1.5%')
     },
     ratingTextStyle: {
-      
+
         fontSize: wp('3.2%'),
         marginRight: wp('1%'),
     },
@@ -163,7 +174,7 @@ const styles = StyleSheet.create({
     reviewStyle: {
         marginLeft: wp('1%'),
         fontSize: wp('3.2%'),
-      
+
     },
     iconImage: {
         height: '70%',

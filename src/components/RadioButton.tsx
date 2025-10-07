@@ -30,21 +30,32 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   });
 
   const toggleSwitchAccepted = () => {
+    const newValue = !isAccepted;
+    setIsAccepted(newValue);
+    setIsPending(false);
     Animated.timing(AcceptedOffset, {
       toValue: isAccepted ? 0 : 1,
       duration: 200,
       useNativeDriver: false,
     }).start();
-    setIsAccepted(!isAccepted);
+      Animated.timing(PendingOffset, { toValue: 0, duration: 200, useNativeDriver: false }).start();
+
+      if(onSelect) onSelect(newValue ? "accept" : "all");
+
   };
 
   const toggleSwitchPending = () => {
+     const newValue = !isPending;
+  setIsPending(newValue);
+  setIsAccepted(false); 
     Animated.timing(PendingOffset, {
       toValue: isPending ? 0 : 1,
       duration: 200,
       useNativeDriver: false,
     }).start();
-    setIsPending(!isPending);
+      Animated.timing(AcceptedOffset, { toValue: 0, duration: 200, useNativeDriver: false }).start();
+  if(onSelect) onSelect(newValue ? "pending" : "all");
+
   };
 
   // 🔹 Colors according to theme

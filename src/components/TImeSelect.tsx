@@ -8,8 +8,29 @@ const TimeSelect = () => {
   const { theme } = useTheme(); // ✅ use theme
  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const slotArray = [
-    "9.00","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","18.00",
+    "9.00","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","18.00","19:00",
   ];
+
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTime = currentHour + currentMinute / 60;
+
+
+  const parseSlot = (slot:string) => {
+    const [h,m] = slot.split(".");
+    return parseInt(h) + (m ? parseInt(m)/60 : 0);
+  }
+
+  const formatSlot = (slot : string) => {
+    let hour = parseInt(slot.split(".")[0]);
+    let minute = slot.split(".")[1] ? parseInt(slot.split(".")[1]) : 0;
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12;
+    if(hour === 0) hour = 12;
+    return  `${hour}${minute > 0 ? ":" + minute : ""} ${ampm}`
+  }
+
 
     return (
     <View style={{ paddingHorizontal: wp("2%") }}>
@@ -24,6 +45,8 @@ const TimeSelect = () => {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const isSelected = selectedSlot === item; // ✅ check if selected
+          const slotTime = parseSlot(item);
+          const isPast = slotTime <= currentTime;
 
           return (
             <Shadow
@@ -34,21 +57,25 @@ const TimeSelect = () => {
               paintInside={isSelected ? true : false} 
             >
               <TouchableOpacity
+              disabled={isPast}
                 style={[
                   styles.slotButton,
                   {
                     backgroundColor: isSelected ? '#F6B745' : theme.cardBackground, // ✅ yellow if selected
+                    
                   },
                 ]}
-                onPress={() => setSelectedSlot(item)} // ✅ update state on press
+                onPress={() => setSelectedSlot(isSelected ? "" : item)} // ✅ update state on press
               >
                 <Text
                   style={[
                     styles.slotText,
-                    { color: isSelected ? '#000' : theme.textPrimary }, // text color contrast
+                    { color: isPast ? 
+                      "#dadada" : 
+                      isSelected ? '#000' : theme.textPrimary }, // text color contrast
                   ]}
                 >
-                  {item}
+                  {formatSlot(item)}
                 </Text>
               </TouchableOpacity>
             </Shadow>
@@ -76,8 +103,10 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   slotText: {
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: wp("3.5%"),
+        fontFamily: "Poppins-Medium",
+
   },
 });
 

@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "column",
     backgroundColor: "#FCDBA040", // ✅ background unchanged
-    width: wp("90%"),
+    width: "90%",
     minHeight: hp("25%"),
     marginVertical: hp("1.5%"),
     alignSelf: "center",

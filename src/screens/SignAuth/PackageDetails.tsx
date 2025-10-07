@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native'
 import React from 'react'
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { Rating } from 'react-native-ratings';
@@ -20,7 +20,7 @@ const PackageDetails = () => {
   const {theme} = useTheme();
 
   return (
-    <View style={[styles.container,{backgroundColor : theme.background}]}>
+    <ScrollView style={[styles.container,{backgroundColor : theme.background}]}>
       <Head title='Our Packages' />
       <Image style={styles.img} source={item.image} />
       <View style={styles.detail}>
@@ -48,7 +48,7 @@ const PackageDetails = () => {
           ratingCount={5}
           imageSize={wp('5%')}
           startingValue={item.rating}
-           tintColor={theme.dark ? '#fff' : '#111'}  
+           tintColor={theme.dark ? '#111' : '#fff'}  
           readonly
         />
         <Text style={[styles.ratTxt,{color : theme.textPrimary}]}>({item.review} reviews)</Text>
@@ -56,11 +56,15 @@ const PackageDetails = () => {
 
       <TouchableOpacity
         style={styles.bookAppoint}
-        onPress={() => navigation.navigate("BookAppointmentScreen", { image: item.image })}
+       onPress={() => {
+          navigation.navigate('MainTabs', {
+  screen: 'BookAppointmentScreen',
+  params: { image:  item.image  }
+}); }}
       >
         <Text style={styles.bookAppointTxt}>Book Appointment</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   )
 }
 
@@ -71,7 +75,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   img: {
-    width: wp('90%'),
+    width: '90%',
     height: hp('25%'),
     alignSelf: 'center',
     borderRadius: wp('4%'),
@@ -146,7 +150,7 @@ const styles = StyleSheet.create({
   },
   bookAppoint: {
     height: hp('6%'),
-    width: wp('90%'),
+    width: '90%',
     backgroundColor: '#F6B745',
     alignSelf: 'center',
     justifyContent: 'center',
@@ -157,6 +161,6 @@ const styles = StyleSheet.create({
   bookAppointTxt: {
     fontSize: wp('4%'),
     fontWeight: '600',
-    color: '#FFFFFF'
+    color: '#FFFFFF',
   },
 })

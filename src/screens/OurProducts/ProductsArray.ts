@@ -9,7 +9,7 @@ export type Product = {
   description: string;
   rating: number;
   reviews: number;
-  image: ImageSourcePropType;
+  image: ImageSourcePropType[];
   featureIcon: ImageSourcePropType;
 };
 

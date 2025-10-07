@@ -16,6 +16,7 @@ import {
     heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
+import Head from '../../components/Head';
 
 const NotificationsScreen = ({ navigation }) => {
     const { theme } = useTheme(); // theme le liya
@@ -160,15 +161,12 @@ const NotificationsScreen = ({ navigation }) => {
             />
 
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: theme.card }]}>
-                <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-                    <Icon name="arrow-back-ios" size={wp('5.5%')} color={theme.textPrimary} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Notifications</Text>
-                <TouchableOpacity onPress={handleDeleteAll} style={styles.deleteButton}>
+            <Head title='Notification' rightComponent={
+                       <TouchableOpacity onPress={handleDeleteAll} style={styles.deleteButton}>
                     <Icon name="delete-outline" size={wp('6%')} color={theme.textPrimary} />
                 </TouchableOpacity>
-            </View>
+                    } />
+           
 
             {/* Notifications List */}
             <FlatList
@@ -187,6 +185,7 @@ const NotificationsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor : '#fff'
     },
     header: {
         flexDirection: 'row',
@@ -203,6 +202,8 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: wp('5%'),
         fontWeight: '600',
+            fontFamily: "Poppins-Medium" 
+
     },
     deleteButton: {
         padding: wp('2%'),
@@ -227,6 +228,8 @@ const styles = StyleSheet.create({
     },
     iconText: {
         fontSize: wp('7%'),
+            fontFamily: "Poppins-Medium" 
+
     },
     contentContainer: {
         flex: 1,
@@ -238,8 +241,10 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: wp('4.5%'),
-        fontWeight: '600',
         flex: 1,
+            fontFamily: "Poppins-Medium" ,
+            fontWeight: 'bold',
+
     },
     greenDot: {
         width: wp('2.5%'),
@@ -252,10 +257,14 @@ const styles = StyleSheet.create({
         fontSize: wp('4%'),
         lineHeight: hp('2.5%'),
         marginBottom: hp('0.5%'),
-        fontWeight: '600',
+        fontWeight: 'bold',
+            fontFamily: "Poppins-Medium" 
+
     },
     time: {
         fontSize: wp('3%'),
+            fontFamily: "Poppins-Medium" 
+
     },
     bottomBarWrap: {
         position: 'absolute',

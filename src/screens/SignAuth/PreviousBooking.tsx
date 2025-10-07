@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
 import Head from "../../components/Head";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -15,9 +15,9 @@ export default function BookingAccepted() {
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Head title="Booking Details" />
 
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         {/* Status Section */}
-        <View style={[styles.statusCard, { backgroundColor: theme.card }]}>
+        <View style={[styles.statusCard, { backgroundColor: theme.background}]}>
           <Text style={[styles.statusText, { color: theme.textPrimary }]}>
             Premium Haircut
           </Text>
@@ -41,7 +41,7 @@ export default function BookingAccepted() {
         </View>
 
         {/* User Info */}
-        <View style={[styles.userCard, { backgroundColor: theme.card }]}>
+        <View style={[styles.userCard, { backgroundColor: theme.background}]}>
           <Text style={[styles.client, { color: theme.textPrimary }]}>Client Name :</Text>
           <Text style={[styles.userName, { color: theme.textPrimary }]}>Rahul Sharma</Text>
           <Text style={[styles.userPhone, { color: theme.textPrimary }]}>+91 9876543210</Text>
@@ -63,7 +63,7 @@ export default function BookingAccepted() {
             <Text style={[styles.actionText]}>Rebook Now</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   locationText: { fontSize: wp("4.5%"), marginLeft: wp("2%") },
 
   // Action Buttons
-  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginTop: hp('4%') },
+  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginVertical: hp('4%') },
   actionBtn: { paddingVertical: hp("1.2%"), paddingHorizontal: wp("6%"), borderRadius: wp("3%"), alignItems: "center", justifyContent: 'center' },
   actionText: { color: "#fff", fontSize: wp("4.5%"), fontWeight: "600" },
 });

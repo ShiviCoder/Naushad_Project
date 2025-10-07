@@ -25,7 +25,8 @@ const PackagesScreen = () => {
      <Head title="Our Packages" ></Head>
 
       {/* Packages List */}
-      <FlatList
+     <View style={{paddingHorizontal : wp('1.5%')}}>
+       <FlatList
         data={packageData}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
@@ -62,6 +63,7 @@ const PackagesScreen = () => {
           </View>
         )}
       />
+     </View>
     </View>
   );
 };
@@ -69,9 +71,8 @@ const PackagesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: wp('3%'),
-    paddingVertical: hp('0%'),
     backgroundColor: '#fff',
+    paddingBottom : hp('7%')
   },
   headContainer: {
     flexDirection: 'row',

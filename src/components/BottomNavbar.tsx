@@ -32,8 +32,8 @@ const BottomNavbar = (props : any) => {
     <View style={styles.bottomBarWrap}>
       <View style={styles.bottomNav}>
         {tabs.map((tab, index) => {
-          const isActive = state.routes[state.index].name === tab.name;
-          let iconElement = tab.icon;
+        const isActive = state?.routes?.[state.index]?.name === tab.name;
+        let iconElement = tab.icon;
 
           // Set dynamic color for icons except FAB
           if (tab.name !== 'BookAppointmentScreen') {
@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: hp('2%'), // Increased from 16
         alignItems: 'center',
-
     },
     bottomNav: {
         backgroundColor: '#1A1A1A', // Darker

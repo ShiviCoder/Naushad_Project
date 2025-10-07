@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext'; // ✅ import your theme hook
+import Head from '../../components/Head';
 
 
 type extra = {
@@ -37,6 +38,11 @@ type RootStackParamList = {
 };
 
 const categories = [
+  { name: 'Haircut', image: require('../../assets/images/haircut.jpg') },
+  { name: 'Hair coloring', image: require('../../assets/images/haircolor.jpg') },
+  { name: 'Facial', image: require('../../assets/images/facial.jpg') },
+  { name: 'Beard', image: require('../../assets/images/beard.jpg') },
+  { name: 'Nail', image: require('../../assets/images/nail.jpg') },
   { name: 'Haircut', image: require('../../assets/images/haircut.jpg') },
   { name: 'Hair coloring', image: require('../../assets/images/haircolor.jpg') },
   { name: 'Facial', image: require('../../assets/images/facial.jpg') },
@@ -88,67 +94,77 @@ const services: Service[] = [
 ];
 
 export default function ServicesScreen() {
+  const [storySelect, setStorySelect] = useState<number | null>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const { theme } = useTheme(); 
-
-  const handleBackPress = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    } else {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      });
-    }
-  };
+  const { theme } = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <TouchableOpacity onPress={handleBackPress}>
-          <Icon name="chevron-back" size={wp('6%')} color={theme.textPrimary} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Services</Text>
-        <View style={styles.headerRight} />
-      </View>
-
+      <Head title="Services" />
       {/* Services List */}
-    <FlatList
+      <FlatList
+        horizontal
+        data={categories}
+        style={{ height: hp('18%'), paddingBottom: hp('2%') }}
+
+        keyExtractor={(item, index) => index.toString()}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingTop: hp('1%'),
+          paddingHorizontal: wp('2%'),
+          paddingBottom: hp('1%')
+
+        }}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity style={styles.categoryItem} onPress={() => setStorySelect(index)}>
+            <View
+              style={{
+                width: wp('19%'),
+                height: wp('19%'),
+                borderRadius: wp('20%') / 2,
+                borderColor: storySelect === index ? '#F6B745' : 'transparent',
+                borderWidth: wp('0.7%'),
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: hp('0.5%'),
+                // white border background
+              }}
+            >
+              <Image
+                source={item.image}
+                style={{
+                  width: wp('16%'),   // slightly smaller than parent
+                  height: wp('16%'),
+                  borderRadius: wp('16%') / 2,
+                  resizeMode: 'cover',
+                }}
+              />
+            </View>
+
+            <Text style={[styles.categoryText, { color: theme.textPrimary }]}>{item.name}</Text>
+
+          </TouchableOpacity>
+        )}
+      />
+      <FlatList
         data={services}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View>
-            {/* Categories */}
-            <FlatList
-              horizontal
-              data={categories}
-              keyExtractor={(item, index) => index.toString()}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={item.image} style={styles.categoryImage} />
-                  <Text style={[styles.categoryText, { color: theme.textPrimary }]}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        }
         renderItem={({ item }) => (
           <View style={[styles.MainView, { backgroundColor: theme.card }]}>
             <View style={styles.imgContainer}>
               <Image source={item.image} style={styles.sectionImage} />
             </View>
-
             <View style={styles.rightContainer}>
               <Text style={[styles.mainText, { color: theme.textPrimary }]}>{item.name}</Text>
               <Text style={[styles.price, { color: theme.textSecondary }]}>₹{item.price}</Text>
               <Text style={[styles.desc, { color: theme.textSecondary }]}>{item.desc}</Text>
               <TouchableOpacity
                 style={styles.bookButton}
-                onPress={() => navigation.navigate('ServiceDetails', { item })}
+                onPress={() => 
+                  navigation.navigate('ServiceDetails', { item })
+                }
               >
                 <Text style={styles.bookButtonText}>Book Now</Text>
               </TouchableOpacity>
@@ -161,28 +177,30 @@ export default function ServicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: wp('4%'),
-    paddingVertical: hp('2%'),
+  container: {
+    flex: 1
   },
-  headerTitle: { fontSize: wp('6%'), fontWeight: 'bold' },
-  headerRight: { width: 34 },
-
-  categoryScroll: { marginVertical: 20, paddingHorizontal: 20 },
-  categoryItem: { alignItems: 'center', marginRight: 20, width: 70 },
-  categoryImage: { width: 60, height: 60, borderRadius: 30, marginBottom: 8 },
+  categoryScroll: {
+    paddingHorizontal: wp('2%')
+  },
+  categoryItem: {
+    alignItems: 'center',
+    marginRight: wp('4%'),
+    width: wp('20%')
+  },
+  categoryImage: {
+    width: wp('17%'),
+    height: wp('17%'),
+    borderRadius: wp('10%'),
+    marginBottom: hp('0.5%')
+  },
   categoryText: {
-    fontSize: 12,
+    fontSize: wp('3.2%'),
     textAlign: 'center',
     fontWeight: '500',
-    lineHeight: 14,
+    lineHeight: wp('4%'),
+    fontFamily: 'Poppins-Medium'
   },
-
   MainView: {
     borderRadius: wp('3%'),
     paddingHorizontal: wp('1%'),
@@ -209,10 +227,20 @@ const styles = StyleSheet.create({
     fontSize: wp('5%'),
     textAlign: 'center',
     fontWeight: '700',
+    fontFamily: 'Poppins-Medium'
   },
-  rightContainer: { flexDirection: 'column', alignItems: 'flex-start' },
-  price: { fontSize: wp('4%') },
-  desc: { fontSize: wp('3%') },
+  rightContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start'
+  },
+  price: {
+    fontSize: wp('4%'),
+    fontFamily: 'Poppins-Medium'
+  },
+  desc: {
+    fontSize: wp('3%'),
+    fontFamily: 'Poppins-Medium'
+  },
   bookButton: {
     backgroundColor: '#F6B745',
     paddingVertical: hp('0.5%'),
@@ -226,6 +254,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  bookButtonText: { color: '#fff', fontSize: wp('3%'), fontWeight: 'bold' },
-
+  bookButtonText: {
+    color: '#fff',
+    fontSize: wp('3%'),
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Medium'
+  },
 });

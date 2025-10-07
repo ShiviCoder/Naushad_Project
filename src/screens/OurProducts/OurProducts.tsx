@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity, } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FlatListComp from './FlatListComp'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -7,6 +7,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
 import BottomNavbar from '../../components/BottomNavbar';
+import { products as ProductData } from '../../screens/OurProducts/ProductsArray';
 type RootStackParamList = {
   HomeScreen: undefined;
   OurProducts: undefined;
@@ -17,11 +18,42 @@ type OurProductsProps = {
 };
 
 const OurProducts = ({ navigation }: OurProductsProps) => {
+  const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const [showLikedOnly, setShowLikedOnly] = useState(false);
+
+  const toggleLike = (productId : string) => {
+    setLikedProducts((prev)=>
+    prev.includes(productId)
+    ? prev.filter((id)=> id !== productId) 
+    : [...prev , productId]
+    )
+  }
+
+  const filteredProducts = showLikedOnly
+  ? ProductData.filter((p)=> likedProducts.includes(p.id)) 
+  : ProductData;
+
+  console.log('Filtered Products:', filteredProducts);
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }} >
-     <Head title="Our Products" ></Head>
-      <FlatListComp />
-      <BottomNavbar/>
+    <View style={{ flex: 1  }}>
+      <Head
+        title="Our Products"
+        rightComponent={
+          <TouchableOpacity onPress={() => setShowLikedOnly(!showLikedOnly)}>
+            <Icon
+              name={ "heart-outline"}
+              size={28}
+              
+            />
+          </TouchableOpacity>
+        }
+      />
+      <FlatListComp 
+       products={filteredProducts}
+  likedProducts={likedProducts}
+  onToggleLike={toggleLike} />
+      
     </View>
   )
 }
@@ -31,11 +63,11 @@ export default OurProducts
 const styles = StyleSheet.create({
   HeadingContain: {
     flexDirection: 'row',
-    width: '90%',
     justifyContent: 'space-between',
     alignSelf: 'center',
     marginVertical: hp('2%'),
-    alignItems: 'center'
+    alignItems: 'center',
+    
   },
   HeadingStyle: {
     fontSize: wp('6%'),

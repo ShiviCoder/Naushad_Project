@@ -9,6 +9,8 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from "../../context/ThemeContext";
 import BottomNavbar from '../../components/BottomNavbar';
+import Head from '../../components/Head';
+import { useState } from 'react';
 
 const allBookings = [
   ...BookingAcceptData.map(item => ({ ...item, type: "accept" })),
@@ -16,29 +18,46 @@ const allBookings = [
   ...PreviousBookingData.map(item => ({ ...item, type: "previous" }))
 ];
 
+const filters = [
+  {label : "All", value: "all"},
+  {label : "Accepted" , value : "accept"},
+  {label : "Pending", value : "pending"},
+]
+
 const BookingScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme(); // ✅ new theme context
+  const [selectedFilter, setSelectedFilter] = useState('all');
+
+  const filteredBookings = allBookings.filter(item=>{
+    if(selectedFilter === "all") return true;
+    if(selectedFilter === "accept") return item.type === 'accept';
+    if(selectedFilter === "pending") return item.type === "pending";
+    return false;
+  });
 
   return (
     <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
-      <View style={styles.headContainer}>
-       
-        <Text style={[styles.headText, { color: theme.textPrimary}]}>Bookings</Text>
-      </View>
-
+      <Head title='Bookings' showBack={false}/>
       {/* RadioButton component */}
-      <RadioButton />
+      <RadioButton 
+      type='status'
+      selected={selectedFilter}
+      onSelect={value => 
+       { console.log('Selected Value ',value);
+        setSelectedFilter(value);}
+      }
+      />
 
       <FlatList
-        data={allBookings}
+        data={filteredBookings}
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: hp("6%") }}
         keyExtractor={(item, index) => item.id + "-" + index}
         renderItem={({ item, index }) => {
-          if (item.type === "previous") {
-            const isFirstPrevious = index === 0 || allBookings[index - 1].type !== "previous";
+          if (item.type === "previous" && selectedFilter === "all") {
+            const isFirstPrevious = index === 0 || filteredBookings[index - 1].type !== "previous";
 
             return (
               <>
