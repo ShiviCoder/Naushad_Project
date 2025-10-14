@@ -6,6 +6,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { useRoute } from '@react-navigation/native';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type RootStackParamList = {
     OurProducts: undefined;
@@ -17,16 +18,27 @@ type ProductDetailsProps = {
 };
 
 const ProductDetails = ({ navigation }: ProductDetailsProps) => {
-    const route = useRoute<any>();
-    const { product } = route.params;
+    const route = useRoute<any>();          // ← Yahan daalo
+    const { product } = route.params; 
     const [count, setCount] = useState(1);
     const { theme } = useTheme();
 
+     const getImageSource = (img: any) => {
+        if (!img) return null;
+        if (typeof img === 'string') {
+            return { uri: img };
+        }
+        return img; // assume it's require()
+    }
+const displayImage = Array.isArray(product.image) 
+    ? getImageSource(product.image[0]) 
+    : getImageSource(product.image);
+
     return (
-       <View style={[styles.container, { backgroundColor: theme.dark ? '#121212' : '#fff' }]}>
+       <SafeAreaView style={[styles.container, { backgroundColor: theme.dark ? '#121212' : '#fff' }]}>
     <Head title='Our Products'/>
    <View style={{paddingHorizontal : wp('4%')}}>
-     <Image style={styles.image} source={product.image[1]} />
+     <Image style={styles.image} source={displayImage} />
     <View style={styles.detailContain}>
         <Text style={[styles.prodName, { color: theme.dark ? '#fff' : '#000' }]}>{product.name}</Text>
         <Text style={[styles.prodPrice, { color: theme.dark ? '#fff' : '#000' }]}>₹ {product.price}</Text>
@@ -61,7 +73,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
             style={[styles.cartButton, { borderColor:  theme.dark ? '#fff' : '#000' }]}  
             onPress={()=>{
                 navigation.navigate('Cart',{
-                    product : {...product, qty : count, cartImage: product.image[1]}
+                    product : {...product, qty : count, cartImage: product.image}
                 });
             }}
         >
@@ -72,7 +84,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
         </TouchableOpacity>
     </View>
    </View>
-</View>
+</SafeAreaView>
 
     )
 }
@@ -101,7 +113,7 @@ const styles = StyleSheet.create({
     prodName: {
         fontSize: wp('7%'),
         fontWeight: '600',
-        textAlign: 'center'
+        textAlign: 'left'
     },
     prodPrice: {
         fontSize: wp('6%'),

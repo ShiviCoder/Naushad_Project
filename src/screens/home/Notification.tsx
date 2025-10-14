@@ -5,7 +5,6 @@ import {
     StyleSheet,
     FlatList,
     TouchableOpacity,
-    SafeAreaView,
     StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,6 +16,7 @@ import {
 } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import Head from '../../components/Head';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const NotificationsScreen = ({ navigation }) => {
     const { theme } = useTheme(); // theme le liya
@@ -154,7 +154,7 @@ const NotificationsScreen = ({ navigation }) => {
 
     
     return (
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar
                 barStyle={theme.dark ? 'light-content' : 'dark-content'}
                 backgroundColor={theme.background}
@@ -178,7 +178,7 @@ const NotificationsScreen = ({ navigation }) => {
             />
 
             {/* Bottom Navigation */}
-        </View>
+        </SafeAreaView>
     );
 };
 

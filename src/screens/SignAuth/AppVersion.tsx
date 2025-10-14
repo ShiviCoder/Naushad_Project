@@ -3,6 +3,7 @@ import React from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AppVersion = () => {
   const { theme } = useTheme();
@@ -14,7 +15,7 @@ const AppVersion = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="App Version" />
       <View style={styles.contentContainer}>
         <Text style={[styles.heading, { color: theme.textPrimary }]}>Current App Version</Text>
@@ -29,7 +30,7 @@ const AppVersion = () => {
           <Text style={styles.updateText}>Check for Update</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 

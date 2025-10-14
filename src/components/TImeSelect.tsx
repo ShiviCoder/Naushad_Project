@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   slotText: {
     fontWeight: "700",
     fontSize: wp("3.5%"),
-        fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Medium",
 
   },
 });

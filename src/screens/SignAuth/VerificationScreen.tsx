@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // ✅ Import navigation hook
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
 const OTPVerification = () => {
   const [email, setEmail] = useState("");
   const navigation = useNavigation(); // ✅ Initialize navigation
@@ -12,7 +13,7 @@ const OTPVerification = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Logo */}
       <Image
         source={require("../../assets/images/logo.png")} // Replace with your logo path
@@ -40,7 +41,7 @@ const OTPVerification = () => {
       <TouchableOpacity style={styles.button} onPress={handleSendOTP}>
         <Text style={styles.buttonText}>SEND OTP</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

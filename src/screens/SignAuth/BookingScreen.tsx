@@ -11,6 +11,7 @@ import { useTheme } from "../../context/ThemeContext";
 import BottomNavbar from '../../components/BottomNavbar';
 import Head from '../../components/Head';
 import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const allBookings = [
   ...BookingAcceptData.map(item => ({ ...item, type: "accept" })),
@@ -37,7 +38,7 @@ const BookingScreen = () => {
   });
 
   return (
-    <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.mainContainer, { backgroundColor: theme.background }]}>
       <Head title='Bookings' showBack={false}/>
       {/* RadioButton component */}
       <RadioButton 
@@ -79,7 +80,7 @@ const BookingScreen = () => {
         }}
       />
     
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -14,11 +14,15 @@ import {
 } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import Head from '../../components/Head';
+import { useRoute } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const ProductPackages = ({ navigation }) => {
   const [quantity, setQuantity] = useState(1);
   const { theme } = useTheme();
+  const route = useRoute();
+const { item } = route.params;
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
   };
@@ -46,7 +50,7 @@ const ProductPackages = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <Head title="Product Package" />
       <ScrollView style={styles.scrollView}>
@@ -63,10 +67,10 @@ const ProductPackages = ({ navigation }) => {
         <View style={styles.productInfo}>
           <View style={styles.titlePriceRow}>
             <Text style={[styles.productTitle, { color: theme.textPrimary }]}>
-              Luxury hair care kit
+              {item.title}
             </Text>
             <Text style={[styles.price, { color: theme.textPrimary }]}>
-              ₹1,499
+             ₹{item.price}
             </Text>
           </View>
 
@@ -74,19 +78,19 @@ const ProductPackages = ({ navigation }) => {
           <View style={styles.ratingContainer}>
             <View style={styles.starsContainer}>{renderStars()}</View>
             <Text style={[styles.reviewText, { color: theme.textSecondary }]}>
-              (48 Reviews)
+              ({item.review} Reviews)
             </Text>
           </View>
 
           {/* Description */}
           <Text style={[styles.description, { color: theme.textSecondary }]}>
-            Complete hair nourishment in one kit
+            {item.description}
           </Text>
 
           {/* Offer */}
           <View style={styles.offerContainer}>
             <Text style={[styles.offerText, { color: theme.textPrimary }]}>
-              🔖 Save ₹300 on combo purchase
+              {item.offer}
             </Text>
           </View>
         </View>
@@ -97,7 +101,7 @@ const ProductPackages = ({ navigation }) => {
             Items list
           </Text>
           <View style={styles.itemsList}>
-            {['✅ Shampoo (250ml)', '✅ Conditioner (250ml)', '✅ Hair Mask (200g)', '✅ Hair Serum (50ml)'].map((item, i) => (
+            {item.itemsList.map((item, i) => (
               <View style={styles.itemRow} key={i}>
 
                 <Text style={[styles.itemText, { color: theme.textSecondary }]}>
@@ -115,13 +119,13 @@ const ProductPackages = ({ navigation }) => {
           </Text>
           <View style={styles.instructionsList}>
             <Text style={[styles.instructionText, { color: theme.textSecondary }]}>
-              - Use shampoo & conditioner twice weekly
+             {item.usage[1]}
             </Text>
             <Text style={[styles.instructionText, { color: theme.textSecondary }]}>
-              - Apply hair mask once a week
+               {item.usage[2]}
             </Text>
             <Text style={[styles.instructionText, { color: theme.textSecondary }]}>
-              - Serum for daily hair protection
+               {item.usage[0]}
             </Text>
           </View>
         </View>
@@ -188,7 +192,7 @@ const ProductPackages = ({ navigation }) => {
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -317,9 +321,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#000',
     borderRadius: wp('1.67%'),
-    width: wp('14.61%'),
-    height: hp('3.125%'),
-
+    width: wp('20.61%'),
+    height: hp('4.125%'),
   },
   quantityButton: {
     flex: 1,

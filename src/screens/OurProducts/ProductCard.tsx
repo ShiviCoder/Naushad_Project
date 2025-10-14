@@ -5,36 +5,44 @@ import { useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 type Props = {
     product: Product;
-    liked : boolean;
-    onToggleLike : () => void;
+    liked: boolean;
+    onToggleLike: () => void;
 }
-
-const ProductCard: React.FC<Props> = ({ product , liked , onToggleLike }) => {
+const ProductCard:
+React.FC<Props> = ({ product, liked, onToggleLike }) => {
     const navigation = useNavigation<any>();
     const { theme } = useTheme();
+    const getImageSource = (img: any) => {
+        if (!img) return null;
+        if (typeof img === 'string') {
+            return { uri: img };
+        }
+        return img; // assume it's require()
+    }
 
-
+    const selectedImage = Array.isArray(product.image) ? getImageSource(product.image[0]) : getImageSource(product.image);
     return (
-        <View
+        <SafeAreaView
             style={[
                 styles.productCard,
                 { backgroundColor: '#fff' },
             ]}
         >
             <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product })}>
+
                 <Image
                     resizeMode='cover'
-                    source={product.image?.[0]}
+                    source={selectedImage}
                     style={styles.ImageStyle} />
                 <Text
                     numberOfLines={1}
                     style={[styles.productName, { color: '#000' }]}>{product.name}</Text>
                 <View style={styles.OurterPriceContainer}>
                     <View style={styles.InnerPriceContainer}>
-                        <Text style={[styles.priceStyle, { color: '#000' }]}>₹{product.price}</Text>
+                        <Text style={[styles.priceStyle, { color: '#000' }]}>{product.price}</Text>
                         <Text style={[styles.oldPriceStyle, { color: '#ccc' }]}>{product.oldPrice}</Text>
                     </View>
                     <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>{product.discount}</Text>
@@ -60,19 +68,19 @@ const ProductCard: React.FC<Props> = ({ product , liked , onToggleLike }) => {
             </View>
 
             <TouchableOpacity
-      style={[
-        styles.likeImgContainer,
-        { backgroundColor: '#f5eeeeff', alignItems: 'center' }
-      ]}
-      onPress={onToggleLike} // ✅ toggle state
-    >
-        <Icon
-        name={liked ? "heart" : "heart-outline"}
-        size={wp('6%')}
-        color={liked ? "red" : "gray"}
-      />
-    </TouchableOpacity>
-        </View>
+                style={[
+                    styles.likeImgContainer,
+                    { backgroundColor: '#f5eeeeff', alignItems: 'center' }
+                ]}
+                onPress={onToggleLike} // ✅ toggle state
+            >
+                <Icon
+                    name={liked ? "heart" : "heart-outline"}
+                    size={wp('6%')}
+                    color={liked ? "red" : "gray"}
+                />
+            </TouchableOpacity>
+        </SafeAreaView>
     )
 }
 

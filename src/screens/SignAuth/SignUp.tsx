@@ -12,6 +12,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function SignupScreen({ navigation }: any) {
@@ -29,7 +30,8 @@ export default function SignupScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView>
+      <ScrollView contentContainerStyle={styles.container}>
       {/* Logo */}
       <Image
         source={require("../../assets/images/logo.png")}
@@ -93,6 +95,7 @@ export default function SignupScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 

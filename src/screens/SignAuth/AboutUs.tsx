@@ -3,12 +3,13 @@ import React from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AboutUs = () => {
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="About Us" />
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={[styles.heading, { color: theme.textPrimary }]}>Welcome to Our App!</Text>
@@ -32,7 +33,7 @@ const AboutUs = () => {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   )
 }
 

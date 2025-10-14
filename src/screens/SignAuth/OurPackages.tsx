@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  SafeAreaView,
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -13,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Package = {
   id: string;
@@ -169,7 +169,7 @@ const OurPackagesScreen = () => {
 </View>
   );
   return (
-    <View style={[styles.container,{backgroundColor: theme.dark ? '#000' : '#fff'}]}>
+    <SafeAreaView style={[styles.container,{backgroundColor: theme.dark ? '#000' : '#fff'}]}>
       {/* Header */}
       <Head title = 'Our Packages'/>
       {/* Packages List */}
@@ -181,7 +181,7 @@ const OurPackagesScreen = () => {
         showsVerticalScrollIndicator={false}
       />
       {/* Bottom Navigation */}
-    </View>
+    </SafeAreaView>
   );
 };
 const styles = StyleSheet.create({

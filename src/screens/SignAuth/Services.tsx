@@ -15,6 +15,7 @@ import {
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext'; // ✅ import your theme hook
 import Head from '../../components/Head';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 type extra = {
@@ -99,7 +100,7 @@ export default function ServicesScreen() {
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <Head title="Services" />
       {/* Services List */}
@@ -107,14 +108,12 @@ export default function ServicesScreen() {
         horizontal
         data={categories}
         style={{ height: hp('18%'), paddingBottom: hp('2%') }}
-
         keyExtractor={(item, index) => index.toString()}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
           paddingTop: hp('1%'),
           paddingHorizontal: wp('2%'),
           paddingBottom: hp('1%')
-
         }}
         renderItem={({ item, index }) => (
           <TouchableOpacity style={styles.categoryItem} onPress={() => setStorySelect(index)}>
@@ -172,7 +171,7 @@ export default function ServicesScreen() {
           </View>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -222,6 +221,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     height: '90%',
     resizeMode: 'cover',
+    borderTopLeftRadius : wp('3%'),
+    borderTopRightRadius : wp('3%')
   },
   mainText: {
     fontSize: wp('5%'),

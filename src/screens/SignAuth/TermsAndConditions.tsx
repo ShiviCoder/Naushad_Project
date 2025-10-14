@@ -4,13 +4,14 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const TermsAndConditions = () => {
   const { theme } = useTheme();
   const [accepted, setAccepted] = useState(false);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Terms And Conditions" />
       <ScrollView contentContainerStyle={styles.contentContainer}>    
         <Text style={[styles.text, { color: theme.textSecondary }]}>
@@ -50,7 +51,7 @@ const TermsAndConditions = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

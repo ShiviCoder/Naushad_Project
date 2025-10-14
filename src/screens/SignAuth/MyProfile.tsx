@@ -6,6 +6,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from "../../context/ThemeContext"; // ✅ import theme
 import Head from '../../components/Head';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -35,7 +36,7 @@ const MyProfile = () => {
         });
     };
     return (
-        <ScrollView style={[styles.container,{backgroundColor : theme.background}]}>
+              <ScrollView style={[styles.container,{backgroundColor : theme.background}]}>
             <Head title='My Profile' rightComponent={  <TouchableOpacity>
                     <Text style={[styles.saveText,{color:theme.textPrimary}]}>Save</Text>
                 </TouchableOpacity>}/>
@@ -94,7 +95,7 @@ const MyProfile = () => {
                             <View
                                 style={[
                                     styles.radioCircle,
-                                    gender === option && { borderColor: "#F62121", borderWidth: wp('1.5%') }
+                                    gender === option && { borderColor:'#F6B745', borderWidth: wp('1.5%') }
                                 ]}
                             >
                             </View>
@@ -106,6 +107,7 @@ const MyProfile = () => {
                 </View>
             </View>
         </ScrollView>
+       
     )
 }
 

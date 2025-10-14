@@ -12,6 +12,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -23,17 +24,17 @@ const Signin = ({ navigation }) => {
       return;
     }
     // For demo: Navigate to HomeScreen after successful sign-in
-    navigation.replace('MainTabs');  // replace to prevent going back
+     navigation.replace('MainTabs', { from: 'Home' });
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image
         source={require('../../assets/images/logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
-
+            
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -71,7 +72,7 @@ const Signin = ({ navigation }) => {
           <Text style={styles.signupLink}> Signup</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

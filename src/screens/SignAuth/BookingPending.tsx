@@ -7,12 +7,13 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { useTheme } from "../../context/ThemeContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BookingAccepted() {
   const { theme } = useTheme(); // ✅ get current theme
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <Head title="Booking Details" />
 
       <ScrollView style={styles.container}>
@@ -63,7 +64,7 @@ export default function BookingAccepted() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

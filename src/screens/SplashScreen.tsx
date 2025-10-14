@@ -3,6 +3,7 @@ import { View, Image, StyleSheet } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, "Splash">;
@@ -18,13 +19,13 @@ export default function SplashScreen({ navigation }: Props) {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image
         source={require("../assets/images/logo.png")}
         style={styles.logo}
        
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

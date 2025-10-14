@@ -50,11 +50,11 @@ const Card = ({ item }) => {
               Rate: <Text style={styles.bold}>{item.price}</Text>
             </Text>
             <Text style={styles.products}>
-              Products: <Text style={styles.bold}>{item.products}</Text>
+              Products: <Text style={styles.bold}> {item.line1[1]}</Text>
             </Text>
             <View style={styles.footerCon}>
-              <Text style={styles.about}>{item.about}</Text>
-              <TouchableOpacity style={styles.bookButton} onPress={()=>navigation.navigate('ProductPakage')}>
+              <Text style={styles.about}>{item.tag}</Text>
+              <TouchableOpacity style={styles.bookButton} onPress={()=>navigation.navigate('ProductPakage',{item})}>
                 <Text style={styles.bookText}>Book now</Text>
               </TouchableOpacity>
             </View>

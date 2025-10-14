@@ -2,7 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import SplashScreen from '../screens/SplashScreen';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useRoute } from '@react-navigation/native';
 import Signin from '../screens/SignAuth/Signin';
 import HomeScreen from '../screens/home/HomeScreen';
 import SignUp from '../screens/SignAuth/SignUp';
@@ -38,8 +38,8 @@ import TermsAndConditions from '../screens/SignAuth/TermsAndConditions';
 import AppVersion from '../screens/SignAuth/AppVersion';
 
 import OfferScreen from '../screens/SignAuth/OfferScreen'
-import Videos from '../screens/SignAuth/Videos';
 import Certificates from '../screens/SignAuth/Certificates';
+import HomeServices from '../screens/SignAuth/HomeServices';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -54,7 +54,7 @@ export type RootStackParamList = {
   CodeVerification: undefined;
   Services: undefined;
   OurProducts: undefined;
- 
+
   ProductDetails: undefined;
   OurPackages: undefined;
   PackageDetails: undefined;
@@ -63,44 +63,44 @@ export type RootStackParamList = {
   PackagesScreen: undefined;
   ProductPackageScreen: undefined;
   BookAppointmentScreen: undefined;
-  MyProfile : undefined;
-  Notification : undefined;
-  Cart : undefined;
-  BookingScreen : undefined;
-  BlankScreen : undefined;
-  BookingAccepted : undefined;
-  BookingPending : undefined;
-  PreviousBooking : undefined;
-  BookAppoinment2 : undefined;
-  ProductPakage : undefined;
-  Head : undefined;
-  Catelog : undefined;
-  ReferFriend : undefined;
-  AboutUs : undefined;
-  PrivacyPolicy : undefined;
-  TermsAndConditions : undefined;
-  AppVersion : undefined;
-  OfferScreen : undefined;
-  Videos : undefined;
-  Certificates : undefined
+  MyProfile: undefined;
+  Notification: undefined;
+  Cart: undefined;
+  BookingScreen: undefined;
+  BlankScreen: undefined;
+  BookingAccepted: undefined;
+  BookingPending: undefined;
+  PreviousBooking: undefined;
+  BookAppoinment2: undefined;
+  ProductPakage: undefined;
+  Head: undefined;
+  Catelog: undefined;
+  ReferFriend: undefined;
+  AboutUs: undefined;
+  PrivacyPolicy: undefined;
+  TermsAndConditions: undefined;
+  AppVersion: undefined;
+  OfferScreen: undefined;
+  Certificates: undefined,
+  HomeServices: undefined
 };
-
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
- 
 
-function MainTabs(){
+
+function MainTabs() {
   return (
-      <Tab.Navigator screenOptions={{ headerShown: false }}   tabBar={(props) => <BottomNavbar {...props} />}  initialRouteName="HomeScreen"  >
+    <Tab.Navigator
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <BottomNavbar {...props} />}
+      initialRouteName="HomeScreen">
       <Tab.Screen name="HomeScreen" component={HomeScreen} />
-      <Tab.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
       <Tab.Screen name="BookingScreen" component={BookingScreen} />
       <Tab.Screen name="BlankScreen" component={BlankScreen} />
       <Tab.Screen name="AccountScreen" component={AccountScreen} />
     </Tab.Navigator>
   )
 }
-
 
 export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
@@ -110,7 +110,7 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="Signin" component={Signin} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="MainTabs" component={MainTabs} />
-        <Stack.Screen name="VerificationScreen" component={VerificationScreen}/>
+        <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
         <Stack.Screen name="CodeVerification" component={CodeVerification} />
         <Stack.Screen name="Services" component={Services} />
         <Stack.Screen name="OurProducts" component={OurProducts} />
@@ -120,7 +120,7 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="PackageDetails" component={PackageDetails} />
         <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
         <Stack.Screen name="PackagesScreen" component={PackagesScreen} />
-        <Stack.Screen name="ProductPackageScreen" component={ProductPackageScreen}/>
+        <Stack.Screen name="ProductPackageScreen" component={ProductPackageScreen} />
         <Stack.Screen name='MyProfile' component={MyProfile} />
         <Stack.Screen name='Notification' component={Notification} />
         <Stack.Screen name='Cart' component={Cart} />
@@ -137,13 +137,10 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name='PrivacyPolicy' component={PrivacyPolicy} />
         <Stack.Screen name='TermsAndConditions' component={TermsAndConditions} />
         <Stack.Screen name='AppVersion' component={AppVersion} />
-        <Stack.Screen name='Videos' component={Videos} />
         <Stack.Screen name='Certificates' component={Certificates} />
-
-        
-        {/* <Stack.Screen name="BookDetAcc" component={BookDetAcc}/> */}
+        <Stack.Screen name='HomeServices' component={HomeServices} />
+        <Stack.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
       </Stack.Navigator>
-    
     </NavigationContainer>
   );
 }

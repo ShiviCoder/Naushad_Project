@@ -6,6 +6,8 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-nat
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useTheme } from '../../context/ThemeContext';
 import BottomNavbar from '../../components/BottomNavbar';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Head from '../../components/Head';
 
 type RootStackParamList = {
   BookAppointmentScreen: { image?: any };
@@ -13,9 +15,13 @@ type RootStackParamList = {
 
 export default function BookAppointmentScreen() {
   const { theme } = useTheme();
-  const route = useRoute<RouteProp<RootStackParamList, "BookAppointmentScreen">>();
+  const route = useRoute<RouteProp<{ BookAppointmentScreen: { showTab?: boolean } }, 'BookAppointmentScreen'>>();
+
   const { image } = route.params || {};
   const navigation = useNavigation();
+   const from = route.params?.from;
+const showTab = route.params?.showTab ?? false;
+const showBack = !showTab; // agar tab visible → back button hide, else show
 
   // FlatList ke liye ek dummy data array
   const data = ['image', 'selectDate', 'calendar', 'selectTime', 'timeSelect', 'nextButton'];
@@ -57,11 +63,8 @@ export default function BookAppointmentScreen() {
   };
 
   return (
-    <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
-      <View style={styles.headContainer}>
-        <Text style={[styles.headText, { color: theme.textPrimary }]}>Bookings</Text>
-      </View>
-
+    <SafeAreaView style={[styles.mainContainer, { backgroundColor: theme.background }]}>
+      <Head title="Bookings" showBack={showBack}/>
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -69,8 +72,8 @@ export default function BookAppointmentScreen() {
         contentContainerStyle={{ paddingBottom: hp("15%"), paddingHorizontal: wp("3%") }}
         showsVerticalScrollIndicator={false}
       />
-
-    </View>
+ {showTab && <BottomNavbar />} 
+    </SafeAreaView>
   );
 }
 
@@ -106,8 +109,8 @@ const styles = StyleSheet.create({
   },
   calenderContainer: { marginHorizontal: wp("2%"), marginBottom: hp("0.5%") },
   timeContainer: { marginHorizontal: wp("1%"), marginBottom: hp("1%") },
-  nxt: { marginHorizontal: wp("4%"), alignItems: "flex-end", marginTop: hp("2%") },
+  nxt: { marginHorizontal: wp("1%"), marginTop: hp("2%"),width : '93%',alignSelf : 'center' },
   nxtButton: { paddingVertical: hp("1%"), paddingHorizontal: wp("4%"), borderRadius: wp("2%") },
-  nxtText: { fontSize: wp("4%"), fontWeight: "500" ,    fontFamily: "Poppins-Medium",
+  nxtText: { fontSize: wp("5%"), fontWeight: "500" ,    fontFamily: "Poppins-Medium",alignSelf : 'center'
 },
 });

@@ -12,6 +12,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Head from "../../components/Head";
 import { useTheme } from "../../context/ThemeContext"; // ✅ import theme
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 const CartScreen = () => {
@@ -19,9 +20,7 @@ const CartScreen = () => {
   const route = useRoute<any>();
   const product = route.params?.product;
   const { theme } = useTheme(); // ✅ get current theme
-
   const [cartItems, setCartItems] = useState([]);
-
   useEffect(() => {
     if (product) {
       setCartItems((prev) => {
@@ -56,12 +55,32 @@ const CartScreen = () => {
 
   // Calculations
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const discount = 175;
-  const gst = Math.round((subtotal - discount) * 0.1);
-  const total = subtotal - discount + gst;
+  const discount = cartItems.reduce((acc, item) => {
+  const discountValue = item.discount;
 
+  if (!discountValue) return acc; // if no discount, skip safely
+
+  // ✅ Handle percentage like "20%" or "15 %"
+  if (typeof discountValue === "string" && discountValue.includes("%")) {
+    const percent = parseFloat(discountValue.replace("%", "").trim());
+    if (!isNaN(percent)) {
+      return acc + (item.price * item.qty * percent) / 100;
+    }
+  }
+
+  // ✅ Handle fixed numeric discount
+  const fixedDiscount = parseFloat(discountValue);
+  if (!isNaN(fixedDiscount)) {
+    return acc + fixedDiscount * item.qty;
+  }
+
+  return acc;
+}, 0);
+
+const gst = Math.round((subtotal - discount) * 0.1);
+const total = subtotal - discount + gst;
   return (
-    <View style={[styles.container, { backgroundColor: theme.dark ? "#121212" : "#fff" }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.dark ? "#121212" : "#fff" }]}>
       <Head title="Cart" />
 
       <ScrollView
@@ -76,6 +95,7 @@ const CartScreen = () => {
           </View>
         ) : (
           cartItems.map((item) => (
+            <>
             <View
               key={item.id}
               style={[
@@ -102,7 +122,7 @@ const CartScreen = () => {
                     ₹{item.oldPrice}
                   </Text>
                   <Text style={[styles.discount, { color: '#42BA86' }]}>
-                    ({item.discount}%OFF)
+                    {item.discount}
                   </Text>
                 </View>
 
@@ -131,44 +151,44 @@ const CartScreen = () => {
                   <Text style={styles.removeText}>Remove</Text>
                 </TouchableOpacity>
               </View>
+              
             </View>
+            <View style={styles.summary}>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryText, { color: theme.dark ? '#fff' : '#000' }]}>Subtotal</Text>
+                  <Text style={[styles.summaryText, { color: theme.dark ? '#fff' : '#000' }]}>₹{subtotal}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>Discount</Text>
+                  <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>₹{discount}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.gstText, { color: theme.dark ? '#fff' : '#000' }]}>GST (10%)</Text>
+                  <Text style={[styles.gstText, { color: theme.dark ? '#fff' : '#000' }]}>₹{gst}</Text>
+                </View>
+              </View>
+            </>
           ))
         )}
-
-        <View style={styles.summary}>
-          <View style={styles.summaryRow}>
-            <Text style={[styles.summaryText, { color: theme.dark ? '#fff' : '#000' }]}>Subtotal</Text>
-            <Text style={[styles.summaryText, { color: theme.dark ? '#fff' : '#000' }]}>₹{subtotal}</Text>
+        <View
+          style={[
+            styles.stickyFooter,
+            { backgroundColor: theme.dark ? '#222' : '#fff', borderColor: theme.dark ? '#ddd' : '#444' },
+          ]}
+        >
+          <View style={styles.totalRow}>
+            <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>Total</Text>
+            <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>₹{total}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>Discount</Text>
-            <Text style={[styles.discountText, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>₹{discount}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={[styles.gstText, { color: theme.dark ? '#fff' : '#000' }]}>GST (10%)</Text>
-            <Text style={[styles.gstText, { color: theme.dark ? '#fff' : '#000' }]}>₹{gst}</Text>
-          </View>
+          <TouchableOpacity
+            style={[styles.checkoutBtn, { backgroundColor: '#F6B745' }]}
+          >
+            <Text style={[styles.checkoutText, { color: '#fff' }]}>Checkout</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
-
       {/* Sticky Total + Checkout */}
-      <View
-        style={[
-          styles.stickyFooter,
-          { backgroundColor: theme.dark ? '#222' : '#fff', borderColor: theme.dark ? '#ddd' : '#444' },
-        ]}
-      >
-        <View style={styles.totalRow}>
-          <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>Total</Text>
-          <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>₹{total}</Text>
-        </View>
-        <TouchableOpacity
-          style={[styles.checkoutBtn, { backgroundColor: '#F6B745' }]}
-        >
-          <Text style={[styles.checkoutText, { color: '#fff' }]}>Checkout</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 const styles = StyleSheet.create({
@@ -185,7 +205,7 @@ const styles = StyleSheet.create({
   },
   image: { width: wp('32%'), height: hp('15%'), borderRadius: wp('3%'), marginRight: wp('3%') },
   itemDetails: {
-    flex: 1, justifyContent: "center", alignItems: "center", fontFamily: "Poppins-Medium"
+    flex: 1, justifyContent: "center", alignItems: "center", fontFamily: "Poppins-Medium",
   },
   itemName: { fontSize: wp('4%'), fontWeight: "600", fontFamily: "Poppins-Medium" },
   priceRow: { flexDirection: "row", alignItems: "center", marginTop: hp('0.5%'), fontFamily: "Poppins-Medium" },
@@ -196,10 +216,10 @@ const styles = StyleSheet.create({
     marginLeft: wp('2%'),
     fontFamily: "Poppins-Medium"
   },
-  discount: { 
-    marginLeft: wp('2%'), 
-    fontSize: wp('3%'), 
-    fontFamily: "Poppins-Medium" 
+  discount: {
+    marginLeft: wp('2%'),
+    fontSize: wp('3%'),
+    fontFamily: "Poppins-Medium"
   },
   qtyRow: {
     flexDirection: "row",
@@ -226,16 +246,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: "Poppins-Medium"
   },
-  removeRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginTop: hp('0.5%') 
+  removeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: hp('0.5%')
   },
-  removeText: { 
-    color: "red", 
-    fontSize: wp('3%'), 
-    fontWeight: "500", 
-    fontFamily: "Poppins-Medium" 
+  removeText: {
+    color: "red",
+    fontSize: wp('3%'),
+    fontWeight: "500",
+    fontFamily: "Poppins-Medium"
   },
   totalRow: {
     flexDirection: "row",
@@ -243,10 +263,10 @@ const styles = StyleSheet.create({
     marginBottom: hp('1%'),
     paddingTop: hp('0.5%'),
   },
-  totalText: { 
-    fontSize: wp('4%'), 
-    fontWeight: "bold", 
-    fontFamily: "Poppins-Medium" 
+  totalText: {
+    fontSize: wp('4%'),
+    fontWeight: "bold",
+    fontFamily: "Poppins-Medium"
   },
   stickyFooter: {
     position: "absolute",
@@ -262,14 +282,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: hp('1%'),
   },
-  checkoutText: { 
-    fontSize: wp('4%'), 
-    fontWeight: "bold", 
-    letterSpacing: 1, 
-    fontFamily: "Poppins-Medium" 
+  checkoutText: {
+    fontSize: wp('4%'),
+    fontWeight: "bold",
+    letterSpacing: 1,
+    fontFamily: "Poppins-Medium"
   },
-  summary: { 
-    marginTop: hp('2%') 
+  summary: {
+    marginTop: hp('2%')
   },
   summaryRow: {
     flexDirection: "row",

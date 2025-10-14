@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import navigation
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const OTPVerificationScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -47,7 +48,7 @@ const OTPVerificationScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Logo */}
       <Image
         source={require("../../assets/images/logo.png")} // Change this path to your logo
@@ -116,7 +117,7 @@ const OTPVerificationScreen = () => {
       <TouchableOpacity style={styles.verifyBtn} onPress={handleVerify}>
         <Text style={styles.verifyText}>VERIFY OTP</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

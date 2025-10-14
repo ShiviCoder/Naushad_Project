@@ -9,6 +9,7 @@ import ProductData from '../../components/ProductData';
 import Card from '../../components/Cards';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ProductPackageScreen = () => {
   const {theme} = useTheme();
@@ -27,7 +28,7 @@ const ProductPackageScreen = () => {
   }, []);
 
   return (
-    <View style={[styles.mainContainer,{backgroundColor : theme.background}]}>
+    <SafeAreaView style={[styles.mainContainer,{backgroundColor : theme.background}]}>
       {/* Header */}
       <Head title="Product Packages"></Head>
       <View style={{paddingHorizontal : wp('3.5%')}}>
@@ -46,7 +47,7 @@ const ProductPackageScreen = () => {
         ItemSeparatorComponent={() => <View style={{ height: hp('4%') }} />}
       /> 
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

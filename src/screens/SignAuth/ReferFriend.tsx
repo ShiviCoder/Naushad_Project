@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ReferFriend = () => {
   const { theme } = useTheme();
@@ -22,7 +23,7 @@ const ReferFriend = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Refer Friend" />
 
       <View style={styles.contentContainer}>
@@ -53,7 +54,7 @@ const ReferFriend = () => {
           <Text style={styles.buttonText}>Send Referral</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

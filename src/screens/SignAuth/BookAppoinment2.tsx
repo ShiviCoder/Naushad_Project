@@ -11,6 +11,7 @@ import {
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -143,7 +144,7 @@ const renderService = (service) => (
 );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <Head title="Book Appointment" />
 
@@ -158,7 +159,7 @@ const renderService = (service) => (
       <TouchableOpacity style={[styles.proceedButton, { backgroundColor: '#F6B745' }]}>
         <Text style={[styles.proceedButtonText, { color: theme.textOnAccent }]}>Proceed to pay</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

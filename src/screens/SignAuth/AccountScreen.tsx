@@ -17,6 +17,7 @@ import {
 } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AccountScreen = () => {
   const [theme, setTheme] = useState('Light'); // track selected theme
@@ -34,7 +35,7 @@ const AccountScreen = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
       <Head title='Account' showBack={false} rightComponent={<RadioButton
         type="toggle"
@@ -74,13 +75,6 @@ const AccountScreen = () => {
             </Text>
           </View>
         </View>
-        <TouchableOpacity onPress={() => navigation.push('MyProfile')}>
-          <Image
-            style={styles.edit}
-            source={require('../../assets/edit.png')}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.separator} />
@@ -171,7 +165,7 @@ const AccountScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -4,6 +4,7 @@ import { Product, products } from './ProductsArray';
 import ProductCard from './ProductCard';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 type FlatListCompProps = {
     products: Product[];
     likedProducts: string[];
@@ -15,14 +16,14 @@ const FlatListComp: React.FC<FlatListCompProps> = ({ products, likedProducts, on
     const isPortrait = height >= width;
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <FlatList
                 showsVerticalScrollIndicator={false}
                 data={products}
                 keyExtractor={(item) => item.id}
                 numColumns={isPortrait ? 2 : 4}
                 columnWrapperStyle={{
-    justifyContent: 'space-evenly'
+                justifyContent: 'flex-start'
   }}
                 renderItem={({ item }) => (
                     <ProductCard
@@ -32,7 +33,7 @@ const FlatListComp: React.FC<FlatListCompProps> = ({ products, likedProducts, on
                     />
                 )}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
         paddingVertical: wp('2%'),
     },
     row: {
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         marginBottom: hp('1%')
     }
 });

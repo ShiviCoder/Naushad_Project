@@ -8,6 +8,8 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import Head from '../../components/Head';
 import BottomNavbar from '../../components/BottomNavbar';
 import { products as ProductData } from '../../screens/OurProducts/ProductsArray';
+import { useLikedProducts } from '../../context/LikedProductsContext';
+
 type RootStackParamList = {
   HomeScreen: undefined;
   OurProducts: undefined;
@@ -18,43 +20,26 @@ type OurProductsProps = {
 };
 
 const OurProducts = ({ navigation }: OurProductsProps) => {
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const { likedProducts, toggleLike } = useLikedProducts();
   const [showLikedOnly, setShowLikedOnly] = useState(false);
 
-  const toggleLike = (productId : string) => {
-    setLikedProducts((prev)=>
-    prev.includes(productId)
-    ? prev.filter((id)=> id !== productId) 
-    : [...prev , productId]
-    )
-  }
-
   const filteredProducts = showLikedOnly
-  ? ProductData.filter((p)=> likedProducts.includes(p.id)) 
-  : ProductData;
-
+    ? ProductData.filter((p) => likedProducts.includes(p.id))
+    : ProductData;
   console.log('Filtered Products:', filteredProducts);
 
   return (
-    <View style={{ flex: 1  }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Head
         title="Our Products"
-        rightComponent={
-          <TouchableOpacity onPress={() => setShowLikedOnly(!showLikedOnly)}>
-            <Icon
-              name={ "heart-outline"}
-              size={28}
-              
-            />
-          </TouchableOpacity>
-        }
-      />
-      <FlatListComp 
-       products={filteredProducts}
-  likedProducts={likedProducts}
-  onToggleLike={toggleLike} />
       
-    </View>
+      />
+      <FlatListComp
+        products={filteredProducts}
+        likedProducts={likedProducts}
+        onToggleLike={toggleLike}
+      />
+    </SafeAreaView>
   )
 }
 
@@ -67,7 +52,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: hp('2%'),
     alignItems: 'center',
-    
+
   },
   HeadingStyle: {
     fontSize: wp('6%'),
@@ -84,38 +69,11 @@ const styles = StyleSheet.create({
   touchStyle: {
     height: wp('5%'),
     width: wp('10%'),
-    alignItems : 'center',
-    justifyContent : 'center'
-  },
-  iconImage : {
-    height : '70%',
-    width : '70%'
-  },
-  bottomBarWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: hp('2%'),
     alignItems: 'center',
-    paddingBottom: hp('1%'),
+    justifyContent: 'center'
   },
-  bottomNav: {
-    backgroundColor: '#111',
-    width: '92%',
-    height: hp('7%'),
-    borderRadius: wp('10%'),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: wp('3%'),
-  },
-  fabCircle: {
-    width: wp('12%'),
-    height: wp('12%'),
-    borderRadius: wp('7%'),
-    backgroundColor: '#F6B745',
-    alignItems: 'center',
-    justifyContent: 'center',
-  
+  iconImage: {
+    height: '70%',
+    width: '70%'
   },
 })

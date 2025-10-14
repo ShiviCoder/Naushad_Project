@@ -6,6 +6,7 @@ import Head from '../../components/Head';
 import { PackageData } from '../../components/PackageData';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 type RootStackParamList = {
   OurPackages: undefined,
   PackageDetails: { item: PackageData }
@@ -18,9 +19,10 @@ const PackageDetails = () => {
   const navigation = useNavigation<any>()
   const { item } = route.params
   const {theme} = useTheme();
-
+console.log("Hello")
   return (
-    <ScrollView style={[styles.container,{backgroundColor : theme.background}]}>
+   
+      <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
       <Head title='Our Packages' />
       <Image style={styles.img} source={item.image} />
       <View style={styles.detail}>
@@ -34,12 +36,14 @@ const PackageDetails = () => {
 
       <View style={styles.serviceListContain}>
         <Text style={[styles.serviceListHeadTxt,{color : theme.textPrimary}]}>Service List</Text>
-        {item.serviceList.map((service, index) => (
-          <View key={index} style={styles.ServiceListTxtContain}>
-            <Text>✅</Text>
-            <Text style={[styles.serviceListTxt,{color : theme.textPrimary}]}>{service}</Text>
-          </View>
-        ))}
+       {item.serviceList?.map((service, index) => (
+  <View key={index} style={styles.ServiceListTxtContain}>
+    <Text>✅</Text>
+    <Text style={[styles.serviceListTxt,{color : theme.textPrimary}]}>{service}</Text>
+  </View>
+)) || (
+  <Text style={{color: theme.textPrimary}}>No services available</Text>
+)}
       </View>
 
       <View style={styles.ratContain}>
@@ -57,14 +61,14 @@ const PackageDetails = () => {
       <TouchableOpacity
         style={styles.bookAppoint}
        onPress={() => {
-          navigation.navigate('MainTabs', {
-  screen: 'BookAppointmentScreen',
-  params: { image:  item.image  }
-}); }}
+          navigation.navigate('BookAppointmentScreen',
+  {params: { image:  item.image}  }
+); }}
       >
         <Text style={styles.bookAppointTxt}>Book Appointment</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </SafeAreaView>
+   
   )
 }
 
@@ -84,11 +88,11 @@ const styles = StyleSheet.create({
   },
   titleTxt: {
     fontWeight: '600',
-    fontSize: wp('5%'),
+    fontSize: wp('6%'),
     color: '#000'
   },
   priceTxt: {
-    fontSize: wp('5%'),
+    fontSize: wp('5.5%'),
     fontWeight: '600',
     color: '#000'
   },
@@ -99,12 +103,12 @@ const styles = StyleSheet.create({
   },
   aboutTxt: {
     color: '#00000075',
-    fontSize: wp('3.7%'),
+    fontSize: wp('4%'),
     fontWeight: '500',
     marginBottom : hp('0.5%')
   },
   discountTxt: {
-    fontSize: wp('3.7%'),
+    fontSize: wp('3.9%'),
     color: '#42BA86',
     fontWeight: '600'
   },
@@ -116,13 +120,14 @@ const styles = StyleSheet.create({
 
   },
   serviceListHeadTxt: {
-    fontSize: wp('5%'),
+    fontSize: wp('6%'),
     fontWeight: '600',
     marginBottom: hp('1%')
   },
   serviceListTxt: {
-    fontSize: wp('3.5%'),
-    color: '#00000075'
+    fontSize: wp('4%'),
+    color: '#00000075',
+    fontWeight : '400'
   },
   ServiceListTxtContain: {
     flexDirection: 'row',
@@ -136,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: hp('2%')
   },
   ratTxt: {
-    fontSize: wp('3.5%'),
+    fontSize: wp('4%'),
     fontWeight: '500',
     color: '#0000006E'
   },
@@ -156,7 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: wp('3%'),
-    marginBottom: hp('2%')
+    marginVertical: hp('3%')
   },
   bookAppointTxt: {
     fontSize: wp('4%'),

@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, FlatList, Image } from 'react-native';
 import React from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const certificates = [
   {
@@ -29,7 +30,7 @@ const certificates = [
 const Certificates = () => {
   const {theme} = useTheme();
   return (
-    <View style={[styles.container,{backgroundColor : theme.background}]}>
+    <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
         <Head title="🏅 Certificates"/>
       
      <View style={{paddingHorizontal : 15, paddingBottom : 70}}>
@@ -45,7 +46,7 @@ const Certificates = () => {
         showsVerticalScrollIndicator={false}
       />
      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

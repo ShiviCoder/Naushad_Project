@@ -14,13 +14,14 @@ type RootStackParamList = {
   PackageDetails: {item: PackageData}
 }
 import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const PackagesScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <View style={[styles.container,{backgroundColor : theme.background}]}>
+    <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
       {/* Header */}
      <Head title="Our Packages" ></Head>
 
@@ -64,7 +65,7 @@ const PackagesScreen = () => {
         )}
       />
      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
