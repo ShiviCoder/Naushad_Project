@@ -277,9 +277,8 @@ const HomeScreen = () => {
       offer: '33%OFF',
       rating: '4.1',
       tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product22.png'),
-      require('../../assets/images/female-product2.jpg')
-      ],
+      image: [require('../../assets/images/male-product11.jpg'),
+      require('../../assets/images/female-product2.jpg')],
       description: 'Smooth & shiny hair',
       reviews: 3100,
     },
@@ -303,7 +302,7 @@ const HomeScreen = () => {
       offer: '25%OFF',
       rating: '4.1',
       tag: '100% natural oil',
-      image: [require('../../assets/images/male-product12.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product3.jpg')
       ],
       description: 'Anti-dandruff formula',
@@ -316,7 +315,7 @@ const HomeScreen = () => {
       offer: '33%OFF',
       rating: '4.1',
       tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product22.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product4.jpg')
       ],
       description: 'Smooth & shiny hair',

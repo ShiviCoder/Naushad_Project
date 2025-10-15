@@ -31,7 +31,7 @@ const products = [
       offer: '33%OFF',
       rating: '4.1',
       tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product22.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product2.jpg')
       ],
       description: 'Smooth & shiny hair',
@@ -44,7 +44,7 @@ const products = [
       offer: '33%OFF',
       rating: '4.1',
       tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product22.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product4.jpg')
       ],
       description: 'Smooth & shiny hair',
@@ -70,7 +70,7 @@ const products = [
       offer: '25%OFF',
       rating: '4.1',
       tag: '100% natural oil',
-      image: [require('../../assets/images/male-product12.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product3.jpg')
       ],
       description: 'Anti-dandruff formula',
@@ -83,7 +83,7 @@ const products = [
       offer: '33%OFF',
       rating: '4.1',
       tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product22.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product4.jpg')
       ],
       description: 'Smooth & shiny hair',
@@ -109,7 +109,7 @@ const products = [
       offer: '25%OFF',
       rating: '4.1',
       tag: '100% natural oil',
-      image: [require('../../assets/images/male-product12.png'),
+      image: [require('../../assets/images/male-product11.jpg'),
       require('../../assets/images/female-product3.jpg')
       ],
       description: 'Anti-dandruff formula',
@@ -135,8 +135,7 @@ const services = [
       price: '₹400.00',
       desc: 'Long-lasting shades',
       image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service5.jpg')
-      ],
+      require('../../assets/images/man-service5.jpg')],
       highlights: ['Wash & trim included', 'Modern Styling', '1hr Duration'],
       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
     },
@@ -157,8 +156,7 @@ const services = [
       price: '₹600.00',
       desc: 'Glow facial therapy',
       image: [require('../../assets/images/facial.jpg'),
-      require('../../assets/images/man-service3.jpg'),
-      ],
+      require('../../assets/images/man-service3.jpg'),],
       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
     },
