@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Image,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import {
   widthPercentageToDP as wp,
@@ -14,87 +16,140 @@ import {
 } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
-export default function SignupScreen({ navigation }: any) {
+export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = () => {
-    // Signup logic here
-    console.log("Full Name:", fullName);
-    console.log("Email/Phone:", emailOrPhone);
-    console.log("Password:", password);
-    console.log("Confirm Password:", confirmPassword);
+  const handleSignup = async () => {
+    if (!fullName || !emailOrPhone || !password || !confirmPassword) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+    const normalize = (str) => str.replace(/\s+/g, ''); // remove ALL spaces
+    if (normalize(password) !== normalize(confirmPassword)) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch("http://192.168.29.143:5001/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: fullName,
+          email: emailOrPhone, // assuming backend accepts "email"
+          password: password,
+          confirmPassword : confirmPassword
+        }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      console.log("Signup Response:", data);
+
+      if (response.ok && data.success) {
+        Alert.alert("Success", data.message || "Signup successful!", [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate("Signin"),
+          },
+        ]);
+      } else {
+        Alert.alert("Error", data.message || "Signup failed. Try again.");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log("Signup Error:", error);
+      Alert.alert("Error", "Unable to connect to the server.");
+    }
+    console.log("Sending signup data:", {
+      name: fullName,
+      email: emailOrPhone,
+      password: password,
+      confirmPassword : confirmPassword
+    });
   };
 
   return (
     <SafeAreaView>
       <ScrollView contentContainerStyle={styles.container}>
-      {/* Logo */}
-      <Image
-        source={require("../../assets/images/logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+        {/* Logo */}
+        <Image
+          source={require("../../assets/images/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        
+        {/* Full Name */}
+        <Text style={styles.label}>Full Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter full name"
+          placeholderTextColor="#888"
+          value={fullName}
+          onChangeText={setFullName}
+        />
 
-      {/* Full Name */}
-      <Text style={styles.label}>Full Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter full name"
-        placeholderTextColor="#888"
-        value={fullName}
-        onChangeText={setFullName}
-      />
+        {/* Email / Phone */}
+        <Text style={styles.label}>Phone or Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter phone or email"
+          placeholderTextColor="#888"
+          value={emailOrPhone}
+          onChangeText={setEmailOrPhone}
+          keyboardType="email-address"
+        />
 
-      {/* Email / Phone */}
-      <Text style={styles.label}>Phone or Email</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter phone or email"
-        placeholderTextColor="#888"
-        value={emailOrPhone}
-        onChangeText={setEmailOrPhone}
-        keyboardType="email-address"
-      />
+        {/* Password */}
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter password"
+          placeholderTextColor="#888"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      {/* Password */}
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter password"
-        placeholderTextColor="#888"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        {/* Confirm Password */}
+        <Text style={styles.label}>Confirm Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm password"
+          placeholderTextColor="#888"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
 
-      {/* Confirm Password */}
-      <Text style={styles.label}>Confirm Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm password"
-        placeholderTextColor="#888"
-        secureTextEntry
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-      />
-
-      {/* Signup Button */}
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("VerificationScreen")}>
-        <Text style={styles.buttonText}>SIGN UP</Text>
-      </TouchableOpacity>
-
-      {/* Sign In Link */}
-      <View style={styles.signinContainer}>
-        <Text style={styles.signinText}>Already have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signin")}>
-          <Text style={styles.signinLink}> Signin</Text>
+        {/* Signup Button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSignup}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>SIGN UP</Text>
+          )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+
+        {/* Sign In Link */}
+        <View style={styles.signinContainer}>
+          <Text style={styles.signinText}>Already have an account?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Signin")}>
+            <Text style={styles.signinLink}> Signin</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
