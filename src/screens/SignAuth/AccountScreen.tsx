@@ -26,7 +26,11 @@ const AccountScreen = () => {
   const backgroundColor = theme === 'Dark' ? '#121212' : '#fff';
   const textColor = theme === 'Dark' ? '#fff' : '#333';
   const subTextColor = theme === 'Dark' ? '#bbb' : '#757575BA';
+<<<<<<< HEAD
   const textPrimary = theme === 'Dark' ? '#fff' : '#000';
+=======
+  const textPrimary = theme === 'Dark' ? '#fff' : '#000'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 
   const handleLogoutConfirm = () => {
     setShowLogout(false);
@@ -37,6 +41,7 @@ const AccountScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
+<<<<<<< HEAD
       <Head
         title="Account"
         showBack={false}
@@ -60,6 +65,27 @@ const AccountScreen = () => {
             }}
           />
         }
+=======
+      <Head title='Account' showBack={false} rightComponent={<RadioButton
+        type="toggle"
+        selected={theme}
+        labels={[
+          <Image
+            source={require('../../assets/sun.png')}
+            style={styles.themeIcon}
+          />,
+          <Image
+            source={require('../../assets/moon.png')}
+            style={styles.themeIcon}
+          />,
+        ]}
+        onSelect={isDark => {
+          const value = isDark ? 'Dark' : 'Light';
+          setTheme(value);
+        }}
+      />
+      } 
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       />
 
       {/* Profile Section */}
@@ -73,9 +99,13 @@ const AccountScreen = () => {
             />
           </View>
           <View style={styles.profileText}>
+<<<<<<< HEAD
             <Text style={[styles.name, { color: textColor }]}>
               Aanchal Jain
             </Text>
+=======
+            <Text style={[styles.name, { color: textColor }]}>Aanchal Jain</Text>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
             <Text style={[styles.email, { color: subTextColor }]}>
               aachalsethi38881@gmail.com
             </Text>
@@ -91,7 +121,11 @@ const AccountScreen = () => {
         style={styles.detailsContainer}
         contentContainerStyle={{
           margin: wp('2%'),
+<<<<<<< HEAD
           paddingBottom: hp('12%'),
+=======
+          paddingBottom: hp('12%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -102,6 +136,7 @@ const AccountScreen = () => {
                 style={styles.detailsCon}
                 onPress={() => {
                   if (item.title === 'Edit Profile') {
+<<<<<<< HEAD
                     navigation.push('MyProfile');
                   } else if (item.title === 'Cart') {
                     navigation.navigate('Cart');
@@ -118,6 +153,24 @@ const AccountScreen = () => {
                   } else if (item.title === 'App Version: v1.0.0') {
                     navigation.navigate('AppVersion');
                   } else if (item.title === 'Logout') {
+=======
+                    navigation.push('MyProfile')
+                  } else if (item.title === 'Cart') {
+                    navigation.navigate('Cart')
+                  } else if (item.title === 'Catalog') {
+                    navigation.navigate('Catelog')
+                  } else if (item.title === "Refer a friend") {
+                    navigation.navigate('ReferFriend')
+                  } else if (item.title === "About us") {
+                    navigation.navigate('AboutUs')
+                  } else if (item.title === "Privacy Policy") {
+                    navigation.navigate('PrivacyPolicy')
+                  } else if (item.title === "Terms & Conditions") {
+                    navigation.navigate('TermsAndConditions')
+                  } else if (item.title === "App Version: v1.0.0") {
+                    navigation.navigate('AppVersion')
+                  } else if (item.title === "Logout") {
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
                     setShowLogout(true);
                   }
                 }}
@@ -136,14 +189,26 @@ const AccountScreen = () => {
                 </View>
               </TouchableOpacity>
             </>
+<<<<<<< HEAD
+=======
+
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           );
         }}
       />
 
+<<<<<<< HEAD
       <Modal
         visible={showLogout}
         transparent
         animationType="fade"
+=======
+
+      <Modal
+        visible={showLogout}
+        transparent
+        animationType='fade'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         onRequestClose={() => setShowLogout(false)}
       >
         <View style={styles.overlay}>
@@ -154,15 +219,23 @@ const AccountScreen = () => {
             </Text>
 
             <View style={styles.popupActions}>
+<<<<<<< HEAD
               <TouchableOpacity
                 onPress={() => setShowLogout(false)}
+=======
+              <TouchableOpacity onPress={() => setShowLogout(false)}
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
                 style={[styles.popupBtn, styles.cancelBtn]}
               >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
 
+<<<<<<< HEAD
               <TouchableOpacity
                 style={[styles.popupBtn, styles.logoutBtn]}
+=======
+              <TouchableOpacity style={[styles.popupBtn, styles.logoutBtn]}
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
                 onPress={handleLogoutConfirm}
               >
                 <Text style={styles.logoutText}>Logout</Text>
@@ -178,17 +251,31 @@ const AccountScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+<<<<<<< HEAD
     paddingBottom: hp('3%'),
+=======
+    paddingBottom: hp('3%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   headContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+<<<<<<< HEAD
     paddingHorizontal: wp('5%'),
     paddingVertical: hp('2%'),
     justifyContent: 'center',
   },
   headText: {
     fontSize: wp('5%'),
+=======
+    paddingHorizontal: wp("5%"),
+    paddingVertical: hp("2%"),
+    justifyContent: "center",
+
+  },
+  headText: {
+    fontSize: wp("5%"),
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     fontWeight: 'bold',
   },
   profileSection: {
@@ -237,13 +324,21 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     paddingHorizontal: wp('5%'),
+<<<<<<< HEAD
     paddingVertical: hp('3%'),
+=======
+    paddingVertical: hp('3%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   leftIcon: {
     width: wp('5.7%'),
     height: wp('5.7%'),
     resizeMode: 'contain',
+<<<<<<< HEAD
     marginTop: hp('1.2%'),
+=======
+    marginTop: hp('1.2%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   detailsCon: {
     flexDirection: 'row',
@@ -272,7 +367,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
+<<<<<<< HEAD
     alignItems: 'center',
+=======
+    alignItems: 'center'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   popup: {
     width: '80%',
@@ -285,13 +384,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+<<<<<<< HEAD
     textAlign: 'center',
+=======
+    textAlign: 'center'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   popupMessage: {
     fontSize: 15,
     marginBottom: 20,
     textAlign: 'center',
+<<<<<<< HEAD
     color: '#555',
+=======
+    color: '#555'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   popupActions: {
     flexDirection: 'row',
@@ -301,6 +408,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 8,
+<<<<<<< HEAD
     alignItems: 'center',
   },
   cancelBtn: {
@@ -318,6 +426,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
+=======
+    alignItems: 'center'
+  },
+  cancelBtn: {
+    backgroundColor: '#eee',
+    marginRight: 10
+  },
+  logoutBtn: {
+    backgroundColor: 'red'
+  },
+  cancelText: {
+    color: '#333',
+    fontWeight: '600'
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: '600'
+  }
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 });
 
 export default AccountScreen;

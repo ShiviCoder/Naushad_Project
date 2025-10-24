@@ -1,15 +1,22 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { Product } from './ProductsArray';
 import { useNavigation } from '@react-navigation/native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+=======
+import { Product } from "./ProductsArray";
+import { useNavigation } from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import { useTheme } from '../../context/ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 type Props = {
+<<<<<<< HEAD
   product: Product;
   liked: boolean;
   onToggleLike: () => void;
@@ -236,3 +243,197 @@ const styles = StyleSheet.create({
     borderRadius: wp('10%'),
   },
 });
+=======
+    product: Product;
+    liked: boolean;
+    onToggleLike: () => void;
+}
+const ProductCard:
+React.FC<Props> = ({ product, liked, onToggleLike }) => {
+    const navigation = useNavigation<any>();
+    const { theme } = useTheme();
+    const getImageSource = (img: any) => {
+        if (!img) return null;
+        if (typeof img === 'string') {
+            return { uri: img };
+        }
+        return img; // assume it's require()
+    }
+
+    const selectedImage = Array.isArray(product.image) ? getImageSource(product.image[0]) : getImageSource(product.image);
+    return (
+        <SafeAreaView
+            style={[
+                styles.productCard,
+                { backgroundColor: '#fff' },
+            ]}
+        >
+            <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product })}>
+
+                <Image
+                    resizeMode='cover'
+                    source={selectedImage}
+                    style={styles.ImageStyle} />
+                <Text
+                    numberOfLines={1}
+                    style={[styles.productName, { color: '#000' }]}>{product.name}</Text>
+                <View style={styles.OurterPriceContainer}>
+                    <View style={styles.InnerPriceContainer}>
+                        <Text style={[styles.priceStyle, { color: '#000' }]}>{product.price}</Text>
+                        <Text style={[styles.oldPriceStyle, { color: '#ccc' }]}>{product.oldPrice}</Text>
+                    </View>
+                    <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>{product.discount}</Text>
+                </View>
+                <View style={styles.descContain}>
+                    <Image
+                        resizeMode='contain'
+                        source={product.featureIcon}
+                        style={styles.featureIconStyle} />
+                    <Text style={[styles.DescStyle, { color: '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
+                </View>
+            </TouchableOpacity>
+
+            <View style={styles.OutRatContain} >
+                <View style={[styles.InnerRatContain, { backgroundColor: theme.dark ? '#0f8a43' : '#09932B' }]}>
+                    <Text style={[styles.ratingTextStyle, { color: theme.dark ? '#861919ff' : '#e6e2e2ff' }]}>{product.rating}</Text>
+                    <Image
+                        resizeMode='contain'
+                        style={styles.starStyle}
+                        source={require('../../assets/OurProduct/star1.png')} />
+                </View>
+                <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]} >({product.reviews})</Text>
+            </View>
+
+            <TouchableOpacity
+                style={[
+                    styles.likeImgContainer,
+                    { backgroundColor: '#f5eeeeff', alignItems: 'center' }
+                ]}
+                onPress={onToggleLike} // ✅ toggle state
+            >
+                <Icon
+                    name={liked ? "heart" : "heart-outline"}
+                    size={wp('6%')}
+                    color={liked ? "red" : "gray"}
+                />
+            </TouchableOpacity>
+        </SafeAreaView>
+    )
+}
+
+export default ProductCard
+
+const styles = StyleSheet.create({
+    productCard: {
+        width: wp('44%'),
+        borderRadius: wp('7%'),
+        alignItems: 'center',
+        elevation: 5,
+        marginVertical: hp('1%'),
+        marginHorizontal: wp('2%'),
+        paddingVertical: hp('1.5%'),
+        paddingHorizontal: wp('2%')
+    },
+    ImageStyle: {
+        width: wp('40%'),
+        height: wp('30%'),
+        borderRadius: wp('5%'),
+        marginBottom: hp('3%')
+    },
+    OuterPriceContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        justifyContent: 'flex-start',
+        gap: wp('2.5%'),
+        marginBottom: hp('1%')
+    },
+    InnerPriceContainer: {
+        flexDirection: 'row',
+        gap: wp('1.5%')
+
+    },
+    priceStyle: {
+        fontSize: wp('3.8%'),
+        fontWeight: '500'
+    },
+    featureIconStyle: {
+        width: wp('4%'),
+        height: hp('2%')
+    },
+    starStyle: {
+        width: wp('3.2%'),
+        height: wp('3.2%'),
+    },
+    starContainer: {
+        backgroundColor: '#f1ff23'
+    },
+    descContain: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        justifyContent: 'flex-start',
+        gap: wp('1%'),
+        marginBottom: hp('1%')
+    },
+    OutRatContain: {
+        width: '100%',
+        flexDirection: 'row',
+        gap: wp('2%'),
+        alignItems: 'center'
+    },
+    InnerRatContain: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        backgroundColor: '#09932B',
+        borderRadius: wp('3%'),
+        paddingVertical: hp('0.2%'),
+        paddingHorizontal: wp('1.5%')
+    },
+    ratingTextStyle: {
+
+        fontSize: wp('3.2%'),
+        marginRight: wp('1%'),
+    },
+    productName: {
+        fontSize: wp('4%'),
+        alignSelf: 'flex-start',
+        fontWeight: '700',
+        marginBottom: hp('1%')
+    },
+    DescStyle: {
+        flex: 1,
+        fontSize: wp('3.5%'),
+        fontWeight: '600'
+    },
+    oldPriceStyle: {
+        color: 'gray',
+        fontSize: wp('3.5%'),
+        opacity: 0.6,
+        textDecorationLine: 'line-through',
+    },
+    DiscountStyle: {
+        color: '#42BA86',
+        fontSize: wp('3.5%'),
+        fontWeight: '600'
+    },
+    reviewStyle: {
+        marginLeft: wp('1%'),
+        fontSize: wp('3.2%'),
+
+    },
+    iconImage: {
+        height: '70%',
+        width: '70%',
+        alignSelf: 'center'
+    },
+    likeImgContainer: {
+        height: wp('7%'),
+        marginVertical: hp('1%'),
+        width: wp('7%'),
+        backgroundColor: '#9387871F',
+        alignSelf: 'flex-start',
+        justifyContent: 'center',
+        borderRadius: wp('10%')
+    }
+})
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab

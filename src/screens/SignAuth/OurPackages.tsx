@@ -23,8 +23,13 @@ type Package = {
   about: string;
   discount: string;
   serviceList: string[];
+<<<<<<< HEAD
   review: number;
   rating: number;
+=======
+  review: number,
+  rating: number,
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   image: any;
 };
 
@@ -36,6 +41,7 @@ const packagesData: Package[] = [
     services: 'Haircut, Shampoo',
     about: 'Perfect for daily grooming',
     discount: '🔖 Save ₹300 on festive booking',
+<<<<<<< HEAD
     serviceList: [
       'Cleansing & Scrubbing',
       'Steam & Blackhead Removal',
@@ -43,6 +49,9 @@ const packagesData: Package[] = [
       'Hydrating Mask',
       'Skin Brightening Serum',
     ],
+=======
+    serviceList: ['Cleansing & Scrubbing', 'Steam & Blackhead Removal', 'Relaxing Massage', 'Hydrating Mask', 'Skin Brightening Serum'],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     review: 23,
     rating: 4,
     image: require('../../assets/images/haircut1.png'), // Replace with your image path
@@ -54,6 +63,7 @@ const packagesData: Package[] = [
     services: 'Exfoliation, mask',
     about: 'Refresh your skin',
     discount: '🔖 Save ₹300 on festive booking',
+<<<<<<< HEAD
     serviceList: [
       'Cleansing & Scrubbing',
       'Steam & Blackhead Removal',
@@ -61,6 +71,9 @@ const packagesData: Package[] = [
       'Hydrating Mask',
       'Skin Brightening Serum',
     ],
+=======
+    serviceList: ['Cleansing & Scrubbing', 'Steam & Blackhead Removal', 'Relaxing Massage', 'Hydrating Mask', 'Skin Brightening Serum'],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     review: 230,
     rating: 5,
     image: require('../../assets/images/haircut1.png'), // Replace with your image path
@@ -72,6 +85,7 @@ const packagesData: Package[] = [
     services: 'Haircut, Shampoo',
     about: 'Perfect for daily grooming',
     discount: '🔖 Save ₹300 on festive booking',
+<<<<<<< HEAD
     serviceList: [
       'Cleansing & Scrubbing',
       'Steam & Blackhead Removal',
@@ -79,6 +93,9 @@ const packagesData: Package[] = [
       'Hydrating Mask',
       'Skin Brightening Serum',
     ],
+=======
+    serviceList: ['Cleansing & Scrubbing', 'Steam & Blackhead Removal', 'Relaxing Massage', 'Hydrating Mask', 'Skin Brightening Serum'],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     review: 223,
     rating: 1,
     image: require('../../assets/images/haircut1.png'), // Replace with your image path
@@ -90,6 +107,7 @@ const packagesData: Package[] = [
     services: 'Haircut, Shampoo',
     about: 'Perfect for daily grooming',
     discount: '🔖 Save ₹300 on festive booking',
+<<<<<<< HEAD
     serviceList: [
       'Cleansing & Scrubbing',
       'Steam & Blackhead Removal',
@@ -97,6 +115,9 @@ const packagesData: Package[] = [
       'Hydrating Mask',
       'Skin Brightening Serum',
     ],
+=======
+    serviceList: ['Cleansing & Scrubbing', 'Steam & Blackhead Removal', 'Relaxing Massage', 'Hydrating Mask', 'Skin Brightening Serum'],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     review: 123,
     rating: 3,
     image: require('../../assets/images/haircut1.png'), // Replace with your image path
@@ -108,6 +129,7 @@ const packagesData: Package[] = [
     services: 'Haircut, Shampoo',
     about: 'Perfect for daily grooming',
     discount: '🔖 Save ₹300 on festive booking',
+<<<<<<< HEAD
     serviceList: [
       'Cleansing & Scrubbing',
       'Steam & Blackhead Removal',
@@ -115,6 +137,9 @@ const packagesData: Package[] = [
       'Hydrating Mask',
       'Skin Brightening Serum',
     ],
+=======
+    serviceList: ['Cleansing & Scrubbing', 'Steam & Blackhead Removal', 'Relaxing Massage', 'Hydrating Mask', 'Skin Brightening Serum'],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     review: 293,
     rating: 4,
     image: require('../../assets/images/haircut1.png'), // Replace with your image path
@@ -126,6 +151,7 @@ const packagesData: Package[] = [
     services: 'Haircut, Shampoo',
     about: 'Perfect for daily grooming',
     discount: '🔖 Save ₹300 on festive booking',
+<<<<<<< HEAD
     serviceList: [
       'Cleansing & Scrubbing',
       'Steam & Blackhead Removal',
@@ -133,6 +159,9 @@ const packagesData: Package[] = [
       'Hydrating Mask',
       'Skin Brightening Serum',
     ],
+=======
+    serviceList: ['Cleansing & Scrubbing', 'Steam & Blackhead Removal', 'Relaxing Massage', 'Hydrating Mask', 'Skin Brightening Serum'],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     review: 253,
     rating: 2,
     image: require('../../assets/images/haircut1.png'), // Replace with your image path
@@ -140,7 +169,11 @@ const packagesData: Package[] = [
 ];
 const OurPackagesScreen = () => {
   const { theme } = useTheme(); // ✅ get current theme
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   const handleBackPress = () => {
     navigation.goBack();
   };
@@ -150,6 +183,7 @@ const OurPackagesScreen = () => {
     PackageDetails: { item: Package };
   };
 
+<<<<<<< HEAD
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -242,11 +276,76 @@ const OurPackagesScreen = () => {
     >
       {/* Header */}
       <Head title="Our Packages" />
+=======
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const renderPackageItem = ({ item }: { item: Package }) => (
+   <View
+  style={[
+    styles.packageCard,
+    { backgroundColor: theme.dark ? '#111' : '#fff' }, // card bg
+  ]}
+>
+  <View style={styles.cardContent}>
+    <View style={styles.textContent}>
+      <Text style={[styles.packageTitle, { color: theme.dark ? '#fff' : '#000' }]}>
+        {item.title}
+      </Text>
+      <Text style={[styles.packagePrice, { color: COLORS.primary }]}>
+        {item.price}
+      </Text>
+
+      <View style={styles.servicesRow}>
+        <Text style={[styles.servicesLabel, { color: theme.dark ? '#4CAF50' : '#4CAF50' }]}>
+          Services:-
+        </Text>
+        <Text style={[styles.servicesText, { color: theme.dark ? '#ddd' : '#333' }]}>
+          {item.services}
+        </Text>
+      </View>
+
+      <View style={styles.aboutRow}>
+        <Text style={[styles.aboutLabel, { color: theme.dark ? '#4CAF50' : '#4CAF50' }]}>
+          About:-
+        </Text>
+        <Text style={[styles.aboutText, { color: theme.dark ? '#ddd' : '#333' }]}>
+          {item.about}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[
+          styles.bookButton,
+          { backgroundColor: COLORS.primary  },
+        ]}
+        onPress={() => navigation.navigate('PackageDetails', { item })}
+      >
+        <Text style={[styles.bookButtonText, { color: theme.dark ? '#000' : '#fff' }]}>
+          Book now
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    <View style={styles.imageContainer}>
+      <Image source={item.image} style={styles.packageImage} />
+    </View>
+  </View>
+</View>
+  );
+  return (
+    <SafeAreaView style={[styles.container,{backgroundColor: theme.dark ? '#000' : '#fff'}]}>
+      {/* Header */}
+      <Head title = 'Our Packages'/>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       {/* Packages List */}
       <FlatList
         data={packagesData}
         renderItem={renderPackageItem}
+<<<<<<< HEAD
         keyExtractor={item => item.id}
+=======
+        keyExtractor={(item) => item.id}
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
       />
@@ -257,6 +356,10 @@ const OurPackagesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+<<<<<<< HEAD
+=======
+   
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   header: {
     flexDirection: 'row',
@@ -376,7 +479,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 16,
+<<<<<<< HEAD
     alignItems: 'center',
+=======
+    alignItems: 'center'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   bottomNav: {
     backgroundColor: '#111',
@@ -398,4 +505,8 @@ const styles = StyleSheet.create({
     marginTop: -14,
   },
 });
+<<<<<<< HEAD
 export default OurPackagesScreen;
+=======
+export default OurPackagesScreen;
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab

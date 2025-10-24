@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   StyleSheet,
   Text,
@@ -12,6 +13,13 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+=======
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import Head from '../../components/Head';
+import { useTheme } from '../../context/ThemeContext';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,6 +28,7 @@ const TermsAndConditions = () => {
   const [accepted, setAccepted] = useState(false);
 
   return (
+<<<<<<< HEAD
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background }]}
     >
@@ -64,6 +73,33 @@ const TermsAndConditions = () => {
         <Text style={[styles.text, { color: theme.textSecondary }]}>
           We may modify these terms at any time, and changes will be posted
           within the app. Continued use signifies acceptance of updated terms.
+=======
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <Head title="Terms And Conditions" />
+      <ScrollView contentContainerStyle={styles.contentContainer}>    
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+          Welcome to our app. By using our services, you agree to comply with and be bound by the following terms and conditions. Please read them carefully before using the app.
+        </Text>
+
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>1. Use of Services</Text>
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+          You agree to use the app only for lawful purposes and in a way that does not infringe the rights of, restrict or inhibit anyone else's use of the app.
+        </Text>
+
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>2. User Responsibilities</Text>
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+          Users are responsible for maintaining the confidentiality of their account information and for all activities that occur under their account.
+        </Text>
+
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>3. Limitation of Liability</Text>
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+          We are not liable for any direct, indirect, incidental, or consequential damages arising from the use or inability to use the app.
+        </Text>
+
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>4. Changes to Terms</Text>
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+          We may modify these terms at any time, and changes will be posted within the app. Continued use signifies acceptance of updated terms.
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         </Text>
 
         {/* Accept Checkbox */}
@@ -72,9 +108,13 @@ const TermsAndConditions = () => {
           onPress={() => setAccepted(!accepted)}
         >
           <View style={[styles.checkbox, { borderColor: theme.textPrimary }]}>
+<<<<<<< HEAD
             {accepted && (
               <Icon name="checkmark" size={wp('4%')} color="#42BA86" />
             )}
+=======
+            {accepted && <Icon name="checkmark" size={wp('4%')} color="#42BA86" />}
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           </View>
           <Text style={[styles.checkboxText, { color: theme.textPrimary }]}>
             I have read and accept the Terms and Conditions

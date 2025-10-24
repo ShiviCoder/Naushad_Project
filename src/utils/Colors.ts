@@ -1,4 +1,5 @@
 const COLORS = {
+<<<<<<< HEAD
   //For Red Theme
   // primary: "#ea0909",
   // secondary: "#ebddddff",
@@ -61,3 +62,22 @@ const COLORS = {
  
 };
 export default COLORS;
+=======
+
+    //For Red Theme
+  primary: "#ea0909",
+  secondary: "#ebddddff",
+  shadow: "#ee505040",
+  text: "#000000",
+  border: "#E5E5E5",
+
+
+  //For Yellow Theme
+//    primary: "#F6B745",
+//   secondary: "#FFEED069",
+//   shadow: "#F6B74540",
+//   text: "#000000",
+//   border: "#E5E5E5",
+};
+export default COLORS;
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab

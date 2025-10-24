@@ -28,9 +28,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
         return prev.map(item =>
+<<<<<<< HEAD
           item.id === product.id
             ? { ...item, qty: item.qty + product.qty }
             : item,
+=======
+          item.id === product.id ? { ...item, qty: item.qty + product.qty } : item
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         );
       }
       return [...prev, product];
@@ -41,12 +45,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prev =>
       prev.map(item =>
         item.id === id
+<<<<<<< HEAD
           ? {
               ...item,
               qty: type === 'add' ? item.qty + 1 : Math.max(1, item.qty - 1),
             }
           : item,
       ),
+=======
+          ? { ...item, qty: type === 'add' ? item.qty + 1 : Math.max(1, item.qty - 1) }
+          : item
+      )
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     );
   };
 
@@ -55,9 +65,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
+<<<<<<< HEAD
     <CartContext.Provider
       value={{ cartItems, addToCart, updateQty, removeFromCart }}
     >
+=======
+    <CartContext.Provider value={{ cartItems, addToCart, updateQty, removeFromCart }}>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       {children}
     </CartContext.Provider>
   );

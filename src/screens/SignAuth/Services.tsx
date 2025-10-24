@@ -8,16 +8,28 @@ import {
   FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+<<<<<<< HEAD
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+=======
+import {
+  NavigationProp,
+  useNavigation,
+} from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import { useTheme } from '../../context/ThemeContext'; // ✅ import your theme hook
 import Head from '../../components/Head';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 type extra = {
   product: string;
   price: number;
@@ -40,18 +52,26 @@ type RootStackParamList = {
 
 const categories = [
   { name: 'Haircut', image: require('../../assets/images/haircut.jpg') },
+<<<<<<< HEAD
   {
     name: 'Hair coloring',
     image: require('../../assets/images/haircolor.jpg'),
   },
+=======
+  { name: 'Hair coloring', image: require('../../assets/images/haircolor.jpg') },
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   { name: 'Facial', image: require('../../assets/images/facial.jpg') },
   { name: 'Beard', image: require('../../assets/images/beard.jpg') },
   { name: 'Nail', image: require('../../assets/images/nail.jpg') },
   { name: 'Haircut', image: require('../../assets/images/haircut.jpg') },
+<<<<<<< HEAD
   {
     name: 'Hair coloring',
     image: require('../../assets/images/haircolor.jpg'),
   },
+=======
+  { name: 'Hair coloring', image: require('../../assets/images/haircolor.jpg') },
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   { name: 'Facial', image: require('../../assets/images/facial.jpg') },
   { name: 'Beard', image: require('../../assets/images/beard.jpg') },
   { name: 'Nail', image: require('../../assets/images/nail.jpg') },
@@ -64,10 +84,14 @@ const services: Service[] = [
     desc: 'Stylish cut with blow dry',
     image: require('../../assets/images/images_11.png'),
     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+<<<<<<< HEAD
     extras: [
       { product: 'beard cut', price: 500 },
       { product: 'beard cut', price: 900 },
     ],
+=======
+    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   {
     name: 'Hair coloring',
@@ -75,10 +99,14 @@ const services: Service[] = [
     desc: 'Stylish cut with blow dry',
     image: require('../../assets/images/image_1.png'),
     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+<<<<<<< HEAD
     extras: [
       { product: 'beard cut', price: 500 },
       { product: 'beard cut', price: 900 },
     ],
+=======
+    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   {
     name: 'Facial',
@@ -86,10 +114,14 @@ const services: Service[] = [
     desc: 'For healthy, radiant skin',
     image: require('../../assets/images/images__13.png'),
     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+<<<<<<< HEAD
     extras: [
       { product: 'beard cut', price: 500 },
       { product: 'beard cut', price: 900 },
     ],
+=======
+    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   {
     name: 'Beard Trim',
@@ -97,10 +129,14 @@ const services: Service[] = [
     desc: 'Shape and stylish beard',
     image: require('../../assets/images/images__14.png'),
     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+<<<<<<< HEAD
     extras: [
       { product: 'beard cut', price: 500 },
       { product: 'beard cut', price: 900 },
     ],
+=======
+    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   {
     name: 'Nail art',
@@ -108,10 +144,14 @@ const services: Service[] = [
     desc: 'Creative nails',
     image: require('../../assets/images/images__15.png'),
     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+<<<<<<< HEAD
     extras: [
       { product: 'beard cut', price: 500 },
       { product: 'beard cut', price: 900 },
     ],
+=======
+    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
 ];
 
@@ -121,9 +161,13 @@ export default function ServicesScreen() {
   const { theme } = useTheme();
 
   return (
+<<<<<<< HEAD
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background }]}
     >
+=======
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       {/* Header */}
       <Head title="Services" />
       {/* Services List */}
@@ -136,6 +180,7 @@ export default function ServicesScreen() {
         contentContainerStyle={{
           paddingTop: hp('1%'),
           paddingHorizontal: wp('2%'),
+<<<<<<< HEAD
           paddingBottom: hp('1%'),
         }}
         renderItem={({ item, index }) => (
@@ -143,6 +188,12 @@ export default function ServicesScreen() {
             style={styles.categoryItem}
             onPress={() => setStorySelect(index)}
           >
+=======
+          paddingBottom: hp('1%')
+        }}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity style={styles.categoryItem} onPress={() => setStorySelect(index)}>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
             <View
               style={{
                 width: wp('19%'),
@@ -159,7 +210,11 @@ export default function ServicesScreen() {
               <Image
                 source={item.image}
                 style={{
+<<<<<<< HEAD
                   width: wp('16%'), // slightly smaller than parent
+=======
+                  width: wp('16%'),   // slightly smaller than parent
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
                   height: wp('16%'),
                   borderRadius: wp('16%') / 2,
                   resizeMode: 'cover',
@@ -167,9 +222,14 @@ export default function ServicesScreen() {
               />
             </View>
 
+<<<<<<< HEAD
             <Text style={[styles.categoryText, { color: theme.textPrimary }]}>
               {item.name}
             </Text>
+=======
+            <Text style={[styles.categoryText, { color: theme.textPrimary }]}>{item.name}</Text>
+
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           </TouchableOpacity>
         )}
       />
@@ -183,6 +243,7 @@ export default function ServicesScreen() {
               <Image source={item.image} style={styles.sectionImage} />
             </View>
             <View style={styles.rightContainer}>
+<<<<<<< HEAD
               <Text style={[styles.mainText, { color: theme.textPrimary }]}>
                 {item.name}
               </Text>
@@ -195,6 +256,16 @@ export default function ServicesScreen() {
               <TouchableOpacity
                 style={[styles.bookButton, { backgroundColor: COLORS.primary }]}
                 onPress={() => navigation.navigate('ServiceDetails', { item })}
+=======
+              <Text style={[styles.mainText, { color: theme.textPrimary }]}>{item.name}</Text>
+              <Text style={[styles.price, { color: theme.textSecondary }]}>₹{item.price}</Text>
+              <Text style={[styles.desc, { color: theme.textSecondary }]}>{item.desc}</Text>
+              <TouchableOpacity
+                style={[styles.bookButton,{backgroundColor : COLORS.primary}]}
+                onPress={() => 
+                  navigation.navigate('ServiceDetails', { item })
+                }
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
               >
                 <Text style={styles.bookButtonText}>Book Now</Text>
               </TouchableOpacity>
@@ -208,28 +279,47 @@ export default function ServicesScreen() {
 
 const styles = StyleSheet.create({
   container: {
+<<<<<<< HEAD
     flex: 1,
   },
   categoryScroll: {
     paddingHorizontal: wp('2%'),
+=======
+    flex: 1
+  },
+  categoryScroll: {
+    paddingHorizontal: wp('2%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   categoryItem: {
     alignItems: 'center',
     marginRight: wp('4%'),
+<<<<<<< HEAD
     width: wp('20%'),
+=======
+    width: wp('20%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   categoryImage: {
     width: wp('17%'),
     height: wp('17%'),
     borderRadius: wp('10%'),
+<<<<<<< HEAD
     marginBottom: hp('0.5%'),
+=======
+    marginBottom: hp('0.5%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   categoryText: {
     fontSize: wp('3.2%'),
     textAlign: 'center',
     fontWeight: '500',
     lineHeight: wp('4%'),
+<<<<<<< HEAD
     fontFamily: 'Poppins-Medium',
+=======
+    fontFamily: 'Poppins-Medium'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   MainView: {
     borderRadius: wp('3%'),
@@ -252,13 +342,19 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     height: '90%',
     resizeMode: 'cover',
+<<<<<<< HEAD
     borderTopLeftRadius: wp('3%'),
     borderTopRightRadius: wp('3%'),
+=======
+    borderTopLeftRadius : wp('3%'),
+    borderTopRightRadius : wp('3%')
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   mainText: {
     fontSize: wp('5%'),
     textAlign: 'center',
     fontWeight: '700',
+<<<<<<< HEAD
     fontFamily: 'Poppins-Medium',
   },
   rightContainer: {
@@ -272,6 +368,21 @@ const styles = StyleSheet.create({
   desc: {
     fontSize: wp('3%'),
     fontFamily: 'Poppins-Medium',
+=======
+    fontFamily: 'Poppins-Medium'
+  },
+  rightContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start'
+  },
+  price: {
+    fontSize: wp('4%'),
+    fontFamily: 'Poppins-Medium'
+  },
+  desc: {
+    fontSize: wp('3%'),
+    fontFamily: 'Poppins-Medium'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   bookButton: {
     paddingVertical: hp('0.5%'),
@@ -289,6 +400,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('3%'),
     fontWeight: 'bold',
+<<<<<<< HEAD
     fontFamily: 'Poppins-Medium',
+=======
+    fontFamily: 'Poppins-Medium'
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
 });

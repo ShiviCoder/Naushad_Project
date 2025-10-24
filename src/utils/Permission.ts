@@ -1,5 +1,12 @@
 import { Platform } from 'react-native';
+<<<<<<< HEAD
 import { requestMultiple, PERMISSIONS } from 'react-native-permissions';
+=======
+import {
+  requestMultiple,
+  PERMISSIONS,
+} from 'react-native-permissions';
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 
 export async function requestAppPermissions() {
   try {

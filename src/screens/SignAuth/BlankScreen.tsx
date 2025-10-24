@@ -7,7 +7,10 @@ import {
   Share,
   Alert,
   StatusBar,
+<<<<<<< HEAD
   ScrollView,
+=======
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +22,11 @@ import {
 } from 'react-native-responsive-screen';
 import COLORS from '../../utils/Colors';
 
+<<<<<<< HEAD
 const copyToClipboard = text => {
+=======
+const copyToClipboard = (text) => {
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   try {
     const { Clipboard } = require('react-native');
     if (Clipboard && Clipboard.setString) {
@@ -40,6 +47,10 @@ const ReferFriendScreen = () => {
   const copyCodeToClipboard = () => {
     try {
       const success = copyToClipboard(referralCode);
+<<<<<<< HEAD
+=======
+
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       if (success) {
         setCopiedCode(true);
       } else {
@@ -49,7 +60,11 @@ const ReferFriendScreen = () => {
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Share Instead', onPress: shareWithFriends },
+<<<<<<< HEAD
           ],
+=======
+          ]
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         );
       }
     } catch (error) {
@@ -59,6 +74,7 @@ const ReferFriendScreen = () => {
 
   const shareWithFriends = async () => {
     try {
+<<<<<<< HEAD
       const shareMessage = `Join me on our salon app! Discover premium beauty and grooming services tailored just for you. Use my referral code: ${referralCode}`;
       await Share.share({
         message: shareMessage,
@@ -66,6 +82,17 @@ const ReferFriendScreen = () => {
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to share content');
+=======
+      const shareMessage = `Join me on this amazing app and earn ₹100 Digital Gold! Use my referral code: ${referralCode}`;
+
+      await Share.share({
+        message: shareMessage,
+        title: 'Invite Friends & Earn Rewards',
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to share content');
+      console.error(error);
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     }
   };
 
@@ -77,6 +104,7 @@ const ReferFriendScreen = () => {
         barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={theme.background}
       />
+<<<<<<< HEAD
       {/* <Head title="Refer a Friend" showBack={false} /> */}
 
       <ScrollView
@@ -187,6 +215,62 @@ const ReferFriendScreen = () => {
           </View>
         </View>
       </ScrollView>
+=======
+      <Head title="Refer a Friend" showBack={false} />
+
+      <View style={styles.content}>
+        <Text style={[styles.mainTitle, { color: theme.textPrimary }]}>
+          Invite & Earn Rewards
+        </Text>
+
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+          Share the love of great hair and beauty! Invite your friends to try
+          our premium salon services and earn rewards when they book their first
+          appointment.
+        </Text>
+
+        <View
+          style={[
+            styles.referralCodeCard,
+            {
+              backgroundColor: COLORS.primary,
+              shadowColor: theme.shadow,
+            },
+          ]}
+        >
+          <Text style={[styles.referralCodeLabel, { color: theme.text }]}>
+            Your Referral Code
+          </Text>
+          <Text
+            style={[styles.referralCodeText, { color: theme.text }]}
+            selectable
+          >
+            {referralCode}
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              styles.copyButton,
+              copiedCode
+                ? { backgroundColor: '#4CAF50' }
+                : { backgroundColor: '#fff' },
+            ]}
+            onPress={copyCodeToClipboard}
+          >
+            <Text style={[styles.copyButtonText,{color: COLORS.primary}]}>
+              {copiedCode ? 'Copied!' : 'Copy Code'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.shareButton, {backgroundColor : COLORS.primary}]}
+          onPress={shareWithFriends}
+        >
+          <Text style={styles.shareButtonText}>Share with Friends</Text>
+        </TouchableOpacity>
+      </View>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     </SafeAreaView>
   );
 };
@@ -196,9 +280,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+<<<<<<< HEAD
     paddingHorizontal: wp('5%'),
     paddingTop: hp('1%'),
     paddingBottom: hp('5%'),
+=======
+    flex: 1,
+    paddingHorizontal: wp('5%'),
+    paddingTop: hp('2%'),
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   mainTitle: {
     fontSize: wp('6%'),
@@ -237,6 +327,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('8%'),
     paddingVertical: hp('1.8%'),
     borderRadius: wp('2%'),
+<<<<<<< HEAD
   },
   copyButtonText: {
     color: '#F6B745',
@@ -251,6 +342,21 @@ const styles = StyleSheet.create({
     marginBottom: hp('0%'),
     width: '98%',
     alignSelf: 'center',
+=======
+    
+  },
+  copyButtonText: {
+    fontSize: wp('4%'),
+    fontWeight: '600',
+  },
+  shareButton: {
+    paddingVertical: hp('2.5%'),
+    borderRadius: wp('3%'),
+    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   shareButtonText: {
     color: '#fff',
@@ -258,6 +364,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+<<<<<<< HEAD
   howItWorksSection: {
     marginTop: hp('4%'),
   },
@@ -291,6 +398,8 @@ const styles = StyleSheet.create({
     fontSize: wp('3.8%'),
     lineHeight: hp('2.8%'),
   },
+=======
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 });
 
 export default ReferFriendScreen;

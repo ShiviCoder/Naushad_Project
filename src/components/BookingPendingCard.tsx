@@ -19,6 +19,7 @@ const BookingPendingCard = ({ item }) => {
       <View style={styles.pendingContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
           <Image style={styles.icon} source={item.image[0]} />
+<<<<<<< HEAD
           <Text style={[styles.text, { color: theme.textPrimary }]}>
             {item.service}
           </Text>
@@ -31,31 +32,51 @@ const BookingPendingCard = ({ item }) => {
           <Text style={[styles.text, { color: theme.textPrimary }]}>
             Pending
           </Text>
+=======
+          <Text style={[styles.text, { color: theme.textPrimary }]}>{item.service}</Text>
+        </View>
+
+        <View style={[styles.content, { gap: wp('0%'), marginBottom: hp('-0.8%') }]}>
+          <Image style={styles.icon} source={item.image[4]} />
+          <Text style={[styles.text, { color: theme.textPrimary }]}>Pending</Text>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         </View>
       </View>
 
       {/* Date */}
       <View style={[styles.content, { marginVertical: hp('-0.2%') }]}>
         <Image style={styles.icon} source={item.image[1]} />
+<<<<<<< HEAD
         <Text style={[styles.text, { color: theme.textPrimary }]}>
           Date :- {item.date}
         </Text>
+=======
+        <Text style={[styles.text, { color: theme.textPrimary }]}>Date :- {item.date}</Text>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       </View>
 
       {/* Time */}
       <View style={styles.content}>
         <Image style={styles.icon} source={item.image[2]} />
+<<<<<<< HEAD
         <Text style={[styles.text, { color: theme.textPrimary }]}>
           Time :- {item.time}
         </Text>
+=======
+        <Text style={[styles.text, { color: theme.textPrimary }]}>Time :- {item.time}</Text>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       </View>
 
       {/* Amount */}
       <View style={styles.content}>
         <Image style={styles.icon} source={item.image[3]} />
+<<<<<<< HEAD
         <Text style={[styles.text, { color: theme.textPrimary }]}>
           Amount :- ₹{item.price}
         </Text>
+=======
+        <Text style={[styles.text, { color: theme.textPrimary }]}>Amount :- ₹{item.price}</Text>
+>>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       </View>
     </TouchableOpacity>
   );
