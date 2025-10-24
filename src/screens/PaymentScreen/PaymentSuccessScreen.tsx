@@ -15,12 +15,13 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import COLORS from '../../utils/Colors';
+import { useTheme } from '../../context/ThemeContext';
 
 const PaymentSuccessScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { paymentId } = route.params;
-
+  const {theme} = useTheme();
   // Function to navigate to Bookings tab in MainTabs
   const navigateToBookingsTab = () => {
     navigation.reset({
@@ -51,7 +52,7 @@ const PaymentSuccessScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea,{backgroundColor : theme.background}]}>
       <View style={styles.logoWrapper}>
         <Image
           source={require('../../assets/images/logo.png')}
@@ -91,7 +92,6 @@ export default PaymentSuccessScreen;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: wp('6%'),

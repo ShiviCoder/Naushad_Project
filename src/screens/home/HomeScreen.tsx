@@ -211,7 +211,7 @@ const HomeScreen = () => {
     {
       id: '1',
       name: 'Hair Cut',
-      price: '₹350.00',
+      price: '350.00',
       desc: 'Stylish cut with blow dry',
       image: [
         require('../../assets/images/haircut1.png'),
@@ -226,7 +226,7 @@ const HomeScreen = () => {
     {
       id: '2',
       name: 'Hair Coloring',
-      price: '₹400.00',
+      price: '400.00',
       desc: 'Long-lasting shades',
       image: [
         require('../../assets/images/haircolor1.png'),
@@ -241,7 +241,7 @@ const HomeScreen = () => {
     {
       id: '3',
       name: 'Facial',
-      price: '₹600.00',
+      price: '600.00',
       desc: 'Glow facial therapy',
       image: [
         require('../../assets/images/facial.jpg'),
@@ -256,7 +256,7 @@ const HomeScreen = () => {
     {
       id: '4',
       name: 'Hair Cut',
-      price: '₹350.00',
+      price: '350.00',
       desc: 'Stylish cut with blow dry',
       image: [
         require('../../assets/images/haircut1.png'),
@@ -271,7 +271,7 @@ const HomeScreen = () => {
     {
       id: '5',
       name: 'Hair Coloring',
-      price: '₹400.00',
+      price: '400.00',
       desc: 'Long-lasting shades',
       image: [
         require('../../assets/images/haircolor1.png'),
@@ -286,7 +286,7 @@ const HomeScreen = () => {
     {
       id: '6',
       name: 'Facial',
-      price: '₹600.00',
+      price: '600.00',
       desc: 'Glow facial therapy',
       image: [
         require('../../assets/images/facial.jpg'),
@@ -970,15 +970,200 @@ const HomeScreen = () => {
               />
             </View>
 
-            {/* Search Bar with filter */}
-            <View style={styles.searchFilContain}>
-              {/* Search Bar */}
-              <View style={[styles.searchBar]}>
-                <Icon name="search" size={wp('5%')} color="#9E9E9E" />
-                <TextInput
-                  placeholder="Search"
-                  placeholderTextColor="#9E9E9E"
-                  style={styles.searchInput}
+          {/* Special Offer split card */}
+          <View style={{ height: hp('27%'), marginBottom: hp('4%') }}>
+            <Swiper
+              autoplay
+              autoplayTimeout={3}
+              showsPagination
+              dotStyle={{ backgroundColor: "#ccc", }}
+              activeDotStyle={{ backgroundColor: COLORS.primary, }}
+              paginationStyle={{ top: hp('28%') }}
+            >
+              {offers.map((item) => (
+                <View key={item.id} style={[styles.offerCard, { backgroundColor: COLORS.primary }]}>
+                  <View style={[styles.offerLeft, { backgroundColor: COLORS.primary }]}>
+                    <Text style={styles.offerBig}>{item.title}</Text>
+                    <Text style={styles.offerSmall}>{item.discount}</Text>
+                    <Text style={styles.offerDate}>{item.date}</Text>
+                    <TouchableOpacity
+                      style={styles.offerBtn}
+                      onPress={() => navigation.navigate("OfferScreen")}
+                    >
+                      <Text style={styles.offerBtnText}>Offer now</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Image
+                    source={gender === "Male" ? item.imageMale : item.imageFemale}
+                    style={styles.offerRightImage}
+                  />
+                </View>
+              ))}
+            </Swiper>
+          </View>
+
+          {/* Services Section with navigation */}
+          <SectionTitle
+            title="Our services"
+            onPress={() => handleSectionNavigation('services')}
+          />
+          <FlatList
+            data={services}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ paddingHorizontal: wp('2%') }}
+            renderItem={({ item }) => (
+              <View style={styles.serviceCard}>
+                <Image source={
+                  gender === 'Male' ? item.image[1] : item.image[0]
+                } style={styles.serviceImage} />
+                <View style={styles.nameItem}>
+                  <Text style={styles.serviceName}>{item.name}</Text>
+                  <Text style={styles.servicePrice}>₹{item.price}</Text>
+                </View>
+                <Text style={styles.serviceDesc}>{item.desc}</Text>
+                <View style={{ flex: 1 }} />
+
+                <TouchableOpacity
+                  style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
+                  onPress={() =>
+                    navigation.navigate('ServiceDetails', {
+                      item: {
+                        ...item,
+                        image: gender === 'Male' ? item.image[1] : item.image[0]
+                      }
+                    })
+                  }
+                >
+                  <Text style={styles.bookBtnText}>Book now</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+
+          {/* Appointment Banner */}
+          <ImageBackground
+            resizeMode='cover'
+            source={
+              gender === 'Male'
+                ? require('../../assets/images/man-banner.jpg')
+                : require('../../assets/images/image1.jpg')
+            }
+            style={styles.appointmentBanner}
+
+          >
+            <View style={styles.overlay}>
+              <Text style={styles.bannerText}>Book your appointment today</Text>
+              <Text style={styles.bannerText}>
+                and take your look to the next level
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen", { showTab: true })}
+                style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
+                <Text style={[styles.bookBtnText, { color: '#111', fontWeight: 'bold' }]}>Book Appointment</Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
+
+          {/* Products Section with navigation */}
+          <SectionTitle
+            title="Get our products"
+            onPress={() => handleSectionNavigation('products')}
+          />
+          <FlatList
+            data={products}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ paddingHorizontal: wp('1.5%') }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: gender === 'Male' ? item.image[0] : item.image[1] } })}
+                android_ripple={{ color: 'transparent' }}
+                activeOpacity={1}
+
+              >
+                <View style={styles.productCard}>
+                  <Image
+                    source={
+                      gender === 'Male' ? item.image[0] : item.image[1]
+                    }
+                    style={styles.productImage} />
+                  <Text style={styles.productName} numberOfLines={2}>
+                    {gender === 'Male' ? item.name[0] : item.name[1]}
+                  </Text>
+                  <Text style={styles.productPrice}>
+                    {item.price}{' '}
+                    <Text style={{ color: '#29A244' }}>({item.offer})</Text>
+                  </Text>
+
+                  {/* rating + tag pills */}
+                  <View
+                    style={{
+                      flexDirection: 'column',
+                      gap: wp('2%'),
+                      marginTop: hp('1%'),
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <View style={styles.pill}>
+                      <Icon name="star" size={wp('3%')} color="#29A244" />
+                      <Text style={styles.pillText}>{item.rating}</Text>
+                    </View>
+                    <View style={[styles.pill, { backgroundColor: '#E8F6EF' }]}>
+                      <Text
+                        style={[styles.pillText, { color: '#29A244' }]}
+                        numberOfLines={1}
+                      >
+                        {item.tag}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+
+          {/* Videos with navigation */}
+          <SectionTitle
+            title="Videos"
+            onPress={() => handleSectionNavigation('videos')}
+          />
+          <FlatList
+            data={videos}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ paddingHorizontal: wp('3%'), marginVertical: hp('2%') }}
+            renderItem={({ item }) =>
+              <VideoCard videoId={item.videoId} />
+            }
+          />
+
+          {/* Certificates with navigation */}
+          <SectionTitle
+            title="Our Certificates"
+            onPress={() => handleSectionNavigation('certificates')}
+          />
+          <FlatList
+            data={certificates}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{
+              paddingHorizontal: wp('2%'),
+              backgroundColor: COLORS.primary,
+              borderRadius: wp('3%'),
+              marginVertical: hp('2%')
+            }}
+            style={{
+              marginHorizontal: wp('3%'), // FlatList ke bahar spacing
+            }}
+            renderItem={({ item }) => (
+              <View style={styles.certItem}>
+                <Image
+                  source={{ uri: `https://naushad.onrender.com/${item.imageUrl}` }}
+                  style={styles.certImage}
                 />
               </View>
             </View>
@@ -1561,7 +1746,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingBottom: hp('1%'),
+    paddingBottom: hp('4%')
   },
   header: {
     flexDirection: 'row',
@@ -1951,10 +2136,9 @@ const styles = StyleSheet.create({
     marginHorizontal: wp('1%'), // horizontal margin responsive
     marginVertical: hp('2%'), // vertical margin responsive
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: hp('0.2%') }, // responsive shadow
+    shadowOffset: { width: 0, height: hp('0.1%') }, // responsive shadow
     shadowOpacity: 0.08,
-    shadowRadius: wp('1%'), // shadow radius responsive
+    shadowRadius: wp('5%'),        // shadow radius responsive
     borderTopRightRadius: wp('1%'),
     borderBottomLeftRadius: wp('1%'),
   },
@@ -1976,7 +2160,7 @@ const styles = StyleSheet.create({
   packageLabel: {
     fontSize: wp('3.5%'),
     lineHeight: hp('3%'),
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium"
   },
   packageLabelText: {
     color: '#42BA86',

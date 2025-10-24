@@ -1,20 +1,8 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import Head from '../../components/Head';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
@@ -55,21 +43,23 @@ const services = [
     image: require('../../assets/SHH.png'),
   },
 ];
-console.log(services);
 const ServiceDetails = () => {
   const { theme } = useTheme();
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const navigation = useNavigation();
-  const toggleSelection = (index: number) => {
-    if (selectedExtras.includes(index.toString())) {
-      setSelectedExtras(
-        selectedExtras.filter(item => item !== index.toString()),
-      );
-    } else setSelectedExtras([...selectedExtras, index.toString()]);
-  };
   const route = useRoute<RouteProp<RootStackParamList, 'ServiceDetails'>>();
   const { item } = route.params;
-  const [selectedService, setSelectedService] = useState(null);
+
+  // multiple selection ke liye array state
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  // toggle logic
+  const toggleService = (id: string) => {
+    if (selectedServices.includes(id)) {
+      setSelectedServices(selectedServices.filter((item) => item !== id));
+    } else {
+      setSelectedServices([...selectedServices, id]);
+    }
+  };
 
   return (
     <SafeAreaView>
@@ -80,23 +70,31 @@ const ServiceDetails = () => {
         ]}
       >
         <Head title="Our Services" />
+
         <View style={{ gap: hp('2%') }}>
+          {/* Main Image */}
           <Image style={styles.image} source={item.image} />
+
+          {/* Name and Price */}
           <View style={styles.nameCont}>
             <Text style={[styles.name, { color: theme.textPrimary }]}>
               {item.name}
             </Text>
             <Text style={[styles.price, { color: theme.textPrimary }]}>
-              {item.price}
+               ₹{item.price}
             </Text>
           </View>
 
+          {/* Description */}
           <Text style={[styles.desc, { color: theme.subtext }]}>
-            "{item.description}"
+            "{item.desc}"
           </Text>
 
+          {/* Highlights */}
           <View style={styles.highlightCont}>
-            <Text style={[styles.hightlightHead, { color: theme.textPrimary }]}>
+            <Text
+              style={[styles.hightlightHead, { color: theme.textPrimary }]}
+            >
               Highlights
             </Text>
             {item.highlights?.map((element, index) => (
@@ -104,13 +102,16 @@ const ServiceDetails = () => {
                 <View
                   style={[styles.circle, { backgroundColor: COLORS.primary }]}
                 />
-                <Text style={[styles.highlightTxt, { color: theme.subtext }]}>
+                <Text
+                  style={[styles.highlightTxt, { color: theme.subtext }]}
+                >
                   {element}
                 </Text>
               </View>
             ))}
           </View>
 
+          {/* Extra Services Section */}
           <View style={styles.extra}>
             <Text style={[styles.extraHead, { color: theme.textPrimary }]}>
               Extra
@@ -122,9 +123,10 @@ const ServiceDetails = () => {
                 style={[
                   styles.serviceItem,
                   { backgroundColor: theme.card },
-                  selectedService === service.id && {},
+                  selectedServices.includes(service.id) && {                   
+                  },
                 ]}
-                onPress={() => setSelectedService(service.id)}
+                onPress={() => toggleService(service.id)}
                 activeOpacity={0.8}
               >
                 {/* Image */}
@@ -157,15 +159,14 @@ const ServiceDetails = () => {
                     </Text>
                     <View
                       style={[
-                        styles.checkbox,
-                        { borderColor: theme.textSecondary },
+                        styles.checkbox,  
                       ]}
                     >
-                      {selectedService === service.id && (
+                      {selectedServices.includes(service.id) && (
                         <View
                           style={[
                             styles.checkboxFill,
-                            { backgroundColor: theme.secondary },
+                            { backgroundColor: COLORS.primary },
                           ]}
                         />
                       )}
@@ -176,14 +177,18 @@ const ServiceDetails = () => {
             ))}
           </View>
 
+          {/* Book Appointment Button */}
           <TouchableOpacity
             style={[styles.BookAppointBtn, { backgroundColor: COLORS.primary }]}
             onPress={() => {
-              navigation.navigate('BookAppointmentScreen'); // showTab false by default
+              navigation.navigate('BookAppointmentScreen');
             }}
           >
             <Text
-              style={[styles.BookAppointBtnTxt, { color: theme.background }]}
+              style={[
+                styles.BookAppointBtnTxt,
+                { color: theme.background },
+              ]}
             >
               Book Appointment
             </Text>
@@ -195,13 +200,14 @@ const ServiceDetails = () => {
 };
 
 export default ServiceDetails;
+
 const styles = StyleSheet.create({
   container: {
     gap: hp('4%'),
   },
   image: {
-    width: '90%', // 90% of screen width
-    height: hp('25%'), // 25% of screen height
+    width: '90%',
+    height: hp('25%'),
     alignSelf: 'center',
     borderRadius: wp('3%'),
   },
@@ -245,7 +251,7 @@ const styles = StyleSheet.create({
   circle: {
     height: wp('4%'),
     width: wp('4%'),
-    borderRadius: '50%',
+    borderRadius: 999,
   },
   highlightTxt: {
     color: '#00000075',
@@ -258,13 +264,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'Poppins-Medium',
   },
-  extraItemContain: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-between',
-    alignSelf: 'center',
-  },
   extraHead: {
     fontSize: hp('3%'),
     fontWeight: '500',
@@ -274,16 +273,6 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     gap: hp('0.3%'),
-  },
-  extraTxt: {
-    fontSize: hp('1.9%'),
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-  },
-  extraItemSubCon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp('3%'),
   },
   BookAppointBtn: {
     width: '90%',
@@ -335,7 +324,6 @@ const styles = StyleSheet.create({
     gap: wp('2%'),
     marginBottom: hp('3%'),
   },
-
   checkbox: {
     width: wp('4.5%'),
     height: wp('4.5%'),
@@ -348,19 +336,5 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: wp('1%'),
-  },
-  content: { flex: 1, paddingHorizontal: wp('5%') },
-  servicesContainer: { marginTop: hp('3.125%') },
-  proceedButton: {
-    marginHorizontal: wp('5.56%'),
-    marginVertical: hp('2.5%'),
-    paddingVertical: hp('1.875%'),
-    borderRadius: wp('2%'),
-    alignItems: 'center',
-  },
-  proceedButtonText: {
-    fontSize: hp('1.875%'),
-    fontWeight: '600',
-    fontFamily: 'Poppins-Medium',
   },
 });

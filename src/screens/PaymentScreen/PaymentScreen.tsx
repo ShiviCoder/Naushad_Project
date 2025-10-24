@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  SafeAreaView,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
@@ -12,9 +11,12 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RazorpayCheckout from 'react-native-razorpay';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation} from '@react-navigation/native';
 import COLORS from '../../utils/Colors'; // Use your COLORS config
 import Popup from '../../components/PopUp';
+import Head from '../../components/Head';
+import { useTheme } from '../../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SERVICE_PRICE = 1498;
 
@@ -24,6 +26,7 @@ const PaymentScreen = () => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupTitle, setPopupTitle] = useState('');
+  const {theme} = useTheme();
 
   const showPopup = (title, message) => {
     setPopupTitle(title);
@@ -67,18 +70,11 @@ const PaymentScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe,{backgroundColor : theme.background}]}>
       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity activeOpacity={0.7} style={styles.backHit} onPress={() => navigation.goBack()}>
-          <AntDesign name="left" size={wp('5.5%')} color={COLORS.text || '#18181A'} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Payment</Text>
-        <View style={{ width: wp('12%') }} />
-      </View>
-
+      <Head title="Payment"/>
       <ScrollView
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer,{backgroundColor : theme.background}]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -112,7 +108,7 @@ const PaymentScreen = () => {
         </View>
 
         {/* Section Title */}
-        <Text style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle,{color : theme.textPrimary}]}>
           Select Payment Method
         </Text>
 
@@ -144,7 +140,7 @@ const PaymentScreen = () => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer,{backgroundColor : theme.background}]}>
         <TouchableOpacity activeOpacity={0.9} style={[styles.payBtn, { backgroundColor: COLORS.primary }]} onPress={handlePayment}>
           <Text style={styles.payText}>Pay Now</Text>
         </TouchableOpacity>
@@ -164,6 +160,7 @@ const PaymentScreen = () => {
 };
 
 function RadioItem({ label, selected, onPress, primary }) {
+  const {theme} = useTheme();
   return (
     <TouchableOpacity style={styles.radioRow} activeOpacity={0.8} onPress={onPress}>
       <View style={[
@@ -172,7 +169,7 @@ function RadioItem({ label, selected, onPress, primary }) {
       ]}>
         {selected && <View style={[styles.radioDot, { backgroundColor: primary }]} />}
       </View>
-      <Text style={styles.radioText}>{label}</Text>
+      <Text style={[styles.radioText,{color : theme.textPrimary}]}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -180,7 +177,6 @@ function RadioItem({ label, selected, onPress, primary }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#FFF',
     paddingTop: Platform.OS === 'ios' ? hp('1.1%') : 0,
   },
 
@@ -287,7 +283,6 @@ const styles = StyleSheet.create({
   radioText: {
     fontSize: wp('4%'),
     fontWeight: '700',
-    color: '#18191C',
     lineHeight: wp('5.5%'),
     letterSpacing: 0.1,
   },

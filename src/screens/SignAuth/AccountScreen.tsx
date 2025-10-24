@@ -18,6 +18,8 @@ import {
 import Head from '../../components/Head';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
+
 
 
 const AccountScreen = () => {
@@ -52,11 +54,11 @@ const AccountScreen = () => {
             labels={[
               <Image
                 source={require('../../assets/sun.png')}
-                style={styles.themeIcon}
+                style={[styles.themeIcon,{tintColor:COLORS.primary}]}
               />,
               <Image
                 source={require('../../assets/moon.png')}
-                style={styles.themeIcon}
+                style={[styles.themeIcon,{tintColor:COLORS.primary}]}
               />,
             ]}
             onSelect={isDark => {
@@ -90,7 +92,8 @@ const AccountScreen = () => {
       </View>
 
 
-      <View style={styles.separator} />
+      <View style={[styles.separator,{backgroundColor :COLORS.primary}]} />
+
 
 
       {/* Settings List */}
@@ -99,7 +102,7 @@ const AccountScreen = () => {
         style={styles.detailsContainer}
         contentContainerStyle={{
           margin: wp('2%'),
-          paddingBottom: hp('12%'),
+          paddingBottom: hp('15%'),
         }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -131,7 +134,8 @@ const AccountScreen = () => {
                 }}
               >
                 {/* Left Icon */}
-                <Image style={styles.leftIcon} source={item.image} />
+                <Image style={[styles.leftIcon,{tintColor : COLORS.primary}]} source={item.image} />
+
 
 
                 {/* Right Content */}
@@ -148,7 +152,6 @@ const AccountScreen = () => {
           );
         }}
       />
-
 
       {/* Confirm Logout Modal */}
       <Modal
@@ -230,7 +233,6 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#ccc',
     marginVertical: hp('1%'),
   },
   detailsContainer: {
@@ -306,7 +308,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   logoutBtn: {
+<<<<<<< HEAD
     backgroundColor: 'red',
+=======
+    backgroundColor: COLORS.primary,
+>>>>>>> 2c111980ff066f031b35f5826870cd8ee5134286
   },
   cancelText: {
     color: '#333',
