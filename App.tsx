@@ -1,45 +1,30 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import RootNavigator from './src/navigation/RootNavigator';
+import { ThemeProvider } from './src/context/ThemeContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { LikedProductsProvider } from './src/context/LikedProductsContext';
+import { requestAppPermissions } from './src/utils/Permission';
+import { CartProvider } from './src/context/CartContext';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+// import Services from './src/screens/SignAuth/Services'
+const App = () => {
+  useEffect(() => {
+    requestAppPermissions();
+  }, []);
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <ThemeProvider>
+        <LikedProductsProvider>
+          <CartProvider>
+            <RootNavigator />
+          </CartProvider>
+        </LikedProductsProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+};
 
 export default App;
+const styles = StyleSheet.create({});
