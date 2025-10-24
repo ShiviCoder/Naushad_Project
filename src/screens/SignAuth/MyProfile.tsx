@@ -25,27 +25,6 @@ const MyProfile = () => {
             mediaType: 'photo',
             quality: 1,
         };
-
-    const handleChange = (text) => {
-    // Remove non-digit characters
-    let cleaned = text.replace(/\D/g, "");
-
-    // Limit to 8 digits (DDMMYYYY)
-    if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
-
-    // Add slashes after every 2 digits (first two and next two)
-    let formatted = "";
-    if (cleaned.length <= 2) {
-      formatted = cleaned;
-    } else if (cleaned.length <= 4) {
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    } else {
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
-    }
-
-    setDob(formatted);
-  };
-
         launchImageLibrary(options, (response) => {
             if (response.didCancel) {
                 console.log('User cancelled image picker');
@@ -58,6 +37,25 @@ const MyProfile = () => {
             }
         });
     };
+   const handleChange = (text) => {
+  // Remove non-digit characters
+  let cleaned = text.replace(/\D/g, "");
+
+  // Limit to 8 digits (DDMMYYYY)
+  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+
+  // Format with slashes
+  let formatted = "";
+  if (cleaned.length <= 2) {
+    formatted = cleaned;
+  } else if (cleaned.length <= 4) {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  } else {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+  }
+
+  setDob(formatted);
+};
     return (
         <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
             <Head title='My Profile' rightComponent={
@@ -101,10 +99,10 @@ const MyProfile = () => {
                 <TextInput placeholder='Enter your email' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} keyboardType='email-address' />
 
                 <Text style={[styles.label, { color: theme.textPrimary }]}>Phone Number</Text>
-                <TextInput placeholder='Enter your number' placeholderTextColor={'gray'} value={dob} style={[styles.input, { color: theme.textPrimary }]} keyboardType='phone-pad' />
+                <TextInput placeholder='Enter your number' placeholderTextColor={'gray'}style={[styles.input, { color: theme.textPrimary }]} keyboardType='phone-pad' />
 
                 <Text style={[styles.label, { color: theme.textPrimary }]}>Date of Birth</Text>
-                <TextInput placeholder='Enter your date of birth' onChangeText={handleChange} placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} />
+                <TextInput placeholder='Enter your date of birth' onChangeText={handleChange}   value={dob} placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} />
 
                 <Text style={[styles.label, { color: theme.textPrimary }]}>Address</Text>
                 <TextInput placeholder='Enter your address' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} multiline />
