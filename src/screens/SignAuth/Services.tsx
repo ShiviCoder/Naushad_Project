@@ -16,6 +16,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { useTheme } from '../../context/ThemeContext'; // ✅ import your theme hook
 import Head from '../../components/Head';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 
 type extra = {
@@ -160,7 +161,7 @@ export default function ServicesScreen() {
               <Text style={[styles.price, { color: theme.textSecondary }]}>₹{item.price}</Text>
               <Text style={[styles.desc, { color: theme.textSecondary }]}>{item.desc}</Text>
               <TouchableOpacity
-                style={styles.bookButton}
+                style={[styles.bookButton,{backgroundColor : COLORS.primary}]}
                 onPress={() => 
                   navigation.navigate('ServiceDetails', { item })
                 }
@@ -243,7 +244,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium'
   },
   bookButton: {
-    backgroundColor: '#F6B745',
     paddingVertical: hp('0.5%'),
     paddingHorizontal: wp('3%'),
     borderRadius: wp('10%'),

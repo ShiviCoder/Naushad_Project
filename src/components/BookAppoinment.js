@@ -20,7 +20,7 @@ const BookAppoinment = () => {
         }}
       >
         <Text style={styles.text}>
-          Book your appointment today and take your look to the next level
+          Book your appointmenday and take your look to the next level
         </Text>
 
         <TouchableOpacity style={styles.Btn}>

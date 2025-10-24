@@ -8,6 +8,7 @@ import {
 } from "react-native-responsive-screen";
 import { useTheme } from "../../context/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
 
 export default function BookingAccepted() {
   const { theme } = useTheme(); // ✅ get current theme
@@ -26,7 +27,7 @@ export default function BookingAccepted() {
               <Icon name="calendar-outline" size={hp("3%")} color={theme.textPrimary} />
               <Text style={[styles.dateText, { color: theme.textPrimary }]}>15 Aug 2025</Text>
             </View>
-            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#F6B745" }]}>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.primary}]}>
               <Text style={[styles.actionText]}>Pending</Text>
             </TouchableOpacity>
           </View>

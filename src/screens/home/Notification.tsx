@@ -242,9 +242,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: wp('4.5%'),
         flex: 1,
-            fontFamily: "Poppins-Medium" ,
-            fontWeight: 'bold',
-
+        fontFamily: "Poppins-Medium" ,
+        fontWeight: 'bold',
     },
     greenDot: {
         width: wp('2.5%'),
@@ -265,37 +264,6 @@ const styles = StyleSheet.create({
         fontSize: wp('3%'),
             fontFamily: "Poppins-Medium" 
 
-    },
-    bottomBarWrap: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: hp('2.5%'),
-        alignItems: 'center',
-    },
-    bottomNav: {
-        width: '90%',
-        height: hp('7%'),
-        borderRadius: hp('3.5%'),
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        paddingHorizontal: wp('4%'),
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-    },
-    fabCircle: {
-        width: wp('13%'),
-        height: wp('13%'),
-        borderRadius: wp('6.5%'),
-        backgroundColor: '#F6B745',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: -hp('2.5%'),
-        elevation: 4,
     },
 });
 

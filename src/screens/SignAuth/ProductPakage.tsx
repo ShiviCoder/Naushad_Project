@@ -16,22 +16,26 @@ import { useTheme } from '../../context/ThemeContext';
 import Head from '../../components/Head';
 import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import COLORS from '../../utils/Colors';
 
 const ProductPackages = ({ navigation }) => {
   const [quantity, setQuantity] = useState(1);
   const { theme } = useTheme();
   const route = useRoute();
-const { item } = route.params;
-  const increaseQuantity = () => {
-    setQuantity(quantity + 1);
-  };
+  const { item } = route.params || {};
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
+  if (!item) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <Text style={{ color: theme.textPrimary, textAlign: 'center', marginTop: 50 }}>
+          Product data not available
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  const increaseQuantity = () => setQuantity(quantity + 1);
+  const decreaseQuantity = () => quantity > 1 && setQuantity(quantity - 1);
 
   const renderStars = () => {
     const stars = [];
@@ -51,7 +55,6 @@ const { item } = route.params;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header */}
       <Head title="Product Package" />
       <ScrollView style={styles.scrollView}>
         {/* Product Image */}
@@ -67,10 +70,10 @@ const { item } = route.params;
         <View style={styles.productInfo}>
           <View style={styles.titlePriceRow}>
             <Text style={[styles.productTitle, { color: theme.textPrimary }]}>
-              {item.title}
+              {item.name || 'No title'}
             </Text>
             <Text style={[styles.price, { color: theme.textPrimary }]}>
-             ₹{item.price}
+             ₹{item.price || 'N/A'}
             </Text>
           </View>
 
@@ -78,21 +81,23 @@ const { item } = route.params;
           <View style={styles.ratingContainer}>
             <View style={styles.starsContainer}>{renderStars()}</View>
             <Text style={[styles.reviewText, { color: theme.textSecondary }]}>
-              ({item.review} Reviews)
+              ({item.review || 0} Reviews)
             </Text>
           </View>
 
           {/* Description */}
           <Text style={[styles.description, { color: theme.textSecondary }]}>
-            {item.description}
+            {item.description || 'No description available.'}
           </Text>
 
           {/* Offer */}
-          <View style={styles.offerContainer}>
-            <Text style={[styles.offerText, { color: theme.textPrimary }]}>
-              {item.offer}
-            </Text>
-          </View>
+          {item.offer && (
+            <View style={styles.offerContainer}>
+              <Text style={[styles.offerText, { color: theme.textPrimary }]}>
+                {item.offer}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Items List */}
@@ -101,14 +106,17 @@ const { item } = route.params;
             Items list
           </Text>
           <View style={styles.itemsList}>
-            {item.itemsList.map((item, i) => (
-              <View style={styles.itemRow} key={i}>
-
-                <Text style={[styles.itemText, { color: theme.textSecondary }]}>
-                  {item}
-                </Text>
-              </View>
-            ))}
+            {item.itemsList?.length > 0 ? (
+              item.itemsList.map((i, index) => (
+                <View style={styles.itemRow} key={index}>
+                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>
+                    {i}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text style={{ color: theme.textSecondary }}>-</Text>
+            )}
           </View>
         </View>
 
@@ -118,15 +126,15 @@ const { item } = route.params;
             Usage Instruction
           </Text>
           <View style={styles.instructionsList}>
-            <Text style={[styles.instructionText, { color: theme.textSecondary }]}>
-             {item.usage[1]}
-            </Text>
-            <Text style={[styles.instructionText, { color: theme.textSecondary }]}>
-               {item.usage[2]}
-            </Text>
-            <Text style={[styles.instructionText, { color: theme.textSecondary }]}>
-               {item.usage[0]}
-            </Text>
+            {item.usage?.length > 0 ? (
+              item.usage.map((u, index) => (
+                <Text key={index} style={[styles.instructionText, { color: theme.textSecondary }]}>
+                  {item.usageInstructions}
+                </Text>
+              ))
+            ) : (
+              <Text style={{ color: theme.textSecondary }}>-</Text>
+            )}
           </View>
         </View>
 
@@ -135,19 +143,12 @@ const { item } = route.params;
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Quantity Selector
           </Text>
-          <View
-            style={[
-              styles.quantityContainer,
-              { backgroundColor: theme.textPrimary },
-            ]}
-          >
+          <View style={[styles.quantityContainer, { backgroundColor: theme.textPrimary }]}>
             <TouchableOpacity style={styles.quantityButton} onPress={decreaseQuantity}>
               <Text style={[styles.quantityButtonText, { color: theme.background }]}>-</Text>
             </TouchableOpacity>
             <View style={styles.quantityDisplay}>
-              <Text style={[styles.quantityText, { color: theme.background }]}>
-                {quantity}
-              </Text>
+              <Text style={[styles.quantityText, { color: theme.background }]}>{quantity}</Text>
             </View>
             <TouchableOpacity style={styles.quantityButton} onPress={increaseQuantity}>
               <Text style={[styles.quantityButtonText, { color: theme.background }]}>+</Text>
@@ -159,36 +160,25 @@ const { item } = route.params;
       {/* Bottom Buttons */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          style={[
-            styles.addToCartButton,
-            {
-              backgroundColor: theme.background,
-              borderColor: theme.textPrimary,
-            },
-          ]}
+          style={[styles.addToCartButton, { backgroundColor: theme.background, borderColor: theme.textPrimary }]}
           onPress={() => {
             const product = {
               id: 1,
-              name: "Luxury hair care kit",
-              price: 1499,
-              oldPrice: 7888,
-              discount: Math.round(((7888 - 1499) / 7888) * 100),
-              image: require("../../assets/newPic.png")
+              name: item.title || "Product",
+              price: item.price || 0,
+              oldPrice: 0,
+              discount: 0,
+              image: require("../../assets/newPic.png"),
             };
-            navigation.navigate('Cart', {
-              product: { ...product, qty: quantity  }
-            });
+            navigation.navigate('Cart', { product: { ...product, qty: quantity } });
           }}
         >
-          <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>
-            Add to cart
-          </Text>
+          <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>Add to cart</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.bottomContainer}>
-        <TouchableOpacity
-          style={[styles.buyNowButton, { backgroundColor: '#F6B745' }]}
-        >
+        <TouchableOpacity style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>

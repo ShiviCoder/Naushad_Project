@@ -4,11 +4,12 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import FlatListComp from '../OurProducts/FlatListComp';
-import ProductData from '../../components/ProductData';
+import ProductData from '../../components/useProductData';
 import ProductCard from '../OurProducts/ProductCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 const products = [
    {
@@ -220,7 +221,7 @@ const Catelog = () => {
           style={[
             styles.toggleButton,
             styles.leftButton,
-            activeTab === 'Products' && styles.activeButton,
+            activeTab === 'Products' && [styles.activeButton,{backgroundColor : COLORS.primary}],
           ]}
           onPress={() => setActiveTab('Products')}
         >
@@ -238,7 +239,7 @@ const Catelog = () => {
           style={[
             styles.toggleButton,
             styles.rightButton,
-            activeTab === 'Services' && styles.activeButton,
+            activeTab === 'Services' &&  [styles.activeButton,{backgroundColor : COLORS.primary}],
           ]}
           onPress={() => setActiveTab('Services')}
         >
@@ -324,7 +325,7 @@ const Catelog = () => {
                    <Text style={styles.servicePrice}>{item.price}</Text>
                  </View>
                  <Text style={styles.serviceDesc}>{item.desc}</Text>
-                 <TouchableOpacity style={styles.bookBtn} onPress={() => navigation.navigate('ServiceDetails', {
+                 <TouchableOpacity style={[styles.bookBtn,{backgroundColor : COLORS.primary}]} onPress={() => navigation.navigate('ServiceDetails', {
                    item: { ...item, image: item.image[0] }
                  })}>
                    <Text style={styles.bookBtnText}>Book now</Text>
@@ -365,7 +366,6 @@ const styles = StyleSheet.create({
     marginLeft: wp('0.5%'),
   },
   activeButton: {
-    backgroundColor: '#F6B745',
   },
   toggleText: {
     fontSize: wp('4%'),           // responsive font size
@@ -466,7 +466,6 @@ const styles = StyleSheet.create({
     marginBottom: hp('0.5%'),
   },
   bookBtn: {
-    backgroundColor: '#F6B745',
     paddingVertical: hp('0.3%'),
     borderRadius: wp('50%'),
     alignItems: 'center',

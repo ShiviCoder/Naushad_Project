@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "reac
 import { useNavigation } from "@react-navigation/native"; // ✅ Import navigation hook
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
 const OTPVerification = () => {
   const [email, setEmail] = useState("");
   const navigation = useNavigation(); // ✅ Initialize navigation
@@ -11,7 +12,7 @@ const OTPVerification = () => {
     console.log("OTP sent to:", email);
     navigation.navigate("CodeVerification"); // ✅ Navigate to CodeVerification screen
   };
-
+  
   return (
     <SafeAreaView style={styles.container}>
       {/* Logo */}
@@ -38,7 +39,7 @@ const OTPVerification = () => {
       />
 
       {/* Button */}
-      <TouchableOpacity style={styles.button} onPress={handleSendOTP}>
+      <TouchableOpacity style={[styles.button,{color : COLORS.primary}]} onPress={handleSendOTP}>
         <Text style={styles.buttonText}>SEND OTP</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -85,7 +86,6 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    backgroundColor: "#F6B745",
     paddingVertical: hp('2%'),
     borderRadius: wp('2%'),
     alignItems: "center",

@@ -8,6 +8,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import COLORS from '../utils/Colors';
 
 const BottomNavbar = (props: any) => {
   const { state, navigation } = props;
@@ -23,7 +24,7 @@ const BottomNavbar = (props: any) => {
     { name: 'HomeScreen', icon: <Icon name="home" /> },
     { name: 'BookingScreen', icon: <MySvgIcon /> },
     { name: 'BookAppointmentScreen', icon: (
-        <View style={styles.fabCircle}>
+        <View style={[styles.fabCircle,{backgroundColor : COLORS.primary}]}>
           <Icon name="add" size={wp('7%')} color="#000" />
         </View>
       )
@@ -41,13 +42,13 @@ const BottomNavbar = (props: any) => {
           // Set dynamic color for icons except FAB
           if (tab.name !== 'BookAppointmentScreen') {
             if (tab.name === 'HomeScreen') {
-              iconElement = <Icon name="home" size={wp('7%')} color={isActive ? '#F6B745' : '#fff'} />;
+              iconElement = <Icon name="home" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'BookingScreen') {
-              iconElement = <MySvgIcon width={wp('7%')} height={hp('3%')} fill={isActive ? '#F6B745' : '#fff'} />;
+              iconElement = <MySvgIcon width={wp('7%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'BlankScreen') {
-              iconElement = <StarSvgIcon width={hp('5%')} height={hp('3%')} fill={isActive ? '#F6B745' : '#fff'} />;
+              iconElement = <StarSvgIcon width={hp('5%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'AccountScreen') {
-              iconElement = <Icon name="person-outline" size={wp('7%')} color={isActive ? '#F6B745' : '#fff'} />;
+              iconElement = <Icon name="person-outline" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
             }
           }
 
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: hp('2%'), // Increased from 16
+    bottom: hp('4%'), // Increased from 16
     alignItems: 'center',
   },
   bottomNav: {
@@ -90,7 +91,6 @@ const styles = StyleSheet.create({
     width: wp('13%'),
     height: wp('13%'),
     borderRadius: wp('50%'),
-    backgroundColor: '#F6B745',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 0,

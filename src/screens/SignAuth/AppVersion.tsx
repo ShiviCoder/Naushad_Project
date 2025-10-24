@@ -4,6 +4,7 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 const AppVersion = () => {
   const { theme } = useTheme();
@@ -24,7 +25,7 @@ const AppVersion = () => {
           Keep your app updated to enjoy the latest features, improvements, and bug fixes.
         </Text>
         <TouchableOpacity
-          style={[styles.updateButton, { backgroundColor: theme.dark ? '#42BA86' : '#F6B745' }]}
+          style={[styles.updateButton, { backgroundColor:  COLORS.primary }]}
           onPress={handleUpdate}
         >
           <Text style={styles.updateText}>Check for Update</Text>

@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 type Package = {
   id: string;
@@ -127,7 +128,7 @@ const OurPackagesScreen = () => {
       <Text style={[styles.packageTitle, { color: theme.dark ? '#fff' : '#000' }]}>
         {item.title}
       </Text>
-      <Text style={[styles.packagePrice, { color: theme.dark ? '#F6B745' : '#FFA726' }]}>
+      <Text style={[styles.packagePrice, { color: COLORS.primary }]}>
         {item.price}
       </Text>
 
@@ -152,7 +153,7 @@ const OurPackagesScreen = () => {
       <TouchableOpacity
         style={[
           styles.bookButton,
-          { backgroundColor: theme.dark ? '#F6B745' : '#FFA726' },
+          { backgroundColor: COLORS.primary  },
         ]}
         onPress={() => navigation.navigate('PackageDetails', { item })}
       >
@@ -281,7 +282,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bookButton: {
-    backgroundColor: '#FFA726',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,

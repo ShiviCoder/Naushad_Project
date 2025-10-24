@@ -16,6 +16,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import COLORS from '../../utils/Colors';
 
 const copyToClipboard = (text) => {
   try {
@@ -95,7 +96,7 @@ const ReferFriendScreen = () => {
           style={[
             styles.referralCodeCard,
             {
-              backgroundColor: '#F6B745',
+              backgroundColor: COLORS.primary,
               shadowColor: theme.shadow,
             },
           ]}
@@ -119,14 +120,14 @@ const ReferFriendScreen = () => {
             ]}
             onPress={copyCodeToClipboard}
           >
-            <Text style={styles.copyButtonText}>
+            <Text style={[styles.copyButtonText,{color: COLORS.primary}]}>
               {copiedCode ? 'Copied!' : 'Copy Code'}
             </Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={[styles.shareButton, {backgroundColor : '#F6B745'}]}
+          style={[styles.shareButton, {backgroundColor : COLORS.primary}]}
           onPress={shareWithFriends}
         >
           <Text style={styles.shareButtonText}>Share with Friends</Text>
@@ -185,7 +186,6 @@ const styles = StyleSheet.create({
     
   },
   copyButtonText: {
-    color: '#F6B745',
     fontSize: wp('4%'),
     fontWeight: '600',
   },

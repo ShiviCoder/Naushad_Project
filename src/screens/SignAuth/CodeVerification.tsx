@@ -1,14 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useState, useRef, useEffect,ActivityIndicator } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import navigation
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
 
 const OTPVerificationScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(59);
   const inputRefs = useRef([]);
   const navigation = useNavigation(); // Navigation Hook
+  const [loading, setLoading] = useState(false);
+  
 
   // Timer countdown
   useEffect(() => {
@@ -39,12 +42,27 @@ const OTPVerificationScreen = () => {
   };
 
   // Verify OTP
-  const handleVerify = () => {
+ const handleVerify = async () => {
     const otpCode = otp.join("");
-    console.log("OTP Entered:", otpCode);
 
-    // Navigate to SignIn screen after OTP verification
-    navigation.navigate("Signin");
+    if (otpCode.length < 6) {
+      alert("Please enter the complete 6-digit OTP");
+      return;
+    }
+
+    setLoading(true); // loader start
+    try {
+      // fake API delay (simulate backend verification)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      console.log("OTP Entered:", otpCode);
+      navigation.navigate("Signin");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Something went wrong!");
+    } finally {
+      setLoading(false); // loader stop
+    }
   };
 
   return (
@@ -68,53 +86,53 @@ const OTPVerificationScreen = () => {
       {/* OTP Inputs */}
       <View style={styles.otpContainer}>
         {otp.map((digit, index) => (
-         <TextInput
-  key={index}
-  style={styles.otpInput}
-  keyboardType="numeric"
-  maxLength={1}
-  value={digit}
-  onChangeText={(text) => handleChange(text, index)}
-  ref={(ref) => (inputRefs.current[index] = ref)}
-  onKeyPress={({ nativeEvent }) => {
-    if (nativeEvent.key === "Backspace") {
-      const newOtp = [...otp];
+          <TextInput
+            key={index}
+            style={styles.otpInput}
+            keyboardType="numeric"
+            maxLength={1}
+            value={digit}
+            onChangeText={(text) => handleChange(text, index)}
+            ref={(ref) => (inputRefs.current[index] = ref)}
+            onKeyPress={({ nativeEvent }) => {
+              if (nativeEvent.key === "Backspace") {
+                const newOtp = [...otp];
 
-      if (otp[index] === "") {
-        // agar current box already empty hai -> pehle wale box pe jao
-        if (index > 0) {
-          inputRefs.current[index - 1].focus();
-          newOtp[index - 1] = "";
-        }
-      } else {
-        // agar current box me digit hai -> usi box ko clear karo
-        newOtp[index] = "";
-      }
+                if (otp[index] === "") {
+                  // agar current box already empty hai -> pehle wale box pe jao
+                  if (index > 0) {
+                    inputRefs.current[index - 1].focus();
+                    newOtp[index - 1] = "";
+                  }
+                } else {
+                  // agar current box me digit hai -> usi box ko clear karo
+                  newOtp[index] = "";
+                }
 
-      setOtp(newOtp);
-    }
-  }}
-/>
+                setOtp(newOtp);
+              }
+            }}
+          />
         ))}
       </View>
 
       {/* Resend Row */}
       <View style={styles.resendRow}>
-        <View style={{flexDirection : 'row'}}>
+        <View style={{ flexDirection: 'row' }}>
           <Text style={styles.resendText}>Didn’t get it?</Text>
-        <TouchableOpacity onPress={handleResend}>
-          <Text style={styles.resendButton}>Resend Code</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleResend}>
+            <Text style={styles.resendButton}>Resend Code</Text>
+          </TouchableOpacity>
         </View>
-        
-         
-         <View>
-        <Text style={styles.timer}>{`0:${timer < 10 ? `0${timer}` : timer}`}</Text>
-      </View>
+
+
+        <View>
+          <Text style={styles.timer}>{`0:${timer < 10 ? `0${timer}` : timer}`}</Text>
+        </View>
       </View>
 
       {/* Verify Button */}
-      <TouchableOpacity style={styles.verifyBtn} onPress={handleVerify}>
+      <TouchableOpacity style={[styles.verifyBtn, { backgroundColor: COLORS.primary }]} onPress={handleVerify}>
         <Text style={styles.verifyText}>VERIFY OTP</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -191,7 +209,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   verifyBtn: {
-    backgroundColor: "#F6B93B",
     paddingVertical: hp('2%'),
     width: "92%",
     borderRadius: wp('2%'),

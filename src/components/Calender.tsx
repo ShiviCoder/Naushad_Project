@@ -4,6 +4,7 @@ import { Calendar, LocaleConfig } from "react-native-calendars";
 import Icon from "react-native-vector-icons/Ionicons";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useTheme } from "../context/ThemeContext";
+import COLORS from "../utils/Colors";
 
 export default function Calender() {
   const { theme } = useTheme(); // ✅ use theme
@@ -59,7 +60,7 @@ export default function Calender() {
                 alignItems: "center",
                 width: wp("6%"),
                 height: wp("6%"),
-                backgroundColor: isSelected ? '#F6B745' : theme.cardBackground,
+                backgroundColor: isSelected ? COLORS.primary : theme.cardBackground,
                 borderRadius: wp("50%"),
                 padding: wp("0.5%"),
               }}
@@ -71,7 +72,7 @@ export default function Calender() {
             : isSelected
             ? theme.textPrimary
             : isToday
-            ? "orange"
+            ? COLORS.primary
             : theme.textSecondary,
                   fontWeight: isSelected || isToday ? "700" : "600",
                   fontSize: wp("3.5%"),

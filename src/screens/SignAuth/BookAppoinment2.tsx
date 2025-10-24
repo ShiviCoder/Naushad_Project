@@ -12,6 +12,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -156,7 +157,7 @@ const renderService = (service) => (
       </ScrollView>
 
       {/* Proceed Button */}
-      <TouchableOpacity style={[styles.proceedButton, { backgroundColor: '#F6B745' }]}>
+      <TouchableOpacity style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}>
         <Text style={[styles.proceedButtonText, { color: theme.textOnAccent }]}>Proceed to pay</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -186,13 +187,13 @@ const styles = StyleSheet.create({
   serviceName: {
     fontSize: wp("4%"),
     fontWeight: "700",
-        fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Medium",
 
   },
   serviceIncludes: {
     fontSize: wp("3.3%"),
     marginTop: hp("0.3%"),
-        fontFamily: "Poppins-Medium",
+    fontFamily: "Poppins-Medium",
 
   },
   rightSection: {

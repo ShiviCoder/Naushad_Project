@@ -13,6 +13,8 @@ import { useLikedProducts } from '../../context/LikedProductsContext';
 import { products as ProductData } from '../OurProducts/ProductsArray';
 import Head from '../../components/Head';
 import { requestAppPermissions } from '../../utils/Permission';
+import COLORS from '../../utils/Colors'
+import RadioButton from '../../components/RadioButton';
 
 
 const { width } = Dimensions.get("window");
@@ -132,7 +134,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
 
-   useEffect(() => {
+  useEffect(() => {
     requestAppPermissions();
   }, []);
 
@@ -337,37 +339,58 @@ const HomeScreen = () => {
   ];
 
   // Videos row (thumbnails with play)
-  const videos = [
-    { id: '1', videoId: 'LepsdGtPOzs' },
-    { id: '2', videoId: 'yyc7nKGlJnc' },
-    { id: '4', videoId: 'hNXWf6wS4aE' },
-    { id: '5', videoId: 'TKPNhEf1ZTQ' },
-  ];
+  const [videos, setVideos] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8"
+
+        const res = await fetch("https://naushad.onrender.com/api/youtube", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, // 👈 token yahan lagta hai
+          },
+        });
+
+        const data = await res.json();
+        setVideos(data);
+        console.log("Youtube Data:", data);
+      } catch (err) {
+        console.log("Error loading:", err);
+      }
+    };
+
+    fetchVideos();
+  }, []);
+
 
   // Certificates (two items like the mock)
-  const certificates = [
-    {
-      id: '1',
-      title: 'Hair Styling Certificate',
-      image: require('../../assets/images/certificate1.png'),
-    },
-    {
-      id: '2',
-      title: 'Certified Hair Cutting Expert',
-      image: require('../../assets/images/certificate2.png'),
-    },
-    {
-      id: '3',
-      title: 'Hair Styling Certificate',
-      image: require('../../assets/images/certificate1.png'),
-    },
-    {
-      id: '4',
-      title: 'Certified Hair Cutting Expert',
-      image: require('../../assets/images/certificate2.png'),
-    },
-  ];
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const fetchCertificates = async () => {
+    try {
+      const response = await fetch('https://naushad.onrender.com/api/certificates', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8',
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      console.log('API Response:', json);
 
+      // setCertificates to the data array from response
+      setCertificates(json.data);
+    } catch (error) {
+      console.error('Error fetching certificates:', error);
+      setCertificates([]); // fallback
+    }
+  }
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
   // Packages (two-column cards)
   const packages = [
     {
@@ -481,228 +504,27 @@ const HomeScreen = () => {
   ];
 
   // Product packages (small horizontal cards)
-  const productPackages = [
-    {
-      id: '1',
-      title: 'Luxury Hair Care Kit',
-      price: 1499,
-      oldPrice: 1799,
-      discount: Math.round(((1799 - 1499) / 1799) * 100), // Auto calculate %
-      image: require('../../assets/newPic.png'),
-      rating: 4,
-      review: 48,
-      description: 'Complete hair nourishment in one kit',
-      offer: '🔖 Save ₹300 on combo purchase',
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      itemsList: [
-        '✅ Shampoo (250ml)',
-        '✅ Conditioner (250ml)',
-        '✅ Hair Mask (200g)',
-        '✅ Hair Serum (50ml)',
-      ],
-      usage: [
-        '- Use shampoo & conditioner twice weekly',
-        '- Apply hair mask once a week',
-        '- Serum for daily hair protection',
-      ],
-      tag: 'Repair & shine',
-    },
-    {
-      id: '2',
-      title: 'Beard Care Pro',
-      price: 499,
-      oldPrice: 699,
-      discount: Math.round(((699 - 499) / 699) * 100),
-      image: require('../../assets/newPic.png'),
-      rating: 4,
-      review: 30,
-      description: 'Shape & nourish beard with pro care',
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      offer: '✨ Flat ₹200 off',
-      itemsList: [
-        '✅ Beard Oil (50ml)',
-        '✅ Beard Balm (30g)',
-        '✅ Wooden Comb',
-      ],
-      usage: [
-        '- Apply oil daily for nourishment',
-        '- Use balm for styling',
-        '- Comb beard twice a day',
-      ],
-      tag: 'Ideal for oily skin',
-    },
-    {
-      id: '3',
-      title: 'Glow & Go Pack',
-      price: 599,
-      oldPrice: 899,
-      discount: Math.round(((899 - 599) / 899) * 100),
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      image: require('../../assets/newPic.png'),
-      rating: 5,
-      review: 75,
-      description: 'Quick glow for your party look',
-      offer: '🔥 Save ₹300 instantly',
-      itemsList: [
-        '✅ Facewash',
-        '✅ Bleach Cream',
-        '✅ Threading Kit',
-      ],
-      usage: [
-        '- Wash face daily',
-        '- Use bleach cream once a week',
-        '- Threading as required',
-      ],
-      tag: 'Quick glow for party',
-    },
-    {
-      id: '4',
-      title: 'Luxury Hair Care Kit',
-      price: 1499,
-      oldPrice: 1799,
-      discount: Math.round(((1799 - 1499) / 1799) * 100), // Auto calculate %
-      image: require('../../assets/newPic.png'),
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      rating: 4,
-      review: 48,
-      description: 'Complete hair nourishment in one kit',
-      offer: '🔖 Save ₹300 on combo purchase',
-      itemsList: [
-        '✅ Shampoo (250ml)',
-        '✅ Conditioner (250ml)',
-        '✅ Hair Mask (200g)',
-        '✅ Hair Serum (50ml)',
-      ],
-      usage: [
-        '- Use shampoo & conditioner twice weekly',
-        '- Apply hair mask once a week',
-        '- Serum for daily hair protection',
-      ],
-      tag: 'Shape & nourish',
-    },
-    {
-      id: '5',
-      title: 'Beard Care Pro',
-      price: 499,
-      oldPrice: 699,
-      discount: Math.round(((699 - 499) / 699) * 100),
-      image: require('../../assets/newPic.png'),
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      rating: 4,
-      review: 30,
-      description: 'Shape & nourish beard with pro care',
-      offer: '✨ Flat ₹200 off',
-      itemsList: [
-        '✅ Beard Oil (50ml)',
-        '✅ Beard Balm (30g)',
-        '✅ Wooden Comb',
-      ],
-      usage: [
-        '- Apply oil daily for nourishment',
-        '- Use balm for styling',
-        '- Comb beard twice a day',
-      ],
-      tag: 'Repair & shine',
-    },
-    {
-      id: '6',
-      title: 'Glow & Go Pack',
-      price: 599,
-      oldPrice: 899,
-      discount: Math.round(((899 - 599) / 899) * 100),
-      image: require('../../assets/newPic.png'),
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      rating: 5,
-      review: 75,
-      description: 'Quick glow for your party look',
-      offer: '🔥 Save ₹300 instantly',
-      itemsList: [
-        '✅ Facewash',
-        '✅ Bleach Cream',
-        '✅ Threading Kit',
-      ],
-      usage: [
-        '- Wash face daily',
-        '- Use bleach cream once a week',
-        '- Threading as required',
-      ],
-      tag: 'Quick glow for party',
-    },
-    {
-      id: '7',
-      title: 'Luxury Hair Care Kit',
-      price: 1499,
-      oldPrice: 1799,
-      discount: Math.round(((1799 - 1499) / 1799) * 100), // Auto calculate %
-      image: require('../../assets/newPic.png'),
-      rating: 4,
-      review: 48,
-      description: 'Complete hair nourishment in one kit',
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      offer: '🔖 Save ₹300 on combo purchase',
-      itemsList: [
-        '✅ Shampoo (250ml)',
-        '✅ Conditioner (250ml)',
-        '✅ Hair Mask (200g)',
-        '✅ Hair Serum (50ml)',
-      ],
-      usage: [
-        '- Use shampoo & conditioner twice weekly',
-        '- Apply hair mask once a week',
-        '- Serum for daily hair protection',
-      ],
-      tag: 'Repair & nourish',
-    },
-    {
-      id: '8',
-      title: 'Beard Care Pro',
-      price: 499,
-      oldPrice: 699,
-      discount: Math.round(((699 - 499) / 699) * 100),
-      image: require('../../assets/newPic.png'),
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      rating: 4,
-      review: 30,
-      description: 'Shape & nourish beard with pro care',
-      offer: '✨ Flat ₹200 off',
-      itemsList: [
-        '✅ Beard Oil (50ml)',
-        '✅ Beard Balm (30g)',
-        '✅ Wooden Comb',
-      ],
-      usage: [
-        '- Apply oil daily for nourishment',
-        '- Use balm for styling',
-        '- Comb beard twice a day',
-      ],
-      tag: 'Shape & nourish',
-    },
-    {
-      id: '9',
-      title: 'Glow & Go Pack',
-      price: 599,
-      oldPrice: 899,
-      discount: Math.round(((899 - 599) / 899) * 100),
-      image: require('../../assets/newPic.png'),
-      rating: 5,
-      review: 75,
-      description: 'Quick glow for your party look',
-      line1: ['Bleach, Threading', 'Hair Cutting & Hair Coloring'],
-      offer: '🔥 Save ₹300 instantly',
-      itemsList: [
-        '✅ Facewash',
-        '✅ Bleach Cream',
-        '✅ Threading Kit',
-      ],
-      usage: [
-        '- Wash face daily',
-        '- Use bleach cream once a week',
-        '- Threading as required',
-      ],
-      tag: 'Quick glow for party',
-    },
-  ];
+  const [productPackages, setProductPackage] = useState([]);
+  const fetchProductPackages = async () => {
+    try {
+      const response = await fetch('https://naushad.onrender.com/api/product-packages', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8', // Postman me jo token use kiya tha
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      console.log("Product package response : ", json);
+      setProductPackage(json.data);
+    } catch (err) {
+      console.log("Product package error : ", err)
+    }
+  }
 
+  useEffect(() => {
+    fetchProductPackages();
+  }, [])
 
   const offers = [
     {
@@ -738,329 +560,339 @@ const HomeScreen = () => {
       imageFemale: require('../../assets/images/female-offer3.jpg'),
     },
   ];
-  const homeServices = [
-    { id: 1, name: "Mundan ", price: 300, desc: "shaving a baby's first hair", image: require('../../assets/mundan.png') },
-    { id: 2, name: "Hair Cut", price: 350, desc: "Stylish cut with blow dry", image: require("../../assets/images/haircut.jpg") },
-    { id: 3, name: "Hair coloring", price: 500, desc: "Stylish cut with blow dry", image: require("../../assets/images/haircolor.jpg") },
-    { id: 4, name: "Facial", price: 700, desc: "For healthy, radiant skin", image: require("../../assets/images/facial.jpg") },
-    { id: 5, name: "Beard Trim", price: 299, desc: "Shape and stylish beard", image: require("../../assets/images/beard.jpg") },
-    { id: 6, name: "Nail art", price: 300, desc: "Creative nails", image: require("../../assets/images/nail.jpg") }]
-  //    { name: "Mundan ", price: 300, desc: "Creative nails", image: require("../../assets/images/mundan.jpg") },
+
+  const [homeServices, setHomeService] = useState([]);
+  const fetchHomeServices = async () => {
+    try {
+      const response = await fetch('https://naushad.onrender.com/api/home-services/', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8', // Postman me jo token use kiya tha
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      console.log("Home services : ", json);
+      setHomeService(json.data);
+    } catch (error) {
+      console.log("Home services error : ", error)
+    }
+  }
+  useEffect(() => {
+    fetchHomeServices();
+  }, [])
+
+  const [aboutData, setAboutData] = useState([]);
+  const fetchAboutData = async () => {
+    try {
+      const response = await fetch('https://naushad.onrender.com/api/about-salon', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8',
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      console.log("About Data : ", json);
+      setAboutData(json.data);
+    } catch (error) {
+      console.log("About Data : ", error)
+    }
+  }
+  useEffect(() => {
+    fetchAboutData();
+  }, [])
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
 
-    {showLiked ? (
-  likedItems.length > 0 ? (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.dark ? '#000' : '#fff',
-        paddingVertical: hp('2%'),
-        paddingHorizontal: wp('3%'),
-      }}
-    >
-      {/* 🔹 Header (only once) */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          gap: wp('25%'),
-          marginBottom: hp('2%'),
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.replace('MainTabs', { from: 'Home' })}
-          style={{ width: wp('10%'), height: wp('10%') }}
-        >
-          <Icon
-            name="chevron-back"
-            size={wp('7%')}
-            color={theme.textPrimary}
-          />
-        </TouchableOpacity>
+      {showLiked ? (
+        likedItems.length > 0 ? (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: theme.dark ? '#000' : '#fff',
+              paddingVertical: hp('2%'),
+              paddingHorizontal: wp('3%'),
+            }}
+          >
+            {/* 🔹 Header (only once) */}
+            <Head title="Liked Products" />
 
-        <Text
-          style={{
-            fontSize: wp('5%'),
-            fontWeight: 'bold',
-            color: theme.textPrimary,
-          }}
-        >
-          Liked Products
-        </Text>
-      </View>
+            {/* 🔹 Liked products list */}
+            <FlatList
+              data={likedItems}
+              showsHorizontalScrollIndicator={false}
+              numColumns={2}
+              keyExtractor={(item) => item.id.toString()}
 
-      {/* 🔹 Liked products list */}
-      <FlatList
-        data={likedItems}
-        showsHorizontalScrollIndicator={false}
-        numColumns={2}
-        keyExtractor={(item) => item.id.toString()}
-        
-        renderItem={({ item }) => {
-          const selectedImage = Array.isArray(item.image)
-            ? typeof item.image[0] === 'string'
-              ? { uri: item.image[0] }
-              : item.image[0]
-            : typeof item.image === 'string'
-              ? { uri: item.image }
-              : item.image;
+              renderItem={({ item }) => {
+                const selectedImage = Array.isArray(item.image)
+                  ? typeof item.image[0] === 'string'
+                    ? { uri: item.image[0] }
+                    : item.image[0]
+                  : typeof item.image === 'string'
+                    ? { uri: item.image }
+                    : item.image;
 
-          return (
+                return (
+                  <View
+                    style={[
+                      styles.likedProductCard,
+                      {
+                        backgroundColor: '#FFFFFF',
+                        borderColor: theme.dark ? '#333' : '#ddd',
+                      },
+                    ]}
+                  >
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate('ProductDetails', { product: item })
+                      }
+                    >
+                      <Image
+                        resizeMode="cover"
+                        source={selectedImage}
+                        style={styles.ImageStyle}
+                      />
+
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.likedProductName,
+
+                        ]}
+                      >
+                        {item.name}
+                      </Text>
+
+                      <View style={styles.OurterPriceContainer}>
+                        <View style={styles.InnerPriceContainer}>
+                          <Text
+                            style={[
+                              styles.priceStyle,
+                            ]}
+                          >
+                            {item.price}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.oldPriceStyle,
+
+                            ]}
+                          >
+                            {item.oldPrice}
+                          </Text>
+                        </View>
+                        <Text
+                          style={[
+                            styles.DiscountStyle,
+                            { color: '#42BA86' },
+                          ]}
+                        >
+                          {item.discount}
+                        </Text>
+                      </View>
+
+                      <View style={styles.descContain}>
+                        <Image
+                          resizeMode="contain"
+                          source={item.featureIcon}
+                          style={styles.featureIconStyle}
+                        />
+                        <Text
+                          style={[
+                            styles.DescStyle,
+
+                          ]}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {item.description}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <View style={styles.OutRatContain}>
+                      <View
+                        style={[
+                          styles.InnerRatContain,
+                          {
+                            backgroundColor: theme.dark
+                              ? '#0f8a43'
+                              : '#09932B',
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.ratingTextStyle,
+                            { color: '#fff' },
+                          ]}
+                        >
+                          {item.rating}
+                        </Text>
+                        <Image
+                          resizeMode="contain"
+                          style={styles.starStyle}
+                          source={require('../../assets/OurProduct/star1.png')}
+                        />
+                      </View>
+                      <Text
+                        style={[
+                          styles.reviewStyle,
+                          { color: theme.dark ? '#ccc' : '#ACACAC' },
+                        ]}
+                      >
+                        ({item.reviews})
+                      </Text>
+                    </View>
+                  </View>
+                );
+              }}
+            />
+          </View>
+        ) : (
+          // 🔹 Empty state
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: theme.dark ? '#000' : '#fff',
+              paddingVertical: hp('2%'),
+              paddingHorizontal: wp('3%'),
+            }}
+          >
             <View
-              style={[
-                styles.likedProductCard,
-                {
-                  backgroundColor: '#FFFFFF',
-                  borderColor: theme.dark ? '#333' : '#ddd',
-                },
-              ]}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: wp('25%'),
+              }}
             >
               <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate('ProductDetails', { product: item })
-                }
+                onPress={() => navigation.replace('MainTabs', { from: 'Home' })}
+                style={{ width: wp('5%'), height: wp('10%') }}
               >
-                <Image
-                  resizeMode="cover"
-                  source={selectedImage}
-                  style={styles.ImageStyle}
+                <Icon
+                  name="chevron-back"
+                  size={wp('7%')}
+                  color={theme.textPrimary}
                 />
-
-                <Text
-                  numberOfLines={1}
-                  style={[
-                    styles.likedProductName,
-                  
-                  ]}
-                >
-                  {item.name}
-                </Text>
-
-                <View style={styles.OurterPriceContainer}>
-                  <View style={styles.InnerPriceContainer}>
-                    <Text
-                      style={[
-                        styles.priceStyle,
-                        
-                      ]}
-                    >
-                      {item.price}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.oldPriceStyle,
-                       
-                      ]}
-                    >
-                      {item.oldPrice}
-                    </Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.DiscountStyle,
-                      { color: '#42BA86' },
-                    ]}
-                  >
-                    {item.discount}
-                  </Text>
-                </View>
-
-                <View style={styles.descContain}>
-                  <Image
-                    resizeMode="contain"
-                    source={item.featureIcon}
-                    style={styles.featureIconStyle}
-                  />
-                  <Text
-                    style={[
-                      styles.DescStyle,
-                      
-                    ]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {item.description}
-                  </Text>
-                </View>
               </TouchableOpacity>
 
-              <View style={styles.OutRatContain}>
-                <View
-                  style={[
-                    styles.InnerRatContain,
-                    {
-                      backgroundColor: theme.dark
-                        ? '#0f8a43'
-                        : '#09932B',
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.ratingTextStyle,
-                      { color: '#fff' },
-                    ]}
-                  >
-                    {item.rating}
-                  </Text>
-                  <Image
-                    resizeMode="contain"
-                    style={styles.starStyle}
-                    source={require('../../assets/OurProduct/star1.png')}
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.reviewStyle,
-                    { color: theme.dark ? '#ccc' : '#ACACAC' },
-                  ]}
-                >
-                  ({item.reviews})
-                </Text>
-              </View>
+              <Text
+                style={{
+                  fontSize: wp('5%'),
+                  fontWeight: 'bold',
+                  color: theme.textPrimary,
+                }}
+              >
+                Liked Products
+              </Text>
             </View>
-          );
-        }}
-      />
-    </View>
-  ) : (
-    // 🔹 Empty state
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.dark ? '#000' : '#fff',
-        paddingVertical: hp('2%'),
-        paddingHorizontal: wp('3%'),
-      }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          gap: wp('25%'),
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.replace('MainTabs', { from: 'Home' })}
-          style={{ width: wp('5%'), height: wp('10%') }}
-        >
-          <Icon
-            name="chevron-back"
-            size={wp('7%')}
-            color={theme.textPrimary}
-          />
-        </TouchableOpacity>
 
-        <Text
-          style={{
-            fontSize: wp('5%'),
-            fontWeight: 'bold',
-            color: theme.textPrimary,
-          }}
-        >
-          Liked Products
-        </Text>
-      </View>
-
-      <Text
-        style={{
-          paddingVertical: hp('2%'),
-          paddingHorizontal: wp('3%'),
-          fontSize: wp('5%'),
-          color: theme.textPrimary,
-        }}
-      >
-        No liked products yet ❤️
-      </Text>
-    </View>
-  )
-) : (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
+            <Text
+              style={{
+                paddingVertical: hp('2%'),
+                paddingHorizontal: wp('3%'),
+                fontSize: wp('5%'),
+                color: theme.textPrimary,
+              }}
+            >
+              No liked products yet ❤️
+            </Text>
+          </View>
+        )
+      ) : (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#F6B745']} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} tintColor={COLORS.primary} />
           }
           contentContainerStyle={{ paddingBottom: hp('10%') }}
         >
           {/* Fixed Header */}
-          <View style={styles.header}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: wp('3%') }}>
+          <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+            {/* Left Section */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
               <TouchableOpacity>
                 <Image
                   source={require('../../assets/location.png')}
                   style={[styles.locationbtn, { tintColor: theme.textPrimary }]}
                 />
               </TouchableOpacity>
-              <View style={{ flexDirection: 'column', width : wp('17%') }}>
-                <Text style={[styles.welcomeText, { color: theme.textPrimary }]}>
-                  Hi {gender === 'Male' ? 'Rahul' : 'Aanchal'}  !
+              <View style={{ flexDirection: 'column', marginLeft: wp('3%'), width: wp('20%') }}>
+                <Text
+                  style={[styles.welcomeText, { color: theme.textPrimary }]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  Hi {gender === 'Male' ? 'Rahul' : 'Aanchal'} !
                 </Text>
                 <Text style={[styles.locationText, { color: theme.textPrimary }]}>
                   {gender === 'Male' ? 'Pune' : 'Indore'}
                 </Text>
               </View>
             </View>
+
+            {/* Center Logo */}
             <Image
               source={require('../../assets/images/logo.png')}
               style={[styles.logo, { tintColor: theme.textPrimary }]}
             />
 
+            {/* Right Icons */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
                 <Image
                   source={require('../../assets/cart2.png')}
-                  style={{ marginLeft: wp('5%'), width: wp('7%'), height: wp('7%'), }}
+                  style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%') }}
                 />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Notification')}
-              > 
+
+              <TouchableOpacity onPress={() => navigation.navigate('Notification')}>
                 <Image
                   source={require('../../assets/notification3.png')}
-                  style={{ marginLeft: wp('1%'), width: wp('7%'), height: wp('7%'), }}
+                  style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%') }}
                 />
               </TouchableOpacity>
+
               <TouchableOpacity onPress={() => setShowLiked(!showLiked)}>
-                <View style={[{width : wp('7%'), height : wp('7%') , borderRadius : wp('5%'),borderWidth : wp('0.4%'),borderColor : '#aca6a6ff',justifyContent : 'center',marginLeft: wp('1%')},{backgroundColor : '#fff'}]}>
+                <View
+                  style={{
+                    width: wp('7%'),
+                    height: wp('7%'),
+                    borderRadius: wp('5%'),
+                    borderWidth: wp('0.4%'),
+                    borderColor: '#aca6a6ff',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: wp('2%'),
+                    backgroundColor: '#fff',
+                  }}
+                >
                   <Image
-                  source={require('../../assets/heart.png')}
-                  style={{  width: wp('3.5%'), height: wp('3.5%'),alignSelf : 'center' }}
-                />
+                    source={require('../../assets/heart.png')}
+                    style={{ width: wp('3.5%'), height: wp('3.5%') }}
+                  />
                 </View>
               </TouchableOpacity>
             </View>
+          </View>
+
+
+          <View style={styles.genderToggleContainer}>
+            {/* Label Row */}
+            <RadioButton
+              type="gender"
+              selected={gender}
+              onSelect={(value) => setGender(value)}
+              labels={["Male", "Female"]}
+            />
 
           </View>
 
 
-          <View style={styles.genderSelection}>
-            {['Male', 'Female'].map(g => (
-              <TouchableOpacity
-                key={g}
-                onPress={() => setGender(g as 'Male' | 'Female')}
-                style={[styles.genderBtn, gender === g && styles.genderBtnActive]}
-              >
-                {/* Radio outer circle */}
-                <View
-                  style={[
-                    styles.radioOuter,
-                    gender === g && styles.radioOuterActive,
-                    { borderColor: theme.textPrimary } // circle color dynamic
-                  ]}
-                >
-                  {/* Radio inner circle if selected */}
-                  {gender === g && <View style={styles.radioInner} />}
-                </View>
-                {/* Text */}
-                <Text style={{ ...styles.genderText, color: theme.textPrimary }}>
-                  {g}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
 
           {/* Search Bar with filter */}
           <View style={styles.searchFilContain}>
@@ -1078,18 +910,18 @@ const HomeScreen = () => {
           <SectionTitle title="Special Offers" showSeeAll={false} color={theme.textPrimary} />
 
           {/* Special Offer split card */}
-          <View style={{ height: 200, marginBottom: hp('2.5%') }}>
+          <View style={{ height: hp('27%'), marginBottom: hp('4%') }}>
             <Swiper
               autoplay
               autoplayTimeout={3}
               showsPagination
-              dotStyle={{ backgroundColor: "#ccc" }}
-              activeDotStyle={{ backgroundColor: "#F6B745" }}
-              paginationStyle={{ bottom: -20 }}
+              dotStyle={{ backgroundColor: "#ccc", }}
+              activeDotStyle={{ backgroundColor: COLORS.primary, }}
+              paginationStyle={{ top: hp('28%') }}
             >
               {offers.map((item) => (
-                <View key={item.id} style={styles.offerCard}>
-                  <View style={styles.offerLeft}>
+                <View key={item.id} style={[styles.offerCard, { backgroundColor: COLORS.primary }]}>
+                  <View style={[styles.offerLeft, { backgroundColor: COLORS.primary }]}>
                     <Text style={styles.offerBig}>{item.title}</Text>
                     <Text style={styles.offerSmall}>{item.discount}</Text>
                     <Text style={styles.offerDate}>{item.date}</Text>
@@ -1130,9 +962,19 @@ const HomeScreen = () => {
                   <Text style={styles.servicePrice}>{item.price}</Text>
                 </View>
                 <Text style={styles.serviceDesc}>{item.desc}</Text>
-                <TouchableOpacity style={styles.bookBtn} onPress={() => navigation.navigate('ServiceDetails', {
-                  item: { ...item, image: gender === 'Male' ? item.image[1] : item.image[0] }
-                })}>
+                <View style={{ flex: 1 }} />
+
+                <TouchableOpacity
+                  style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
+                  onPress={() =>
+                    navigation.navigate('ServiceDetails', {
+                      item: {
+                        ...item,
+                        image: gender === 'Male' ? item.image[1] : item.image[0]
+                      }
+                    })
+                  }
+                >
                   <Text style={styles.bookBtnText}>Book now</Text>
                 </TouchableOpacity>
               </View>
@@ -1156,8 +998,8 @@ const HomeScreen = () => {
                 and take your look to the next level
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen", { showTab: true })}
-                style={styles.bookNowBtn}>
-                <Text style={[styles.bookBtnText, { color: '#111' }]}>Book Appointment</Text>
+                style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
+                <Text style={[styles.bookBtnText, { color: '#111', fontWeight: 'bold' }]}>Book Appointment</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>
@@ -1242,66 +1084,55 @@ const HomeScreen = () => {
             title="Our Certificates"
             onPress={() => handleSectionNavigation('certificates')}
           />
-          <ScrollView
+          <FlatList
+            data={certificates}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: wp('2%'), backgroundColor: '#F6B745', borderRadius: wp('3%'), marginVertical: hp('2%') }}
-            style={{
-              marginHorizontal: wp('3%'), // scrollView ke bahar spacing
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{
+              paddingHorizontal: wp('2%'),
+              backgroundColor: COLORS.primary,
+              borderRadius: wp('3%'),
+              marginVertical: hp('2%')
             }}
-          >
-            {certificates.map(c => (
-              <View key={c.id} style={styles.certItem}>
-                <Image source={c.image} style={styles.certImage} />
+            style={{
+              marginHorizontal: wp('3%'), // FlatList ke bahar spacing
+            }}
+            renderItem={({ item }) => (
+              <View style={styles.certItem}>
+                <Image
+                  source={{ uri: `https://naushad.onrender.com/${item.imageUrl}` }}
+                  style={styles.certImage}
+                />
                 <Text numberOfLines={2} style={styles.certCaption}>
-                  {c.title}
+                  {item.title}
                 </Text>
               </View>
-            ))}
-          </ScrollView>
+            )}
+          />
 
           {/* About our salon - No "See all" button needed */}
           <SectionTitle title="About our salon" showSeeAll={false} />
 
           <View style={[styles.aboutContainer, { backgroundColor: theme.background }]}>
-            <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
-              <Image
-                source={require("../../assets/images/calender9.png")}
-                style={{ width: wp("5%"), height: wp("5%") }}
-              />
-              <Text style={[styles.aboutTop, { color: theme.background }]}>
-                Founded Year
-              </Text>
-              <Text style={[styles.aboutBottom, { color: theme.background }]}>
-                2002
-              </Text>
-            </View>
+            <FlatList
+              data={aboutData}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={(item) => {
+                return (
+                  <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
+                    <Image source={item.icon} style={{ width: wp("5%"), height: wp("5%") }} />
+                    <Text style={[styles.aboutTop, { color: theme.background }]}>{item.title}</Text>
+                    <Text style={[styles.aboutBottom, { color: theme.background }]}>{item.value}</Text>
+                  </View>
+                )
+              }
 
-            <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
-              <Image
-                source={require("../../assets/people.png")}
-                style={{ width: wp("5%"), height: wp("5%"), }}
-              />
-              <Text style={[styles.aboutTop, { color: theme.background }]}>
-                Employees
-              </Text>
-              <Text style={[styles.aboutBottom, { color: theme.background }]}>
-                12
-              </Text>
-            </View>
-
-            <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
-              <Image
-                source={require("../../assets/sheild.png")}
-                style={{ width: wp("5%"), height: wp("5%"), }}
-              />
-              <Text style={[styles.aboutTop, { color: theme.background }]}>
-                Hygiene
-              </Text>
-              <Text style={[styles.aboutBottom, { color: theme.background }]}>
-                98%
-              </Text>
-            </View>
+              }
+              contentContainerStyle={{ paddingHorizontal: wp("2%") }}
+            />
           </View>
 
 
@@ -1316,7 +1147,7 @@ const HomeScreen = () => {
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingHorizontal: wp('2%') }}
             renderItem={({ item }) => (
-              <View style={styles.packageCard}>
+              <View style={[styles.packageCard, { backgroundColor: COLORS.secondary }]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Text style={styles.packageTitle} numberOfLines={2}>{item.title}</Text>
                   <Text style={styles.packagePrice}>{item.price}</Text>
@@ -1331,7 +1162,7 @@ const HomeScreen = () => {
                     <Text style={styles.packageValue}>{item.about}</Text>
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.packageBtn} onPress={() => navigation.navigate('PackageDetails', { item })}>
+                <TouchableOpacity style={[styles.packageBtn, { backgroundColor: COLORS.primary }]} onPress={() => navigation.navigate('PackageDetails', { item })}>
                   <Text style={styles.packageBtnText}>Book now</Text>
                 </TouchableOpacity>
               </View>
@@ -1346,14 +1177,14 @@ const HomeScreen = () => {
           <FlatList
             data={productPackages}
             horizontal
-            keyExtractor={i => i.id}
+            keyExtractor={(item, index) => item.id?.toString() || index.toString()} // ✅ fallback
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 10 }}
             renderItem={({ item }) => (
               <View style={{ marginHorizontal: wp("2%"), paddingVertical: hp('2%'), marginBottom: hp('2%') }}>
                 <Shadow
                   distance={3}
-                  startColor="#F6B74540"
+                  startColor={COLORS.shadow}
                   offset={[0, 13]}
                   style={{ borderRadius: wp("4%") }}
                 >
@@ -1391,7 +1222,7 @@ const HomeScreen = () => {
                       <Svg height={hp("6%")} width={wp("22%")}>
                         <Polygon
                           points={`0,0 ${wp("22%")},0 ${wp("22%")},${hp("3%")} ${wp("11%")},${hp("6%")} 0,${hp("3%")}`}
-                          fill="#F6B745"
+                          fill={COLORS.primary}
                         />
                       </Svg>
                       <Text
@@ -1404,7 +1235,7 @@ const HomeScreen = () => {
                           alignSelf: 'center'
                         }}
                       >
-                        {item.title}
+                        {item.name}
                       </Text>
                     </View>
 
@@ -1414,18 +1245,18 @@ const HomeScreen = () => {
                         Rate:- <Text style={{ fontWeight: "700" }}>₹ {item.price}</Text>
                       </Text>
                       <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
-                        Products:- <Text style={{ fontWeight: "700" }}>{gender === 'Male' ? item.line1[1] : item.line1[0]}</Text>
+                        Products:- <Text style={{ fontWeight: "700" }}>{item.products}</Text>
                       </Text>
                       <Text
                         style={{
                           marginTop: hp("1%"),
                           fontStyle: "italic",
                           fontSize: hp("1.3%"),
-                          color: "#d19a33",
+                          color: COLORS.primary,
                           textAlign: "center",
                         }}
                       >
-                        {item.tag}
+                        {item.tagline}
                       </Text>
                     </View>
 
@@ -1433,7 +1264,7 @@ const HomeScreen = () => {
                     <TouchableOpacity
                       onPress={() => navigation.navigate('ProductPakage', { item })}
                       style={{
-                        backgroundColor: "#F6B745",
+                        backgroundColor: COLORS.primary,
                         paddingVertical: hp("0.8%"),
                         paddingHorizontal: wp("5%"),
                         borderRadius: wp("5%"),
@@ -1458,7 +1289,7 @@ const HomeScreen = () => {
             data={homeServices}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
+            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
             contentContainerStyle={{ paddingHorizontal: wp('2%') }}
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>
@@ -1469,16 +1300,22 @@ const HomeScreen = () => {
                   <Text style={styles.serviceName}>{item.name}</Text>
                   <Text style={styles.servicePrice}>₹ {item.price}</Text>
                 </View>
-                <Text style={styles.serviceDesc}>{item.desc}</Text>
-                <TouchableOpacity style={styles.bookBtn} onPress={() => navigation.navigate('ServiceDetails', {
-                  item: { ...item, image: item.image }
-                })}>
+                <Text style={styles.serviceDesc}>{item.description}</Text>
+                <View style={{ flex: 1 }} />
+
+                <TouchableOpacity
+                  style={[styles.bookBtn, { backgroundColor: COLORS.primary, }]}
+                  onPress={() =>
+                    navigation.navigate('ServiceDetails', {
+                      item: { ...item, image: item.image },
+                    })
+                  }
+                >
                   <Text style={styles.bookBtnText}>Book now</Text>
                 </TouchableOpacity>
               </View>
             )}
           />
-
         </ScrollView>
       </Animated.View>)}
     </SafeAreaView>
@@ -1504,7 +1341,7 @@ const SectionTitle = ({
       </Text>
       {showSeeAll && (
         <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-          <Text style={[styles.seeAll, { color: theme.textSecondary }]}>
+          <Text style={[styles.seeAll, { color: '#3939ebff' }]}>
             See all
           </Text>
         </TouchableOpacity>
@@ -1512,15 +1349,13 @@ const SectionTitle = ({
     </View>
   );
 };
-
-
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#fff', 
-    paddingBottom: hp('1%') 
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingBottom: hp('1%')
   },
   header: {
     flexDirection: 'row',
@@ -1529,8 +1364,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('3%'),
   },
   welcomeText: {
-    fontSize: wp('3%'),        
-    fontWeight: '700',       
+    fontSize: wp('3%'),
+    fontWeight: '700',
     color: '#8E8E93',
     fontFamily: "Poppins-Medium"
   },
@@ -1547,9 +1382,7 @@ const styles = StyleSheet.create({
     width: wp('7%'),
     height: wp('7%'),
     tintColor: '#7575759C',
-
   },
-
   topRightCont: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1562,56 +1395,32 @@ const styles = StyleSheet.create({
   headerIcons: {
     flexDirection: 'row',
   },
-
-  genderSelection: {
+  genderToggleContainer: {
+    marginHorizontal: hp('2%')
+  },
+  genderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // Increased from 6
-    paddingHorizontal: wp('1%'),
-  },
-  genderBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: wp('4%'), // Increased from 14
-    // Increased from 8
-
-    // borderColor: '#eee7e7ff',
-    // borderRadius: 25,      // Increased from 20
-    // backgroundColor: '#f7f0f0ff',
-  },
-  genderBtnActive: {
-    // borderColor: '#fdfdfdff',
-    // backgroundColor: '#FFF8E5'
+    width: wp('20%'),
+    marginBottom: 8,
   },
   genderText: {
-    marginLeft: wp('3%'),
-    color: '#0b0b0bff',
-    fontFamily: "Poppins-Medium"
-
-
+    fontSize: wp('3%'),
+    fontWeight: '600',
   },
-  genderTextActive: {
-    color: '#111',
-    fontWeight: '600'
+  genderToggle: {
+    width: wp('15%'),
+    height: hp('3%'),
+    borderRadius: wp('5%'),
+    borderWidth: 1.5,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  radioOuter: {
-    width: wp('4%'),
-    height: wp('4%'),
-    borderRadius: wp('3%'),
-    borderWidth: 1,
-    borderColor: '#9E9E9E'
-  },
-  radioOuterActive: {
-    borderColor: '#9E9E9E',
-  },
-  radioInner: {
-    width: wp('2%'),
-    height: wp('2%'),
-    borderRadius: 4,
-    backgroundColor: '#2988FC',
+  toggleThumb: {
     position: 'absolute',
-    top: 2.5,
-    left: 2.5,
+    width: '50%',
+    height: '100%',
+    borderRadius: wp('5%'),
   },
   searchFilContain: {
     width: '97%',
@@ -1640,7 +1449,6 @@ const styles = StyleSheet.create({
     color: '#0e0d0dff',
     fontFamily: "Poppins-Medium"
   },
-
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1650,8 +1458,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18, // Increased from 16
-    fontWeight: '700' // Increased from bold
-    , fontFamily: "Poppins-Medium"
+    fontWeight: '700',
+    fontFamily: "Poppins-Medium"
   },
   seeAll: {
     color: '#20B2A6',
@@ -1663,7 +1471,6 @@ const styles = StyleSheet.create({
     marginHorizontal: wp('2%'),
     marginVertical: hp('2%'),
     borderRadius: wp('4%'), // Increased from 12
-    backgroundColor: '#F6B745',
     elevation: 4, // Increased from 3
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -1676,7 +1483,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   offerLeft: {
-    backgroundColor: '#F6B745',
     paddingHorizontal: wp('4%'), // Increased from 14
     justifyContent: 'flex-start',
     width: '50%'
@@ -1723,7 +1529,6 @@ const styles = StyleSheet.create({
   // Updated service card styles to match the design exactly
   serviceCard: {
     width: wp('38%'),
-    height: hp('25%'),
     marginHorizontal: wp('2%'),
     marginVertical: hp('2%'),
     borderRadius: wp('3%'),
@@ -1734,6 +1539,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     padding: wp('2%'),
+
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    minHeight: hp('25%'),
   },
   serviceImage: {
     width: '100%',
@@ -1765,9 +1575,9 @@ const styles = StyleSheet.create({
     color: '#1111118A',
     fontSize: wp('2.5%'),
     marginBottom: hp('0.5%'),
+    alignSelf: 'flex-start'
   },
   bookBtn: {
-    backgroundColor: '#F6B745',
     paddingVertical: hp('0.3%'),
     borderRadius: wp('50%'),
     alignItems: 'center',
@@ -1806,7 +1616,6 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium"
   },
   bookNowBtn: {
-    backgroundColor: '#F6B745',
     paddingHorizontal: wp('5%'),
     borderRadius: wp('50%'),
     marginTop: hp('5%'),
@@ -1925,7 +1734,6 @@ const styles = StyleSheet.create({
   packageCard: {
     width: wp('65%'),              // screen width ka 65%
     height: hp('22%'),             // screen height ka 22%
-    backgroundColor: '#FFEED0',
     borderRadius: wp('3%'),        // borderRadius bhi responsive
     borderWidth: wp('0.3%'),       // borderWidth responsive
     borderColor: '#E5D4B1',
@@ -1955,8 +1763,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: wp('4%'),
     fontFamily: "Poppins-Medium"
-
-
   },
   packageLabel: {
     fontSize: wp('3.5%'),
@@ -1981,7 +1787,6 @@ const styles = StyleSheet.create({
     // width:57,
     // height:21,
     alignSelf: 'flex-start',
-    backgroundColor: '#F6B745',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,

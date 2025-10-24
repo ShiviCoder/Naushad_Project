@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Animated, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useTheme } from "../context/ThemeContext";
+import COLORS from "../utils/Colors";
 
 const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   const { theme, toggleTheme } = useTheme();
@@ -65,8 +66,9 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   return (
     <View style={styles.checkContainer}>
       <View style={styles.checkBox}>
-        <Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>Accepted</Text>
-        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchAccepted}>
+<Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>
+  {labels[0] || "Accepted"}
+</Text>        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchAccepted}>
           <View
             style={[
               styles.track,
@@ -94,8 +96,9 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
       </View>
 
       <View style={styles.checkBox}>
-        <Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>Pending</Text>
-        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchPending}>
+<Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>
+  {labels[1] || "Pending"}
+</Text>        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchPending}>
           <View
             style={[
               styles.track,
@@ -191,6 +194,86 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   );
 }
 
+if (type === "gender") {
+  const [isMale, setIsMale] = useState(selected === "Male");
+  const Offset = useState(new Animated.Value(isMale ? 0 : 1))[0];
+
+  const thumbSize = wp("3.5%");
+  const trackWidth = wp("12%");
+  const trackHeight = hp("3%");
+  const padding = wp("1%");
+
+
+  const translateX = Offset.interpolate({
+    inputRange: [0, 1],
+    outputRange: [padding, trackWidth - thumbSize - padding],
+  });
+
+  const toggleGender = () => {
+    const newValue = !isMale;
+    setIsMale(newValue);
+
+    Animated.timing(Offset, {
+      toValue: newValue ? 0 : 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+
+    if (onSelect) onSelect(newValue ? "Male" : "Female");
+  };
+
+  const maleColor = COLORS.primary;
+  const femaleColor = COLORS.primary;
+
+  return (
+  <View style={styles.genderToggleContainer}>
+    <Text
+      style={[
+        styles.genderLabel,
+        { color: isMale ? maleColor : theme.textPrimary },
+      ]}
+    >
+      Male
+    </Text>
+
+    <TouchableOpacity activeOpacity={1} onPress={toggleGender}>
+      <View
+        style={[
+          styles.track,
+          {
+            width: trackWidth,
+            height: trackHeight,
+            backgroundColor: isMale ? maleColor : femaleColor,
+          },
+        ]}
+      >
+        <Animated.View
+          style={[
+            styles.thumb,
+            {
+              width: thumbSize,
+              height: thumbSize,
+              borderRadius: thumbSize / 2,
+              transform: [{ translateX }],
+              backgroundColor: theme.background,
+            },
+          ]}
+        />
+      </View>
+    </TouchableOpacity>
+
+    <Text
+      style={[
+        styles.genderLabel,
+        { color: !isMale ? femaleColor : theme.textPrimary },
+      ]}
+    >
+      Female
+    </Text>
+  </View>
+);
+}
+
   return null;
 };
 
@@ -223,6 +306,16 @@ const styles = StyleSheet.create({
     gap: wp("2%"),
     marginTop: hp("1%"),
   },
+  genderToggleContainer: {
+  marginVertical: hp("0.5%"),
+  flexDirection : 'row',
+  alignItems : 'center',
+  gap : wp('2%')
+},
+genderLabel: {
+  fontWeight: "600",
+  fontSize: wp("3.5%"),
+},
 });
 
 export default RadioButton;

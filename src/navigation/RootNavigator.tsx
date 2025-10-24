@@ -40,6 +40,9 @@ import AppVersion from '../screens/SignAuth/AppVersion';
 import OfferScreen from '../screens/SignAuth/OfferScreen'
 import Certificates from '../screens/SignAuth/Certificates';
 import HomeServices from '../screens/SignAuth/HomeServices';
+import ForgotPassword from '../screens/SignAuth/ForgetPassword';
+import BottomNavbarWrapper from '../components/BottomNavbarWrapper'; 
+
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -82,7 +85,8 @@ export type RootStackParamList = {
   AppVersion: undefined;
   OfferScreen: undefined;
   Certificates: undefined,
-  HomeServices: undefined
+  HomeServices: undefined,
+  ForgetPassword : undefined
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -91,9 +95,9 @@ const Tab = createBottomTabNavigator();
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{ headerShown: false }}
-      tabBar={(props) => <BottomNavbar {...props} />}
-      initialRouteName="HomeScreen">
+       screenOptions={{ headerShown: false }}
+  tabBar={(props) => <BottomNavbarWrapper {...props} />}
+  initialRouteName="HomeScreen">
       <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="BookingScreen" component={BookingScreen} />
       <Tab.Screen name="BlankScreen" component={BlankScreen} />
@@ -105,7 +109,7 @@ function MainTabs() {
 export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none' }} >
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Signin" component={Signin} />
         <Stack.Screen name="SignUp" component={SignUp} />
@@ -140,6 +144,7 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name='Certificates' component={Certificates} />
         <Stack.Screen name='HomeServices' component={HomeServices} />
         <Stack.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
+        <Stack.Screen name="ForgetPassword" component={ForgotPassword}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

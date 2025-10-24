@@ -5,6 +5,7 @@ import { ThemeProvider } from "./src/context/ThemeContext";
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import {LikedProductsProvider} from './src/context/LikedProductsContext';
 import { requestAppPermissions } from './src/utils/Permission';
+import { CartProvider } from './src/context/CartContext';
 
   
 
@@ -17,8 +18,10 @@ const App = () => {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-         <LikedProductsProvider> 
-          <RootNavigator/>
+        <LikedProductsProvider>
+          <CartProvider> 
+            <RootNavigator />
+          </CartProvider>
         </LikedProductsProvider>
       </ThemeProvider>
     </SafeAreaProvider>

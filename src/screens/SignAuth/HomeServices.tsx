@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { useNavigation } from "@react-navigation/native";
 import Head from "../../components/Head";
 import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
+import { useTheme } from "../../context/ThemeContext";
 
 type RootStackParamList = {
   Home: undefined;
@@ -23,18 +25,33 @@ type RootStackParamList = {
 
 
 
-const services = [
-  { name: "Mundan ", price: 300, desc: "Shaving a baby's first hair", image: require("../../assets/mundan.png") },
-  { name: "Hair Cut", price: 350, desc: "Stylish cut with blow dry", image: require("../../assets/images/haircut.jpg") },
-  { name: "Hair coloring", price: 500, desc: "Stylish cut with blow dry", image: require("../../assets/images/haircolor.jpg") },
-  { name: "Facial", price: 700, desc: "For healthy, radiant skin", image: require("../../assets/images/facial.jpg") },
-  { name: "Beard Trim", price: 299, desc: "Shape and stylish beard", image: require("../../assets/images/beard.jpg") },
-  { name: "Nail art", price: 300, desc: "Creative nails", image: require("../../assets/images/nail.jpg") },
-];
 
 export default function ServicesScreen() {
   //   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const navigation = useNavigation();
+  const [services , setServices] = useState([]);
+  const {theme} = useTheme();
+const fetchHomeServices = async() => {
+  try {
+     const response = await fetch('https://naushad.onrender.com/api/home-services/', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8', // Postman me jo token use kiya tha
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      console.log("Home services : ", json);
+      setServices(json.data);
+  }catch(error){
+    console.log("Home services error , ", error);
+  }
+}
+
+useEffect(()=>{
+   fetchHomeServices();
+},[])
+
   // Multiple back button methods
   const handleBackPress = () => {
     console.log('Back button pressed');
@@ -58,7 +75,7 @@ export default function ServicesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
       {/* Header */}
       <Head title='Home Services' />
 
@@ -71,8 +88,8 @@ export default function ServicesScreen() {
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>{item.name}</Text>
               <Text style={styles.cardPrice}>₹{item.price}.00</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-              <TouchableOpacity style={styles.bookBtn} onPress={() => navigation.navigate('ServiceDetails', {
+              <Text style={styles.cardDesc}>{item.description}</Text>
+              <TouchableOpacity style={[styles.bookBtn,{backgroundColor : COLORS.primary}]} onPress={() => navigation.navigate('ServiceDetails', {
                 item: { ...item, image: item.image }
               })}>
                 <Text style={styles.bookBtnText}>Book now</Text>
@@ -81,8 +98,6 @@ export default function ServicesScreen() {
           </View>
         ))}
       </ScrollView>
-
-
     </SafeAreaView>
   );
 }
@@ -164,7 +179,6 @@ const styles = StyleSheet.create({
     lineHeight: hp('2%'),
   },
   bookBtn: {
-    backgroundColor: "#F6B745",
     alignSelf: "flex-start",
     paddingHorizontal: wp('4%'),
     paddingVertical: hp('1%'),

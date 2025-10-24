@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Shadow } from "react-native-shadow-2";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useTheme } from "../context/ThemeContext";
+import COLORS from "../utils/Colors";
 
 const TimeSelect = () => {
   const { theme } = useTheme(); // ✅ use theme
@@ -51,7 +52,7 @@ const TimeSelect = () => {
           return (
             <Shadow
               distance={3}
-              startColor={'#F6B745'} // yellow if selected
+              startColor={COLORS.shadow} // yellow if selected
               offset={[4, 0]}
               style={[styles.shadowContainer, { width: wp("18%") , height: hp("4.5%")}]}
               paintInside={isSelected ? true : false} 
@@ -61,7 +62,7 @@ const TimeSelect = () => {
                 style={[
                   styles.slotButton,
                   {
-                    backgroundColor: isSelected ? '#F6B745' : theme.cardBackground, // ✅ yellow if selected
+                    backgroundColor: isSelected ? COLORS.primary : theme.cardBackground, // ✅ yellow if selected
                     
                   },
                 ]}
@@ -71,7 +72,7 @@ const TimeSelect = () => {
                   style={[
                     styles.slotText,
                     { color: isPast ? 
-                      "#dadada" : 
+                      "#8a8787ff" : 
                       isSelected ? '#000' : theme.textPrimary }, // text color contrast
                   ]}
                 >
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   },
   slotButton: {
     borderRadius: wp("2%"),
-    paddingVertical: hp("1%"),
+    paddingVertical: hp("1.3%"),
     paddingHorizontal: wp("3%"),
     justifyContent: "center",
     alignItems: "center",

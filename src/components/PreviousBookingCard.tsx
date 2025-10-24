@@ -7,6 +7,7 @@ import {
 } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../context/ThemeContext";
+import COLORS from "../utils/Colors";
 
 const PreviousBookingCard = ({ item }) => {
   const [isChecked, setIsChecked] = useState(false);
@@ -15,7 +16,7 @@ const PreviousBookingCard = ({ item }) => {
 
   return (
     <TouchableOpacity
-      style={styles.container} // background unchanged
+      style={[styles.container,{backgroundColor : COLORS.secondary}]} // background unchanged
       onPress={() => navigation.navigate('PreviousBooking')}
     >
       {/* Service + Completed */}
@@ -61,7 +62,7 @@ const PreviousBookingCard = ({ item }) => {
 
       {/* Rebook Button */}
       <TouchableOpacity>
-        <Text style={[styles.button, { color: theme.textPrimary }]} >Rebook</Text>
+        <Text style={[styles.button, { color: theme.textPrimary ,backgroundColor : COLORS.primaryz}]} >Rebook</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -70,7 +71,6 @@ const PreviousBookingCard = ({ item }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "column",
-    backgroundColor: "#FCDBA040", // ✅ background unchanged
     width: "90%",
     minHeight: hp("25%"),
     marginVertical: hp("1.5%"),
@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
     height: wp("4%"),
   },
   button: {
-    backgroundColor: "#F6B745",
     paddingHorizontal: wp("4%"),
     paddingVertical: hp("0.8%"),
     borderRadius: wp("7%"),

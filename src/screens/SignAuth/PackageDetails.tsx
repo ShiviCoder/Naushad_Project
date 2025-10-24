@@ -7,6 +7,7 @@ import { PackageData } from '../../components/PackageData';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 type RootStackParamList = {
   OurPackages: undefined,
   PackageDetails: { item: PackageData }
@@ -59,7 +60,7 @@ console.log("Hello")
       </View>
 
       <TouchableOpacity
-        style={styles.bookAppoint}
+        style={[styles.bookAppoint,{backgroundColor : COLORS.primary}]}
        onPress={() => {
           navigation.navigate('BookAppointmentScreen',
   {params: { image:  item.image}  }
@@ -156,7 +157,6 @@ const styles = StyleSheet.create({
   bookAppoint: {
     height: hp('6%'),
     width: '90%',
-    backgroundColor: '#F6B745',
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',

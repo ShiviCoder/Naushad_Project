@@ -11,10 +11,10 @@ const OfferScreen = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="OfferScreen" />
       <View style={styles.content}>
-        <Text style={[styles.text, { color: theme.text }]}>
+        <Text style={[styles.text, { color: theme.textPrimary }]}>
           🎉 Special Offers for You!
         </Text>
-        <Text style={[styles.subText, { color: theme.subText }]}>
+        <Text style={[styles.subText, { color: theme.textPrimary }]}>
           Check out our latest discounts and promotions.
         </Text>
       </View>

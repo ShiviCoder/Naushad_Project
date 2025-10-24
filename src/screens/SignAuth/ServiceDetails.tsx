@@ -7,6 +7,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 type extra = {
   product: string;
@@ -66,16 +67,16 @@ const ServiceDetails = () => {
           <Image style={styles.image} source={item.image} />
           <View style={styles.nameCont}>
             <Text style={[styles.name, { color: theme.textPrimary }]}>{item.name}</Text>
-            <Text style={[styles.price, { color: theme.textPrimary }]}> {item.price}</Text>
+            <Text style={[styles.price, { color: theme.textPrimary }]}>{item.price}</Text>
           </View>
 
-          <Text style={[styles.desc, { color: theme.subtext }]}>"{item.desc}"</Text>
+          <Text style={[styles.desc, { color: theme.subtext }]}>"{item.description}"</Text>
 
           <View style={styles.highlightCont}>
             <Text style={[styles.hightlightHead, { color: theme.textPrimary }]}>Highlights</Text>
             {item.highlights?.map((element, index) => (
               <View key={index} style={styles.highInCon}>
-                <View style={[styles.circle, { backgroundColor: '#F6B745' }]} />
+                <View style={[styles.circle, { backgroundColor: COLORS.primary }]} />
                 <Text style={[styles.highlightTxt, { color: theme.subtext }]}>{element}</Text>
               </View>
             ))}
@@ -139,7 +140,7 @@ const ServiceDetails = () => {
 
 
           <TouchableOpacity
-            style={[styles.BookAppointBtn, { backgroundColor: '#F6B745' }]}
+            style={[styles.BookAppointBtn, { backgroundColor: COLORS.primary }]}
             onPress={() => {
               navigation.navigate("BookAppointmentScreen"); // showTab false by default
 
@@ -205,7 +206,6 @@ const styles = StyleSheet.create({
   circle: {
     height: wp("4%"),
     width: wp("4%"),
-    backgroundColor: "#F6B745",
     borderRadius: '50%',
   },
   highlightTxt: {
@@ -249,7 +249,6 @@ const styles = StyleSheet.create({
   BookAppointBtn: {
     width: '90%',
     paddingVertical: hp("2%"),
-    backgroundColor: "#F6B745",
     borderRadius: wp("3%"),
     alignSelf: "center",
     alignItems: "center",

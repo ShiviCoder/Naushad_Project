@@ -7,6 +7,7 @@ import {
 } from "react-native-responsive-screen";
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
+import COLORS from '../utils/Colors';
 
 const Card = ({ item }) => {
   // dynamic sizes
@@ -30,7 +31,7 @@ const Card = ({ item }) => {
 />
 </Svg>
 
-      <Shadow distance={2} startColor="#F6B74580" offset={[0, hp("2%")]}>
+      <Shadow distance={2} startColor={COLORS.shadow} offset={[0, hp("2%")]}>
         {/* Main Card */}
         <View style={[styles.container, { width: cardWidth, height: cardHeight }]}>
           {/* Hexagon Header */}
@@ -38,10 +39,10 @@ const Card = ({ item }) => {
             <Svg height={hp("6%")} width={cardWidth * 0.6}>
               <Polygon
                 points={`0,0 ${cardWidth * 0.6},0 ${cardWidth * 0.6},${hp("4%")} ${(cardWidth * 0.6) / 2},${hp("6%")} 0,${hp("4%")}`}
-                fill="#F6B745"
+                fill={COLORS.primary}
               />
             </Svg>
-            <Text style={styles.headerText}>{item.title}</Text>
+            <Text style={styles.headerText}>{item.name}</Text>
           </View>
 
           {/* Card Content */}
@@ -50,11 +51,11 @@ const Card = ({ item }) => {
               Rate: <Text style={styles.bold}>{item.price}</Text>
             </Text>
             <Text style={styles.products}>
-              Products: <Text style={styles.bold}> {item.line1[1]}</Text>
+              Products: <Text style={styles.bold}> {item.products}</Text>
             </Text>
             <View style={styles.footerCon}>
               <Text style={styles.about}>{item.tag}</Text>
-              <TouchableOpacity style={styles.bookButton} onPress={()=>navigation.navigate('ProductPakage',{item})}>
+              <TouchableOpacity style={[styles.bookButton,{ backgroundColor: COLORS.primary}]} onPress={()=>navigation.navigate('ProductPakage',{item})}>
                 <Text style={styles.bookText}>Book now</Text>
               </TouchableOpacity>
             </View>

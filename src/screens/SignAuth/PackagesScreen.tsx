@@ -15,6 +15,7 @@ type RootStackParamList = {
 }
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 
 const PackagesScreen = () => {
@@ -36,9 +37,9 @@ const PackagesScreen = () => {
           <View style={styles.cardWrapper}>
             <Shadow
               distance={wp('2%')}
-              startColor="#ebd18bff"
+              startColor={COLORS.shadow}
               offset={[0, 0]}
-              style={styles.mainContainer}
+              style={[styles.mainContainer,{backgroundColor : COLORS.secondary}]}
             >
               {/* Text Section */}
               <View style={styles.mainText}>
@@ -52,7 +53,7 @@ const PackagesScreen = () => {
                 <Text style={styles.aboutText}>
                   About: <Text style={{ color: '#000' }}>{item.about}</Text>
                 </Text>
-                <TouchableOpacity onPress={()=>navigation.navigate('PackageDetails', {item})} style={styles.bookNowButton}>
+                <TouchableOpacity onPress={()=>navigation.navigate('PackageDetails', {item})} style={[styles.bookNowButton,{backgroundColor : COLORS.primary}]}>
                   <Text style={styles.bookButtonText}>Book Now</Text>
                 </TouchableOpacity>
               </View>
@@ -100,7 +101,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     width: '100%',
     flexDirection: 'row',
-    backgroundColor: '#FFEED0',
     borderRadius: wp('4%'),
     paddingLeft: wp('3%'),
     marginBottom: hp('1%'),

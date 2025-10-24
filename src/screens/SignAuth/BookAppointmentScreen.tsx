@@ -8,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 import BottomNavbar from '../../components/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Head from '../../components/Head';
+import COLORS from '../../utils/Colors';
 
 type RootStackParamList = {
   BookAppointmentScreen: { image?: any };
@@ -51,7 +52,7 @@ const showBack = !showTab; // agar tab visible → back button hide, else show
           <View style={styles.nxt}>
             <TouchableOpacity
               onPress={() => navigation.navigate('BookAppoinment2')}
-              style={[styles.nxtButton, { backgroundColor: '#F6B745' }]}
+              style={[styles.nxtButton, { backgroundColor: COLORS.primary }]}
             >
               <Text style={[styles.nxtText, { color: '#fff' }]}>Next</Text>
             </TouchableOpacity>

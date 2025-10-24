@@ -8,6 +8,7 @@ import {
 } from "react-native-responsive-screen";
 import { useTheme } from "../../context/ThemeContext"; // ✅ import theme
 import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
 
 export default function BookingAccepted() {
   const { theme } = useTheme(); // ✅ get current theme
@@ -58,7 +59,7 @@ export default function BookingAccepted() {
         <View style={styles.buttonSection}>
           <TouchableOpacity
             style={[styles.actionBtn, {
-              backgroundColor: '#F6B745', width: '100%', paddingVertical: hp('2%')
+              backgroundColor: COLORS.primary, width: '100%', paddingVertical: hp('2%')
             }]}
           >
             <Text style={[styles.actionText]}>Rebook Now</Text>
