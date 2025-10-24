@@ -120,7 +120,7 @@ const ReferFriendScreen = () => {
             ]}
             onPress={copyCodeToClipboard}
           >
-            <Text style={styles.copyButtonText}>
+            <Text style={[styles.copyButtonText,{color : COLORS.primary}]}>
               {copiedCode ? 'Copied!' : 'Copy Code'}
             </Text>
           </TouchableOpacity>
@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
     
   },
   copyButtonText: {
-    color: '#F6B745',
     fontSize: wp('4%'),
     fontWeight: '600',
   },

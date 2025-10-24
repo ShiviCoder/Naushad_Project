@@ -16,6 +16,8 @@ import {
 } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
+import Popup from "../../components/PopUp";
+import Signin from "./Signin";
 
 export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
@@ -26,15 +28,22 @@ export default function SignupScreen({ navigation }) {
   const [address, setAddress] = useState("");
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
+  const [popupMessage,setPopupMessage] = useState('');
+  const [popupVisible,setPopupVisible] = useState(false);
+  const [nextRoute,setNextRoute] = useState(null);
 
   const handleSignup = async () => {
     if (!fullName || !emailOrPhone || !password || !confirmPassword) {
-      Alert.alert("Error", "All fields are required.");
+      setPopupMessage("Error , All fields are required.");
+      setPopupVisible(true);
+      setNextRoute(null);
       return;
     }
     const normalize = (str) => str.replace(/\s+/g, ''); // remove ALL spaces
     if (normalize(password) !== normalize(confirmPassword)) {
-      Alert.alert("Error", "Passwords do not match.");
+      setPopupMessage("Error, Passwords do not match.");
+      setPopupVisible(true);
+      setNextRoute(null);
       return;
     }
     setLoading(true);
@@ -58,19 +67,20 @@ export default function SignupScreen({ navigation }) {
       console.log("Signup Response:", data);
 
       if (response.ok && data.success) {
-        Alert.alert("Success", data.message || "Signup successful!", [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("Signin"),
-          },
-        ]);
+        setPopupMessage("Success", data.message || "Signup successful!"); 
+        setNextRoute({name : "VerificationScreen"});
+        setPopupVisible(true);
       } else {
-        Alert.alert("Error", data.message || "Signup failed. Try again.");
+        setPopupMessage(data.message || "Signup failed. Try again.");
+        setPopupVisible(true);
+        setNextRoute(null);
       }
     } catch (error) {
       setLoading(false);
       console.log("Signup Error:", error);
-      Alert.alert("Error", "Unable to connect to the server.");
+      setPopupMessage("Error, Unable to connect to the server.");
+      setPopupVisible(true);
+      setNextRoute(null);
     }
     console.log("Sending signup data:", {
       name: fullName,
@@ -78,6 +88,12 @@ export default function SignupScreen({ navigation }) {
       password: password,
       confirmPassword: confirmPassword
     });
+  };
+  const handlePopupClose = () => {
+    setPopupVisible(false);
+    if (nextRoute) {
+      navigation.navigate(nextRoute.name, nextRoute.params);
+    }
   };
   const handleChange = (text) => {
   // Remove non-digit characters
@@ -211,7 +227,10 @@ export default function SignupScreen({ navigation }) {
             <Text style={[styles.signinLink, { color: COLORS.primary }]}> Sign In</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+        </ScrollView>
+            
+        <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
+
     </SafeAreaView>
   );
 }
@@ -229,19 +248,19 @@ const styles = StyleSheet.create({
     marginTop: hp("1%"),
   },
   label: {
-    fontSize: wp("3.5%"),
+    fontSize: wp("3.6%"),
     fontWeight: "600",
     marginBottom: hp("1%"),
     marginTop: hp("0.5%"),
     color: "#000",
   },
   input: {
-    height: hp("4.5%"),
+    height: hp("6%"),
     borderWidth: 0.5,
     borderColor: "#ccc",
     borderRadius: wp("2%"),
     paddingHorizontal: wp("4%"),
-    fontSize: wp("3%"),
+    fontSize: wp("3.5%"),
     backgroundColor: "#fff",
     color:"black"
   },
@@ -264,12 +283,12 @@ const styles = StyleSheet.create({
     marginBottom: hp("3%"),
   },
   signinText: {
-    fontSize: wp("3%"),
+    fontSize: wp("3.5%"),
     color: "#000",
   },
   signinLink: {
     fontWeight: "bold",
-    fontSize: wp("3%"),
+    fontSize: wp("3.5%"),
   },
   radioContainer: {
     flexDirection: "row",
@@ -297,6 +316,6 @@ const styles = StyleSheet.create({
     borderRadius: wp("1.25%"),
   },
   radioLabel: {
-    fontSize: wp("3%"),
+    fontSize: wp("3.5%"),
   }
 });
