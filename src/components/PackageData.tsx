@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 export type PackageData = {
   id: string;
   title: string;
@@ -11,20 +10,6 @@ export type PackageData = {
   discount: string;
   serviceList: string[];
 };
-=======
-export type PackageData  = {
-    id : string;
-    title :  string;
-    price: string;
-    services: string[];
-    about : string;
-    image: any;
-    review: number;
-    rating: number;
-    discount: string;
-    serviceList : string[];
-}
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 
 export const packageData: PackageData[] = [
   {

@@ -11,10 +11,6 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
-<<<<<<< HEAD
-    "@react-native-clipboard/clipboard": "^1.16.3",
-=======
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     "@react-native-community/checkbox": "^0.5.20",
     "@react-native/new-app-screen": "0.81.0",
     "@react-navigation/bottom-tabs": "^7.4.7",
@@ -28,6 +24,7 @@
     "react-native-image-picker": "^8.2.1",
     "react-native-permissions": "^5.4.2",
     "react-native-ratings": "^8.1.0",
+    "react-native-razorpay": "^2.3.0",
     "react-native-reanimated": "^4.0.2",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^5.6.1",
@@ -50,11 +47,7 @@
     "@react-native-community/cli-platform-ios": "20.0.0",
     "@react-native/babel-preset": "0.81.0",
     "@react-native/eslint-config": "0.81.0",
-<<<<<<< HEAD
     "@react-native/metro-config": "^0.81.0",
-=======
-    "@react-native/metro-config": "0.81.0",
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     "@react-native/typescript-config": "0.81.0",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.1.0",

@@ -1,10 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-<<<<<<< HEAD
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-=======
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import SplashScreen from '../screens/SplashScreen';
 import { NavigationContainer, useRoute } from '@react-navigation/native';
 import Signin from '../screens/SignAuth/Signin';
@@ -25,22 +21,14 @@ import BookAppointmentScreen from '../screens/SignAuth/BookAppointmentScreen';
 import Head from '../components/Head';
 import MyProfile from '../screens/SignAuth/MyProfile';
 import Notification from '../screens/home/Notification';
-<<<<<<< HEAD
 import Cart from '../screens/home/Cart';
-=======
-import Cart from '../screens/home/Cart'
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import BookingScreen from '../screens/SignAuth/BookingScreen';
 import BlankScreen from '../screens/SignAuth/BlankScreen';
 import BookingAccepted from '../screens/SignAuth/BookingAccepted';
 import BookingPending from '../screens/SignAuth/BookingPending';
 import PreviousBooking from '../screens/SignAuth/PreviousBooking';
 import BookAppoinment2 from '../screens/SignAuth/BookAppoinment2';
-<<<<<<< HEAD
 import ProductPakage from '../screens/SignAuth/ProductPakage';
-=======
-import ProductPakage from '../screens/SignAuth/ProductPakage'
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import BottomNavbar from '../components/BottomNavbar';
 import Catelog from '../screens/SignAuth/Catelog';
 import ReferFriend from '../screens/SignAuth/ReferFriend';
@@ -49,20 +37,13 @@ import PrivacyPolicy from '../screens/SignAuth/PrivacyPolicy';
 import TermsAndConditions from '../screens/SignAuth/TermsAndConditions';
 import AppVersion from '../screens/SignAuth/AppVersion';
 
-<<<<<<< HEAD
 import OfferScreen from '../screens/SignAuth/OfferScreen';
 import Certificates from '../screens/SignAuth/Certificates';
 import HomeServices from '../screens/SignAuth/HomeServices';
 import ForgotPassword from '../screens/SignAuth/ForgetPassword';
 import BottomNavbarWrapper from '../components/BottomNavbarWrapper';
-=======
-import OfferScreen from '../screens/SignAuth/OfferScreen'
-import Certificates from '../screens/SignAuth/Certificates';
-import HomeServices from '../screens/SignAuth/HomeServices';
-import ForgotPassword from '../screens/SignAuth/ForgetPassword';
-import BottomNavbarWrapper from '../components/BottomNavbarWrapper'; 
-
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
+import PaymentScreen from '../screens/PaymentScreen/PaymentScreen';
+import PaymentSuccessScreen from '../screens/PaymentScreen/PaymentSuccessScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -104,20 +85,13 @@ export type RootStackParamList = {
   TermsAndConditions: undefined;
   AppVersion: undefined;
   OfferScreen: undefined;
-<<<<<<< HEAD
   Certificates: undefined;
   HomeServices: undefined;
   ForgetPassword: undefined;
-=======
-  Certificates: undefined,
-  HomeServices: undefined,
-  ForgetPassword : undefined
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
-<<<<<<< HEAD
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -125,49 +99,28 @@ function MainTabs() {
       tabBar={props => <BottomNavbarWrapper {...props} />}
       initialRouteName="HomeScreen"
     >
-=======
-
-function MainTabs() {
-  return (
-    <Tab.Navigator
-       screenOptions={{ headerShown: false }}
-  tabBar={(props) => <BottomNavbarWrapper {...props} />}
-  initialRouteName="HomeScreen">
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="BookingScreen" component={BookingScreen} />
       <Tab.Screen name="BlankScreen" component={BlankScreen} />
       <Tab.Screen name="AccountScreen" component={AccountScreen} />
     </Tab.Navigator>
-<<<<<<< HEAD
   );
-=======
-  )
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 }
 
 export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <NavigationContainer>
-<<<<<<< HEAD
       <Stack.Navigator
         screenOptions={{ headerShown: false, animation: 'none' }}
       >
-=======
-      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none' }} >
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Signin" component={Signin} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="MainTabs" component={MainTabs} />
-<<<<<<< HEAD
         <Stack.Screen
           name="VerificationScreen"
           component={VerificationScreen}
         />
-=======
-        <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         <Stack.Screen name="CodeVerification" component={CodeVerification} />
         <Stack.Screen name="Services" component={Services} />
         <Stack.Screen name="OurProducts" component={OurProducts} />
@@ -177,7 +130,6 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="PackageDetails" component={PackageDetails} />
         <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
         <Stack.Screen name="PackagesScreen" component={PackagesScreen} />
-<<<<<<< HEAD
         <Stack.Screen
           name="ProductPackageScreen"
           component={ProductPackageScreen}
@@ -208,29 +160,8 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
           component={BookAppointmentScreen}
         />
         <Stack.Screen name="ForgetPassword" component={ForgotPassword} />
-=======
-        <Stack.Screen name="ProductPackageScreen" component={ProductPackageScreen} />
-        <Stack.Screen name='MyProfile' component={MyProfile} />
-        <Stack.Screen name='Notification' component={Notification} />
-        <Stack.Screen name='Cart' component={Cart} />
-        <Stack.Screen name='BookingScreen' component={BookingScreen} />
-        <Stack.Screen name='BookingAccepted' component={BookingAccepted} />
-        <Stack.Screen name='BookingPending' component={BookingPending} />
-        <Stack.Screen name='PreviousBooking' component={PreviousBooking} />
-        <Stack.Screen name='BookAppoinment2' component={BookAppoinment2} />
-        <Stack.Screen name='ProductPakage' component={ProductPakage} />
-        <Stack.Screen name='Head' component={Head} />
-        <Stack.Screen name='Catelog' component={Catelog} />
-        <Stack.Screen name='ReferFriend' component={ReferFriend} />
-        <Stack.Screen name='AboutUs' component={AboutUs} />
-        <Stack.Screen name='PrivacyPolicy' component={PrivacyPolicy} />
-        <Stack.Screen name='TermsAndConditions' component={TermsAndConditions} />
-        <Stack.Screen name='AppVersion' component={AppVersion} />
-        <Stack.Screen name='Certificates' component={Certificates} />
-        <Stack.Screen name='HomeServices' component={HomeServices} />
-        <Stack.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
-        <Stack.Screen name="ForgetPassword" component={ForgotPassword}/>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
+        <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+        <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

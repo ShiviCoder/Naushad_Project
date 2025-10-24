@@ -26,7 +26,6 @@ const ProductPackages = ({ navigation }) => {
 
   if (!item) {
     return (
-<<<<<<< HEAD
       <SafeAreaView
         style={[styles.container, { backgroundColor: theme.background }]}
       >
@@ -37,10 +36,6 @@ const ProductPackages = ({ navigation }) => {
             marginTop: 50,
           }}
         >
-=======
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.textPrimary, textAlign: 'center', marginTop: 50 }}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           Product data not available
         </Text>
       </SafeAreaView>
@@ -56,32 +51,20 @@ const ProductPackages = ({ navigation }) => {
       stars.push(
         <Icon
           key={i}
-<<<<<<< HEAD
           name={i <= 4 ? 'star' : 'star-outline'}
           size={10}
           color="#F6B745"
           style={styles.star}
         />,
-=======
-          name={i <= 4 ? "star" : "star-outline"}
-          size={10}
-          color="#F6B745"
-          style={styles.star}
-        />
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       );
     }
     return stars;
   };
 
   return (
-<<<<<<< HEAD
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-=======
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       <Head title="Product Package" />
       <ScrollView style={styles.scrollView}>
         {/* Product Image */}
@@ -100,11 +83,7 @@ const ProductPackages = ({ navigation }) => {
               {item.name || 'No title'}
             </Text>
             <Text style={[styles.price, { color: theme.textPrimary }]}>
-<<<<<<< HEAD
               ₹{item.price || 'N/A'}
-=======
-             ₹{item.price || 'N/A'}
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
             </Text>
           </View>
 
@@ -140,13 +119,9 @@ const ProductPackages = ({ navigation }) => {
             {item.itemsList?.length > 0 ? (
               item.itemsList.map((i, index) => (
                 <View style={styles.itemRow} key={index}>
-<<<<<<< HEAD
                   <Text
                     style={[styles.itemText, { color: theme.textSecondary }]}
                   >
-=======
-                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
                     {i}
                   </Text>
                 </View>
@@ -165,7 +140,6 @@ const ProductPackages = ({ navigation }) => {
           <View style={styles.instructionsList}>
             {item.usage?.length > 0 ? (
               item.usage.map((u, index) => (
-<<<<<<< HEAD
                 <Text
                   key={index}
                   style={[
@@ -173,9 +147,6 @@ const ProductPackages = ({ navigation }) => {
                     { color: theme.textSecondary },
                   ]}
                 >
-=======
-                <Text key={index} style={[styles.instructionText, { color: theme.textSecondary }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
                   {item.usageInstructions}
                 </Text>
               ))
@@ -190,7 +161,6 @@ const ProductPackages = ({ navigation }) => {
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Quantity Selector
           </Text>
-<<<<<<< HEAD
           <View
             style={[
               styles.quantityContainer,
@@ -221,17 +191,6 @@ const ProductPackages = ({ navigation }) => {
               >
                 +
               </Text>
-=======
-          <View style={[styles.quantityContainer, { backgroundColor: theme.textPrimary }]}>
-            <TouchableOpacity style={styles.quantityButton} onPress={decreaseQuantity}>
-              <Text style={[styles.quantityButtonText, { color: theme.background }]}>-</Text>
-            </TouchableOpacity>
-            <View style={styles.quantityDisplay}>
-              <Text style={[styles.quantityText, { color: theme.background }]}>{quantity}</Text>
-            </View>
-            <TouchableOpacity style={styles.quantityButton} onPress={increaseQuantity}>
-              <Text style={[styles.quantityButtonText, { color: theme.background }]}>+</Text>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
             </TouchableOpacity>
           </View>
         </View>
@@ -240,7 +199,6 @@ const ProductPackages = ({ navigation }) => {
       {/* Bottom Buttons */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-<<<<<<< HEAD
           style={[
             styles.addToCartButton,
             {
@@ -265,33 +223,13 @@ const ProductPackages = ({ navigation }) => {
           <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>
             Add to cart
           </Text>
-=======
-          style={[styles.addToCartButton, { backgroundColor: theme.background, borderColor: theme.textPrimary }]}
-          onPress={() => {
-            const product = {
-              id: 1,
-              name: item.title || "Product",
-              price: item.price || 0,
-              oldPrice: 0,
-              discount: 0,
-              image: require("../../assets/newPic.png"),
-            };
-            navigation.navigate('Cart', { product: { ...product, qty: quantity } });
-          }}
-        >
-          <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>Add to cart</Text>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         </TouchableOpacity>
       </View>
 
       <View style={styles.bottomContainer}>
-<<<<<<< HEAD
         <TouchableOpacity
           style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}
         >
-=======
-        <TouchableOpacity style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>

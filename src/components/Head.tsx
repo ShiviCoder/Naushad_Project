@@ -2,20 +2,15 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-<<<<<<< HEAD
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-=======
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import { useTheme } from '../context/ThemeContext';
 
 interface HeadProps {
   title: string;
   rightComponent?: React.ReactNode;
-<<<<<<< HEAD
   showBack?: boolean;
 }
 
@@ -24,12 +19,6 @@ const Head: React.FC<HeadProps> = ({
   rightComponent,
   showBack = true,
 }) => {
-=======
-  showBack?: boolean; 
-}
-
-const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true }) => {
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   const navigation = useNavigation();
   const { theme } = useTheme();
 
@@ -50,14 +39,10 @@ const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true }) =
       )}
 
       {/* Center - Title */}
-<<<<<<< HEAD
       <Text
         style={[styles.title, { color: theme.textPrimary }]}
         numberOfLines={1}
       >
-=======
-      <Text style={[styles.title, { color: theme.textPrimary }]} numberOfLines={1}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         {title}
       </Text>
 
@@ -90,7 +75,3 @@ const styles = StyleSheet.create({
     right: wp('2%'),
   },
 });
-<<<<<<< HEAD
-=======
- 
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab

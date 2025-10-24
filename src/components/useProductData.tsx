@@ -1,16 +1,11 @@
 // src/components/useProductData.js
-<<<<<<< HEAD
 import { useEffect, useState } from 'react';
-=======
-import { useEffect, useState } from "react";
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 
 const useProductData = () => {
   const [productData, setProductData] = useState([]);
 
   const fetchProductData = async () => {
     try {
-<<<<<<< HEAD
       const response = await fetch(
         'https://naushad.onrender.com/api/product-packages',
         {
@@ -27,20 +22,6 @@ const useProductData = () => {
       setProductData(json.data || []);
     } catch (err) {
       console.log('❌ Product package error:', err);
-=======
-      const response = await fetch('https://naushad.onrender.com/api/product-packages', {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8',
-          'Content-Type': 'application/json',
-        },
-      });
-      const json = await response.json();
-      console.log("✅ Product package response:", json);
-      setProductData(json.data || []);
-    } catch (err) {
-      console.log("❌ Product package error:", err);
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     }
   };
 

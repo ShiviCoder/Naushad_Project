@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
   View,
   Text,
@@ -17,36 +16,18 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // ✅ import theme
-=======
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
-import React from "react";
-import Head from "../../components/Head";
-import Icon from "react-native-vector-icons/Ionicons";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
-import { useTheme } from "../../context/ThemeContext";
-import { SafeAreaView } from "react-native-safe-area-context";
- // ✅ import theme
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 
 export default function BookingAccepted() {
   const { theme } = useTheme(); // ✅ get current theme
 
   return (
-<<<<<<< HEAD
     <SafeAreaView
       style={[styles.screen, { backgroundColor: theme.background }]}
     >
-=======
-    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       <Head title="Booking Details" />
 
       <ScrollView style={styles.container}>
         {/* Status Section */}
-<<<<<<< HEAD
         <View
           style={[styles.statusCard, { backgroundColor: theme.background }]}
         >
@@ -74,28 +55,13 @@ export default function BookingAccepted() {
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: theme.primary }]}
             >
-=======
-        <View style={[styles.statusCard, { backgroundColor: theme.background }]}>
-          <Text style={[styles.statusText, { color: theme.textPrimary }]}>Accepted</Text>
-
-          <View style={styles.dateRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: hp('2%') }}>
-              <Icon name="calendar-outline" size={hp("3%")} color={theme.textPrimary} />
-              <Text style={[styles.dateText, { color: theme.textPrimary }]}>15 Aug 2025</Text>
-            </View>
-            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: theme.primary }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
               <Text style={[styles.actionText]}>Accepted</Text>
             </TouchableOpacity>
           </View>
 
-<<<<<<< HEAD
           <Text style={[styles.price, { color: theme.textPrimary }]}>
             ₹ 500
           </Text>
-=======
-          <Text style={[styles.price, { color: theme.textPrimary }]}>₹ 500</Text>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           <Text style={[styles.desc, { color: theme.textPrimary }]}>
             Professional haircut with styling included.
           </Text>
@@ -104,7 +70,6 @@ export default function BookingAccepted() {
         {/* User Info */}
         <View style={[styles.userCard, { backgroundColor: theme.background }]}>
           <Image
-<<<<<<< HEAD
             source={require('../../assets/images/bookUser.png')}
             style={styles.userImg}
           />
@@ -115,47 +80,29 @@ export default function BookingAccepted() {
             <Text style={[styles.userPhone, { color: theme.textPrimary }]}>
               +91 9876543210
             </Text>
-=======
-            source={require("../../assets/images/bookUser.png")}
-            style={styles.userImg}
-          />
-          <View>
-            <Text style={[styles.userName, { color: theme.textPrimary }]}>Rahul Sharma</Text>
-            <Text style={[styles.userPhone, { color: theme.textPrimary }]}>+91 9876543210</Text>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           </View>
         </View>
 
         {/* Location */}
         <View style={styles.locationRow}>
-<<<<<<< HEAD
           <Icon name="location" size={hp('2.6%')} color={theme.textPrimary} />
           <Text style={[styles.locationText, { color: theme.textPrimary }]}>
             123, Main Street, City
           </Text>
-=======
-          <Icon name="location" size={hp("2.6%")} color={theme.textPrimary} />
-          <Text style={[styles.locationText, { color: theme.textPrimary }]}>123, Main Street, City</Text>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         </View>
 
         {/* Actions */}
         <View style={styles.buttonSection}>
           <TouchableOpacity
-<<<<<<< HEAD
             style={[
               styles.actionBtn,
               { backgroundColor: theme.primary, flex: 1 },
             ]}
-=======
-            style={[styles.actionBtn, { backgroundColor: theme.primary, flex: 1 }]}
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           >
             <Text style={styles.actionText}>Call</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-<<<<<<< HEAD
             style={[
               styles.actionBtn,
               {
@@ -164,9 +111,6 @@ export default function BookingAccepted() {
                 marginLeft: wp('4%'),
               },
             ]}
-=======
-            style={[styles.actionBtn, { backgroundColor: theme.secondary, flex: 1, marginLeft: wp("4%") }]}
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           >
             <Text style={styles.actionText}>Message</Text>
           </TouchableOpacity>
@@ -177,7 +121,6 @@ export default function BookingAccepted() {
 }
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   screen: { flex: 1 },
   container: { padding: wp('4%'), paddingBottom: hp('5%') },
 
@@ -186,25 +129,10 @@ const styles = StyleSheet.create({
     padding: wp('4%'),
     marginBottom: hp('2%'),
     shadowColor: '#000',
-=======
-  screen: { flex: 1 ,
-    
-  },
-  container: { padding: wp("4%"),
-    paddingBottom : hp('5%')
-   },
-
-  // Status Card
-  statusCard: {
-    padding: wp("4%"),
-    marginBottom: hp("2%"),
-    shadowColor: "#000",
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   statusText: {
-<<<<<<< HEAD
     fontSize: wp('6%'),
     fontWeight: 'bold',
   },
@@ -215,23 +143,10 @@ const styles = StyleSheet.create({
   },
   desc: {
     fontSize: wp('5%'),
-=======
-    fontSize: wp("6%"),
-    fontWeight: "bold",
-  },
-  price: {
-    fontSize: wp("6%"),
-    fontWeight: "bold",
-    marginBottom: hp("1.5%"),
-  },
-  desc: {
-    fontSize: wp("5%"),
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
 
   // Date Row
   dateRow: {
-<<<<<<< HEAD
     flexDirection: 'column',
     alignItems: 'flex-start',
     marginVertical: hp('2%'),
@@ -239,38 +154,20 @@ const styles = StyleSheet.create({
   dateText: {
     marginLeft: wp('2%'),
     fontSize: wp('4%'),
-=======
-    flexDirection: "column",
-    alignItems: "flex-start",
-    marginVertical: hp("2%"),
-  },
-  dateText: {
-    marginLeft: wp("2%"),
-    fontSize: wp("4%"),
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     fontWeight: '500',
   },
 
   // User Card
   userCard: {
-<<<<<<< HEAD
     flexDirection: 'row',
     alignItems: 'center',
     padding: wp('3%'),
     marginBottom: hp('2%'),
     shadowColor: '#000',
-=======
-    flexDirection: "row",
-    alignItems: "center",
-    padding: wp("3%"),
-    marginBottom: hp("2%"),
-    shadowColor: "#000",
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   userImg: {
-<<<<<<< HEAD
     width: wp('18%'),
     height: wp('18%'),
     borderRadius: wp('7%'),
@@ -305,38 +202,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('4.5%'),
     fontWeight: '600',
-=======
-    width: wp("18%"),
-    height: wp("18%"),
-    borderRadius: wp("7%"),
-    marginRight: wp("3%"),
-  },
-  userName: { fontSize: wp("4.5%"), fontWeight: "600" },
-  userPhone: { fontSize: wp("4.5%"), marginTop: hp("0.3%"), fontWeight: "600" },
-
-  // Location
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: hp("3%"),
-    marginLeft: wp("1%"),
-  },
-  locationText: { fontSize: wp("4.5%"), marginLeft: wp("2%") },
-
-  // Action Buttons
-  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginTop: hp('4%'),
-    marginBottom : hp('5%')
-   },
-  actionBtn: {
-    paddingVertical: hp("1.2%"),
-    paddingHorizontal: wp("6%"),
-    borderRadius: wp("3%"),
-    alignItems: "center",
-  },
-  actionText: {
-    color: "#fff",
-    fontSize: wp("4.5%"),
-    fontWeight: "600",
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
 });

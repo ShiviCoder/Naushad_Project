@@ -4,16 +4,11 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-<<<<<<< HEAD
-=======
-
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 const Certificates = () => {
   const { theme } = useTheme();
   const [certificates, setCertificates] = useState<any[]>([]);
   const fetchCertificates = async () => {
     try {
-<<<<<<< HEAD
       const response = await fetch(
         'https://naushad.onrender.com/api/certificates',
         {
@@ -25,15 +20,6 @@ const Certificates = () => {
           },
         },
       );
-=======
-      const response = await fetch('https://naushad.onrender.com/api/certificates', {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8',
-          'Content-Type': 'application/json',
-        },
-      });
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       const json = await response.json();
       console.log('API Response:', json);
 
@@ -43,35 +29,23 @@ const Certificates = () => {
       console.error('Error fetching certificates:', error);
       setCertificates([]); // fallback
     }
-<<<<<<< HEAD
   };
-=======
-  }
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 
   useEffect(() => {
     fetchCertificates();
   }, []);
   return (
-<<<<<<< HEAD
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-=======
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       <Head title="🏅 Certificates" />
 
       <View style={{ paddingHorizontal: 15, paddingBottom: 70 }}>
         <FlatList
           data={certificates}
-<<<<<<< HEAD
           keyExtractor={(item, index) =>
             item.id?.toString() || index.toString()
           }
-=======
-          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Image source={item.image} style={styles.image} />
@@ -87,7 +61,6 @@ const Certificates = () => {
 export default Certificates;
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   container: {
     flex: 1,
   },
@@ -95,15 +68,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 12,
-=======
-  container: { 
-    flex: 1 
-  },
-  heading: { 
-    fontSize: 20, 
-    fontWeight: '700', 
-    marginBottom: 12 
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
   },
   card: {
     marginBottom: 16,

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useState } from 'react';
-=======
-import React, { useState } from "react";
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 import {
   View,
   Text,
@@ -13,7 +9,6 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-<<<<<<< HEAD
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -21,6 +16,8 @@ import {
 } from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
+import Popup from '../../components/PopUp';
+import Signin from './Signin';
 
 export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -31,100 +28,59 @@ export default function SignupScreen({ navigation }) {
   const [address, setAddress] = useState('');
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [nextRoute, setNextRoute] = useState(null);
 
   const handleSignup = async () => {
     if (!fullName || !emailOrPhone || !password || !confirmPassword) {
-      Alert.alert('Error', 'All fields are required.');
+      setPopupMessage('Error , All fields are required.');
+      setPopupVisible(true);
+      setNextRoute(null);
       return;
     }
     const normalize = str => str.replace(/\s+/g, ''); // remove ALL spaces
     if (normalize(password) !== normalize(confirmPassword)) {
-      Alert.alert('Error', 'Passwords do not match.');
-=======
-} from "react-native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
-import { SafeAreaView } from "react-native-safe-area-context";
-import COLORS from "../../utils/Colors";
-import Popup from "../../components/PopUp";
-import Signin from "./Signin";
-
-export default function SignupScreen({ navigation }) {
-  const [fullName, setFullName] = useState("");
-  const [emailOrPhone, setEmailOrPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [dob, setDob] = useState("");
-  const [address, setAddress] = useState("");
-  const [gender, setGender] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [popupMessage,setPopupMessage] = useState('');
-  const [popupVisible,setPopupVisible] = useState(false);
-  const [nextRoute,setNextRoute] = useState(null);
-
-  const handleSignup = async () => {
-    if (!fullName || !emailOrPhone || !password || !confirmPassword) {
-      setPopupMessage("Error , All fields are required.");
+      setPopupMessage('Error, Passwords do not match.');
       setPopupVisible(true);
       setNextRoute(null);
-      return;
-    }
-    const normalize = (str) => str.replace(/\s+/g, ''); // remove ALL spaces
-    if (normalize(password) !== normalize(confirmPassword)) {
-      setPopupMessage("Error, Passwords do not match.");
-      setPopupVisible(true);
-      setNextRoute(null);
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
       return;
     }
     setLoading(true);
     try {
-<<<<<<< HEAD
       const response = await fetch('https://naushad.onrender.com/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-=======
-      const response = await fetch("https://naushad.onrender.com/api/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         },
         body: JSON.stringify({
           name: fullName,
           email: emailOrPhone, // assuming backend accepts "email"
           password: password,
-<<<<<<< HEAD
           confirmPassword: confirmPassword,
-=======
-          confirmPassword: confirmPassword
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
         }),
       });
 
       const data = await response.json();
       setLoading(false);
 
-<<<<<<< HEAD
       console.log('Signup Response:', data);
 
       if (response.ok && data.success) {
-        Alert.alert('Success', data.message || 'Signup successful!', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Signin'),
-          },
-        ]);
+        setPopupMessage('Success', data.message || 'Signup successful!');
+        setNextRoute({ name: 'VerificationScreen' });
+        setPopupVisible(true);
       } else {
-        Alert.alert('Error', data.message || 'Signup failed. Try again.');
+        setPopupMessage(data.message || 'Signup failed. Try again.');
+        setPopupVisible(true);
+        setNextRoute(null);
       }
     } catch (error) {
       setLoading(false);
       console.log('Signup Error:', error);
-      Alert.alert('Error', 'Unable to connect to the server.');
+      setPopupMessage('Error, Unable to connect to the server.');
+      setPopupVisible(true);
+      setNextRoute(null);
     }
     console.log('Sending signup data:', {
       name: fullName,
@@ -132,6 +88,12 @@ export default function SignupScreen({ navigation }) {
       password: password,
       confirmPassword: confirmPassword,
     });
+  };
+  const handlePopupClose = () => {
+    setPopupVisible(false);
+    if (nextRoute) {
+      navigation.navigate(nextRoute.name, nextRoute.params);
+    }
   };
   const handleChange = text => {
     // Remove non-digit characters
@@ -162,65 +124,6 @@ export default function SignupScreen({ navigation }) {
         {/* Logo */}
         <Image
           source={require('../../assets/images/logo.png')}
-=======
-      console.log("Signup Response:", data);
-
-      if (response.ok && data.success) {
-        setPopupMessage("Success", data.message || "Signup successful!"); 
-        setNextRoute({name : "VerificationScreen"});
-        setPopupVisible(true);
-      } else {
-        setPopupMessage(data.message || "Signup failed. Try again.");
-        setPopupVisible(true);
-        setNextRoute(null);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.log("Signup Error:", error);
-      setPopupMessage("Error, Unable to connect to the server.");
-      setPopupVisible(true);
-      setNextRoute(null);
-    }
-    console.log("Sending signup data:", {
-      name: fullName,
-      email: emailOrPhone,
-      password: password,
-      confirmPassword: confirmPassword
-    });
-  };
-  const handlePopupClose = () => {
-    setPopupVisible(false);
-    if (nextRoute) {
-      navigation.navigate(nextRoute.name, nextRoute.params);
-    }
-  };
-  const handleChange = (text) => {
-  // Remove non-digit characters
-  let cleaned = text.replace(/\D/g, "");
-
-  // Limit to 8 digits (DDMMYYYY)
-  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
-
-  // Format with slashes
-  let formatted = "";
-  if (cleaned.length <= 2) {
-    formatted = cleaned;
-  } else if (cleaned.length <= 4) {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-  } else {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
-  }
-
-  setDob(formatted);
-};
-
-  return (
-    <SafeAreaView style={{flex : 1, backgroundColor : '#fff'}}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Logo */}
-        <Image
-          source={require("../../assets/images/logo.png")}
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
           style={styles.logo}
           resizeMode="contain"
         />
@@ -288,11 +191,7 @@ export default function SignupScreen({ navigation }) {
 
         <Text style={styles.label}>Gender</Text>
         <View style={styles.radioContainer}>
-<<<<<<< HEAD
           {['male', 'female', 'other'].map(option => (
-=======
-          {['male', 'female', 'other'].map((option) => (
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
             <TouchableOpacity
               key={option}
               style={[styles.radioOption]}
@@ -301,19 +200,12 @@ export default function SignupScreen({ navigation }) {
               <View
                 style={[
                   styles.radioCircle,
-<<<<<<< HEAD
                   gender === option && {
                     borderColor: COLORS.primary,
                     borderWidth: wp('1.5%'),
                   },
                 ]}
               ></View>
-=======
-                  gender === option && { borderColor: COLORS.primary, borderWidth: wp('1.5%') }
-                ]}
-              >
-              </View>
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
               <Text style={styles.radioLabel}>
                 {option.charAt(0).toUpperCase() + option.slice(1)}
               </Text>
@@ -336,7 +228,6 @@ export default function SignupScreen({ navigation }) {
         {/* Sign In Link */}
         <View style={styles.signinContainer}>
           <Text style={styles.signinText}>Already have an account?</Text>
-<<<<<<< HEAD
           <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
             <Text style={[styles.signinLink, { color: COLORS.primary }]}>
               {' '}
@@ -345,16 +236,12 @@ export default function SignupScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-=======
-          <TouchableOpacity onPress={() => navigation.navigate("Signin")}>
-            <Text style={[styles.signinLink, { color: COLORS.primary }]}> Sign In</Text>
-          </TouchableOpacity>
-        </View>
-        </ScrollView>
-            
-        <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
 
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
+      <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={handlePopupClose}
+      />
     </SafeAreaView>
   );
 }
@@ -362,7 +249,6 @@ export default function SignupScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-<<<<<<< HEAD
     paddingHorizontal: wp('5%'),
     justifyContent: 'center',
   },
@@ -373,19 +259,19 @@ const styles = StyleSheet.create({
     marginTop: hp('1%'),
   },
   label: {
-    fontSize: wp('3.5%'),
+    fontSize: wp('3.6%'),
     fontWeight: '600',
     marginBottom: hp('1%'),
     marginTop: hp('0.5%'),
     color: '#000',
   },
   input: {
-    height: hp('4.5%'),
+    height: hp('6%'),
     borderWidth: 0.5,
-    borderColor: '#ccc',
+    borderColor: COLORS.primary,
     borderRadius: wp('2%'),
     paddingHorizontal: wp('4%'),
-    fontSize: wp('3%'),
+    fontSize: wp('3.5%'),
     backgroundColor: '#fff',
     color: 'black',
   },
@@ -408,12 +294,12 @@ const styles = StyleSheet.create({
     marginBottom: hp('3%'),
   },
   signinText: {
-    fontSize: wp('3%'),
+    fontSize: wp('3.5%'),
     color: '#000',
   },
   signinLink: {
     fontWeight: 'bold',
-    fontSize: wp('3%'),
+    fontSize: wp('3.5%'),
   },
   radioContainer: {
     flexDirection: 'row',
@@ -441,88 +327,6 @@ const styles = StyleSheet.create({
     borderRadius: wp('1.25%'),
   },
   radioLabel: {
-    fontSize: wp('3%'),
+    fontSize: wp('3.5%'),
   },
-=======
-    paddingHorizontal: wp("5%"),
-    justifyContent: "center",
-  },
-  logo: {
-    width: wp("70%"),
-    height: hp("15%"),
-    alignSelf: "center",
-    marginTop: hp("1%"),
-  },
-  label: {
-    fontSize: wp("3.6%"),
-    fontWeight: "600",
-    marginBottom: hp("1%"),
-    marginTop: hp("0.5%"),
-    color: "#000",
-  },
-  input: {
-    height: hp("6%"),
-    borderWidth: 0.5,
-    borderColor: "#ccc",
-    borderRadius: wp("2%"),
-    paddingHorizontal: wp("4%"),
-    fontSize: wp("3.5%"),
-    backgroundColor: "#fff",
-    color:"black"
-  },
-  button: {
-    paddingVertical: hp("1.5%"),
-    borderRadius: wp("2%"),
-    alignItems: "center",
-    marginTop: hp("3%"),
-    marginBottom: hp("2%"),
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: wp("4%"),
-    fontWeight: "bold",
-  },
-  signinContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: hp("1%"),
-    marginBottom: hp("3%"),
-  },
-  signinText: {
-    fontSize: wp("3.5%"),
-    color: "#000",
-  },
-  signinLink: {
-    fontWeight: "bold",
-    fontSize: wp("3.5%"),
-  },
-  radioContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: wp("5%"),
-    marginTop: hp("1%"),
-  },
-  radioOption: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  radioCircle: {
-    width: wp("5%"),
-    height: wp("5%"),
-    borderRadius: wp("2.5%"),
-    borderWidth: wp('1.5%'),
-    borderColor: "#3E4347",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: wp("2%"),
-  },
-  radioDot: {
-    width: wp("2.5%"),
-    height: wp("2.5%"),
-    borderRadius: wp("1.25%"),
-  },
-  radioLabel: {
-    fontSize: wp("3.5%"),
-  }
->>>>>>> ed4025b9ad386196f70fb049558ddda4e4b161ab
 });
