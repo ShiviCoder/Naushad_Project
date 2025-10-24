@@ -37,7 +37,7 @@ const MyProfile = () => {
             }
         });
     };
-   const handleChange = (text) => {
+  const handleChange = (text) => {
   // Remove non-digit characters
   let cleaned = text.replace(/\D/g, "");
 

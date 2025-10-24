@@ -79,6 +79,25 @@ export default function SignupScreen({ navigation }) {
       confirmPassword: confirmPassword
     });
   };
+  const handleChange = (text) => {
+  // Remove non-digit characters
+  let cleaned = text.replace(/\D/g, "");
+
+  // Limit to 8 digits (DDMMYYYY)
+  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+
+  // Format with slashes
+  let formatted = "";
+  if (cleaned.length <= 2) {
+    formatted = cleaned;
+  } else if (cleaned.length <= 4) {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  } else {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+  }
+
+  setDob(formatted);
+};
 
   return (
     <SafeAreaView style={{flex : 1, backgroundColor : '#fff'}}>
@@ -139,7 +158,7 @@ export default function SignupScreen({ navigation }) {
           placeholder="Enter your date of birth"
           placeholderTextColor={'gray'}
           value={dob}
-          onChangeText={setDob}
+          onChangeText={handleChange}
         />
 
         <Text style={styles.label}>Address</Text>
