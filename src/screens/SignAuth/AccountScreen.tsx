@@ -5,10 +5,10 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Modal,
 } from 'react-native';
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import settingData from '../../components/EditProfileData';
 import RadioButton from '../../components/RadioButton';
 import {
@@ -18,6 +18,8 @@ import {
 import Head from '../../components/Head';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
+
 
 const AccountScreen = () => {
   const [theme, setTheme] = useState('Light'); // track selected theme
@@ -26,37 +28,46 @@ const AccountScreen = () => {
   const backgroundColor = theme === 'Dark' ? '#121212' : '#fff';
   const textColor = theme === 'Dark' ? '#fff' : '#333';
   const subTextColor = theme === 'Dark' ? '#bbb' : '#757575BA';
-  const textPrimary = theme === 'Dark' ? '#fff' : '#000'
+  const textPrimary = theme === 'Dark' ? '#fff' : '#000';
 
-  const handleLogoutConfirm = () => {
+
+  const handleLogoutConfirm = async () => {
     setShowLogout(false);
-    console.log('User logged out');
-    navigation.navigate('Signin');
+    // Clear login state
+    await AsyncStorage.removeItem('userData');
+    // Navigate to Signin screen after clearing data
+    navigation.replace('Signin');
   };
+
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
-      <Head title='Account' showBack={false} rightComponent={<RadioButton
-        type="toggle"
-        selected={theme}
-        labels={[
-          <Image
-            source={require('../../assets/sun.png')}
-            style={styles.themeIcon}
-          />,
-          <Image
-            source={require('../../assets/moon.png')}
-            style={styles.themeIcon}
-          />,
-        ]}
-        onSelect={isDark => {
-          const value = isDark ? 'Dark' : 'Light';
-          setTheme(value);
-        }}
+      <Head
+        title="Account"
+        showBack={false}
+        rightComponent={
+          <RadioButton
+            type="toggle"
+            selected={theme}
+            labels={[
+              <Image
+                source={require('../../assets/sun.png')}
+                style={[styles.themeIcon,{tintColor:COLORS.primary}]}
+              />,
+              <Image
+                source={require('../../assets/moon.png')}
+                style={[styles.themeIcon,{tintColor:COLORS.primary}]}
+              />,
+            ]}
+            onSelect={isDark => {
+              const value = isDark ? 'Dark' : 'Light';
+              setTheme(value);
+            }}
+          />
+        }
       />
-      } 
-      />
+
 
       {/* Profile Section */}
       <View style={styles.profileSection}>
@@ -69,7 +80,9 @@ const AccountScreen = () => {
             />
           </View>
           <View style={styles.profileText}>
-            <Text style={[styles.name, { color: textColor }]}>Aanchal Jain</Text>
+            <Text style={[styles.name, { color: textColor }]}>
+              Aanchal Jain
+            </Text>
             <Text style={[styles.email, { color: subTextColor }]}>
               aachalsethi38881@gmail.com
             </Text>
@@ -77,7 +90,9 @@ const AccountScreen = () => {
         </View>
       </View>
 
-      <View style={styles.separator} />
+
+      <View style={[styles.separator,{backgroundColor :COLORS.primary}]} />
+
 
       {/* Settings List */}
       <FlatList
@@ -85,7 +100,7 @@ const AccountScreen = () => {
         style={styles.detailsContainer}
         contentContainerStyle={{
           margin: wp('2%'),
-          paddingBottom: hp('12%')
+          paddingBottom: hp('15%'),
         }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -96,28 +111,29 @@ const AccountScreen = () => {
                 style={styles.detailsCon}
                 onPress={() => {
                   if (item.title === 'Edit Profile') {
-                    navigation.push('MyProfile')
+                    navigation.push('MyProfile');
                   } else if (item.title === 'Cart') {
-                    navigation.navigate('Cart')
+                    navigation.navigate('Cart');
                   } else if (item.title === 'Catalog') {
-                    navigation.navigate('Catelog')
-                  } else if (item.title === "Refer a friend") {
-                    navigation.navigate('ReferFriend')
-                  } else if (item.title === "About us") {
-                    navigation.navigate('AboutUs')
-                  } else if (item.title === "Privacy Policy") {
-                    navigation.navigate('PrivacyPolicy')
-                  } else if (item.title === "Terms & Conditions") {
-                    navigation.navigate('TermsAndConditions')
-                  } else if (item.title === "App Version: v1.0.0") {
-                    navigation.navigate('AppVersion')
-                  } else if (item.title === "Logout") {
+                    navigation.navigate('Catelog');
+                  } else if (item.title === 'Refer a friend') {
+                    navigation.navigate('ReferFriend');
+                  } else if (item.title === 'About us') {
+                    navigation.navigate('AboutUs');
+                  } else if (item.title === 'Privacy Policy') {
+                    navigation.navigate('PrivacyPolicy');
+                  } else if (item.title === 'Terms & Conditions') {
+                    navigation.navigate('TermsAndConditions');
+                  } else if (item.title === 'App Version: v1.0.0') {
+                    navigation.navigate('AppVersion');
+                  } else if (item.title === 'Logout') {
                     setShowLogout(true);
                   }
                 }}
               >
                 {/* Left Icon */}
-                <Image style={styles.leftIcon} source={item.image} />
+                <Image style={[styles.leftIcon,{tintColor : COLORS.primary}]} source={item.image} />
+
 
                 {/* Right Content */}
                 <View style={styles.textCon}>
@@ -130,16 +146,15 @@ const AccountScreen = () => {
                 </View>
               </TouchableOpacity>
             </>
-
           );
         }}
       />
 
-
+      {/* Confirm Logout Modal */}
       <Modal
         visible={showLogout}
         transparent
-        animationType='fade'
+        animationType="fade"
         onRequestClose={() => setShowLogout(false)}
       >
         <View style={styles.overlay}>
@@ -149,14 +164,18 @@ const AccountScreen = () => {
               Are you sure you want to logout?
             </Text>
 
+
             <View style={styles.popupActions}>
-              <TouchableOpacity onPress={() => setShowLogout(false)}
+              <TouchableOpacity
+                onPress={() => setShowLogout(false)}
                 style={[styles.popupBtn, styles.cancelBtn]}
               >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.popupBtn, styles.logoutBtn]}
+
+              <TouchableOpacity
+                style={[styles.popupBtn, styles.logoutBtn]}
                 onPress={handleLogoutConfirm}
               >
                 <Text style={styles.logoutText}>Logout</Text>
@@ -169,22 +188,11 @@ const AccountScreen = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: hp('3%')
-  },
-  headContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: wp("5%"),
-    paddingVertical: hp("2%"),
-    justifyContent: "center",
-
-  },
-  headText: {
-    fontSize: wp("5%"),
-    fontWeight: 'bold',
+    paddingBottom: hp('3%'),
   },
   profileSection: {
     paddingHorizontal: wp('4%'),
@@ -220,25 +228,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
   },
-  edit: {
-    width: wp('6%'),
-    height: wp('6%'),
-    marginBottom: hp('2%'),
-  },
   separator: {
     height: 1,
-    backgroundColor: '#ccc',
     marginVertical: hp('1%'),
   },
   detailsContainer: {
     paddingHorizontal: wp('5%'),
-    paddingVertical: hp('3%')
+    paddingVertical: hp('3%'),
   },
   leftIcon: {
     width: wp('5.7%'),
     height: wp('5.7%'),
     resizeMode: 'contain',
-    marginTop: hp('1.2%')
+    marginTop: hp('1.2%'),
   },
   detailsCon: {
     flexDirection: 'row',
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   popup: {
     width: '80%',
@@ -280,13 +282,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   popupMessage: {
     fontSize: 15,
     marginBottom: 20,
     textAlign: 'center',
-    color: '#555'
+    color: '#555',
   },
   popupActions: {
     flexDirection: 'row',
@@ -296,23 +298,23 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   cancelBtn: {
     backgroundColor: '#eee',
-    marginRight: 10
+    marginRight: 10,
   },
   logoutBtn: {
-    backgroundColor: 'red'
+    backgroundColor: COLORS.primary,
   },
   cancelText: {
     color: '#333',
-    fontWeight: '600'
+    fontWeight: '600',
   },
   logoutText: {
     color: '#fff',
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });
 
 export default AccountScreen;

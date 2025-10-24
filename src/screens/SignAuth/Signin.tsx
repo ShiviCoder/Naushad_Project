@@ -5,9 +5,10 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -16,8 +17,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
 
+
 const ADMIN_EMAIL = 'ad@gmail.com';
 const ADMIN_PASSWORD = 'Admin@123';
+
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -27,6 +30,7 @@ const Signin = ({ navigation }) => {
   const [popupMessage, setPopupMessage] = useState('');
   const [nextRoute, setNextRoute] = useState(null); // For navigation after popup
 
+
   const handleSignIn = async () => {
     if (!email || !password) {
       setPopupMessage('Please enter both email and password.');
@@ -35,6 +39,7 @@ const Signin = ({ navigation }) => {
       return;
     }
 
+
     if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
       setPopupMessage('Access Denied. Only admin can login.');
       setNextRoute(null);
@@ -42,21 +47,32 @@ const Signin = ({ navigation }) => {
       return;
     }
 
+
     setLoading(true);
     try {
-      const response = await fetch('https://naushad.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://naushad.onrender.com/api/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
         },
-        body: JSON.stringify({ email, password }),
-      });
+      );
+
 
       const data = await response.json();
 
+
       if (response.ok) {
+        // Save login state persistently
+        await AsyncStorage.setItem('userData', JSON.stringify(data));
         setPopupMessage('Login successful!');
-        setNextRoute({ name: 'MainTabs', params: { from: 'Home', user: data } });
+        setNextRoute({
+          name: 'MainTabs',
+          params: { from: 'Home', user: data },
+        });
         setPopupVisible(true);
       } else {
         setPopupMessage(data.message || 'Login Failed');
@@ -73,12 +89,14 @@ const Signin = ({ navigation }) => {
     }
   };
 
+
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) {
       navigation.replace(nextRoute.name, nextRoute.params);
     }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -87,6 +105,7 @@ const Signin = ({ navigation }) => {
         style={styles.logo}
         resizeMode="contain"
       />
+
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
@@ -101,6 +120,7 @@ const Signin = ({ navigation }) => {
         />
       </View>
 
+
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -113,9 +133,14 @@ const Signin = ({ navigation }) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.forgotPasswordContainer} onPress={() => navigation.navigate("ForgetPassword")}>
+
+      <TouchableOpacity
+        style={styles.forgotPasswordContainer}
+        onPress={() => navigation.navigate('ForgetPassword')}
+      >
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
+
 
       <TouchableOpacity
         style={[styles.signinButton, { backgroundColor: COLORS.primary }]}
@@ -129,12 +154,17 @@ const Signin = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
+
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don’t have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-          <Text style={[styles.signupLink, { color: COLORS.primary }]}> Sign Up</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <Text style={[styles.signupLink, { color: COLORS.primary }]}>
+            {' '}
+            Sign Up
+          </Text>
         </TouchableOpacity>
       </View>
+
 
       {/* Popup Component */}
       <Popup
@@ -146,7 +176,9 @@ const Signin = ({ navigation }) => {
   );
 };
 
+
 export default Signin;
+
 
 const styles = StyleSheet.create({
   container: {
@@ -157,32 +189,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('5%'),
   },
   logo: {
-    width: wp("70%"),
-    height: hp("20%"),
-    alignSelf: "center",
-    marginBottom: hp("1%"),
-    marginTop: hp("4%"),
+    width: wp('70%'),
+    height: hp('20%'),
+    alignSelf: 'center',
+    marginBottom: hp('1%'),
+    marginTop: hp('4%'),
   },
   inputContainer: {
     width: '95%',
     marginBottom: hp('2%'),
   },
   label: {
-    fontSize: wp("4%"),
-    fontWeight: "600",
-    marginBottom: hp("1%"),
-    marginTop: hp("0.5%"),
-    color: "#000",
+    fontSize: wp('4%'),
+    fontWeight: '600',
+    marginBottom: hp('1%'),
+    marginTop: hp('0.5%'),
+    color: '#000',
   },
   input: {
-    height: hp("6%"),
+    height: hp('6%'),
     borderWidth: 0.5,
-    borderColor: "#ccc",
-    borderRadius: wp("2%"),
-    paddingHorizontal: wp("4%"),
-    fontSize: wp("3.5%"),
-    backgroundColor: "#fff",
-    color: "black",
+    borderColor: COLORS.primary,
+    borderRadius: wp('2%'),
+    paddingHorizontal: wp('4%'),
+    fontSize: wp('3.5%'),
+    backgroundColor: '#fff',
+    color: 'black',
   },
   forgotPasswordContainer: {
     width: '100%',
@@ -197,17 +229,17 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   signinButton: {
-   paddingVertical: hp("1.5%"),
-    borderRadius: wp("2%"),
-    alignItems: "center",
-    marginTop: hp("3%"),
-    marginBottom: hp("2%"),
+    paddingVertical: hp('1.5%'),
+    borderRadius: wp('2%'),
+    alignItems: 'center',
+    marginTop: hp('3%'),
+    marginBottom: hp('2%'),
     width: '98%',
   },
   signinButtonText: {
-    color: "#fff",
-    fontSize: wp("4%"),
-    fontWeight: "bold",
+    color: '#fff',
+    fontSize: wp('4%'),
+    fontWeight: 'bold',
   },
   signupContainer: {
     flexDirection: 'row',

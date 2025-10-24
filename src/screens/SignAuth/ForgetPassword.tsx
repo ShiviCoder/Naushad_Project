@@ -10,9 +10,12 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-  Image
+  Image,
 } from 'react-native';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 
@@ -50,17 +53,21 @@ const ForgotPassword = ({ navigation }) => {
   };
 
   const handleResetPassword = async () => {
-    if (!validateEmail(email) || newPassword.length < 6 || confirmPassword !== newPassword) {
+    if (
+      !validateEmail(email) ||
+      newPassword.length < 6 ||
+      confirmPassword !== newPassword
+    ) {
       Alert.alert('Error', 'Please fill all fields correctly.');
       return;
     }
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulated API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       setIsLoading(false);
-      navigation.navigate('Signin')
+      navigation.navigate('Signin');
     } catch (err) {
       setIsLoading(false);
       Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -68,24 +75,18 @@ const ForgotPassword = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: 'center',
-            paddingHorizontal: wp('7%'),
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
+
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
@@ -121,7 +122,7 @@ const ForgotPassword = ({ navigation }) => {
           {confirmError ? <Text style={styles.error}>{confirmError}</Text> : null}
 
           <TouchableOpacity
-            style={[styles.button,{backgroundColor : COLORS.primary}]}
+            style={[styles.button, { backgroundColor: COLORS.primary }]}
             onPress={handleResetPassword}
             disabled={isLoading}
           >
@@ -132,59 +133,74 @@ const ForgotPassword = ({ navigation }) => {
             )}
           </TouchableOpacity>
 
-          <View style={styles.helperContainer}>
-            <Text style={styles.helperText}>
-             <Text> Remember your password?{' '}</Text>
-              <Text style={[styles.helperLink,{color : COLORS.primary}]} onPress={()=>navigation.navigate("Signin")}>
-                Sign In
-              </Text>
-            </Text>
-          </View>        
-          </ScrollView>
+          <View style={styles.signinContainer}>
+            <Text style={styles.signinText}>Remember your password?</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
+              <Text style={[styles.signinLink, { color: COLORS.primary }]}> Sign In</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f8f8' },
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: wp('5%'),
+    justifyContent: 'center',
+  },
+  logo: {
+    width: wp('70%'),
+    height: hp('15%'),
+    alignSelf: 'center',
+    marginTop: hp('1%'),
+  },
   label: {
-    fontSize: wp('3%'),
+    fontSize: wp('3.6%'),
     fontWeight: '600',
     marginBottom: hp('1%'),
-    marginTop: hp("1.5%"),
-    color: '#333',
+    marginTop: hp('0.5%'),
+    color: '#000',
   },
   input: {
-    width: '100%',
-    height: hp('4.5%'),
-    backgroundColor: '#f1efefff',
-    borderWidth: wp('0.2%'),
-    borderColor: '#ddd',
+    height: hp('6%'),
+    borderWidth: 0.5,
+    borderColor: COLORS.primary,
     borderRadius: wp('2%'),
     paddingHorizontal: wp('4%'),
-    fontSize: wp('3%'),
+    fontSize: wp('3.5%'),
+    backgroundColor: '#fff',
+    color: 'black',
+    marginBottom: hp('1.3%'),
   },
   error: { color: 'red', marginBottom: hp('1%') },
-  button: { padding: hp('1.5%'), borderRadius: wp('2%'), alignItems: 'center', marginTop: hp('2%') },
-  buttonText: { color: '#fff', fontWeight: 'bold',     fontSize: wp("4%"),
- },
-  logo: {
-    width: wp("70%"),
-    height: hp("20%"),
-    alignSelf: "center",
-    marginBottom: hp("1%"),
-  },
-   helperContainer: {
+  button: {
+    paddingVertical: hp('1.5%'),
+    borderRadius: wp('2%'),
     alignItems: 'center',
-    marginVertical : hp('2%'),
+    marginTop: hp('3%'),
+    marginBottom: hp('2%'),
   },
-  helperText: {
-    color: '#666',
-    fontSize: wp('3%'),
-  },
-  helperLink: {
+  buttonText: {
+    color: '#fff',
+    fontSize: wp('4%'),
     fontWeight: 'bold',
+  },
+  signinContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: hp('1%'),
+    marginBottom: hp('3%'),
+  },
+  signinText: {
+    fontSize: wp('3.5%'),
+    color: '#000',
+  },
+  signinLink: {
+    fontWeight: 'bold',
+    fontSize: wp('3.5%'),
   },
 });
 

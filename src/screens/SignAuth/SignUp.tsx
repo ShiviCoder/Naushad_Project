@@ -17,7 +17,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
 import Popup from "../../components/PopUp";
-import Signin from "./Signin";
+import { launchImageLibrary } from "react-native-image-picker";
+import Icon from "react-native-vector-icons/Ionicons";
 
 export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
@@ -28,20 +29,23 @@ export default function SignupScreen({ navigation }) {
   const [address, setAddress] = useState("");
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
-  const [popupMessage,setPopupMessage] = useState('');
-  const [popupVisible,setPopupVisible] = useState(false);
-  const [nextRoute,setNextRoute] = useState(null);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [nextRoute, setNextRoute] = useState(null);
+  const [referal, setReferal] = useState('');
+  const [photo, setPhoto] = useState(null);
+
 
   const handleSignup = async () => {
     if (!fullName || !emailOrPhone || !password || !confirmPassword) {
-      setPopupMessage("Error , All fields are required.");
+      setPopupMessage("All fields are required.");
       setPopupVisible(true);
       setNextRoute(null);
       return;
     }
     const normalize = (str) => str.replace(/\s+/g, ''); // remove ALL spaces
     if (normalize(password) !== normalize(confirmPassword)) {
-      setPopupMessage("Error, Passwords do not match.");
+      setPopupMessage("Passwords do not match.");
       setPopupVisible(true);
       setNextRoute(null);
       return;
@@ -63,12 +67,10 @@ export default function SignupScreen({ navigation }) {
 
       const data = await response.json();
       setLoading(false);
-
       console.log("Signup Response:", data);
-
       if (response.ok && data.success) {
-        setPopupMessage("Success", data.message || "Signup successful!"); 
-        setNextRoute({name : "VerificationScreen"});
+        setPopupMessage("Success", data.message || "Signup successful!");
+        setNextRoute({ name: "VerificationScreen" });
         setPopupVisible(true);
       } else {
         setPopupMessage(data.message || "Signup failed. Try again.");
@@ -78,7 +80,7 @@ export default function SignupScreen({ navigation }) {
     } catch (error) {
       setLoading(false);
       console.log("Signup Error:", error);
-      setPopupMessage("Error, Unable to connect to the server.");
+      setPopupMessage("Unable to connect to the server.");
       setPopupVisible(true);
       setNextRoute(null);
     }
@@ -96,27 +98,49 @@ export default function SignupScreen({ navigation }) {
     }
   };
   const handleChange = (text) => {
-  // Remove non-digit characters
-  let cleaned = text.replace(/\D/g, "");
+    // Remove non-digit characters
+    let cleaned = text.replace(/\D/g, "");
 
-  // Limit to 8 digits (DDMMYYYY)
-  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+    // Limit to 8 digits (DDMMYYYY)
+    if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
-  // Format with slashes
-  let formatted = "";
-  if (cleaned.length <= 2) {
-    formatted = cleaned;
-  } else if (cleaned.length <= 4) {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-  } else {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
-  }
+    // Format with slashes
+    let formatted = "";
+    if (cleaned.length <= 2) {
+      formatted = cleaned;
+    } else if (cleaned.length <= 4) {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    } else {
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
 
-  setDob(formatted);
-};
+    setDob(formatted);
+  };
+
+  const handleChoosePhoto = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        maxWidth: 300,
+        maxHeight: 300,
+        quality: 0.7,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorMessage) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          // iOS / Android me path thoda different ho sakta hai
+          const source = { uri: response.assets[0].uri };
+          setPhoto(source);
+        }
+      }
+    );
+  };
 
   return (
-    <SafeAreaView style={{flex : 1, backgroundColor : '#fff'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Logo */}
         <Image
@@ -176,6 +200,11 @@ export default function SignupScreen({ navigation }) {
           value={dob}
           onChangeText={handleChange}
         />
+        <Text style={[styles.label]}>Phone Number</Text>
+        <TextInput
+          placeholder='Enter your number'
+          placeholderTextColor={'gray'}
+          style={[styles.input]} keyboardType='phone-pad' />
 
         <Text style={styles.label}>Address</Text>
         <TextInput
@@ -207,6 +236,35 @@ export default function SignupScreen({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
+
+        <View style={styles.imageContainer}>
+           <TouchableOpacity onPress={handleChoosePhoto}>
+          <Image
+            source={
+              photo
+                ? photo
+                : require('../../assets/user-img.png') // fallback image
+            }
+            style={styles.profileImage}
+          />
+          <View style={styles.editIcon}>
+            <Icon name="create-outline" size={wp('4%')} color="#fff" />
+          </View>
+        </TouchableOpacity>
+        
+          <View style={styles.nameRow}>
+            <Text style={styles.nameText}>Upload your picture</Text>
+          </View>  
+        </View>
+
+        <Text style={styles.label}>Referal Code(Optional)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your referal code"
+          placeholderTextColor={'gray'}
+          value={referal}
+          onChangeText={setReferal}
+        />
         {/* Signup Button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.primary }]}
@@ -227,9 +285,9 @@ export default function SignupScreen({ navigation }) {
             <Text style={[styles.signinLink, { color: COLORS.primary }]}> Sign In</Text>
           </TouchableOpacity>
         </View>
-        </ScrollView>
-            
-        <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
+      </ScrollView>
+
+      <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
 
     </SafeAreaView>
   );
@@ -257,12 +315,12 @@ const styles = StyleSheet.create({
   input: {
     height: hp("6%"),
     borderWidth: 0.5,
-    borderColor: "#ccc",
+    borderColor: COLORS.primary,
     borderRadius: wp("2%"),
     paddingHorizontal: wp("4%"),
     fontSize: wp("3.5%"),
     backgroundColor: "#fff",
-    color:"black"
+    color: "black"
   },
   button: {
     paddingVertical: hp("1.5%"),
@@ -299,6 +357,7 @@ const styles = StyleSheet.create({
   radioOption: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: hp('1.5%')
   },
   radioCircle: {
     width: wp("5%"),
@@ -317,5 +376,56 @@ const styles = StyleSheet.create({
   },
   radioLabel: {
     fontSize: wp("3.5%"),
-  }
+  },
+  uploadButton: {
+    height: hp("6%"),
+    borderWidth: 0.5,
+    borderColor: "#ccc",
+    borderRadius: wp("2%"),
+    paddingHorizontal: wp("4%"),
+    backgroundColor: "#fff",
+    flex: 1,
+    justifyContent: 'center'
+  },
+  uploadText: {
+    color: 'gray',
+    fontSize: wp("3.5%"),
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 60,
+  },
+   imageContainer: {
+    position: "relative",
+    flexDirection : 'row',
+    alignItems : 'center',
+    justifyContent : 'center'
+  },
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  editIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    padding: hp('0.2%'),
+    alignSelf : 'center',
+    
+  },
+  nameRow: {
+    flex: 1,
+    marginLeft: wp('3%'),
+    flexDirection: "row",
+    alignItems : 'center'
+  },
+  nameText: {
+    fontSize: wp('4%'),
+    fontWeight: "600",
+    color: "#000",
+  },
 });

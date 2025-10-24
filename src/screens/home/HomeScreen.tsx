@@ -192,7 +192,7 @@ const HomeScreen = () => {
     {
       id: '1',
       name: 'Hair Cut',
-      price: '₹350.00',
+      price: '350.00',
       desc: 'Stylish cut with blow dry',
       image: [require('../../assets/images/haircut1.png'),
       require('../../assets/images/man-service1.jpg')
@@ -203,7 +203,7 @@ const HomeScreen = () => {
     {
       id: '2',
       name: 'Hair Coloring',
-      price: '₹400.00',
+      price: '400.00',
       desc: 'Long-lasting shades',
       image: [require('../../assets/images/haircolor1.png'),
       require('../../assets/images/man-service2.jpg')
@@ -214,7 +214,7 @@ const HomeScreen = () => {
     {
       id: '3',
       name: 'Facial',
-      price: '₹600.00',
+      price: '600.00',
       desc: 'Glow facial therapy',
       image: [require('../../assets/images/facial.jpg'),
       require('../../assets/images/man-service3.jpg'),
@@ -225,7 +225,7 @@ const HomeScreen = () => {
     {
       id: '4',
       name: 'Hair Cut',
-      price: '₹350.00',
+      price: '350.00',
       desc: 'Stylish cut with blow dry',
       image: [require('../../assets/images/haircut1.png'),
       require('../../assets/images/man-service4.jpg')
@@ -236,7 +236,7 @@ const HomeScreen = () => {
     {
       id: '5',
       name: 'Hair Coloring',
-      price: '₹400.00',
+      price: '400.00',
       desc: 'Long-lasting shades',
       image: [require('../../assets/images/haircolor1.png'),
       require('../../assets/images/man-service5.jpg')
@@ -247,7 +247,7 @@ const HomeScreen = () => {
     {
       id: '6',
       name: 'Facial',
-      price: '₹600.00',
+      price: '600.00',
       desc: 'Glow facial therapy',
       image: [require('../../assets/images/facial.jpg'),
       require('../../assets/images/man-service6.jpg')
@@ -959,7 +959,7 @@ const HomeScreen = () => {
                 } style={styles.serviceImage} />
                 <View style={styles.nameItem}>
                   <Text style={styles.serviceName}>{item.name}</Text>
-                  <Text style={styles.servicePrice}>{item.price}</Text>
+                  <Text style={styles.servicePrice}>₹{item.price}</Text>
                 </View>
                 <Text style={styles.serviceDesc}>{item.desc}</Text>
                 <View style={{ flex: 1 }} />
@@ -1355,7 +1355,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingBottom: hp('1%')
+    paddingBottom: hp('4%')
   },
   header: {
     flexDirection: 'row',
@@ -1742,10 +1742,9 @@ const styles = StyleSheet.create({
     marginHorizontal: wp('1%'),    // horizontal margin responsive
     marginVertical: hp('2%'),      // vertical margin responsive
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: hp('0.2%') }, // responsive shadow
+    shadowOffset: { width: 0, height: hp('0.1%') }, // responsive shadow
     shadowOpacity: 0.08,
-    shadowRadius: wp('1%'),        // shadow radius responsive
+    shadowRadius: wp('5%'),        // shadow radius responsive
     borderTopRightRadius: wp('1%'),
     borderBottomLeftRadius: wp('1%'),
   },
@@ -1768,7 +1767,6 @@ const styles = StyleSheet.create({
     fontSize: wp('3.5%'),
     lineHeight: hp('3%'),
     fontFamily: "Poppins-Medium"
-
   },
   packageLabelText: {
     color: '#42BA86',

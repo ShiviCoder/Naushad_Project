@@ -7,6 +7,7 @@ import {
   Share,
   Alert,
   StatusBar,
+  ScrollView,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +19,7 @@ import {
 } from 'react-native-responsive-screen';
 import COLORS from '../../utils/Colors';
 
-const copyToClipboard = (text) => {
+const copyToClipboard = text => {
   try {
     const { Clipboard } = require('react-native');
     if (Clipboard && Clipboard.setString) {
@@ -39,7 +40,6 @@ const ReferFriendScreen = () => {
   const copyCodeToClipboard = () => {
     try {
       const success = copyToClipboard(referralCode);
-
       if (success) {
         setCopiedCode(true);
       } else {
@@ -49,7 +49,7 @@ const ReferFriendScreen = () => {
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Share Instead', onPress: shareWithFriends },
-          ]
+          ],
         );
       }
     } catch (error) {
@@ -59,15 +59,13 @@ const ReferFriendScreen = () => {
 
   const shareWithFriends = async () => {
     try {
-      const shareMessage = `Join me on this amazing app and earn ₹100 Digital Gold! Use my referral code: ${referralCode}`;
-
+      const shareMessage = `Join me on our salon app! Discover premium beauty and grooming services tailored just for you. Use my referral code: ${referralCode}`;
       await Share.share({
         message: shareMessage,
-        title: 'Invite Friends & Earn Rewards',
+        title: 'Invite Friends',
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to share content');
-      console.error(error);
     }
   };
 
@@ -79,60 +77,116 @@ const ReferFriendScreen = () => {
         barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={theme.background}
       />
-      <Head title="Refer a Friend" showBack={false} />
+      {/* <Head title="Refer a Friend" showBack={false} /> */}
 
-      <View style={styles.content}>
-        <Text style={[styles.mainTitle, { color: theme.textPrimary }]}>
-          Invite & Earn Rewards
-        </Text>
-
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Share the love of great hair and beauty! Invite your friends to try
-          our premium salon services and earn rewards when they book their first
-          appointment.
-        </Text>
-
-        <View
-          style={[
-            styles.referralCodeCard,
-            {
-              backgroundColor: COLORS.primary,
-              shadowColor: theme.shadow,
-            },
-          ]}
-        >
-          <Text style={[styles.referralCodeLabel, { color: theme.text }]}>
-            Your Referral Code
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: hp('5%') }}
+      >
+        <View style={styles.content}>
+          <Text style={[styles.mainTitle, { color: theme.textPrimary }]}>
+            Share Salon Luxury
           </Text>
-          <Text
-            style={[styles.referralCodeText, { color: theme.text }]}
-            selectable
+
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+            Invite your friends to experience the finest hair, beauty, and spa
+            services from our professional stylists. Let them enjoy the same
+            premium care that you already love.
+          </Text>
+
+          <View
+            style={[
+              styles.referralCodeCard,
+              {
+                backgroundColor: COLORS.primary,
+                shadowColor: theme.shadow,
+              },
+            ]}
           >
-            {referralCode}
-          </Text>
+            <Text style={[styles.referralCodeLabel, { color: theme.text }]}>
+              Your Referral Code
+            </Text>
+            <Text
+              style={[styles.referralCodeText, { color: theme.text }]}
+              selectable
+            >
+              {referralCode}
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.copyButton,
+                copiedCode
+                  ? { backgroundColor: '#4CAF50' }
+                  : { backgroundColor: '#fff' },
+              ]}
+              onPress={copyCodeToClipboard}
+            >
+              <Text style={styles.copyButtonText}>
+                {copiedCode ? 'Copied!' : 'Copy Code'}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
-            style={[
-              styles.copyButton,
-              copiedCode
-                ? { backgroundColor: '#4CAF50' }
-                : { backgroundColor: '#fff' },
-            ]}
-            onPress={copyCodeToClipboard}
+            style={[styles.signupButton, { backgroundColor: COLORS.primary }]}
+            onPress={shareWithFriends}
           >
-            <Text style={[styles.copyButtonText,{color: COLORS.primary}]}>
-              {copiedCode ? 'Copied!' : 'Copy Code'}
-            </Text>
+            <Text style={styles.shareButtonText}>Share with Friends</Text>
           </TouchableOpacity>
-        </View>
 
-        <TouchableOpacity
-          style={[styles.shareButton, {backgroundColor : COLORS.primary}]}
-          onPress={shareWithFriends}
-        >
-          <Text style={styles.shareButtonText}>Share with Friends</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.howItWorksSection}>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+              How It Works
+            </Text>
+
+            <View style={styles.stepContainer}>
+              <Text style={[styles.stepNumber, { color: COLORS.primary }]}>
+                1
+              </Text>
+              <View style={styles.stepTextContainer}>
+                <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>
+                  Share Your Code
+                </Text>
+                <Text style={[styles.stepText, { color: theme.textSecondary }]}>
+                  Send your unique referral code to friends directly through the
+                  app or via social platforms like WhatsApp, Instagram, or SMS.
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.stepContainer}>
+              <Text style={[styles.stepNumber, { color: COLORS.primary }]}>
+                2
+              </Text>
+              <View style={styles.stepTextContainer}>
+                <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>
+                  Friends Join
+                </Text>
+                <Text style={[styles.stepText, { color: theme.textSecondary }]}>
+                  When your friends sign up using your referral code, they’ll
+                  get instant access to exclusive salon services and offers.
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.stepContainer}>
+              <Text style={[styles.stepNumber, { color: COLORS.primary }]}>
+                3
+              </Text>
+              <View style={styles.stepTextContainer}>
+                <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>
+                  Enjoy Together
+                </Text>
+                <Text style={[styles.stepText, { color: theme.textSecondary }]}>
+                  Book appointments together and experience our personalized
+                  beauty and spa treatments with your friends.
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -142,9 +196,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    flex: 1,
     paddingHorizontal: wp('5%'),
-    paddingTop: hp('2%'),
+    paddingTop: hp('1%'),
+    paddingBottom: hp('5%'),
   },
   mainTitle: {
     fontSize: wp('6%'),
@@ -183,25 +237,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('8%'),
     paddingVertical: hp('1.8%'),
     borderRadius: wp('2%'),
-    
   },
   copyButtonText: {
+    color: COLORS.primary,
     fontSize: wp('4%'),
     fontWeight: '600',
   },
-  shareButton: {
-    paddingVertical: hp('2.5%'),
-    borderRadius: wp('3%'),
-    elevation: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+  signupButton: {
+    paddingVertical: hp('1.3%'),
+    borderRadius: wp('2%'),
+    alignItems: 'center',
+    marginTop: hp('0%'),
+    marginBottom: hp('0%'),
+    width: '98%',
+    alignSelf: 'center',
   },
   shareButtonText: {
     color: '#fff',
     fontSize: wp('4.5%'),
     fontWeight: '600',
     textAlign: 'center',
+  },
+  howItWorksSection: {
+    marginTop: hp('4%'),
+  },
+  sectionTitle: {
+    fontSize: wp('5.2%'),
+    fontWeight: 'bold',
+    marginBottom: hp('2%'),
+    textAlign: 'center',
+  },
+  stepContainer: {
+    flexDirection: 'row',
+    marginBottom: hp('2.5%'),
+    alignItems: 'flex-start',
+  },
+  stepNumber: {
+    fontSize: wp('6%'),
+    fontWeight: 'bold',
+    width: wp('10%'),
+    textAlign: 'center',
+  },
+  stepTextContainer: {
+    flex: 1,
+    paddingLeft: wp('2%'),
+  },
+  stepTitle: {
+    fontSize: wp('4.3%'),
+    fontWeight: '600',
+    marginBottom: hp('0.5%'),
+  },
+  stepText: {
+    fontSize: wp('3.8%'),
+    lineHeight: hp('2.8%'),
   },
 });
 

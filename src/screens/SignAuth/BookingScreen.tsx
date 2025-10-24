@@ -20,9 +20,9 @@ const allBookings = [
 ];
 
 const filters = [
-  {label : "All", value: "all"},
-  {label : "Accepted" , value : "accept"},
-  {label : "Pending", value : "pending"},
+  { label: "All", value: "all" },
+  { label: "Accepted", value: "accept" },
+  { label: "Pending", value: "pending" },
 ]
 
 const BookingScreen = () => {
@@ -30,24 +30,25 @@ const BookingScreen = () => {
   const { theme } = useTheme(); // ✅ new theme context
   const [selectedFilter, setSelectedFilter] = useState('all');
 
-  const filteredBookings = allBookings.filter(item=>{
-    if(selectedFilter === "all") return true;
-    if(selectedFilter === "accept") return item.type === 'accept';
-    if(selectedFilter === "pending") return item.type === "pending";
+  const filteredBookings = allBookings.filter(item => {
+    if (selectedFilter === "all") return true;
+    if (selectedFilter === "accept") return item.type === 'accept';
+    if (selectedFilter === "pending") return item.type === "pending";
     return false;
   });
 
   return (
     <SafeAreaView style={[styles.mainContainer, { backgroundColor: theme.background }]}>
-      <Head title='Bookings' showBack={false}/>
+      <Head title='Bookings' showBack={false} />
       {/* RadioButton component */}
-      <RadioButton 
-      type='status'
-      selected={selectedFilter}
-      onSelect={value => 
-       { console.log('Selected Value ',value);
-        setSelectedFilter(value);}
-      }
+      <RadioButton
+        type='status'
+        selected={selectedFilter}
+        onSelect={value => {
+          console.log('Selected Value ', value);
+          setSelectedFilter(value);
+        }
+        }
       />
 
       <FlatList
@@ -58,17 +59,18 @@ const BookingScreen = () => {
         keyExtractor={(item, index) => item.id + "-" + index}
         renderItem={({ item, index }) => {
           if (item.type === "previous" && selectedFilter === "all") {
-            const isFirstPrevious = index === 0 || filteredBookings[index - 1].type !== "previous";
+            const isFirstPrevious =
+              index === 0 || filteredBookings[index - 1].type !== "previous";
 
             return (
-              <>
+              <View>
                 {isFirstPrevious && (
                   <Text style={[styles.heading, { color: theme.textPrimary }]}>
                     Previous Bookings
                   </Text>
                 )}
                 <PreviousBookingCard item={item} />
-              </>
+              </View>
             );
           } else if (item.type === "accept") {
             return <BookingAcceptCards item={item} />;
@@ -79,7 +81,7 @@ const BookingScreen = () => {
           }
         }}
       />
-    
+
     </SafeAreaView>
   );
 };
@@ -92,7 +94,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp("5%"),
     paddingVertical: hp("2%"),
     justifyContent: "center",
-    
+
   },
   headText: {
     fontSize: wp("5%"),
