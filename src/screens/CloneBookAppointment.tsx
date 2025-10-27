@@ -7,16 +7,19 @@ import {
   FlatList
 } from 'react-native';
 import React, { useState } from 'react';
-import Calender from '../../components/Calender';
-import TimeSelect from '../../components/TImeSelect';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import Calender from '../components/Calender';
+import TimeSelect from '../components/TImeSelect';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp
+} from 'react-native-responsive-screen';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { useTheme } from '../../context/ThemeContext';
-import BottomNavbar from '../../components/BottomNavbar';
+import { useTheme } from '../context/ThemeContext';
+import BottomNavbar from '../components/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Head from '../../components/Head';
-import COLORS from '../../utils/Colors';
-import Popup from '../../components/PopUp';
+import Head from '../components/Head';
+import COLORS from '../utils/Colors';
+import Popup from '../components/PopUp';
 
 type RootStackParamList = {
   BookAppointmentScreen: { image?: any; showTab?: boolean; from?: any };
@@ -71,7 +74,7 @@ export default function BookAppointmentScreen() {
               <Image source={image} style={styles.img} />
             ) : (
               <Image
-                source={require('../../assets/images/facial.jpg')}
+                source={require('../assets/images/facial.jpg')}
                 style={styles.img}
               />
             )}
@@ -123,7 +126,7 @@ export default function BookAppointmentScreen() {
     <SafeAreaView
       style={[styles.mainContainer, { backgroundColor: theme.background }]}
     >
-      <Head title="Bookings" showBack={false} />
+      <Head title="Bookings" showBack={showBack} />
 
       <FlatList
         data={data}
@@ -135,10 +138,10 @@ export default function BookAppointmentScreen() {
         }}
         showsVerticalScrollIndicator={false}
       />
-      {showTab && <BottomNavbar />}
 
       {/* Popup component retained but not used */}
       <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
+      
     </SafeAreaView>
   );
 }

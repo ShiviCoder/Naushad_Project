@@ -40,7 +40,6 @@ const PaymentScreen = () => {
       showPopup('Coming Soon', 'Wallet / Salon Credits payment option will be available soon.');
       return;
     }
-
     const options = {
       description: 'Product Payment - Naushad Hair Salon',
       image: 'https://i.imgur.com/3g7nmJC.png', // Your logo URL
@@ -62,9 +61,7 @@ const PaymentScreen = () => {
         navigation.replace('PaymentSuccessScreen', { paymentId: data.razorpay_payment_id });
       })
       .catch(error => {
-        const errMsg =
-          (error && (error.description || error.error_description || error.reason)) ||
-          'Payment process was not completed or cancelled by user.';
+        const errMsg ='Payment cancelled by user.';
         showPopup('Payment Failed', errMsg);
       });
   };

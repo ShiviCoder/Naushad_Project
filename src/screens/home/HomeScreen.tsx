@@ -25,7 +25,7 @@ const { width } = Dimensions.get("window");
 const VideoCard = ({ videoId }: { videoId: string }) => {
   const cardWidth = wp("40%");
   const cardHeight = hp('40%') // 16:9 ratio
-  const [playing, setPlaying] = useState(false);
+ 
 
   const html = `
    <html>
@@ -59,7 +59,7 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
       </head>
       <body>
         <iframe
-          src="https://www.youtube.com/embed/${videoId}?controls=0&modestbranding=1&rel=0&fs=0&autoplay=${playing ? 1 : 0}"
+          src="https://www.youtube.com/embed/${videoId}?controls=0&modestbranding=1&rel=0&fs=0&autoplay=1"
           frameborder="0"
           allow="autoplay; encrypted-media"
           allowfullscreen
@@ -85,35 +85,10 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
           source={{ html }}
           style={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
           scrollEnabled={false}
-        />
-
-        {!playing && (
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: [{ translateX: -25 }, { translateY: -25 }],
-              zIndex: 10,
-            }}
-            onPress={() => setPlaying(true)}
-          >
-            <View
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: "rgba(255,255,255,0.8)",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>▶</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
+        />      
       </View>
-
     );
   } catch (e) {
     console.log("Error rendering YouTubePlayer:", e);
@@ -147,21 +122,42 @@ const HomeScreen = () => {
     return token;
   }
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    Animated.timing(translateY, {
-      toValue: 50,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-    setTimeout(() => {
-      setRefreshing(false);
-      Animated.timing(translateY, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
-    }, 1500);
-  };
+  const fetchAllData = async () => {
+     try {
+      await Promise.all([
+        fetchServices(),
+        fetchProductPackages(),
+        fetchHomeServices(),
+        fetchCertificates(),
+        fetchAboutData(),
+        fetchVideos()
+      ]);
+      console.log("✅ All APIs loaded");
+    } catch (error) {
+      console.error("Error fetching all data:", error);
+    }
+  }
+
+  useEffect(()=>{
+    fetchAllData();
+  },[])
+ const onRefresh = async () => {
+  setRefreshing(true);
+  Animated.timing(translateY, {
+    toValue: 50,
+    duration: 300,
+    useNativeDriver: true,
+  }).start();
+
+  await fetchAllData(); // wait for APIs
+
+  Animated.timing(translateY, {
+    toValue: 0,
+    useNativeDriver: true,
+  }).start();
+
+  setRefreshing(false);
+};
 
   const handleSectionNavigation = (section: string) => {
     switch (section) {
@@ -173,9 +169,6 @@ const HomeScreen = () => {
         break;
       case 'products':
         navigation.navigate('OurProducts');
-        break;
-      case 'videos':
-        navigation.navigate('Videos')
         break;
       case 'certificates':
         navigation.navigate('Certificates')
@@ -191,6 +184,9 @@ const HomeScreen = () => {
         navigation.navigate('HomeServices');
         console.log('Navigate to Product Packages Screen');
         break;
+      case 'videos' : 
+      navigation.navigate('VideosScreen');
+      break;
       default:
         console.log('Unknown section');
     }
@@ -289,9 +285,7 @@ const HomeScreen = () => {
   }
 
 
-  useEffect(() => {
-    fetchServices();
-  }, [])
+ 
   // Products (added rating + tag)
   const products = [
     {
@@ -376,7 +370,7 @@ const HomeScreen = () => {
   // Videos row (thumbnails with play)
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  useEffect(() => {
+ 
     const fetchVideos = async () => {
       try {
         const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
@@ -398,9 +392,7 @@ const HomeScreen = () => {
       }
     };
 
-    fetchVideos();
-  }, []);
-
+    
 
   // Certificates (two items like the mock)
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -427,9 +419,7 @@ const HomeScreen = () => {
     }
   }
 
-  useEffect(() => {
-    fetchCertificates();
-  }, []);
+ 
   // Packages (two-column cards)
   const packages = [
     {
@@ -564,9 +554,7 @@ const HomeScreen = () => {
     }
   }
 
-  useEffect(() => {
-    fetchProductPackages();
-  }, [])
+ 
 
   const offers = [
     {
@@ -611,7 +599,7 @@ const HomeScreen = () => {
       const response = await fetch('https://naushad.onrender.com/api/home-services/', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`, // Postman me jo token use kiya tha
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -623,9 +611,7 @@ const HomeScreen = () => {
       console.log("Home services error : ", error)
     }
   }
-  useEffect(() => {
-    fetchHomeServices();
-  }, [])
+ 
 
   const [aboutData, setAboutData] = useState([]);
   const fetchAboutData = async () => {
@@ -640,16 +626,14 @@ const HomeScreen = () => {
         },
       });
       const json = await response.json();
-      console.log("About Data token : ", token)
-      console.log("About Data : ", json);
+      console.log("About Salon Data token : ", token)
+      console.log("About Salon Data : ", json);
       setAboutData(json.data);
     } catch (error) {
       console.log("About Data : ", error)
     }
   }
-  useEffect(() => {
-    fetchAboutData();
-  }, [])
+ 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
 
@@ -1003,7 +987,7 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>
                 <Image
-                  source={{ uri: `https://naushad.onrender.com${item.imageUrl}` }}
+                  source={{ uri: item.imageUrl }}
                   style={styles.serviceImage}
                 />
                 <View style={styles.nameItem}>
@@ -1036,7 +1020,7 @@ const HomeScreen = () => {
               </View>
             )}
           />
-
+          
           {/* Appointment Banner */}
           <ImageBackground
             resizeMode='cover'
@@ -1053,7 +1037,7 @@ const HomeScreen = () => {
               <Text style={styles.bannerText}>
                 and take your look to the next level
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen", { from: 'bottomBar', showTab: true })}
+              <TouchableOpacity onPress={() => navigation.navigate("CloneBookAppointment")}
                 style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
                 <Text style={[styles.bookBtnText, { color: '#111', fontWeight: 'bold' }]}>Book Appointment</Text>
               </TouchableOpacity>
@@ -1069,7 +1053,7 @@ const HomeScreen = () => {
             data={products}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
+             keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('1.5%') }}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -1128,7 +1112,7 @@ const HomeScreen = () => {
             data={videos.data}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
+           keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('3%'), marginVertical: hp('2%') }}
             renderItem={({ item }) =>
               <VideoCard videoId={item.videoId} />
@@ -1157,7 +1141,7 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.certItem}>
                 <Image
-                  source={{ uri: `https://naushad.onrender.com/${item.imageUrl}` }}
+                  source={{ uri: item.imageUrl }}
                   style={styles.certImage}
                 />
                 <Text numberOfLines={2} style={styles.certCaption}>
@@ -1171,24 +1155,30 @@ const HomeScreen = () => {
           <SectionTitle title="About our salon" showSeeAll={false} />
 
           <View style={[styles.aboutContainer, { backgroundColor: theme.background }]}>
-            <FlatList
-              data={aboutData}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={(item) => {
-                return (
-                  <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
-                    <Image source={item.icon} style={{ width: wp("5%"), height: wp("5%") }} />
-                    <Text style={[styles.aboutTop, { color: theme.background }]}>{item.title}</Text>
-                    <Text style={[styles.aboutBottom, { color: theme.background }]}>{item.value}</Text>
-                  </View>
-                )
-              }
-
-              }
-              contentContainerStyle={{ paddingHorizontal: wp("2%") }}
-            />
+           <FlatList
+  data={aboutData}
+  keyExtractor={(item) => item._id}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  renderItem={({ item }) => {
+    return (
+      <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
+        <Image
+          source={{ uri: `https://naushad.onrender.com${item.image.replace(/\\/g, "/")}` }}
+          style={{ width: wp("10%"), height: wp("10%"), borderRadius: wp("2%") }}
+          resizeMode="contain"
+        />
+        <Text style={[styles.aboutTop, { color: theme.background }]}>
+          {item.title}
+        </Text>
+        <Text style={[styles.aboutBottom, { color: theme.background }]}>
+          {item.description}
+        </Text>
+      </View>
+    );
+  }}
+  contentContainerStyle={{ paddingHorizontal: wp("2%") }}
+/>
           </View>
 
 
@@ -1233,7 +1223,7 @@ const HomeScreen = () => {
           <FlatList
             data={productPackages}
             horizontal
-            keyExtractor={(item, index) => item.id?.toString() || index.toString()} // ✅ fallback
+           keyExtractor={(item) => item._id}// ✅ fallback
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 10 }}
             renderItem={({ item }) => (
@@ -1345,7 +1335,7 @@ const HomeScreen = () => {
             data={homeServices}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+            keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('2%') }}
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>

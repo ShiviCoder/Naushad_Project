@@ -125,9 +125,11 @@ const AccountScreen = () => {
                     navigation.navigate('PrivacyPolicy');
                   } else if (item.title === 'Terms & Conditions') {
                     navigation.navigate('TermsAndConditions');
-                  } else if (item.title === 'App Version: v1.0.0') {
-                    navigation.navigate('AppVersion');
-                  } else if (item.title === 'Logout') {
+                  } 
+                  // else if (item.title === 'App Version: v1.0.0') {
+                  //   navigation.navigate('AppVersion');
+                  // } 
+                  else if (item.title === 'Logout') {
                     setShowLogout(true);
                   }
                 }}

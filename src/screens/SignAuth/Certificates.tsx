@@ -49,7 +49,7 @@ const Certificates = () => {
           keyExtractor={(item, index) => item.id?.toString() || index.toString()}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Image source={item.image} style={styles.image} />
+              <Image source={{ uri: item.imageUrl }} style={styles.image} />
               <Text style={[styles.title]}>{item.title}</Text>
             </View>
           )}

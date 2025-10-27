@@ -21,13 +21,11 @@ const OfferScreen = () => {
     </SafeAreaView>
   );
 };
-
 export default OfferScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-   
+    flex: 1,  
   },
   content: {
     marginTop: 20,

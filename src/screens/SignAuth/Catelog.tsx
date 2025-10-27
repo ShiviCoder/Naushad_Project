@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -12,216 +12,245 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 
 const products = [
-   {
-      id: '1',
-      name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product1.jpg'),
-      require('../../assets/images/female-product1.jpg')
-      ],
-      description: '100% natural oil',
-      reviews: 5802,
-    },
-    {
-      id: '2',
-      name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product2.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-     {
-      id: '3',
-      name: ['Detan — Face', 'Foaming Face Wash Gel'],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '4',
-      name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
-      price: '₹299',
-      offer: '20%OFF',
-      rating: '4.1',
-      tag: 'Salon grade',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Detox & deep clean',
-      reviews: 2750,
-    },
-    {
-      id: '5',
-      name: ['Shave Cream ', 'MediCube Hair Mask'],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product3.jpg')
-      ],
-      description: 'Anti-dandruff formula',
-      reviews: 3300,
-    },
-    {
-      id: '6',
-      name: ['Detan — Face', 'Foaming Face Wash'],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '7',
-      name: ['Nivea Hair spa', "Plum FaceWash 50ml"],
-      price: '₹299',
-      offer: '20%OFF',
-      rating: '4.1',
-      tag: 'Salon grade',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product2.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '8',
-      name: ['Shave Cream ', 'MediCube Hair Mask'],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product3.jpg')
-      ],
-      description: 'Anti-dandruff formula',
-      reviews: 3300,
-    },
+  {
+    id: '1',
+    name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
+    price: '₹299',
+    offer: '25%OFF',
+    rating: '4.1',
+    tag: '100% natural oil',
+    image: [require('../../assets/images/male-product1.jpg'),
+    require('../../assets/images/female-product1.jpg')
+    ],
+    description: '100% natural oil',
+    reviews: 5802,
+  },
+  {
+    id: '2',
+    name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
+    price: '₹299',
+    offer: '33%OFF',
+    rating: '4.1',
+    tag: 'Instant visible result',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product2.jpg')
+    ],
+    description: 'Smooth & shiny hair',
+    reviews: 3100,
+  },
+  {
+    id: '3',
+    name: ['Detan — Face', 'Foaming Face Wash Gel'],
+    price: '₹299',
+    offer: '33%OFF',
+    rating: '4.1',
+    tag: 'Instant visible result',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product4.jpg')
+    ],
+    description: 'Smooth & shiny hair',
+    reviews: 3100,
+  },
+  {
+    id: '4',
+    name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
+    price: '₹299',
+    offer: '20%OFF',
+    rating: '4.1',
+    tag: 'Salon grade',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product4.jpg')
+    ],
+    description: 'Detox & deep clean',
+    reviews: 2750,
+  },
+  {
+    id: '5',
+    name: ['Shave Cream ', 'MediCube Hair Mask'],
+    price: '₹299',
+    offer: '25%OFF',
+    rating: '4.1',
+    tag: '100% natural oil',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product3.jpg')
+    ],
+    description: 'Anti-dandruff formula',
+    reviews: 3300,
+  },
+  {
+    id: '6',
+    name: ['Detan — Face', 'Foaming Face Wash'],
+    price: '₹299',
+    offer: '33%OFF',
+    rating: '4.1',
+    tag: 'Instant visible result',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product4.jpg')
+    ],
+    description: 'Smooth & shiny hair',
+    reviews: 3100,
+  },
+  {
+    id: '7',
+    name: ['Nivea Hair spa', "Plum FaceWash 50ml"],
+    price: '₹299',
+    offer: '20%OFF',
+    rating: '4.1',
+    tag: 'Salon grade',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product2.jpg')
+    ],
+    description: 'Smooth & shiny hair',
+    reviews: 3100,
+  },
+  {
+    id: '8',
+    name: ['Shave Cream ', 'MediCube Hair Mask'],
+    price: '₹299',
+    offer: '25%OFF',
+    rating: '4.1',
+    tag: '100% natural oil',
+    image: [require('../../assets/images/male-product11.jpg'),
+    require('../../assets/images/female-product3.jpg')
+    ],
+    description: 'Anti-dandruff formula',
+    reviews: 3300,
+  },
 ];
 
-const services = [
-    {
-      id: '1',
-      name: 'Hair Cut',
-      price: '₹350.00',
-      desc: 'Stylish cut with blow dry',
-      image: [require('../../assets/images/haircut1.png'),
-      require('../../assets/images/man-service1.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-      {
-      id: '2',
-      name: 'Hair Coloring',
-      price: '₹400.00',
-      desc: 'Long-lasting shades',
-      image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service5.jpg')],
-      highlights: ['Wash & trim included', 'Modern Styling', '1hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '3',
-      name: 'Hair Coloring',
-      price: '₹400.00',
-      desc: 'Long-lasting shades',
-      image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service2.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '4',
-      name: 'Facial',
-      price: '₹600.00',
-      desc: 'Glow facial therapy',
-      image: [require('../../assets/images/facial.jpg'),
-      require('../../assets/images/man-service3.jpg'),],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '5',
-      name: 'Hair Cut',
-      price: '₹350.00',
-      desc: 'Stylish cut with blow dry',
-      image: [require('../../assets/images/haircut1.png'),
-      require('../../assets/images/man-service4.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '6',
-      name: 'Hair Coloring',
-      price: '₹400.00',
-      desc: 'Long-lasting shades',
-      image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service5.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '7',
-      name: 'Facial',
-      price: '₹600.00',
-      desc: 'Glow facial therapy',
-      image: [require('../../assets/images/facial.jpg'),
-      require('../../assets/images/man-service6.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-      {
-      id: '8',
-      name: 'Hair Coloring',
-      price: '₹400.00',
-      desc: 'Long-lasting shades',
-      image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service5.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-  ];
+// const services = [
+//     {
+//       id: '1',
+//       name: 'Hair Cut',
+//       price: '₹350.00',
+//       desc: 'Stylish cut with blow dry',
+//       image: [require('../../assets/images/haircut1.png'),
+//       require('../../assets/images/man-service1.jpg')
+//       ],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//       {
+//       id: '2',
+//       name: 'Hair Coloring',
+//       price: '₹400.00',
+//       desc: 'Long-lasting shades',
+//       image: [require('../../assets/images/haircolor1.png'),
+//       require('../../assets/images/man-service5.jpg')],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//     {
+//       id: '3',
+//       name: 'Hair Coloring',
+//       price: '₹400.00',
+//       desc: 'Long-lasting shades',
+//       image: [require('../../assets/images/haircolor1.png'),
+//       require('../../assets/images/man-service2.jpg')
+//       ],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//     {
+//       id: '4',
+//       name: 'Facial',
+//       price: '₹600.00',
+//       desc: 'Glow facial therapy',
+//       image: [require('../../assets/images/facial.jpg'),
+//       require('../../assets/images/man-service3.jpg'),],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//     {
+//       id: '5',
+//       name: 'Hair Cut',
+//       price: '₹350.00',
+//       desc: 'Stylish cut with blow dry',
+//       image: [require('../../assets/images/haircut1.png'),
+//       require('../../assets/images/man-service4.jpg')
+//       ],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//     {
+//       id: '6',
+//       name: 'Hair Coloring',
+//       price: '₹400.00',
+//       desc: 'Long-lasting shades',
+//       image: [require('../../assets/images/haircolor1.png'),
+//       require('../../assets/images/man-service5.jpg')
+//       ],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//     {
+//       id: '7',
+//       name: 'Facial',
+//       price: '₹600.00',
+//       desc: 'Glow facial therapy',
+//       image: [require('../../assets/images/facial.jpg'),
+//       require('../../assets/images/man-service6.jpg')
+//       ],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//       {
+//       id: '8',
+//       name: 'Hair Coloring',
+//       price: '₹400.00',
+//       desc: 'Long-lasting shades',
+//       image: [require('../../assets/images/haircolor1.png'),
+//       require('../../assets/images/man-service5.jpg')
+//       ],
+//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+//     },
+//   ];
+
+
+
 
 const Catelog = () => {
-    const { theme } = useTheme();
-     const [activeTab, setActiveTab] = useState('Products');
-     const data = activeTab === 'Products' ? products : 'Services';
-       const { width, height } = useWindowDimensions();
-    const navigation = useNavigation();
-    return (
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <Head title="Catelog" />
-             <View style={styles.toggleContainer}>
+  const { theme } = useTheme();
+  const [activeTab, setActiveTab] = useState('Products');
+  const data = activeTab === 'Products' ? products : 'Services';
+  const { width, height } = useWindowDimensions();
+  const navigation = useNavigation();
+  const [services, setServices] = useState([]);
+  const fetchServices = async () => {
+    try {
+      //const token = await getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const response = await fetch('https://naushad.onrender.com/api/ourservice', {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json();
+      setServices(data);
+      console.log("Services data", data);
+      console.log("Services token", token);
+    } catch (error) {
+      console.log("Error loading:", error);
+    }
+  }
+
+  useEffect(()=>{
+     fetchServices()
+  },[])
+  
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <Head title="Catelog" />
+      <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={[
             styles.toggleButton,
             styles.leftButton,
-            activeTab === 'Products' && [styles.activeButton,{backgroundColor : COLORS.primary}],
+            activeTab === 'Products' && [styles.activeButton, { backgroundColor: COLORS.primary }],
           ]}
           onPress={() => setActiveTab('Products')}
         >
@@ -239,7 +268,7 @@ const Catelog = () => {
           style={[
             styles.toggleButton,
             styles.rightButton,
-            activeTab === 'Services' &&  [styles.activeButton,{backgroundColor : COLORS.primary}],
+            activeTab === 'Services' && [styles.activeButton, { backgroundColor: COLORS.primary }],
           ]}
           onPress={() => setActiveTab('Services')}
         >
@@ -249,99 +278,117 @@ const Catelog = () => {
               activeTab === 'Services' && styles.activeText,
             ]}
           >
-          Services
+            Services
           </Text>
         </TouchableOpacity>
       </View>
-{activeTab === 'Products' && (
-  <FlatList
-    data={products}
-    showsHorizontalScrollIndicator={false}
-    keyExtractor={item => item.id}
-    numColumns={2}
-    contentContainerStyle={{ paddingHorizontal: wp('3%'), alignSelf: 'center' }}
-    renderItem={({ item }) => (
-      <TouchableOpacity
-        onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: item.image[0] } })}
-        android_ripple={{ color: 'transparent' }}
-        activeOpacity={1}
-      >
-        <View style={styles.productCard}>
-          <Image
-            source={item.image[0]}
-            style={styles.productImage} 
-          />
-          <Text style={styles.productName} numberOfLines={2}>
-            {item.name[1]}
-          </Text>
-          <Text style={styles.productPrice}>
-            {item.price}{' '}
-            <Text style={{ color: '#29A244' }}>({item.offer})</Text>
-          </Text>
+      {activeTab === 'Products' && (
+        <FlatList
+          data={products}
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item.id}
+          numColumns={2}
+          contentContainerStyle={{ paddingHorizontal: wp('3%'), alignSelf: 'center' }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: item.image[0] } })}
+              android_ripple={{ color: 'transparent' }}
+              activeOpacity={1}
+            >
+              <View style={styles.productCard}>
+                <Image
+                  source={item.image[0]}
+                  style={styles.productImage}
+                />
+                <Text style={styles.productName} numberOfLines={2}>
+                  {item.name[1]}
+                </Text>
+                <Text style={styles.productPrice}>
+                  {item.price}{' '}
+                  <Text style={{ color: '#29A244' }}>({item.offer})</Text>
+                </Text>
 
-          {/* rating + tag pills */}
-          <View
-            style={{
-              flexDirection: 'column',
-              gap: wp('2%'),
-              marginTop: hp('1%'),
-              flexWrap: 'wrap',
-            }}
-          >
-            <View style={styles.pill}>
-              <Icon name="star" size={wp('3%')} color="#29A244" />
-              <Text style={styles.pillText}>{item.rating}</Text>
-            </View>
-            <View style={[styles.pill, { backgroundColor: '#E8F6EF' }]}>
-              <Text
-                style={[styles.pillText, { color: '#29A244' }]}
-                numberOfLines={1}
+                {/* rating + tag pills */}
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    gap: wp('2%'),
+                    marginTop: hp('1%'),
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <View style={styles.pill}>
+                    <Icon name="star" size={wp('3%')} color="#29A244" />
+                    <Text style={styles.pillText}>{item.rating}</Text>
+                  </View>
+                  <View style={[styles.pill, { backgroundColor: '#E8F6EF' }]}>
+                    <Text
+                      style={[styles.pillText, { color: '#29A244' }]}
+                      numberOfLines={1}
+                    >
+                      {item.tag}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+
+      {activeTab === 'Services' &&
+        <FlatList
+          data={services.data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item._id}
+          contentContainerStyle={{ paddingHorizontal: wp('2%') }}
+          renderItem={({ item }) => (
+            <View style={styles.serviceCard}>
+              <Image
+                source={{ uri: `https://naushad.onrender.com${item.imageUrl}` }}
+                style={styles.serviceImage}
+              />
+              <View style={styles.nameItem}>
+                <Text style={styles.serviceName}>{item.serviceName}</Text>
+                <Text style={styles.servicePrice}>₹{item.price}</Text>
+              </View>
+              <Text style={styles.serviceDesc}>{item.title}</Text>
+              <View style={{ flex: 1 }} />
+
+              <TouchableOpacity
+                style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
+                onPress={() => {
+                  addToCart({
+                    id: item._id.toString(),
+                    name: item.name,
+                    price: item.price,
+                    qty: 1, // default quantity
+                  });
+                  navigation.navigate('ServiceDetails', {
+                    item: {
+                      ...item,
+                      image: item.imageUrl
+                    }
+                  })
+                }
+                }
               >
-                {item.tag}
-              </Text>
+                <Text style={styles.bookBtnText}>Book now</Text>
+              </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    )}
-  />
-)}
-
-
- {activeTab === 'Services' && <FlatList
-             data={services}
-             
-             showsHorizontalScrollIndicator={false}
-             keyExtractor={item => item.id}
-             numColumns={2}
-             contentContainerStyle={{ paddingHorizontal: wp('2%') , alignSelf : 'center' }}
-             renderItem={({ item }) => (
-               <View style={styles.serviceCard}>
-                 <Image source={
-                 item.image[1] 
-                 } style={styles.serviceImage} />
-                 <View style={styles.nameItem}>
-                   <Text style={styles.serviceName}>{item.name}</Text>
-                   <Text style={styles.servicePrice}>{item.price}</Text>
-                 </View>
-                 <Text style={styles.serviceDesc}>{item.desc}</Text>
-                 <TouchableOpacity style={[styles.bookBtn,{backgroundColor : COLORS.primary}]} onPress={() => navigation.navigate('ServiceDetails', {
-                   item: { ...item, image: item.image[0] }
-                 })}>
-                   <Text style={styles.bookBtnText}>Book now</Text>
-                 </TouchableOpacity>
-               </View>
-             )}
-           />}
-        </SafeAreaView>
-    );
+          )}
+        />}
+    </SafeAreaView>
+  );
 };
 
 export default Catelog;
 
 
 const styles = StyleSheet.create({
-    container: {
+  container: {
     flex: 1,
   },
   toggleContainer: {
@@ -375,7 +422,7 @@ const styles = StyleSheet.create({
   activeText: {
     color: '#f5f0f0ff',
   },
- productCard: {
+  productCard: {
     width: wp('43%'), // Increased from 160
     marginHorizontal: wp('2%'), // Increased from 5
     marginVertical: hp('1%'),
@@ -388,7 +435,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     paddingVertical: hp('1%'),
     paddingHorizontal: wp('2%'), // Increased from 10
-    height : hp('31%')
+    height: hp('31%')
   },
   productImage: {
     width: '100%',
@@ -420,7 +467,7 @@ const styles = StyleSheet.create({
     color: '#333',
     fontFamily: "Poppins-Medium"
   },
- serviceCard: {
+  serviceCard: {
     width: wp('42%'),
     height: hp('25%'),
     marginHorizontal: wp('3%'),

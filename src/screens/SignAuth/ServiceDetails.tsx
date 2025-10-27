@@ -219,7 +219,7 @@ const ServiceDetails = () => {
                 });
 
                 // Navigate to payment
-                navigation.navigate('PaymentScreen');
+                navigation.navigate('CloneBookAppointment');
               }}
             >
               <Text style={[styles.BookAppointBtnTxt, { color: '#fff' }]}>

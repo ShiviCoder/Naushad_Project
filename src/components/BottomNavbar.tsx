@@ -14,7 +14,7 @@ const BottomNavbar = (props: any) => {
   const { state, navigation } = props;
   const handlePress = (tab: any) => {
     if (tab.name === 'BookAppointmentScreen') {
-      navigation.getParent()?.navigate('BookAppointmentScreen', { from: 'bottomBar' });
+      navigation.navigate('BookAppointmentScreen', { from: 'bottomBar'});
     } else {
       navigation.navigate(tab.name);
     }

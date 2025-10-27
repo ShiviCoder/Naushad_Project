@@ -62,8 +62,7 @@ console.log("Hello")
       <TouchableOpacity
         style={[styles.bookAppoint,{backgroundColor : COLORS.primary}]}
        onPress={() => {
-          navigation.navigate('BookAppointmentScreen',
-  {params: { image:  item.image}  }
+          navigation.navigate('CloneBookAppointment'
 ); }}
       >
         <Text style={styles.bookAppointTxt}>Book Appointment</Text>

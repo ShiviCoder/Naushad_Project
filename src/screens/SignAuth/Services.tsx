@@ -123,7 +123,7 @@ export default function ServicesScreen() {
                 width: wp('19%'),
                 height: wp('19%'),
                 borderRadius: wp('20%') / 2,
-                borderColor: storySelect === index ? '#F6B745' : 'transparent',
+                borderColor: storySelect === index ? COLORS.primary : 'transparent',
                 borderWidth: wp('0.7%'),
                 justifyContent: 'center',
                 alignItems: 'center',
