@@ -7,11 +7,11 @@ const COLORS = {
   // border: "#E5E5E5",
 
   //For Yellow Theme
-  primary: '#F6B745',
-  secondary: '#FFEED069',
-  shadow: '#F6B74540',
-  text: '#000000',
-  border: '#E5E5E5',
+  // primary: '#F6B745',
+  // secondary: '#FFEED069',
+  // shadow: '#F6B74540',
+  // text: '#000000',
+  // border: '#E5E5E5',
 
   // For Light Blue Theme
   // primary: '#4AA3DF',      // main brand blue
@@ -22,11 +22,11 @@ const COLORS = {
 
   //Lavender Bliss (Soft & Feminine)
 
-  //  primary: '#A47FD4',
-  //   secondary: '#F4EDFA',
-  //   shadow: '#A47FD440',
-  //   text: '#1E1E1E',
-  //   border: '#E3D9EF',
+   primary: '#A47FD4',
+    secondary: '#F4EDFA',
+    shadow: '#A47FD440',
+    text: '#1E1E1E',
+    border: '#E3D9EF',
 
   //Mint Serenity (Natural & Minimal)
 

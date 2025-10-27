@@ -1,24 +1,13 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import COLORS from '../../utils/Colors';
-import Popup from '../../components/PopUp';
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
+import Popup from "../../components/PopUp";
 
 const OTPVerification = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const navigation = useNavigation();
   const [popupMessage, setPopupMessage] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
@@ -27,7 +16,7 @@ const OTPVerification = () => {
 
   const handleSendOTP = () => {
     if (!email) {
-      setPopupMessage('Please enter your email!');
+      setPopupMessage("Please enter your email!");
       setPopupVisible(true);
       return;
     }
@@ -36,10 +25,10 @@ const OTPVerification = () => {
 
     // Simulate OTP send delay
     setTimeout(() => {
-      setLoading(false); // Stop loading first
-      setPopupMessage('OTP sent successfully!');
-      setPopupVisible(true); // Then show popup
-      setNextRoute({ name: 'CodeVerification' });
+      setLoading(false);              // Stop loading first
+      setPopupMessage("OTP sent successfully!");
+      setPopupVisible(true);          // Then show popup
+      setNextRoute({ name: "CodeVerification" });
     }, 1000); // 1 second delay
   };
 
@@ -55,7 +44,7 @@ const OTPVerification = () => {
     <SafeAreaView style={styles.container}>
       {/* Logo */}
       <Image
-        source={require('../../assets/images/logo.png')}
+        source={require("../../assets/images/logo.png")}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -63,7 +52,7 @@ const OTPVerification = () => {
       {/* Title */}
       <Text style={styles.title}>OTP Verification</Text>
       <Text style={styles.subtitle}>
-        We will send you a One Time Passcode{'\n'}via this email address
+        We will send you a One Time Passcode{"\n"}via this email address
       </Text>
 
       {/* Email Input */}
@@ -86,7 +75,7 @@ const OTPVerification = () => {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={[styles.buttonText, { color: '#fff' }]}>SEND OTP</Text>
+          <Text style={[styles.buttonText, { color: "#fff" }]}>SEND OTP</Text>
         )}
       </TouchableOpacity>
 
@@ -103,49 +92,49 @@ const OTPVerification = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: wp('5%'),
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: wp("5%"),
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
-    width: wp('70%'),
-    height: hp('17%'),
-    alignSelf: 'center',
-    marginBottom: hp('2%'),
+    width: wp("70%"),
+    height: hp("17%"),
+    alignSelf: "center",
+    marginBottom: hp("2%"),
   },
   title: {
-    fontSize: wp('6%'),
-    fontWeight: 'bold',
-    marginBottom: hp('1.5%'),
-    color: '#000',
+    fontSize: wp("6%"),
+    fontWeight: "bold",
+    marginBottom: hp("1.5%"),
+    color: "#000",
   },
   subtitle: {
-    fontSize: wp('3.5%'),
-    textAlign: 'center',
-    color: '#0a0909ff',
-    marginBottom: hp('5%'),
-    fontWeight: '400',
+    fontSize: wp("3.5%"),
+    textAlign: "center",
+    color: "#0a0909ff",
+    marginBottom: hp("5%"),
+    fontWeight: "400",
   },
   input: {
-    width: '100%',
-    borderWidth: wp('0.3%'),
-    borderColor: 'rgba(216, 214, 214, 1)',
-    borderRadius: wp('2%'),
-    padding: wp('2%'),
-    fontSize: wp('4%'),
-    marginBottom: hp('5%'),
-    backgroundColor: '#fff',
+    width: "100%",
+    borderWidth: wp("0.3%"),
+    borderColor: "rgba(216, 214, 214, 1)",
+    borderRadius: wp("2%"),
+    padding: wp("2%"),
+    fontSize: wp("4%"),
+    marginBottom: hp("5%"),
+    backgroundColor: "#fff",
   },
   button: {
-    width: '100%',
-    paddingVertical: hp('1.5%'),
-    borderRadius: wp('2%'),
-    alignItems: 'center',
+    width: "100%",
+    paddingVertical: hp("1.5%"),
+    borderRadius: wp("2%"),
+    alignItems: "center",
   },
   buttonText: {
-    fontSize: wp('3%'),
-    fontWeight: '500',
+    fontSize: wp("3%"),
+    fontWeight: "500",
   },
 });
 

@@ -8,9 +8,7 @@ const OfferScreen = () => {
   const { theme } = useTheme(); // theme access
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="OfferScreen" />
       <View style={styles.content}>
         <Text style={[styles.text, { color: theme.textPrimary }]}>
@@ -29,6 +27,7 @@ export default OfferScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+   
   },
   content: {
     marginTop: 20,
@@ -38,11 +37,11 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     fontWeight: 'bold',
-    fontFamily: 'Poppins-Medium',
+    fontFamily : 'Poppins-Medium'
   },
   subText: {
     fontSize: 14,
     marginTop: 8,
-    fontFamily: 'Poppins-Medium',
+    fontFamily : 'Poppins-Medium'
   },
 });

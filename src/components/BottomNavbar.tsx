@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { MySvgIcon } from '../components/Svg';
@@ -23,13 +23,11 @@ const BottomNavbar = (props: any) => {
   const tabs = [
     { name: 'HomeScreen', icon: <Icon name="home" /> },
     { name: 'BookingScreen', icon: <MySvgIcon /> },
-    {
-      name: 'BookAppointmentScreen',
-      icon: (
-        <View style={[styles.fabCircle, { backgroundColor: COLORS.primary }]}>
+    { name: 'BookAppointmentScreen', icon: (
+        <View style={[styles.fabCircle,{backgroundColor : COLORS.primary}]}>
           <Icon name="add" size={wp('7%')} color="#000" />
         </View>
-      ),
+      )
     },
     { name: 'BlankScreen', icon: <StarSvgIcon /> },
     { name: 'AccountScreen', icon: <Icon name="person-outline" /> },
@@ -44,50 +42,19 @@ const BottomNavbar = (props: any) => {
           // Set dynamic color for icons except FAB
           if (tab.name !== 'BookAppointmentScreen') {
             if (tab.name === 'HomeScreen') {
-              iconElement = (
-                <Icon
-                  name="home"
-                  size={wp('7%')}
-                  color={isActive ? COLORS.primary : '#fff'}
-                />
-              );
+              iconElement = <Icon name="home" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'BookingScreen') {
-              iconElement = (
-                <MySvgIcon
-                  width={wp('7%')}
-                  height={hp('3%')}
-                  fill={isActive ? COLORS.primary : '#fff'}
-                />
-              );
+              iconElement = <MySvgIcon width={wp('7%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'BlankScreen') {
-              iconElement = (
-                <StarSvgIcon
-                  width={hp('5%')}
-                  height={hp('3%')}
-                  fill={isActive ? COLORS.primary : '#fff'}
-                />
-              );
+              iconElement = <StarSvgIcon width={hp('5%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'AccountScreen') {
-              iconElement = (
-                <Icon
-                  name="person-outline"
-                  size={wp('7%')}
-                  color={isActive ? COLORS.primary : '#fff'}
-                />
-              );
+              iconElement = <Icon name="person-outline" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
             }
           }
 
           return (
             <TouchableOpacity key={tab.name} onPress={() => handlePress(tab)}>
-              <View
-                style={[
-                  styles.iconWrapper,
-                  isActive && tab.name !== 'BookAppointmentScreen'
-                    ? styles.activeWrapper
-                    : {},
-                ]}
-              >
+              <View style={[styles.iconWrapper, isActive && tab.name !== 'BookAppointmentScreen' ? styles.activeWrapper : {}]}>
                 {iconElement}
               </View>
             </TouchableOpacity>
@@ -137,8 +104,9 @@ const styles = StyleSheet.create({
   },
   activeWrapper: {
     backgroundColor: '#fff',
-    borderRadius: '50%',
+    borderRadius: '50%'
   },
-});
+})
+
 
 export default BottomNavbar;

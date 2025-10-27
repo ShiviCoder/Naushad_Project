@@ -21,7 +21,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 
 
-
 const AccountScreen = () => {
   const [theme, setTheme] = useState('Light'); // track selected theme
   const navigation = useNavigation<any>();
@@ -95,7 +94,6 @@ const AccountScreen = () => {
       <View style={[styles.separator,{backgroundColor :COLORS.primary}]} />
 
 
-
       {/* Settings List */}
       <FlatList
         data={settingData}
@@ -135,7 +133,6 @@ const AccountScreen = () => {
               >
                 {/* Left Icon */}
                 <Image style={[styles.leftIcon,{tintColor : COLORS.primary}]} source={item.image} />
-
 
 
                 {/* Right Content */}

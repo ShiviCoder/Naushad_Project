@@ -1,35 +1,22 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import RadioButton from '../../components/RadioButton';
 import BookingAcceptCards from '../../components/BookingAcceptCard';
-import {
-  BookingAcceptData,
-  BookingPendingData,
-  PreviousBookingData,
-} from '../../components/BookingAcceptData';
+import { BookingAcceptData, BookingPendingData, PreviousBookingData } from '../../components/BookingAcceptData';
 import BookingPendingCard from '../../components/BookingPendingCard';
 import PreviousBookingCard from '../../components/PreviousBookingCard';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from "../../context/ThemeContext";
 import BottomNavbar from '../../components/BottomNavbar';
 import Head from '../../components/Head';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const allBookings = [
-  ...BookingAcceptData.map(item => ({ ...item, type: 'accept' })),
-  ...BookingPendingData.map(item => ({ ...item, type: 'pending' })),
-  ...PreviousBookingData.map(item => ({ ...item, type: 'previous' })),
+  ...BookingAcceptData.map(item => ({ ...item, type: "accept" })),
+  ...BookingPendingData.map(item => ({ ...item, type: "pending" })),
+  ...PreviousBookingData.map(item => ({ ...item, type: "previous" }))
 ];
 
 const filters = [
@@ -68,8 +55,8 @@ const BookingScreen = () => {
         data={filteredBookings}
         style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: hp('6%') }}
-        keyExtractor={(item, index) => item.id + '-' + index}
+        contentContainerStyle={{ paddingBottom: hp("6%") }}
+        keyExtractor={(item, index) => item.id + "-" + index}
         renderItem={({ item, index }) => {
           if (item.type === "previous" && selectedFilter === "all") {
             const isFirstPrevious =
@@ -85,15 +72,16 @@ const BookingScreen = () => {
                 <PreviousBookingCard item={item} />
               </View>
             );
-          } else if (item.type === 'accept') {
+          } else if (item.type === "accept") {
             return <BookingAcceptCards item={item} />;
-          } else if (item.type === 'pending') {
+          } else if (item.type === "pending") {
             return <BookingPendingCard item={item} />;
           } else {
             return null;
           }
         }}
       />
+
     </SafeAreaView>
   );
 };
@@ -109,19 +97,19 @@ const styles = StyleSheet.create({
 
   },
   headText: {
-    fontSize: wp('5%'),
+    fontSize: wp("5%"),
     fontWeight: 'bold',
   },
   container: {
-    paddingTop: hp('2%'),
+    paddingTop: hp("2%"),
   },
   heading: {
-    fontSize: wp('6%'),
-    fontWeight: '500',
-    marginVertical: hp('1.5%'),
-    marginLeft: wp('4%'),
-    fontFamily: 'Poppins-Medium',
-  },
+    fontSize: wp("6%"),
+    fontWeight: "500",
+    marginVertical: hp("1.5%"),
+    marginLeft: wp("4%"),
+    fontFamily: 'Poppins-Medium'
+  }
 });
 
 export default BookingScreen;

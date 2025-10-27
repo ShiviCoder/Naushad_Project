@@ -15,8 +15,8 @@ const BookAppoinment = () => {
           backgroundColor: '#aaaaaaa8',
           width: 357,
           height: 202,
-          padding: 40,
-          gap: 50,
+          padding:40,
+          gap:50,
         }}
       >
         <Text style={styles.text}>
@@ -52,9 +52,9 @@ const styles = StyleSheet.create({
     height: 39,
     width: 154,
   },
-  text: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 5,
-  },
+  text:{
+    fontSize:16,
+    fontWeight:'bold',
+    letterSpacing:5,
+  }
 });

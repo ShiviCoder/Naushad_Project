@@ -1,24 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import COLORS from '../../utils/Colors';
-import PopUp from '../../components/PopUp';
+import React, { useState, useRef, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
+import PopUp from "../../components/PopUp";
 
 const OTPVerificationScreen = () => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(59);
   const inputRefs = useRef([]);
   const navigation = useNavigation();
@@ -47,16 +36,16 @@ const OTPVerificationScreen = () => {
 
   // Resend OTP
   const handleResend = () => {
-    setOtp(['', '', '', '', '', '']);
+    setOtp(["", "", "", "", "", ""]);
     setTimer(59);
   };
 
   // Verify OTP
   const handleVerify = async () => {
-    const otpCode = otp.join('');
+    const otpCode = otp.join("");
 
     if (otpCode.length < 6) {
-      setPopupMessage('Please enter the complete 6-digit OTP');
+      setPopupMessage("Please enter the complete 6-digit OTP");
       setPopupVisible(true);
       setNextRoute(null);
       return;
@@ -68,13 +57,13 @@ const OTPVerificationScreen = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       setLoading(false); // stop loader before popup
 
-      setPopupMessage('OTP Verified Successfully!');
+      setPopupMessage("OTP Verified Successfully!");
       setPopupVisible(true);
-      setNextRoute({ name: 'Signin' });
+      setNextRoute({ name: "Signin" });
     } catch (error) {
       console.error(error);
       setLoading(false);
-      setPopupMessage('Something went wrong!');
+      setPopupMessage("Something went wrong!");
       setPopupVisible(true);
       setNextRoute(null);
     }
@@ -92,7 +81,7 @@ const OTPVerificationScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Logo */}
       <Image
-        source={require('../../assets/images/logo.png')}
+        source={require("../../assets/images/logo.png")}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -103,8 +92,7 @@ const OTPVerificationScreen = () => {
 
       {/* Subtext */}
       <Text style={styles.subtitle}>
-        We will send you an One Time Passcode{'\n'}via this mail@gmail.com email
-        address
+        We will send you an One Time Passcode{"\n"}via this mail@gmail.com email address
       </Text>
 
       {/* OTP Inputs */}
@@ -119,13 +107,13 @@ const OTPVerificationScreen = () => {
             onChangeText={text => handleChange(text, index)}
             ref={ref => (inputRefs.current[index] = ref)}
             onKeyPress={({ nativeEvent }) => {
-              if (nativeEvent.key === 'Backspace') {
+              if (nativeEvent.key === "Backspace") {
                 const newOtp = [...otp];
-                if (otp[index] === '' && index > 0) {
+                if (otp[index] === "" && index > 0) {
                   inputRefs.current[index - 1].focus();
-                  newOtp[index - 1] = '';
+                  newOtp[index - 1] = "";
                 } else {
-                  newOtp[index] = '';
+                  newOtp[index] = "";
                 }
                 setOtp(newOtp);
               }
@@ -142,9 +130,7 @@ const OTPVerificationScreen = () => {
             <Text style={styles.resendButton}>Resend Code</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.timer}>{`0:${
-          timer < 10 ? `0${timer}` : timer
-        }`}</Text>
+        <Text style={styles.timer}>{`0:${timer < 10 ? `0${timer}` : timer}`}</Text>
       </View>
 
       {/* Verify Button */}
@@ -153,19 +139,11 @@ const OTPVerificationScreen = () => {
         onPress={handleVerify}
         disabled={loading}
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.verifyText}>VERIFY OTP</Text>
-        )}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.verifyText}>VERIFY OTP</Text>}
       </TouchableOpacity>
-
+      
       {/* Popup */}
-      <PopUp
-        visible={popupVisible}
-        message={popupMessage}
-        onClose={handlePopupClose}
-      />
+      <PopUp visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
     </SafeAreaView>
   );
 };
@@ -173,78 +151,16 @@ const OTPVerificationScreen = () => {
 export default OTPVerificationScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: wp('5%'),
-  },
-  logo: {
-    width: wp('90%'),
-    height: hp('17%'),
-    alignSelf: 'center',
-    marginBottom: hp('1%'),
-  },
-  title: {
-    fontSize: wp('5%'),
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#000',
-  },
-  subtitle: {
-    fontSize: wp('3%'),
-    textAlign: 'center',
-    color: '#161414ff',
-    marginVertical: hp('2%'),
-    fontWeight: '500',
-    lineHeight: hp('2%'),
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: hp('2%'),
-  },
-  otpInput: {
-    width: wp('12%'),
-    height: hp('6%'),
-    textAlign: 'center',
-    fontSize: hp('2.5%'),
-    borderRadius: wp('1%'),
-    marginHorizontal: wp('1%'),
-    backgroundColor: '#D9D9D975',
-  },
-  resendRow: {
-    flexDirection: 'row',
-    width: '90%',
-    alignItems: 'flex-start',
-    marginBottom: hp('5%'),
-    justifyContent: 'space-between',
-  },
-  resendText: { color: '#555', fontSize: wp('3.5%') },
-  resendButton: {
-    color: '#000',
-    fontWeight: 'bold',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: wp('2%'),
-    paddingVertical: hp('0.2%'),
-    borderRadius: wp('4%'),
-    marginHorizontal: 5,
-    fontSize: wp('3%'),
-  },
-  timer: {
-    marginLeft: wp('2%'),
-    color: 'rgba(0, 0, 0, 1)',
-    fontWeight: 'bold',
-  },
-  verifyBtn: {
-    paddingVertical: hp('1.5%'),
-    borderRadius: wp('2%'),
-    alignItems: 'center',
-    marginTop: hp('3%'),
-    marginBottom: hp('2%'),
-    width: '98%',
-  },
-  verifyText: { color: '#fff', fontWeight: 'bold', fontSize: wp('4%') },
+  container: { flex: 1, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", paddingHorizontal: wp('5%') },
+  logo: { width: wp("90%"), height: hp("17%"), alignSelf: "center", marginBottom: hp("1%") },
+  title: { fontSize: wp('5%'), fontWeight: "bold", textAlign: "center", color: "#000" },
+  subtitle: { fontSize: wp('3%'), textAlign: "center", color: "#161414ff", marginVertical: hp('2%'), fontWeight: '500', lineHeight: hp('2%') },
+  otpContainer: { flexDirection: "row", justifyContent: "space-between", marginVertical: hp('2%') },
+  otpInput: { width: wp('12%'), height: hp('6%'), textAlign: "center", fontSize: hp('2.5%'), borderRadius: wp('1%'), marginHorizontal: wp('1%'), backgroundColor: "#D9D9D975" },
+  resendRow: { flexDirection: "row", width: '90%', alignItems: 'flex-start', marginBottom: hp('5%'), justifyContent: 'space-between' },
+  resendText: { color: "#555", fontSize: wp('3.5%') },
+  resendButton: { color: "#000", fontWeight: "bold", borderWidth: 1, borderColor: "#ccc", paddingHorizontal: wp('2%'), paddingVertical: hp('0.2%'), borderRadius: wp('4%'), marginHorizontal: 5, fontSize: wp('3%') },
+  timer: { marginLeft: wp('2%'), color: "rgba(0, 0, 0, 1)", fontWeight: "bold" },
+  verifyBtn: { paddingVertical: hp("1.5%"), borderRadius: wp("2%"), alignItems: "center", marginTop: hp("3%"), marginBottom: hp("2%"), width: '98%' },
+  verifyText: { color: "#fff", fontWeight: "bold", fontSize: wp('4%') }
 });

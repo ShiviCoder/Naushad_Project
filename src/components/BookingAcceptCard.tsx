@@ -15,7 +15,7 @@ const BookingAcceptCards = ({ item }) => {
 
   // ✅ Inverted logic for card background and text
   const cardBackground = theme.background === '#121212' ? '#fff' : '#000'; // dark theme → white card, light theme → black card
-  const textColor = theme.background === '#121212' ? '#000' : '#fff'; // dark theme → black text, light theme → white text
+  const textColor = theme.background === '#121212' ? '#000' : '#fff';      // dark theme → black text, light theme → white text
 
   const inactiveColor = textColor; // checkbox inactive same as text color
 
@@ -30,9 +30,7 @@ const BookingAcceptCards = ({ item }) => {
       <View style={styles.acceptContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
           <Image source={item.image[0]} style={styles.icon} />
-          <Text style={[styles.text, { color: textColor }]}>
-            {item.service}
-          </Text>
+          <Text style={[styles.text, { color: textColor }]}>{item.service}</Text>
         </View>
 
         <View style={[styles.accept, { marginBottom: hp('-0.8%') }]}>
@@ -42,34 +40,26 @@ const BookingAcceptCards = ({ item }) => {
             onValueChange={setIsChecked}
             tintColors={{ true: theme.primary, false: inactiveColor }}
           />
-          <Text style={[styles.text, { color: acceptedTextColor }]}>
-            Accepted
-          </Text>
+          <Text style={[styles.text, { color: acceptedTextColor }]}>Accepted</Text>
         </View>
       </View>
 
       {/* Date */}
       <View style={styles.content}>
         <Image source={item.image[1]} style={styles.icon} />
-        <Text style={[styles.text, { color: textColor }]}>
-          Date :- {item.date}
-        </Text>
+        <Text style={[styles.text, { color: textColor }]}>Date :- {item.date}</Text>
       </View>
 
       {/* Time */}
       <View style={styles.content}>
         <Image source={item.image[2]} style={styles.icon} />
-        <Text style={[styles.text, { color: textColor }]}>
-          Time :- {item.time}
-        </Text>
+        <Text style={[styles.text, { color: textColor }]}>Time :- {item.time}</Text>
       </View>
 
       {/* Amount */}
       <View style={styles.content}>
         <Image source={item.image[3]} style={styles.icon} />
-        <Text style={[styles.text, { color: textColor }]}>
-          Amount :- ₹{item.price}
-        </Text>
+        <Text style={[styles.text, { color: textColor }]}>Amount :- ₹{item.price}</Text>
       </View>
     </TouchableOpacity>
   );

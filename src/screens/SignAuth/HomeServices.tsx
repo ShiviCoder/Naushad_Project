@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,53 +7,50 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+
   Alert,
-} from 'react-native';
+} from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { useNavigation } from '@react-navigation/native';
-import Head from '../../components/Head';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import COLORS from '../../utils/Colors';
-import { useTheme } from '../../context/ThemeContext';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useNavigation } from "@react-navigation/native";
+import Head from "../../components/Head";
+import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
+import { useTheme } from "../../context/ThemeContext";
 
 type RootStackParamList = {
   Home: undefined;
   ServicesScreen: undefined;
 };
 
+
+
+
 export default function ServicesScreen() {
   //   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const navigation = useNavigation();
-  const [services, setServices] = useState([]);
-  const { theme } = useTheme();
-  const fetchHomeServices = async () => {
-    try {
-      const response = await fetch(
-        'https://naushad.onrender.com/api/home-services/',
-        {
-          method: 'GET',
-          headers: {
-            Authorization:
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8', // Postman me jo token use kiya tha
-            'Content-Type': 'application/json',
-          },
+  const [services , setServices] = useState([]);
+  const {theme} = useTheme();
+const fetchHomeServices = async() => {
+  try {
+     const response = await fetch('https://naushad.onrender.com/api/home-services/', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8', // Postman me jo token use kiya tha
+          'Content-Type': 'application/json',
         },
-      );
+      });
       const json = await response.json();
-      console.log('Home services : ', json);
+      console.log("Home services : ", json);
       setServices(json.data);
-    } catch (error) {
-      console.log('Home services error , ', error);
-    }
-  };
+  }catch(error){
+    console.log("Home services error , ", error);
+  }
+}
 
-  useEffect(() => {
-    fetchHomeServices();
-  }, []);
+useEffect(()=>{
+   fetchHomeServices();
+},[])
 
   // Multiple back button methods
   const handleBackPress = () => {
@@ -78,11 +75,10 @@ export default function ServicesScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
       {/* Header */}
-      <Head title="Home Services" />
+      <Head title='Home Services' />
+
 
       {/* Services List */}
       <ScrollView style={styles.servicesContainer}>
@@ -93,14 +89,9 @@ export default function ServicesScreen() {
               <Text style={styles.cardTitle}>{item.name}</Text>
               <Text style={styles.cardPrice}>₹{item.price}.00</Text>
               <Text style={styles.cardDesc}>{item.description}</Text>
-              <TouchableOpacity
-                style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
-                onPress={() =>
-                  navigation.navigate('ServiceDetails', {
-                    item: { ...item, image: item.image },
-                  })
-                }
-              >
+              <TouchableOpacity style={[styles.bookBtn,{backgroundColor : COLORS.primary}]} onPress={() => navigation.navigate('ServiceDetails', {
+                item: { ...item, image: item.image }
+              })}>
                 <Text style={styles.bookBtnText}>Book now</Text>
               </TouchableOpacity>
             </View>
@@ -114,7 +105,7 @@ export default function ServicesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff"
   },
   // Categories
   categoryScroll: {
@@ -122,7 +113,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('5%'),
   },
   categoryItem: {
-    alignItems: 'center',
+    alignItems: "center",
     marginRight: wp('4%'),
     width: wp('18%'),
   },
@@ -134,8 +125,8 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: hp('1.5%'),
-    color: '#333',
-    textAlign: 'center',
+    color: "#333",
+    textAlign: "center",
     fontWeight: '500',
     lineHeight: hp('2%'),
   },
@@ -148,13 +139,13 @@ const styles = StyleSheet.create({
 
   // Service Cards
   card: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    backgroundColor: "#fff",
     marginBottom: hp('2%'),
     borderRadius: wp('4%'),
     elevation: 3,
     padding: wp('4%'),
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: wp('2%'),
@@ -167,35 +158,36 @@ const styles = StyleSheet.create({
   cardContent: {
     flex: 1,
     paddingLeft: wp('4%'),
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   cardTitle: {
     fontSize: hp('2.5%'),
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: hp('0.5%'),
   },
   cardPrice: {
     fontSize: hp('2%'),
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: hp('1%'),
   },
   cardDesc: {
     fontSize: hp('1.6%'),
-    color: '#666',
+    color: "#666",
     marginBottom: hp('1.5%'),
     lineHeight: hp('2%'),
   },
   bookBtn: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     paddingHorizontal: wp('4%'),
     paddingVertical: hp('1%'),
     borderRadius: wp('2%'),
   },
   bookBtnText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: hp('1.6%'),
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
+

@@ -1,15 +1,15 @@
-export type PackageData = {
-  id: string;
-  title: string;
-  price: string;
-  services: string[];
-  about: string;
-  image: any;
-  review: number;
-  rating: number;
-  discount: string;
-  serviceList: string[];
-};
+export type PackageData  = {
+    id : string;
+    title :  string;
+    price: string;
+    services: string[];
+    about : string;
+    image: any;
+    review: number;
+    rating: number;
+    discount: string;
+    serviceList : string[];
+}
 
 export const packageData: PackageData[] = [
   {

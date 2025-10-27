@@ -43,6 +43,7 @@ const services = [
     image: require('../../assets/SHH.png'),
   },
 ];
+
 const ServiceDetails = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
@@ -117,7 +118,7 @@ const ServiceDetails = () => {
               Extra
             </Text>
 
-            {services.map(service => (
+            {services.map((service) => (
               <TouchableOpacity
                 key={service.id}
                 style={[

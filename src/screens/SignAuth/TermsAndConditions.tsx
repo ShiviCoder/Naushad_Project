@@ -1,17 +1,8 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,50 +11,31 @@ const TermsAndConditions = () => {
   const [accepted, setAccepted] = useState(false);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Terms And Conditions" />
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>    
         <Text style={[styles.text, { color: theme.textSecondary }]}>
-          Welcome to our app. By using our services, you agree to comply with
-          and be bound by the following terms and conditions. Please read them
-          carefully before using the app.
+          Welcome to our app. By using our services, you agree to comply with and be bound by the following terms and conditions. Please read them carefully before using the app.
         </Text>
 
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>
-          1. Use of Services
-        </Text>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>1. Use of Services</Text>
         <Text style={[styles.text, { color: theme.textSecondary }]}>
-          You agree to use the app only for lawful purposes and in a way that
-          does not infringe the rights of, restrict or inhibit anyone else's use
-          of the app.
+          You agree to use the app only for lawful purposes and in a way that does not infringe the rights of, restrict or inhibit anyone else's use of the app.
         </Text>
 
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>
-          2. User Responsibilities
-        </Text>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>2. User Responsibilities</Text>
         <Text style={[styles.text, { color: theme.textSecondary }]}>
-          Users are responsible for maintaining the confidentiality of their
-          account information and for all activities that occur under their
-          account.
+          Users are responsible for maintaining the confidentiality of their account information and for all activities that occur under their account.
         </Text>
 
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>
-          3. Limitation of Liability
-        </Text>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>3. Limitation of Liability</Text>
         <Text style={[styles.text, { color: theme.textSecondary }]}>
-          We are not liable for any direct, indirect, incidental, or
-          consequential damages arising from the use or inability to use the
-          app.
+          We are not liable for any direct, indirect, incidental, or consequential damages arising from the use or inability to use the app.
         </Text>
 
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>
-          4. Changes to Terms
-        </Text>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>4. Changes to Terms</Text>
         <Text style={[styles.text, { color: theme.textSecondary }]}>
-          We may modify these terms at any time, and changes will be posted
-          within the app. Continued use signifies acceptance of updated terms.
+          We may modify these terms at any time, and changes will be posted within the app. Continued use signifies acceptance of updated terms.
         </Text>
 
         {/* Accept Checkbox */}
@@ -72,9 +44,7 @@ const TermsAndConditions = () => {
           onPress={() => setAccepted(!accepted)}
         >
           <View style={[styles.checkbox, { borderColor: theme.textPrimary }]}>
-            {accepted && (
-              <Icon name="checkmark" size={wp('4%')} color="#42BA86" />
-            )}
+            {accepted && <Icon name="checkmark" size={wp('4%')} color="#42BA86" />}
           </View>
           <Text style={[styles.checkboxText, { color: theme.textPrimary }]}>
             I have read and accept the Terms and Conditions

@@ -2,23 +2,16 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useTheme } from '../context/ThemeContext';
 
 interface HeadProps {
   title: string;
   rightComponent?: React.ReactNode;
-  showBack?: boolean;
+  showBack?: boolean; 
 }
 
-const Head: React.FC<HeadProps> = ({
-  title,
-  rightComponent,
-  showBack = true,
-}) => {
+const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
@@ -39,10 +32,7 @@ const Head: React.FC<HeadProps> = ({
       )}
 
       {/* Center - Title */}
-      <Text
-        style={[styles.title, { color: theme.textPrimary }]}
-        numberOfLines={1}
-      >
+      <Text style={[styles.title, { color: theme.textPrimary }]} numberOfLines={1}>
         {title}
       </Text>
 
@@ -75,3 +65,4 @@ const styles = StyleSheet.create({
     right: wp('2%'),
   },
 });
+ 

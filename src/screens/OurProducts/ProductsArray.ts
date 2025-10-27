@@ -23,11 +23,11 @@ export const products: Product[] = [
     description: '100% natural oil',
     rating: 4.1,
     reviews: 5802,
-    image: [
-      require('../../assets/OurProduct/productImage.png'),
-      require('../../assets/OurProduct/beard-oil.png'),
+    image: [require('../../assets/OurProduct/productImage.png'),
+       require('../../assets/OurProduct/beard-oil.png')
     ],
-    featureIcon: require('../../assets/OurProduct/Leaf1.png'),
+        featureIcon: require('../../assets/OurProduct/Leaf1.png'),
+
   },
   {
     id: '2',
@@ -38,9 +38,8 @@ export const products: Product[] = [
     description: 'Cleansing & refreshing',
     rating: 4.5,
     reviews: 4200,
-    image: [
-      require('../../assets/OurProduct/productImage1.png'),
-      require('../../assets/OurProduct/facewash.jpg'),
+    image: [require('../../assets/OurProduct/productImage1.png'),
+            require('../../assets/OurProduct/facewash.jpg')
     ],
     featureIcon: require('../../assets/OurProduct/Leaf1.png'),
   },
@@ -53,9 +52,8 @@ export const products: Product[] = [
     description: 'Smooth & shiny hair',
     rating: 4.3,
     reviews: 3100,
-    image: [
-      require('../../assets/OurProduct/productImage2.png'),
-      require('../../assets/OurProduct/hair-serum.png'),
+    image: [require('../../assets/OurProduct/productImage2.png'),
+            require('../../assets/OurProduct/hair-serum.png')
     ],
     featureIcon: require('../../assets/OurProduct/Leaf1.png'),
   },
@@ -68,9 +66,8 @@ export const products: Product[] = [
     description: 'Detox & deep clean',
     rating: 4.0,
     reviews: 2750,
-    image: [
-      require('../../assets/OurProduct/productImage3.png'),
-      require('../../assets/OurProduct/soap.jpg'),
+    image: [require('../../assets/OurProduct/productImage3.png'),
+      require('../../assets/OurProduct/soap.jpg')
     ],
     featureIcon: require('../../assets/OurProduct/Leaf1.png'),
   },
@@ -83,9 +80,8 @@ export const products: Product[] = [
     description: 'Anti-dandruff formula',
     rating: 4.2,
     reviews: 3300,
-    image: [
-      require('../../assets/OurProduct/productImage4.png'),
-      require('../../assets/OurProduct/shampoo.jpg'),
+    image: [require('../../assets/OurProduct/productImage4.png'),
+      require('../../assets/OurProduct/shampoo.jpg')
     ],
     featureIcon: require('../../assets/OurProduct/Leaf1.png'),
   },
@@ -98,9 +94,8 @@ export const products: Product[] = [
     description: 'Soothing & moisturizing',
     rating: 4.4,
     reviews: 1800,
-    image: [
-      require('../../assets/OurProduct/productImage5.png'),
-      require('../../assets/OurProduct/productImage3.png'),
+    image: [require('../../assets/OurProduct/productImage5.png'),
+      require('../../assets/OurProduct/productImage3.png')
     ],
     featureIcon: require('../../assets/OurProduct/Leaf1.png'),
   },
@@ -113,9 +108,8 @@ export const products: Product[] = [
     description: 'Hydrating & nourishing',
     rating: 4.3,
     reviews: 2400,
-    image: [
-      require('../../assets/OurProduct/lotion.png'),
-      require('../../assets/OurProduct/body-11.jpg'),
+    image: [require('../../assets/OurProduct/lotion.png'),
+      require('../../assets/OurProduct/body-11.jpg')
     ],
     featureIcon: require('../../assets/OurProduct/Leaf1.png'),
   },

@@ -1,21 +1,10 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  FlatList,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity, } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FlatListComp from './FlatListComp';
+import FlatListComp from './FlatListComp'
 import Icon from 'react-native-vector-icons/Ionicons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
 import BottomNavbar from '../../components/BottomNavbar';
 import { products as ProductData } from '../../screens/OurProducts/ProductsArray';
@@ -35,23 +24,26 @@ const OurProducts = ({ navigation }: OurProductsProps) => {
   const [showLikedOnly, setShowLikedOnly] = useState(false);
 
   const filteredProducts = showLikedOnly
-    ? ProductData.filter(p => likedProducts.includes(p.id))
+    ? ProductData.filter((p) => likedProducts.includes(p.id))
     : ProductData;
   console.log('Filtered Products:', filteredProducts);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Head title="Our Products" />
+      <Head
+        title="Our Products"
+      
+      />
       <FlatListComp
         products={filteredProducts}
         likedProducts={likedProducts}
         onToggleLike={toggleLike}
       />
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default OurProducts;
+export default OurProducts
 
 const styles = StyleSheet.create({
   HeadingContain: {
@@ -60,10 +52,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: hp('2%'),
     alignItems: 'center',
+
   },
   HeadingStyle: {
     fontSize: wp('6%'),
-    fontWeight: '700',
+    fontWeight: '700'
   },
   LikeImgContain: {
     height: wp('10%'),
@@ -71,16 +64,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#9387871F',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: wp('10%'),
+    borderRadius: wp('10%')
   },
   touchStyle: {
     height: wp('5%'),
     width: wp('10%'),
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   iconImage: {
     height: '70%',
-    width: '70%',
+    width: '70%'
   },
-});
+})

@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  FlatList,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, Dimensions } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -20,10 +13,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useProductData from '../../components/useProductData';
 
 const ProductPackageScreen = () => {
-  const { theme } = useTheme();
-  const [numColumns, setNumColumns] = useState(2);
+  const {theme} = useTheme();
+  const [numColumns , setNumColumns] = useState(2);
   const ProductData = useProductData();
-
+  
   useEffect(() => {
     const updateOrientation = () => {
       const { width, height } = Dimensions.get('window');
@@ -31,35 +24,30 @@ const ProductPackageScreen = () => {
     };
 
     updateOrientation(); // initial check
-    const subscription = Dimensions.addEventListener(
-      'change',
-      updateOrientation,
-    );
+    const subscription = Dimensions.addEventListener('change', updateOrientation);
 
     return () => subscription?.remove();
   }, []);
 
   return (
-    <SafeAreaView
-      style={[styles.mainContainer, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.mainContainer,{backgroundColor : theme.background}]}>
       {/* Header */}
       <Head title="Product Packages"></Head>
-      <View style={{ paddingHorizontal: wp('3.5%') }}>
+      <View style={{paddingHorizontal : wp('3.5%')}}>
         <FlatList
-          data={ProductData}
-          numColumns={numColumns}
+        data={ProductData}
+        numColumns={numColumns}
           key={numColumns}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
-          contentContainerStyle={{
-            paddingBottom: hp('10%'),
-            paddingTop: hp('2%'),
-          }}
-          renderItem={({ item }) => <Card item={item} />}
-          keyExtractor={(item, index) => index.toString()}
-          ItemSeparatorComponent={() => <View style={{ height: hp('4%') }} />}
-        />
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        contentContainerStyle={{
+          paddingBottom: hp('10%'),
+          paddingTop: hp('2%'),
+        }}
+        renderItem={({ item }) => <Card item={item} />}
+        keyExtractor={(item, index) => index.toString()}
+        ItemSeparatorComponent={() => <View style={{ height: hp('4%') }} />}
+      /> 
       </View>
     </SafeAreaView>
   );
@@ -68,7 +56,8 @@ const ProductPackageScreen = () => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    paddingBottom: hp('4%'),
+    paddingBottom : hp('4%')
+  
   },
   headContainer: {
     flexDirection: 'row',
