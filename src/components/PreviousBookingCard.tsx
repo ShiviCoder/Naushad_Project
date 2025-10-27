@@ -62,7 +62,7 @@ const PreviousBookingCard = ({ item }) => {
 
       {/* Rebook Button */}
       <TouchableOpacity>
-        <Text style={[styles.button, { color: theme.textPrimary ,backgroundColor : COLORS.primaryz}]} >Rebook</Text>
+        <Text style={[styles.button, { color: theme.textPrimary ,backgroundColor : COLORS.primary}]} >Rebook</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );

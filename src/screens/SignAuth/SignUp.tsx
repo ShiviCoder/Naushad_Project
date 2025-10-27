@@ -52,24 +52,29 @@ export default function SignupScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      const response = await fetch("https://naushad.onrender.com/api/signup", {
+      const response = await fetch("https://naushad.onrender.com/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: fullName,
+          fullName: fullName,
           email: emailOrPhone, // assuming backend accepts "email"
           password: password,
-          confirmPassword: confirmPassword
+          confirmPassword: confirmPassword,
+          dob : dob,
+          address : address,
+          gender : gender,
+          referal : referal, 
+          photo : photo
         }),
       });
 
       const data = await response.json();
       setLoading(false);
       console.log("Signup Response:", data);
-      if (response.ok && data.success) {
-        setPopupMessage("Success", data.message || "Signup successful!");
+      if (response.ok && data.token) {
+        setPopupMessage("Signup successful!");
         setNextRoute({ name: "VerificationScreen" });
         setPopupVisible(true);
       } else {
@@ -88,7 +93,9 @@ export default function SignupScreen({ navigation }) {
       name: fullName,
       email: emailOrPhone,
       password: password,
-      confirmPassword: confirmPassword
+      confirmPassword: confirmPassword,
+      dob:dob,
+      address : address,  
     });
   };
   const handlePopupClose = () => {
@@ -113,7 +120,6 @@ export default function SignupScreen({ navigation }) {
     } else {
       formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
     }
-
     setDob(formatted);
   };
 

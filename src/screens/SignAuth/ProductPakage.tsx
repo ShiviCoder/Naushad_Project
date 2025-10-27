@@ -178,7 +178,7 @@ const ProductPackages = ({ navigation }) => {
       </View>
 
       <View style={styles.bottomContainer}>
-        <TouchableOpacity style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
+        <TouchableOpacity onPress={()=>navigation.navigate('PaymentScreen')} style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>

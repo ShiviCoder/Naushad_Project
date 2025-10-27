@@ -60,8 +60,8 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   };
 
   // 🔹 Colors according to theme
-  const inactiveColor = theme.background === "#fff" ? "#000" : "#fff"; // black in light, white in dark
-  const activeColor = theme.primary; // green
+  const inactiveColor = COLORS.primary; // black in light, white in dark
+  const activeColor = COLORS.primary; // green
 
   return (
     <View style={styles.checkContainer}>

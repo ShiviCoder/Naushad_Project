@@ -92,7 +92,7 @@ const CartScreen = () => {
                   {item.name || item.title}
                 </Text>
                 <View style={styles.priceRow}>
-                  <Text style={[styles.price, { color: '#000' }]}>{item.price}</Text>
+                  <Text style={[styles.price, { color: '#000' }]}>₹{item.price}</Text>
                   {item.oldPrice && (
                     <Text style={[styles.oldPrice, { color: '#888' }]}>₹{item.oldPrice}</Text>
                   )}
@@ -163,141 +163,141 @@ const CartScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1
   },
-  card: { 
-    flexDirection: "row", 
-    padding: wp('3%'), 
-    borderRadius: wp('7%'), 
-    borderWidth: 1, 
-    marginBottom: hp('1.5%'), 
-    elevation: 1 
+  card: {
+    flexDirection: "row",
+    padding: wp('3%'),
+    borderRadius: wp('7%'),
+    borderWidth: 1,
+    marginBottom: hp('1.5%'),
+    elevation: 1
   },
-  image: { 
-    width: wp('32%'), 
-    height: hp('15%'), 
-    borderRadius: wp('3%'), 
-    marginRight: wp('3%') 
+  image: {
+    width: wp('32%'),
+    height: hp('15%'),
+    borderRadius: wp('3%'),
+    marginRight: wp('3%')
   },
-  itemDetails: { 
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "flex-start", 
-    fontFamily: "Poppins-Medium" 
+  itemDetails: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "flex-start",
+    fontFamily: "Poppins-Medium"
   },
-  itemName: { 
-    fontSize: wp('4%'), 
-    fontWeight: "700", 
-    fontFamily: "Poppins-Medium" 
+  itemName: {
+    fontSize: wp('4%'),
+    fontWeight: "700",
+    fontFamily: "Poppins-Medium"
   },
-  priceRow: { 
-    flexDirection: "row", 
-    alignItems: "flex-start", 
-    marginTop: hp('0.5%'), 
-    fontFamily: "Poppins-Medium" 
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: hp('0.5%'),
+    fontFamily: "Poppins-Medium"
   },
-  price: { 
-    fontWeight: "bold", 
-    fontSize: wp('3.5%'), 
-    fontFamily: "Poppins-Medium" 
+  price: {
+    fontWeight: "bold",
+    fontSize: wp('3.5%'),
+    fontFamily: "Poppins-Medium"
   },
-  oldPrice: { 
-    textDecorationLine: "line-through", 
-    fontSize: wp('3%'), 
-    marginLeft: wp('2%'), 
-    fontFamily: "Poppins-Medium" 
+  oldPrice: {
+    textDecorationLine: "line-through",
+    fontSize: wp('3%'),
+    marginLeft: wp('2%'),
+    fontFamily: "Poppins-Medium"
   },
-  discount: { 
-    marginLeft: wp('2%'), 
-    fontSize: wp('3%'), 
-    fontFamily: "Poppins-Medium" 
+  discount: {
+    marginLeft: wp('2%'),
+    fontSize: wp('3%'),
+    fontFamily: "Poppins-Medium"
   },
-  qtyRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    justifyContent: "space-between", 
-    borderRadius: wp('3%'), 
-    paddingHorizontal: wp('3%'), 
-    paddingVertical: hp('0.5%'), 
-    minWidth: wp('22%'), 
-    marginTop: hp('1%') 
+  qtyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: wp('3%'),
+    paddingHorizontal: wp('3%'),
+    paddingVertical: hp('0.5%'),
+    minWidth: wp('22%'),
+    marginTop: hp('1%')
   },
-  qtyBtnText: { 
-    fontSize: wp('5%'), 
-    fontWeight: "bold", 
-    paddingHorizontal: wp('2%'), 
-    color: '#fff', 
-    fontFamily: "Poppins-Medium" 
+  qtyBtnText: {
+    fontSize: wp('5%'),
+    fontWeight: "bold",
+    paddingHorizontal: wp('2%'),
+    color: '#fff',
+    fontFamily: "Poppins-Medium"
   },
-  qtyValue: { 
-    fontSize: wp('4%'), 
-    fontWeight: "bold", 
-    textAlign: "center", 
-    minWidth: wp('6%'), 
-    color: '#fff', 
-    fontFamily: "Poppins-Medium" 
+  qtyValue: {
+    fontSize: wp('4%'),
+    fontWeight: "bold",
+    textAlign: "center",
+    minWidth: wp('6%'),
+    color: '#fff',
+    fontFamily: "Poppins-Medium"
   },
-  removeRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginTop: hp('0.5%') 
+  removeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: hp('0.5%')
   },
-  removeText: { 
-    color: "red", 
-    fontSize: wp('3%'), 
-    fontWeight: "500", 
-    fontFamily: "Poppins-Medium" 
+  removeText: {
+    color: "red",
+    fontSize: wp('3%'),
+    fontWeight: "500",
+    fontFamily: "Poppins-Medium"
   },
-  totalRow: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginBottom: hp('1%'), 
-    paddingTop: hp('0.5%') 
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: hp('1%'),
+    paddingTop: hp('0.5%')
   },
-  totalText: { 
-    fontSize: wp('4%'), 
-    fontWeight: "bold", 
-    fontFamily: "Poppins-Medium" 
+  totalText: {
+    fontSize: wp('4%'),
+    fontWeight: "bold",
+    fontFamily: "Poppins-Medium"
   },
-  stickyFooter: { 
-    position: "absolute", 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    padding: wp('4%'), 
-    borderTopWidth: 1 
+  stickyFooter: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: wp('4%'),
+    borderTopWidth: 1
   },
-  checkoutBtn: { 
-    borderRadius: wp('3%'), 
-    paddingVertical: hp('1.5%'), 
-    alignItems: "center", 
-    marginTop: hp('1%') 
+  checkoutBtn: {
+    borderRadius: wp('3%'),
+    paddingVertical: hp('1.5%'),
+    alignItems: "center",
+    marginTop: hp('1%')
   },
-  checkoutText: { 
-    fontSize: wp('4%'), 
-    fontWeight: "bold", 
-    letterSpacing: 1, 
-    fontFamily: "Poppins-Medium" 
+  checkoutText: {
+    fontSize: wp('4%'),
+    fontWeight: "bold",
+    letterSpacing: 1,
+    fontFamily: "Poppins-Medium"
   },
-  summary: { 
-    marginTop: hp('2%') 
+  summary: {
+    marginTop: hp('2%')
   },
-  summaryRow: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginVertical: hp('1%') 
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: hp('1%')
   },
-  summaryText: { 
-    fontSize: wp('4.5%') 
+  summaryText: {
+    fontSize: wp('4.5%')
   },
-  discountText: { 
-    color: "#42BA86", 
-    fontSize: wp('4.5%') 
+  discountText: {
+    color: "#42BA86",
+    fontSize: wp('4.5%')
   },
-  gstText: { 
-    color: "black", 
-    fontSize: wp('4.5%') 
+  gstText: {
+    color: "black",
+    fontSize: wp('4.5%')
   },
 });
 

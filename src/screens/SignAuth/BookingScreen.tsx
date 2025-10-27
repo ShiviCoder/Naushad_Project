@@ -50,18 +50,15 @@ const BookingScreen = () => {
         }
         }
       />
-
       <FlatList
         data={filteredBookings}
         style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: hp("6%") }}
+        contentContainerStyle={{ paddingBottom: hp("15%") }}
         keyExtractor={(item, index) => item.id + "-" + index}
         renderItem={({ item, index }) => {
           if (item.type === "previous" && selectedFilter === "all") {
-            const isFirstPrevious =
-              index === 0 || filteredBookings[index - 1].type !== "previous";
-
+            const isFirstPrevious = index === 0 || filteredBookings[index - 1].type !== "previous";
             return (
               <View>
                 {isFirstPrevious && (
@@ -81,7 +78,6 @@ const BookingScreen = () => {
           }
         }}
       />
-
     </SafeAreaView>
   );
 };

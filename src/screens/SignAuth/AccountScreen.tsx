@@ -34,6 +34,7 @@ const AccountScreen = () => {
   const handleLogoutConfirm = async () => {
     setShowLogout(false);
     // Clear login state
+    await AsyncStorage.removeItem('userToken');
     await AsyncStorage.removeItem('userData');
     // Navigate to Signin screen after clearing data
     navigation.replace('Signin');

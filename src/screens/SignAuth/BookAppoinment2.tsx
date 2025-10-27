@@ -18,8 +18,7 @@ const { width } = Dimensions.get('window');
 
 const BookAppointmentScreen = ({ navigation }) => {
   const { theme } = useTheme(); // ✅ Theme access
-  const [selectedService, setSelectedService] = useState(null);
-  
+const [selectedServices, setSelectedServices] = useState([]);  
 
   const services = [
     {
@@ -87,62 +86,62 @@ const BookAppointmentScreen = ({ navigation }) => {
     },
   ];
 
+   const toggleService = (id) => {
+    setSelectedServices((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((item) => item !== id)
+        : [...prevSelected, id]
+    );
+  };
 
-const renderService = (service) => (
-  <TouchableOpacity
-    key={service.id}
-    style={[
-      styles.serviceItem,
-      { backgroundColor: theme.card },
-      selectedService === service.id && {
-        borderColor: theme.secondary, // highlight border
-      },
-    ]}
-    onPress={() => setSelectedService(service.id)}
-    activeOpacity={0.8}
-  >
-    {/* Service Image */}
-    <Image source={service.image} style={styles.serviceImage} />
+const renderService = (service) => {
+   const isSelected = selectedServices.includes(service.id);
+  return (    // ✅ Add return here
+    <TouchableOpacity
+      key={service.id}
+      style={[
+        styles.serviceItem,
+        { backgroundColor: theme.card },    
+      ]}
+      onPress={() => toggleService(service.id)}
+      activeOpacity={0.8}
+    >
+      {/* Service Image */}
+      <Image source={service.image} style={styles.serviceImage} />
 
-    {/* Service Details */}
-    <View style={styles.serviceDetails}>
-      {/* Title + Includes */}
-      <View style={{ flex: 1 }}>
-        <Text
-          style={[styles.serviceName, { color: theme.textPrimary }]}
-          numberOfLines={1}
-        >
-          {service.name}
-        </Text>
-        <Text
-          style={[styles.serviceIncludes, { color: theme.textSecondary }]}
-          numberOfLines={1}
-        >
-          Includes: {service.includes}
-        </Text>
-      </View>
+      {/* Service Details */}
+      <View style={styles.serviceDetails}>
+        {/* Title + Includes */}
+        <View style={{ flex: 1 }}>
+          <Text
+            style={[styles.serviceName, { color: theme.textPrimary }]}
+            numberOfLines={1}
+          >
+            {service.name}
+          </Text>
+          <Text
+            style={[styles.serviceIncludes, { color: theme.textSecondary }]}
+            numberOfLines={1}
+          >
+            Includes: {service.includes}
+          </Text>
+        </View>
 
-      {/* Price + Checkbox */}
-      <View style={styles.rightSection}>
-        <Text style={[styles.price, { color: theme.textPrimary }]}>
-          ₹ {service.price}
-        </Text>
-        <View
-          style={[styles.checkbox, { borderColor: theme.textSecondary }]}
-        >
-          {selectedService === service.id && (
-            <View
-              style={[
-                styles.checkboxFill,
-                { backgroundColor: theme.secondary },
-              ]}
-            />
-          )}
+        {/* Price + Checkbox */}
+        <View style={styles.rightSection}>
+          <Text style={[styles.price, { color: theme.textPrimary }]}>
+            ₹ {service.price}
+          </Text>
+          <View
+            style={[styles.checkbox, { borderColor: theme.textSecondary }]}
+          >
+            {isSelected && <View style={[styles.checkboxFill, { backgroundColor:COLORS.primary }]} />}
+          </View>
         </View>
       </View>
-    </View>
-  </TouchableOpacity>
-);
+    </TouchableOpacity>
+  );
+};
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -157,7 +156,7 @@ const renderService = (service) => (
       </ScrollView>
 
       {/* Proceed Button */}
-      <TouchableOpacity style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}>
+      <TouchableOpacity onPress={()=>navigation.navigate('PaymentScreen')} style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}>
         <Text style={[styles.proceedButtonText, { color: theme.textOnAccent }]}>Proceed to pay</Text>
       </TouchableOpacity>
     </SafeAreaView>

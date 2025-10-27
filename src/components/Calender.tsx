@@ -5,8 +5,10 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useTheme } from "../context/ThemeContext";
 import COLORS from "../utils/Colors";
-
-export default function Calender() {
+interface CalenderProps {
+  onDateSelect?: (date: Date) => void; // ✅ Add callback prop
+}
+export default function Calender({ onDateSelect }: CalenderProps) {
   const { theme } = useTheme(); // ✅ use theme
   const [selected, setSelected] = useState("");
 
@@ -21,10 +23,28 @@ export default function Calender() {
   };
   LocaleConfig.defaultLocale = "en";
 
+    const handleDatePress = (dateString: string) => {
+    const isAlreadySelected = selected === dateString;
+    
+    if (isAlreadySelected) {
+      setSelected("");
+      // Reset to today's date when deselecting
+      if (onDateSelect) {
+        onDateSelect(new Date());
+      }
+    } else {
+      setSelected(dateString);
+      // Call callback with selected date
+      if (onDateSelect) {
+        const selectedDate = new Date(dateString);
+        onDateSelect(selectedDate);
+      }
+    }
+  };
   return (
     <View>
       <Calendar
-        onDayPress={(day) => setSelected(day.dateString)}
+        onDayPress={(day) => handleDatePress(day.dateString)}
         hideExtraDays={true}
         monthFormat={"MMMM"}
         minDate={new Date().toISOString().split("T")[0]}
@@ -52,7 +72,7 @@ export default function Calender() {
             <TouchableOpacity
             disabled={isPast}
                onPress={() =>
-        setSelected(isSelected ? "" : date.dateString) // ✅ toggle selection
+        handleDatePress(isSelected ? "" : date.dateString) // ✅ toggle selection
       }
               activeOpacity={0.7}
               style={{

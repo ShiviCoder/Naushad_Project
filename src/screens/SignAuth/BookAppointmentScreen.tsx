@@ -54,13 +54,17 @@ export default function BookAppointmentScreen() {
 
   // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
+  if (route.params?.from === 'bottomBar') {
+    navigation.navigate('BookAppoinment2');
+  } else {
     navigation.navigate('PaymentScreen');
-  };
-
+  }
+};
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
 
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const renderItem = ({ item }: { item: string }) => {
     switch (item) {
       case 'image':
@@ -86,7 +90,7 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.calenderContainer}>
             {/* Removed any onMonthChange prop */}
-            <Calender />
+            <Calender  onDateSelect={setSelectedDate}/>
           </View>
         );
       case 'selectTime':
@@ -99,7 +103,7 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.timeContainer}>
             {/* Removed any onTimeChange prop */}
-            <TimeSelect />
+            <TimeSelect selectedDate={selectedDate}/>
           </View>
         );
       case 'nextButton':
@@ -134,7 +138,6 @@ export default function BookAppointmentScreen() {
         }}
         showsVerticalScrollIndicator={false}
       />
-
       {showTab && <BottomNavbar />}
 
       {/* Popup component retained but not used */}
