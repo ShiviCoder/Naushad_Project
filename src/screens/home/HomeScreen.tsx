@@ -15,6 +15,8 @@ import Head from '../../components/Head';
 import { requestAppPermissions } from '../../utils/Permission';
 import COLORS from '../../utils/Colors'
 import RadioButton from '../../components/RadioButton';
+import { useCart } from '../../context/CartContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const { width } = Dimensions.get("window");
@@ -125,7 +127,7 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme(); // ✅ get current theme
   // Fixed Navigation handler function
-
+  const { addToCart } = useCart();
 
   const { likedProducts } = useLikedProducts();
   const likedItems = ProductData.filter(p => likedProducts.includes(p.id));
@@ -137,6 +139,13 @@ const HomeScreen = () => {
   useEffect(() => {
     requestAppPermissions();
   }, []);
+
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -188,75 +197,101 @@ const HomeScreen = () => {
   };
 
   // Services (added short description)
-  const services = [
-    {
-      id: '1',
-      name: 'Hair Cut',
-      price: '350.00',
-      desc: 'Stylish cut with blow dry',
-      image: [require('../../assets/images/haircut1.png'),
-      require('../../assets/images/man-service1.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '2',
-      name: 'Hair Coloring',
-      price: '400.00',
-      desc: 'Long-lasting shades',
-      image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service2.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '3',
-      name: 'Facial',
-      price: '600.00',
-      desc: 'Glow facial therapy',
-      image: [require('../../assets/images/facial.jpg'),
-      require('../../assets/images/man-service3.jpg'),
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '4',
-      name: 'Hair Cut',
-      price: '350.00',
-      desc: 'Stylish cut with blow dry',
-      image: [require('../../assets/images/haircut1.png'),
-      require('../../assets/images/man-service4.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '5',
-      name: 'Hair Coloring',
-      price: '400.00',
-      desc: 'Long-lasting shades',
-      image: [require('../../assets/images/haircolor1.png'),
-      require('../../assets/images/man-service5.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-    {
-      id: '6',
-      name: 'Facial',
-      price: '600.00',
-      desc: 'Glow facial therapy',
-      image: [require('../../assets/images/facial.jpg'),
-      require('../../assets/images/man-service6.jpg')
-      ],
-      highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-      extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-    },
-  ];
+  // const services = [
+  //   {
+  //     id: '1',
+  //     name: 'Hair Cut',
+  //     price: '350.00',
+  //     desc: 'Stylish cut with blow dry',
+  //     image: [require('../../assets/images/haircut1.png'),
+  //     require('../../assets/images/man-service1.jpg')
+  //     ],
+  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Hair Coloring',
+  //     price: '400.00',
+  //     desc: 'Long-lasting shades',
+  //     image: [require('../../assets/images/haircolor1.png'),
+  //     require('../../assets/images/man-service2.jpg')
+  //     ],
+  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'Facial',
+  //     price: '600.00',
+  //     desc: 'Glow facial therapy',
+  //     image: [require('../../assets/images/facial.jpg'),
+  //     require('../../assets/images/man-service3.jpg'),
+  //     ],
+  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+  //   },
+  //   {
+  //     id: '4',
+  //     name: 'Hair Cut',
+  //     price: '350.00',
+  //     desc: 'Stylish cut with blow dry',
+  //     image: [require('../../assets/images/haircut1.png'),
+  //     require('../../assets/images/man-service4.jpg')
+  //     ],
+  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+  //   },
+  //   {
+  //     id: '5',
+  //     name: 'Hair Coloring',
+  //     price: '400.00',
+  //     desc: 'Long-lasting shades',
+  //     image: [require('../../assets/images/haircolor1.png'),
+  //     require('../../assets/images/man-service5.jpg')
+  //     ],
+  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+  //   },
+  //   {
+  //     id: '6',
+  //     name: 'Facial',
+  //     price: '600.00',
+  //     desc: 'Glow facial therapy',
+  //     image: [require('../../assets/images/facial.jpg'),
+  //     require('../../assets/images/man-service6.jpg')
+  //     ],
+  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
+  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
+  //   },
+  // ];
 
+  const [services, setServices] = useState([]);
+  const fetchServices = async () => {
+    try {
+      //const token = await getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const response = await fetch('https://naushad.onrender.com/api/ourservice', {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json();
+      setServices(data);
+      console.log("Services data", data);
+      console.log("Services token", token);
+    } catch (error) {
+      console.log("Error loading:", error);
+    }
+  }
+
+
+  useEffect(() => {
+    fetchServices();
+  }, [])
   // Products (added rating + tag)
   const products = [
     {
@@ -344,18 +379,19 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8"
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
 
         const res = await fetch("https://naushad.onrender.com/api/youtube", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`, // 👈 token yahan lagta hai
+            "Authorization": `Bearer ${token}`,
           },
         });
 
         const data = await res.json();
         setVideos(data);
+        console.log("Youtube Token : ", token);
         console.log("Youtube Data:", data);
       } catch (err) {
         console.log("Error loading:", err);
@@ -370,15 +406,18 @@ const HomeScreen = () => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const fetchCertificates = async () => {
     try {
+      //const token = await getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8',
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       const json = await response.json();
       console.log('API Response:', json);
+      console.log("Certificate token", token)
 
       // setCertificates to the data array from response
       setCertificates(json.data);
@@ -507,15 +546,18 @@ const HomeScreen = () => {
   const [productPackages, setProductPackage] = useState([]);
   const fetchProductPackages = async () => {
     try {
+      //const token = await getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
       const response = await fetch('https://naushad.onrender.com/api/product-packages', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8', // Postman me jo token use kiya tha
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       const json = await response.json();
       console.log("Product package response : ", json);
+      console.log('Product package token : ', token)
       setProductPackage(json.data);
     } catch (err) {
       console.log("Product package error : ", err)
@@ -564,14 +606,17 @@ const HomeScreen = () => {
   const [homeServices, setHomeService] = useState([]);
   const fetchHomeServices = async () => {
     try {
+      //const token =await  getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
       const response = await fetch('https://naushad.onrender.com/api/home-services/', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8', // Postman me jo token use kiya tha
+          'Authorization': `Bearer ${token}`, // Postman me jo token use kiya tha
           'Content-Type': 'application/json',
         },
       });
       const json = await response.json();
+      console.log("Home service token : ", token)
       console.log("Home services : ", json);
       setHomeService(json.data);
     } catch (error) {
@@ -585,14 +630,17 @@ const HomeScreen = () => {
   const [aboutData, setAboutData] = useState([]);
   const fetchAboutData = async () => {
     try {
+      //const token = await getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
       const response = await fetch('https://naushad.onrender.com/api/about-salon', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTIyMjkxMiwiZXhwIjoxNzYxODI3NzEyfQ.pne-LG6PirEOcYyZcum8Fj-AGB7KiRdgUgk8cf1Q-V8',
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       const json = await response.json();
+      console.log("About Data token : ", token)
       console.log("About Data : ", json);
       setAboutData(json.data);
     } catch (error) {
@@ -947,32 +995,40 @@ const HomeScreen = () => {
             onPress={() => handleSectionNavigation('services')}
           />
           <FlatList
-            data={services}
+            data={services.data}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('2%') }}
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>
-                <Image source={
-                  gender === 'Male' ? item.image[1] : item.image[0]
-                } style={styles.serviceImage} />
+                <Image
+                  source={{ uri: `https://naushad.onrender.com${item.imageUrl}` }}
+                  style={styles.serviceImage}
+                />
                 <View style={styles.nameItem}>
-                  <Text style={styles.serviceName}>{item.name}</Text>
+                  <Text style={styles.serviceName}>{item.serviceName}</Text>
                   <Text style={styles.servicePrice}>₹{item.price}</Text>
                 </View>
-                <Text style={styles.serviceDesc}>{item.desc}</Text>
+                <Text style={styles.serviceDesc}>{item.title}</Text>
                 <View style={{ flex: 1 }} />
 
                 <TouchableOpacity
                   style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
-                  onPress={() =>
+                  onPress={() => {
+                    addToCart({
+                      id: item._id.toString(),
+                      name: item.name,
+                      price: item.price,
+                      qty: 1, // default quantity
+                    });
                     navigation.navigate('ServiceDetails', {
                       item: {
                         ...item,
-                        image: gender === 'Male' ? item.image[1] : item.image[0]
+                      image: item.imageUrl
                       }
                     })
+                  }
                   }
                 >
                   <Text style={styles.bookBtnText}>Book now</Text>
@@ -997,7 +1053,7 @@ const HomeScreen = () => {
               <Text style={styles.bannerText}>
                 and take your look to the next level
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen", { showTab: true })}
+              <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen", { from: 'bottomBar', showTab: true })}
                 style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
                 <Text style={[styles.bookBtnText, { color: '#111', fontWeight: 'bold' }]}>Book Appointment</Text>
               </TouchableOpacity>
@@ -1069,7 +1125,7 @@ const HomeScreen = () => {
             onPress={() => handleSectionNavigation('videos')}
           />
           <FlatList
-            data={videos}
+            data={videos.data}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={item => item.id}
@@ -1511,22 +1567,23 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     height: '100%',
     borderRadius: 0,
+    borderTopLeftRadius: wp('4%'),
+    borderBottomLeftRadius: wp('4%')
   },
   offerBtn: {
     backgroundColor: '#fff',
     paddingVertical: hp('1.5%'),
     borderRadius: wp('10%'),
     marginTop: hp('4%'),
-    // alignSelf: 'flex-start',
     paddingHorizontal: wp('2%'),
-    // width:134.81,
-    // height:32,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  offerBtnText: { color: '#111', fontWeight: '700', fontFamily: "Poppins-Medium" },
-
-  // Updated service card styles to match the design exactly
+  offerBtnText: {
+    color: '#111',
+    fontWeight: '700',
+    fontFamily: "Poppins-Medium"
+  },
   serviceCard: {
     width: wp('38%'),
     marginHorizontal: wp('2%'),
@@ -1539,7 +1596,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     padding: wp('2%'),
-
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',

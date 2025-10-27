@@ -1,36 +1,79 @@
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Shadow } from "react-native-shadow-2";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useTheme } from "../context/ThemeContext";
 import COLORS from "../utils/Colors";
 
-const TimeSelect = () => {
-  const { theme } = useTheme(); // ✅ use theme
- const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+interface TimeSelectProps {
+  selectedDate?: Date; // ✅ Accept selected date as prop
+}
+
+const TimeSelect = ({ selectedDate }: TimeSelectProps) => {
+  const { theme } = useTheme();
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  
   const slotArray = [
-    "9.00","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","18.00","19:00",
+    "9.00", "10.00", "11.00", "12.00", "13.00", "14.00", "15.00", "16.00", "17.00", "18.00", "19.00",
   ];
 
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  const currentTime = currentHour + currentMinute / 60;
+  // ✅ Update current time periodically
+  useEffect(() => {
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
 
+  // ✅ Reset selected slot when date changes
+  useEffect(() => {
+    setSelectedSlot(null);
+  }, [selectedDate]);
 
-  const parseSlot = (slot:string) => {
-    const [h,m] = slot.split(".");
-    return parseInt(h) + (m ? parseInt(m)/60 : 0);
-  }
+  const updateCurrentTime = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    setCurrentTime(currentHour + currentMinute / 60);
+  };
 
-  const formatSlot = (slot : string) => {
+  const parseSlot = (slot: string) => {
+    const [h, m] = slot.split(".");
+    return parseInt(h) + (m ? parseInt(m) / 60 : 0);
+  };
+
+  const formatSlot = (slot: string) => {
     let hour = parseInt(slot.split(".")[0]);
     let minute = slot.split(".")[1] ? parseInt(slot.split(".")[1]) : 0;
     const ampm = hour >= 12 ? "PM" : "AM";
     hour = hour % 12;
-    if(hour === 0) hour = 12;
-    return  `${hour}${minute > 0 ? ":" + minute : ""} ${ampm}`
-  }
+    if (hour === 0) hour = 12;
+    return `${hour}${minute > 0 ? ":" + minute : ""} ${ampm}`;
+  };
+
+  // ✅ Check if the selected date is today
+  const isToday = () => {
+    if (!selectedDate) return true; // If no date selected, assume today
+    
+    const today = new Date();
+    return (
+      selectedDate.getDate() === today.getDate() &&
+      selectedDate.getMonth() === today.getMonth() &&
+      selectedDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // ✅ Determine if a time slot should be disabled
+  const isSlotDisabled = (slot: string) => {
+    // If selected date is not today, enable all slots
+    if (!isToday()) {
+      return false;
+    }
+
+    // If today, disable past time slots
+    const slotTime = parseSlot(slot);
+    return slotTime <= currentTime;
+  };
 
 
     return (
@@ -46,9 +89,7 @@ const TimeSelect = () => {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const isSelected = selectedSlot === item; // ✅ check if selected
-          const slotTime = parseSlot(item);
-          const isPast = slotTime <= currentTime;
-
+          const isPast =  isSlotDisabled(item);
           return (
             <Shadow
               distance={3}
@@ -62,11 +103,10 @@ const TimeSelect = () => {
                 style={[
                   styles.slotButton,
                   {
-                    backgroundColor: isSelected ? COLORS.primary : theme.cardBackground, // ✅ yellow if selected
-                    
+                    backgroundColor: isSelected ? COLORS.primary : theme.cardBackground, // ✅ yellow if selected             
                   },
                 ]}
-                onPress={() => setSelectedSlot(isSelected ? "" : item)} // ✅ update state on press
+                onPress={() => setSelectedSlot(isSelected ? null : item)} // ✅ update state on press
               >
                 <Text
                   style={[

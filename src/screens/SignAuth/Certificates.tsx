@@ -3,22 +3,31 @@ import React, { useEffect, useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Certificates = () => {
   const { theme } = useTheme();
   const [certificates, setCertificates] = useState<any[]>([]);
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
   const fetchCertificates = async () => {
     try {
+      //const token = getToken();
+      const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8',
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       const json = await response.json();
-      console.log('API Response:', json);
+      console.log('Certificate  Response:', json);
 
       // setCertificates to the data array from response
       setCertificates(json.data);
@@ -34,7 +43,6 @@ const Certificates = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="🏅 Certificates" />
-
       <View style={{ paddingHorizontal: 15, paddingBottom: 70 }}>
         <FlatList
           data={certificates}

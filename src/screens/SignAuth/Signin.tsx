@@ -18,8 +18,8 @@ import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
 
 
-const ADMIN_EMAIL = 'ad@gmail.com';
-const ADMIN_PASSWORD = 'Admin@123';
+// const ADMIN_EMAIL = 'shivani123@gmail.com';
+// const ADMIN_PASSWORD = 'shi123';
 
 
 const Signin = ({ navigation }) => {
@@ -40,12 +40,12 @@ const Signin = ({ navigation }) => {
     }
 
 
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-      setPopupMessage('Access Denied. Only admin can login.');
-      setNextRoute(null);
-      setPopupVisible(true);
-      return;
-    }
+    // if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    //   setPopupMessage('Access Denied. Only admin can login.');
+    //   setNextRoute(null);
+    //   setPopupVisible(true);
+    //   return;
+    // }
 
 
     setLoading(true);
@@ -60,12 +60,10 @@ const Signin = ({ navigation }) => {
           body: JSON.stringify({ email, password }),
         },
       );
-
-
       const data = await response.json();
-
-
-      if (response.ok) {
+      if (response.ok && data.token) {
+        console.log('Token :' , data.token);
+        await AsyncStorage.setItem('userToken', data.token);
         // Save login state persistently
         await AsyncStorage.setItem('userData', JSON.stringify(data));
         setPopupMessage('Login successful!');

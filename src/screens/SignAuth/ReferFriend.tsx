@@ -78,7 +78,6 @@ const ReferFriendScreen = () => {
         backgroundColor={theme.background}
       />
       <Head title="Refer a Friend" showBack={true} />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: hp('5%') }}
@@ -87,7 +86,7 @@ const ReferFriendScreen = () => {
           <Text style={[styles.mainTitle, { color: theme.textPrimary }]}>
             Share Salon Luxury
           </Text>
-
+          
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
             Invite your friends to experience the finest hair, beauty, and spa
             services from our professional stylists. Let them enjoy the same
@@ -122,7 +121,7 @@ const ReferFriendScreen = () => {
               ]}
               onPress={copyCodeToClipboard}
             >
-              <Text style={styles.copyButtonText}>
+              <Text style={[styles.copyButtonText,{color:COLORS.primary}]}>
                 {copiedCode ? 'Copied!' : 'Copy Code'}
               </Text>
             </TouchableOpacity>
@@ -238,7 +237,6 @@ const styles = StyleSheet.create({
     borderRadius: wp('2%'),
   },
   copyButtonText: {
-    color: COLORS.primary,
     fontSize: wp('4%'),
     fontWeight: '600',
   },

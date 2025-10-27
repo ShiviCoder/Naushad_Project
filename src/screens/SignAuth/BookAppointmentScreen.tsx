@@ -39,11 +39,7 @@ export default function BookAppointmentScreen() {
   const navigation = useNavigation();
   const showBack = !showTab; // if tab visible → back button hide, else show
 
-  // Only month and time is required!
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
-  // Popup state
+  // Popup state - can be removed since no validation needed now
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
 
@@ -56,20 +52,19 @@ export default function BookAppointmentScreen() {
     'nextButton'
   ];
 
-  // Handler for "Next" button press
+  // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
-    if (!selectedMonth || !selectedTime) {
-      setPopupMessage('Please select both month and time before proceeding.');
-      setPopupVisible(true);
-      return;
-    }
+  if (route.params?.from === 'bottomBar') {
+    navigation.navigate('BookAppoinment2');
+  } else {
     navigation.navigate('PaymentScreen');
-  };
-
+  }
+};
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
 
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const renderItem = ({ item }: { item: string }) => {
     switch (item) {
       case 'image':
@@ -94,11 +89,8 @@ export default function BookAppointmentScreen() {
       case 'calendar':
         return (
           <View style={styles.calenderContainer}>
-            {/* Pass handlers to Calendar to update month selection */}
-            <Calender
-              // You must implement or ensure Calender calls this with the selected month string
-              onMonthChange={(month: string) => setSelectedMonth(month)}
-            />
+            {/* Removed any onMonthChange prop */}
+            <Calender  onDateSelect={setSelectedDate}/>
           </View>
         );
       case 'selectTime':
@@ -110,11 +102,8 @@ export default function BookAppointmentScreen() {
       case 'timeSelect':
         return (
           <View style={styles.timeContainer}>
-            {/* Pass handler to TimeSelect to update time selection */}
-            <TimeSelect
-              // You must implement or ensure TimeSelect calls this with the selected time string
-              onTimeChange={(time: string) => setSelectedTime(time)}
-            />
+            {/* Removed any onTimeChange prop */}
+            <TimeSelect selectedDate={selectedDate}/>
           </View>
         );
       case 'nextButton':
@@ -149,10 +138,9 @@ export default function BookAppointmentScreen() {
         }}
         showsVerticalScrollIndicator={false}
       />
-
       {showTab && <BottomNavbar />}
 
-      {/* Popup Component for alert */}
+      {/* Popup component retained but not used */}
       <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
     </SafeAreaView>
   );
