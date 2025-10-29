@@ -87,14 +87,12 @@ const Signin = ({ navigation }) => {
     }
   };
 
-
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) {
       navigation.replace(nextRoute.name, nextRoute.params);
     }
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -103,8 +101,7 @@ const Signin = ({ navigation }) => {
         style={styles.logo}
         resizeMode="contain"
       />
-
-
+      
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput

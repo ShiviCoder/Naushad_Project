@@ -27,7 +27,7 @@ const CartScreen = () => {
   useEffect(() => {
     if (product) addToCart({ ...product, qty: 1 }); // ensure qty is initialized
   }, [product]);
-
+  console.log(cartItems)
   // Quantity update
   const handleQtyChange = (id, type) => updateQty(id, type);
 
@@ -77,7 +77,7 @@ const CartScreen = () => {
         ) : (
           cartItems.map((item) => (
             <View
-              key={item.id.toString()}
+              key={item._id.toString()}
               style={[
                 styles.card,
                 { backgroundColor: '#dadada', borderColor: COLORS.shadow },
@@ -89,7 +89,7 @@ const CartScreen = () => {
               />
               <View style={styles.itemDetails}>
                 <Text style={[styles.itemName, { color: '#000' }]}>
-                  {item.name || item.title}
+                  {item.name || item.title || item.serviceName}
                 </Text>
                 <View style={styles.priceRow}>
                   <Text style={[styles.price, { color: '#000' }]}>₹{item.price}</Text>
@@ -151,7 +151,7 @@ const CartScreen = () => {
                 <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>Total</Text>
                 <Text style={[styles.totalText, { color: theme.dark ? '#fff' : '#000' }]}>₹{total}</Text>
               </View>
-              <TouchableOpacity style={[styles.checkoutBtn, { backgroundColor: COLORS.primary }]}>
+              <TouchableOpacity onPress={()=>navigation.navigate("PaymentScreen")} style={[styles.checkoutBtn, { backgroundColor: COLORS.primary }]}>
                 <Text style={[styles.checkoutText, { color: '#fff' }]}>Checkout</Text>
               </TouchableOpacity>
             </View>

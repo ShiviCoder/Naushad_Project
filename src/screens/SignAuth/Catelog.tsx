@@ -10,113 +10,114 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
+import { useCart } from '../../context/CartContext';
 
-const products = [
-  {
-    id: '1',
-    name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
-    price: '₹299',
-    offer: '25%OFF',
-    rating: '4.1',
-    tag: '100% natural oil',
-    image: [require('../../assets/images/male-product1.jpg'),
-    require('../../assets/images/female-product1.jpg')
-    ],
-    description: '100% natural oil',
-    reviews: 5802,
-  },
-  {
-    id: '2',
-    name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
-    price: '₹299',
-    offer: '33%OFF',
-    rating: '4.1',
-    tag: 'Instant visible result',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product2.jpg')
-    ],
-    description: 'Smooth & shiny hair',
-    reviews: 3100,
-  },
-  {
-    id: '3',
-    name: ['Detan — Face', 'Foaming Face Wash Gel'],
-    price: '₹299',
-    offer: '33%OFF',
-    rating: '4.1',
-    tag: 'Instant visible result',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product4.jpg')
-    ],
-    description: 'Smooth & shiny hair',
-    reviews: 3100,
-  },
-  {
-    id: '4',
-    name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
-    price: '₹299',
-    offer: '20%OFF',
-    rating: '4.1',
-    tag: 'Salon grade',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product4.jpg')
-    ],
-    description: 'Detox & deep clean',
-    reviews: 2750,
-  },
-  {
-    id: '5',
-    name: ['Shave Cream ', 'MediCube Hair Mask'],
-    price: '₹299',
-    offer: '25%OFF',
-    rating: '4.1',
-    tag: '100% natural oil',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product3.jpg')
-    ],
-    description: 'Anti-dandruff formula',
-    reviews: 3300,
-  },
-  {
-    id: '6',
-    name: ['Detan — Face', 'Foaming Face Wash'],
-    price: '₹299',
-    offer: '33%OFF',
-    rating: '4.1',
-    tag: 'Instant visible result',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product4.jpg')
-    ],
-    description: 'Smooth & shiny hair',
-    reviews: 3100,
-  },
-  {
-    id: '7',
-    name: ['Nivea Hair spa', "Plum FaceWash 50ml"],
-    price: '₹299',
-    offer: '20%OFF',
-    rating: '4.1',
-    tag: 'Salon grade',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product2.jpg')
-    ],
-    description: 'Smooth & shiny hair',
-    reviews: 3100,
-  },
-  {
-    id: '8',
-    name: ['Shave Cream ', 'MediCube Hair Mask'],
-    price: '₹299',
-    offer: '25%OFF',
-    rating: '4.1',
-    tag: '100% natural oil',
-    image: [require('../../assets/images/male-product11.jpg'),
-    require('../../assets/images/female-product3.jpg')
-    ],
-    description: 'Anti-dandruff formula',
-    reviews: 3300,
-  },
-];
+// const products = [
+//   {
+//     id: '1',
+//     name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
+//     price: '₹299',
+//     offer: '25%OFF',
+//     rating: '4.1',
+//     tag: '100% natural oil',
+//     image: [require('../../assets/images/male-product1.jpg'),
+//     require('../../assets/images/female-product1.jpg')
+//     ],
+//     description: '100% natural oil',
+//     reviews: 5802,
+//   },
+//   {
+//     id: '2',
+//     name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
+//     price: '₹299',
+//     offer: '33%OFF',
+//     rating: '4.1',
+//     tag: 'Instant visible result',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product2.jpg')
+//     ],
+//     description: 'Smooth & shiny hair',
+//     reviews: 3100,
+//   },
+//   {
+//     id: '3',
+//     name: ['Detan — Face', 'Foaming Face Wash Gel'],
+//     price: '₹299',
+//     offer: '33%OFF',
+//     rating: '4.1',
+//     tag: 'Instant visible result',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product4.jpg')
+//     ],
+//     description: 'Smooth & shiny hair',
+//     reviews: 3100,
+//   },
+//   {
+//     id: '4',
+//     name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
+//     price: '₹299',
+//     offer: '20%OFF',
+//     rating: '4.1',
+//     tag: 'Salon grade',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product4.jpg')
+//     ],
+//     description: 'Detox & deep clean',
+//     reviews: 2750,
+//   },
+//   {
+//     id: '5',
+//     name: ['Shave Cream ', 'MediCube Hair Mask'],
+//     price: '₹299',
+//     offer: '25%OFF',
+//     rating: '4.1',
+//     tag: '100% natural oil',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product3.jpg')
+//     ],
+//     description: 'Anti-dandruff formula',
+//     reviews: 3300,
+//   },
+//   {
+//     id: '6',
+//     name: ['Detan — Face', 'Foaming Face Wash'],
+//     price: '₹299',
+//     offer: '33%OFF',
+//     rating: '4.1',
+//     tag: 'Instant visible result',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product4.jpg')
+//     ],
+//     description: 'Smooth & shiny hair',
+//     reviews: 3100,
+//   },
+//   {
+//     id: '7',
+//     name: ['Nivea Hair spa', "Plum FaceWash 50ml"],
+//     price: '₹299',
+//     offer: '20%OFF',
+//     rating: '4.1',
+//     tag: 'Salon grade',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product2.jpg')
+//     ],
+//     description: 'Smooth & shiny hair',
+//     reviews: 3100,
+//   },
+//   {
+//     id: '8',
+//     name: ['Shave Cream ', 'MediCube Hair Mask'],
+//     price: '₹299',
+//     offer: '25%OFF',
+//     rating: '4.1',
+//     tag: '100% natural oil',
+//     image: [require('../../assets/images/male-product11.jpg'),
+//     require('../../assets/images/female-product3.jpg')
+//     ],
+//     description: 'Anti-dandruff formula',
+//     reviews: 3300,
+//   },
+// ];
 
 // const services = [
 //     {
@@ -217,6 +218,9 @@ const Catelog = () => {
   const { width, height } = useWindowDimensions();
   const navigation = useNavigation();
   const [services, setServices] = useState([]);
+  const [products,setProducts] = useState([]);
+  const { addToCart } = useCart();
+  
   const fetchServices = async () => {
     try {
       //const token = await getToken();
@@ -238,10 +242,33 @@ const Catelog = () => {
     }
   }
 
+  useEffect(() => {
+    fetchServices()
+  }, [])
+
+  const fetchProducts = async () => {
+     try {
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
+
+      const res = await fetch("https://naushad.onrender.com/api/products", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+      const data = await res.json();
+      setProducts(data.data);
+      console.log("Product data : ", data);
+    } catch(error){
+      console.log("Catelog Product Error : ", error);
+    }
+  }
+
   useEffect(()=>{
-     fetchServices()
+    fetchProducts();
   },[])
-  
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Catelog" />
@@ -291,20 +318,20 @@ const Catelog = () => {
           contentContainerStyle={{ paddingHorizontal: wp('3%'), alignSelf: 'center' }}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: item.image[0] } })}
+              onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: item.image } })}
               android_ripple={{ color: 'transparent' }}
               activeOpacity={1}
             >
               <View style={styles.productCard}>
                 <Image
-                  source={item.image[0]}
+                  source={{uri : item.image}}
                   style={styles.productImage}
                 />
                 <Text style={styles.productName} numberOfLines={2}>
-                  {item.name[1]}
+                  {item.name}
                 </Text>
                 <Text style={styles.productPrice}>
-                  {item.price}{' '}
+                  ₹{item.price}{' '}
                   <Text style={{ color: '#29A244' }}>({item.offer})</Text>
                 </Text>
 
@@ -336,18 +363,17 @@ const Catelog = () => {
         />
       )}
 
-
       {activeTab === 'Services' &&
         <FlatList
           data={services.data}
-          horizontal
-          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           keyExtractor={item => item._id}
           contentContainerStyle={{ paddingHorizontal: wp('2%') }}
+          numColumns={2}
           renderItem={({ item }) => (
             <View style={styles.serviceCard}>
               <Image
-                source={{ uri: `https://naushad.onrender.com${item.imageUrl}` }}
+                source={{ uri: item.imageUrl }}
                 style={styles.serviceImage}
               />
               <View style={styles.nameItem}>
@@ -362,7 +388,7 @@ const Catelog = () => {
                 onPress={() => {
                   addToCart({
                     id: item._id.toString(),
-                    name: item.name,
+                    name: item.serviceName,
                     price: item.price,
                     qty: 1, // default quantity
                   });

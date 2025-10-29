@@ -5,7 +5,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-nat
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
 import PopUp from "../../components/PopUp";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const OTPVerificationScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(59);
@@ -15,8 +15,8 @@ const OTPVerificationScreen = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
   const [nextRoute, setNextRoute] = useState(null);
+  const [email, setEmail] = useState("");
 
-  // Timer countdown
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
@@ -24,7 +24,19 @@ const OTPVerificationScreen = () => {
     }
   }, [timer]);
 
-  // Handle OTP input change
+  useEffect(() => {
+    const fetchEmail = async () => {
+      const data = await AsyncStorage.getItem("pendingUserData");
+      if (data) {
+        const parsed = JSON.parse(data);
+        setEmail(parsed.email);
+        console.log("Loaded user data ", parsed);
+        sendEmail(parsed.email);
+      }
+    }
+    fetchEmail();
+  }, []);
+
   const handleChange = (text, index) => {
     if (/^\d$/.test(text)) {
       const newOtp = [...otp];
@@ -35,9 +47,27 @@ const OTPVerificationScreen = () => {
   };
 
   // Resend OTP
-  const handleResend = () => {
+  const handleResend = async () => {
     setOtp(["", "", "", "", "", ""]);
     setTimer(59);
+    try {
+      const response = await fetch("https://naushad.onrender.com/api/auth/resend-otp", {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setPopupMessage("OTP resent successfully");
+      } else {
+        setPopupMessage(data.message || "Failed to resent OTP.");
+      }
+    } catch (err) {
+      setPopupMessage("Error sending otp.")
+    }
+    setPopupVisible(true);
   };
 
   // Verify OTP
@@ -50,16 +80,48 @@ const OTPVerificationScreen = () => {
       setNextRoute(null);
       return;
     }
-
-    setLoading(true);
     try {
-      // simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setLoading(false); // stop loader before popup
+      setLoading(true);
+      const response = await fetch("https://naushad.onrender.com/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: otpCode }),
+      })
+      const data = await response.json();
+      console.log("OTP verify response:", data);
 
-      setPopupMessage("OTP Verified Successfully!");
+      if (response.ok && data.success) {
+        const storedData = await AsyncStorage.getItem('pendingUserData');
+        if (storedData) {
+          const userData = JSON.parse(storedData);
+          console.log("Registering user after otp verification : ", userData);
+          const registerResponse = await fetch("https://naushad.onrender.com/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData),
+          });
+
+          const registerData = await registerResponse.json();
+          console.log("Register response : ", registerData);
+
+          if (registerResponse.ok && registerData.token) {
+            await AsyncStorage.removeItem("pendingUserData");
+            setPopupMessage("Registration Successful! Please sign in");
+            setNextRoute({ name: "Signin" });
+          } else {
+            setPopupMessage(registerData.message || "SignUp fail");
+            setNextRoute(null);
+          }
+        } else {
+          setPopupMessage("No signUp data found. SignUp again");
+          setNextRoute({ name: 'SignUp' });
+        }
+      } else {
+        setPopupMessage("Invalid Otp. Try again");
+        setNextRoute(null);
+      }
+      setLoading(false);
       setPopupVisible(true);
-      setNextRoute({ name: "Signin" });
     } catch (error) {
       console.error(error);
       setLoading(false);
@@ -92,7 +154,12 @@ const OTPVerificationScreen = () => {
 
       {/* Subtext */}
       <Text style={styles.subtitle}>
-        We will send you an One Time Passcode{"\n"}via this mail@gmail.com email address
+        <Text style={styles.subtitle}>
+          We will send you a One Time Passcode{"\n"}
+          via this <Text style={{ fontWeight: "700", color: COLORS.primary }}>
+            {email || "your email"}
+          </Text> email address
+        </Text>
       </Text>
 
       {/* OTP Inputs */}
@@ -141,7 +208,7 @@ const OTPVerificationScreen = () => {
       >
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.verifyText}>VERIFY OTP</Text>}
       </TouchableOpacity>
-      
+
       {/* Popup */}
       <PopUp visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
     </SafeAreaView>

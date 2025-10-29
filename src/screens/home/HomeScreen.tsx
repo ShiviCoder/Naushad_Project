@@ -25,7 +25,7 @@ const { width } = Dimensions.get("window");
 const VideoCard = ({ videoId }: { videoId: string }) => {
   const cardWidth = wp("40%");
   const cardHeight = hp('40%') // 16:9 ratio
- 
+
 
   const html = `
    <html>
@@ -87,7 +87,7 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
           scrollEnabled={false}
           allowsInlineMediaPlayback={true}
           mediaPlaybackRequiresUserAction={false}
-        />      
+        />
       </View>
     );
   } catch (e) {
@@ -123,14 +123,17 @@ const HomeScreen = () => {
   }
 
   const fetchAllData = async () => {
-     try {
+    try {
       await Promise.all([
         fetchServices(),
         fetchProductPackages(),
         fetchHomeServices(),
         fetchCertificates(),
         fetchAboutData(),
-        fetchVideos()
+        fetchVideos(),
+        fetchProducts(),
+        fetchPackages(),
+        fetchSpecialOffers(),
       ]);
       console.log("✅ All APIs loaded");
     } catch (error) {
@@ -138,26 +141,26 @@ const HomeScreen = () => {
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchAllData();
-  },[])
- const onRefresh = async () => {
-  setRefreshing(true);
-  Animated.timing(translateY, {
-    toValue: 50,
-    duration: 300,
-    useNativeDriver: true,
-  }).start();
+  }, [])
+  const onRefresh = async () => {
+    setRefreshing(true);
+    Animated.timing(translateY, {
+      toValue: 50,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
 
-  await fetchAllData(); // wait for APIs
+    await fetchAllData(); // wait for APIs
 
-  Animated.timing(translateY, {
-    toValue: 0,
-    useNativeDriver: true,
-  }).start();
+    Animated.timing(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
 
-  setRefreshing(false);
-};
+    setRefreshing(false);
+  };
 
   const handleSectionNavigation = (section: string) => {
     switch (section) {
@@ -184,9 +187,9 @@ const HomeScreen = () => {
         navigation.navigate('HomeServices');
         console.log('Navigate to Product Packages Screen');
         break;
-      case 'videos' : 
-      navigation.navigate('VideosScreen');
-      break;
+      case 'videos':
+        navigation.navigate('VideosScreen');
+        break;
       default:
         console.log('Unknown section');
     }
@@ -285,114 +288,54 @@ const HomeScreen = () => {
   }
 
 
- 
+
   // Products (added rating + tag)
-  const products = [
-    {
-      id: '1',
-      name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product1.jpg'),
-      require('../../assets/images/female-product1.jpg')
-      ],
-      description: '100% natural oil',
-      reviews: 5802,
-    },
-    {
-      id: '2',
-      name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product2.jpg')],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '3',
-      name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
-      price: '₹299',
-      offer: '20%OFF',
-      rating: '4.1',
-      tag: 'Salon grade',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Detox & deep clean',
-      reviews: 2750,
-    },
-    {
-      id: '4',
-      name: ['Shave Cream ', 'MediCube Hair Mask'],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product3.jpg')
-      ],
-      description: 'Anti-dandruff formula',
-      reviews: 3300,
-    },
-    {
-      id: '5',
-      name: ['Detan — Face', 'Foaming Face Wash Gel'],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '6',
-      name: ['Nivea Hair spa', "Plum FaceWash - 500ml"],
-      price: '₹299',
-      offer: '20%OFF',
-      rating: '4.1',
-      tag: 'Salon grade',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product2.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const fetchProducts = async () => {
+    try {
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
+
+      const res = await fetch("https://naushad.onrender.com/api/products", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+      const data = await res.json();
+      setProducts(data.data);
+      console.log("Product data : ", data);
+    } catch (error) {
+      console.log("Product error : ", error)
+    }
+  }
 
   // Videos row (thumbnails with play)
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
- 
-    const fetchVideos = async () => {
-      try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
 
-        const res = await fetch("https://naushad.onrender.com/api/youtube", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+  const fetchVideos = async () => {
+    try {
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
 
-        const data = await res.json();
-        setVideos(data);
-        console.log("Youtube Token : ", token);
-        console.log("Youtube Data:", data);
-      } catch (err) {
-        console.log("Error loading:", err);
-      }
-    };
+      const res = await fetch("https://naushad.onrender.com/api/youtube", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-    
+      const data = await res.json();
+      setVideos(data);
+      //console.log("Youtube Token : ", token);
+      console.log("Youtube Data:", data);
+    } catch (err) {
+      console.log("Error loading:", err);
+    }
+  };
+
+
 
   // Certificates (two items like the mock)
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -419,118 +362,140 @@ const HomeScreen = () => {
     }
   }
 
- 
+
   // Packages (two-column cards)
-  const packages = [
-    {
-      id: '1',
-      title: 'Basic hair cut package',
-      price: '₹ 499',
-      services: 'Haircut , Shampoo',
-      about: 'Perfect for daily grooming',
-      image: require('../../assets/pkgImage2.png'),
-      discount: '🔖 Save ₹300 on festive booking',
-      review: 23,
-      rating: 4.5,
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '2',
-      title: 'Deluxe Facial package',
-      price: '₹ 899',
-      services: 'Exfoliation , Massage',
-      about: 'Refresh & glow routine',
-      image: require('../../assets/pkgImage1.png'),
-      discount: '🔖 Save ₹300 on festive booking',
-      review: 23,
-      rating: 4.5,
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '3',
-      title: 'Basic hair cut package',
-      price: '₹ 499',
-      services: 'Haircut , Shampoo',
-      about: 'Perfect for daily grooming',
-      image: require('../../assets/pkgImage3.png'),
-      discount: '🔖 Save ₹300 on festive booking',
-      review: 23,
-      rating: 4.5,
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '4',
-      title: 'Deluxe Facial package',
-      price: '₹ 899',
-      services: 'Exfoliation , Massage',
-      about: 'Refresh & glow routine',
-      image: require('../../assets/pkgImage1.png'),
-      review: 23,
-      rating: 4.5,
-      discount: '🔖 Save ₹300 on festive booking',
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '5',
-      title: 'Basic hair cut package',
-      price: '₹ 499',
-      services: 'Haircut , Shampoo',
-      about: 'Perfect for daily grooming',
-      image: require('../../assets/pkgImage1.png'),
-      review: 23,
-      rating: 4.5,
-      discount: '🔖 Save ₹300 on festive booking',
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '6',
-      title: 'Deluxe Facial package',
-      price: '₹ 899',
-      services: 'Exfoliation , Massage',
-      about: 'Refresh & glow routine',
-      image: require('../../assets/pkgImage1.png'),
-      review: 23,
-      rating: 4.5,
-      discount: '🔖 Save ₹300 on festive booking',
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-  ];
+  // const packages = [
+  //   {
+  //     id: '1',
+  //     title: 'Basic hair cut package',
+  //     price: '₹ 499',
+  //     services: 'Haircut , Shampoo',
+  //     about: 'Perfect for daily grooming',
+  //     image: require('../../assets/pkgImage2.png'),
+  //     discount: '🔖 Save ₹300 on festive booking',
+  //     review: 23,
+  //     rating: 4.5,
+  //     serviceList: [
+  //       'Cleansing & Scrubbing',
+  //       'Steam & Blackhead Removal',
+  //       'Relaxing Massage',
+  //       'Hydrating Mask',
+  //       'Skin Brightening Serum',
+  //     ],
+  //   },
+  //   {
+  //     id: '2',
+  //     title: 'Deluxe Facial package',
+  //     price: '₹ 899',
+  //     services: 'Exfoliation , Massage',
+  //     about: 'Refresh & glow routine',
+  //     image: require('../../assets/pkgImage1.png'),
+  //     discount: '🔖 Save ₹300 on festive booking',
+  //     review: 23,
+  //     rating: 4.5,
+  //     serviceList: [
+  //       'Cleansing & Scrubbing',
+  //       'Steam & Blackhead Removal',
+  //       'Relaxing Massage',
+  //       'Hydrating Mask',
+  //       'Skin Brightening Serum',
+  //     ],
+  //   },
+  //   {
+  //     id: '3',
+  //     title: 'Basic hair cut package',
+  //     price: '₹ 499',
+  //     services: 'Haircut , Shampoo',
+  //     about: 'Perfect for daily grooming',
+  //     image: require('../../assets/pkgImage3.png'),
+  //     discount: '🔖 Save ₹300 on festive booking',
+  //     review: 23,
+  //     rating: 4.5,
+  //     serviceList: [
+  //       'Cleansing & Scrubbing',
+  //       'Steam & Blackhead Removal',
+  //       'Relaxing Massage',
+  //       'Hydrating Mask',
+  //       'Skin Brightening Serum',
+  //     ],
+  //   },
+  //   {
+  //     id: '4',
+  //     title: 'Deluxe Facial package',
+  //     price: '₹ 899',
+  //     services: 'Exfoliation , Massage',
+  //     about: 'Refresh & glow routine',
+  //     image: require('../../assets/pkgImage1.png'),
+  //     review: 23,
+  //     rating: 4.5,
+  //     discount: '🔖 Save ₹300 on festive booking',
+  //     serviceList: [
+  //       'Cleansing & Scrubbing',
+  //       'Steam & Blackhead Removal',
+  //       'Relaxing Massage',
+  //       'Hydrating Mask',
+  //       'Skin Brightening Serum',
+  //     ],
+  //   },
+  //   {
+  //     id: '5',
+  //     title: 'Basic hair cut package',
+  //     price: '₹ 499',
+  //     services: 'Haircut , Shampoo',
+  //     about: 'Perfect for daily grooming',
+  //     image: require('../../assets/pkgImage1.png'),
+  //     review: 23,
+  //     rating: 4.5,
+  //     discount: '🔖 Save ₹300 on festive booking',
+  //     serviceList: [
+  //       'Cleansing & Scrubbing',
+  //       'Steam & Blackhead Removal',
+  //       'Relaxing Massage',
+  //       'Hydrating Mask',
+  //       'Skin Brightening Serum',
+  //     ],
+  //   },
+  //   {
+  //     id: '6',
+  //     title: 'Deluxe Facial package',
+  //     price: '₹ 899',
+  //     services: 'Exfoliation , Massage',
+  //     about: 'Refresh & glow routine',
+  //     image: require('../../assets/pkgImage1.png'),
+  //     review: 23,
+  //     rating: 4.5,
+  //     discount: '🔖 Save ₹300 on festive booking',
+  //     serviceList: [
+  //       'Cleansing & Scrubbing',
+  //       'Steam & Blackhead Removal',
+  //       'Relaxing Massage',
+  //       'Hydrating Mask',
+  //       'Skin Brightening Serum',
+  //     ],
+  //   },
+  // ];
+
+  const [packages, setPackages] = useState([]);
+  const fetchPackages = async () => {
+    try {
+      //const token = await getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const response = await fetch('https://naushad.onrender.com/api/packages', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      console.log("Package response : ", json);
+      console.log('Package token : ', token)
+      setPackages(json.data);
+    } catch (err) {
+      console.log("Package error : ", err)
+    }
+  }
+
 
   // Product packages (small horizontal cards)
   const [productPackages, setProductPackage] = useState([]);
@@ -554,42 +519,63 @@ const HomeScreen = () => {
     }
   }
 
- 
 
-  const offers = [
-    {
-      id: "1",
-      title: "Haircut",
-      discount: "20% off",
-      date: "July 16 - July 24",
-      imageMale: require('../../assets/images/man-offer.jpg'),
-      imageFemale: require("../../assets/images/specialhaircut.png"),
-    },
-    {
-      id: "2",
-      title: "Facial",
-      discount: "15% off",
-      date: "July 20 - July 28",
-      imageMale: require('../../assets/images/male-offer1.jpg'),
-      imageFemale: require("../../assets/images/female-offer1.jpg"),
-    },
-    {
-      id: "3",
-      title: "Spa",
-      discount: "25% off",
-      date: "Aug 1 - Aug 10",
-      imageMale: require('../../assets/images/male-offer2.jpg'),
-      imageFemale: require("../../assets/images/female-offer2.jpg"),
-    },
-    {
-      id: "4",
-      title: "Shaving",
-      discount: "10% off",
-      date: "Aug 5 - Aug 15",
-      imageMale: require('../../assets/images/male-offer3.jpg'),
-      imageFemale: require('../../assets/images/female-offer3.jpg'),
-    },
-  ];
+
+  // const offers = [
+  //   {
+  //     id: "1",
+  //     title: "Haircut",
+  //     discount: "20% off",
+  //     date: "July 16 - July 24",
+  //     imageMale: require('../../assets/images/man-offer.jpg'),
+  //     imageFemale: require("../../assets/images/specialhaircut.png"),
+  //   },
+  //   {
+  //     id: "2",
+  //     title: "Facial",
+  //     discount: "15% off",
+  //     date: "July 20 - July 28",
+  //     imageMale: require('../../assets/images/male-offer1.jpg'),
+  //     imageFemale: require("../../assets/images/female-offer1.jpg"),
+  //   },
+  //   {
+  //     id: "3",
+  //     title: "Spa",
+  //     discount: "25% off",
+  //     date: "Aug 1 - Aug 10",
+  //     imageMale: require('../../assets/images/male-offer2.jpg'),
+  //     imageFemale: require("../../assets/images/female-offer2.jpg"),
+  //   },
+  //   {
+  //     id: "4",
+  //     title: "Shaving",
+  //     discount: "10% off",
+  //     date: "Aug 5 - Aug 15",
+  //     imageMale: require('../../assets/images/male-offer3.jpg'),
+  //     imageFemale: require('../../assets/images/female-offer3.jpg'),
+  //   },
+  // ];
+
+  const [offers, setOffers] = useState([]);
+  const fetchSpecialOffers = async () => {
+    try {
+      //const token =await  getToken();
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const response = await fetch('https://naushad.onrender.com/api/offers', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const json = await response.json();
+      //console.log("Special offer token : ", token)
+      console.log("Special offer data : ", json);
+      setOffers(json.data);
+    } catch (error) {
+      console.log("special offer error : ", error)
+    }
+  }
 
   const [homeServices, setHomeService] = useState([]);
   const fetchHomeServices = async () => {
@@ -611,7 +597,7 @@ const HomeScreen = () => {
       console.log("Home services error : ", error)
     }
   }
- 
+
 
   const [aboutData, setAboutData] = useState([]);
   const fetchAboutData = async () => {
@@ -633,7 +619,7 @@ const HomeScreen = () => {
       console.log("About Data : ", error)
     }
   }
- 
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
 
@@ -944,15 +930,16 @@ const HomeScreen = () => {
           {/* Special Offer split card */}
           <View style={{ height: hp('27%'), marginBottom: hp('4%') }}>
             <Swiper
+              key={offers.length} // forces re-render when offers change
               autoplay
               autoplayTimeout={3}
               showsPagination
-              dotStyle={{ backgroundColor: "#ccc", }}
-              activeDotStyle={{ backgroundColor: COLORS.primary, }}
+              dotStyle={{ backgroundColor: "#ccc" }}
+              activeDotStyle={{ backgroundColor: COLORS.primary }}
               paginationStyle={{ top: hp('28%') }}
             >
-              {offers.map((item) => (
-                <View key={item.id} style={[styles.offerCard, { backgroundColor: COLORS.primary }]}>
+              {offers.map((item, index) => (
+                <View key={index} style={[styles.offerCard, { backgroundColor: COLORS.primary }]}>
                   <View style={[styles.offerLeft, { backgroundColor: COLORS.primary }]}>
                     <Text style={styles.offerBig}>{item.title}</Text>
                     <Text style={styles.offerSmall}>{item.discount}</Text>
@@ -965,7 +952,7 @@ const HomeScreen = () => {
                     </TouchableOpacity>
                   </View>
                   <Image
-                    source={gender === "Male" ? item.imageMale : item.imageFemale}
+                    source={{ uri: item.imageUrl }}
                     style={styles.offerRightImage}
                   />
                 </View>
@@ -1009,7 +996,7 @@ const HomeScreen = () => {
                     navigation.navigate('ServiceDetails', {
                       item: {
                         ...item,
-                      image: item.imageUrl
+                        image: item.imageUrl
                       }
                     })
                   }
@@ -1020,7 +1007,7 @@ const HomeScreen = () => {
               </View>
             )}
           />
-          
+
           {/* Appointment Banner */}
           <ImageBackground
             resizeMode='cover'
@@ -1043,7 +1030,6 @@ const HomeScreen = () => {
               </TouchableOpacity>
             </View>
           </ImageBackground>
-
           {/* Products Section with navigation */}
           <SectionTitle
             title="Get our products"
@@ -1053,29 +1039,30 @@ const HomeScreen = () => {
             data={products}
             horizontal
             showsHorizontalScrollIndicator={false}
-             keyExtractor={(item) => item._id}
+            keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('1.5%') }}
             renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: gender === 'Male' ? item.image[0] : item.image[1] } })}
+                onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: item.image } })}
                 android_ripple={{ color: 'transparent' }}
                 activeOpacity={1}
 
               >
                 <View style={styles.productCard}>
                   <Image
-                    source={
-                      gender === 'Male' ? item.image[0] : item.image[1]
-                    }
+
+                    // gender === 'Male' ? item.image[0] : item.image[1]
+                    source={{ uri: item.image }}
+
                     style={styles.productImage} />
                   <Text style={styles.productName} numberOfLines={2}>
-                    {gender === 'Male' ? item.name[0] : item.name[1]}
+                    {/* {gender === 'Male' ? item.name[0] : item.name[1]} */}
+                    {item.name}
                   </Text>
                   <Text style={styles.productPrice}>
-                    {item.price}{' '}
+                    ₹{item.price}{' '}
                     <Text style={{ color: '#29A244' }}>({item.offer})</Text>
                   </Text>
-
                   {/* rating + tag pills */}
                   <View
                     style={{
@@ -1112,7 +1099,7 @@ const HomeScreen = () => {
             data={videos.data}
             horizontal
             showsHorizontalScrollIndicator={false}
-           keyExtractor={(item) => item._id}
+            keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('3%'), marginVertical: hp('2%') }}
             renderItem={({ item }) =>
               <VideoCard videoId={item.videoId} />
@@ -1155,30 +1142,30 @@ const HomeScreen = () => {
           <SectionTitle title="About our salon" showSeeAll={false} />
 
           <View style={[styles.aboutContainer, { backgroundColor: theme.background }]}>
-           <FlatList
-  data={aboutData}
-  keyExtractor={(item) => item._id}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  renderItem={({ item }) => {
-    return (
-      <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
-        <Image
-          source={{ uri: `https://naushad.onrender.com${item.image.replace(/\\/g, "/")}` }}
-          style={{ width: wp("10%"), height: wp("10%"), borderRadius: wp("2%") }}
-          resizeMode="contain"
-        />
-        <Text style={[styles.aboutTop, { color: theme.background }]}>
-          {item.title}
-        </Text>
-        <Text style={[styles.aboutBottom, { color: theme.background }]}>
-          {item.description}
-        </Text>
-      </View>
-    );
-  }}
-  contentContainerStyle={{ paddingHorizontal: wp("2%") }}
-/>
+            <FlatList
+              data={aboutData}
+              keyExtractor={(item) => item._id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => {
+                return (
+                  <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
+                    <Image
+                      source={{ uri: `https://naushad.onrender.com${item.image.replace(/\\/g, "/")}` }}
+                      style={{ width: wp("10%"), height: wp("10%"), borderRadius: wp("2%") }}
+                      resizeMode="contain"
+                    />
+                    <Text style={[styles.aboutTop, { color: theme.background }]}>
+                      {item.title}
+                    </Text>
+                    <Text style={[styles.aboutBottom, { color: theme.background }]}>
+                      {item.description}
+                    </Text>
+                  </View>
+                );
+              }}
+              contentContainerStyle={{ paddingHorizontal: wp("2%") }}
+            />
           </View>
 
 
@@ -1223,7 +1210,7 @@ const HomeScreen = () => {
           <FlatList
             data={productPackages}
             horizontal
-           keyExtractor={(item) => item._id}// ✅ fallback
+            keyExtractor={(item) => item._id}// ✅ fallback
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 10 }}
             renderItem={({ item }) => (

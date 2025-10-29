@@ -25,7 +25,7 @@ console.log("Hello")
    
       <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
       <Head title='Our Packages' />
-      <Image style={styles.img} source={item.image} />
+      <Image style={styles.img} source={{uri : item.image}} />
       <View style={styles.detail}>
         <View style={styles.titleContain}>
           <Text style={[styles.titleTxt,{color : theme.textPrimary}]}>{item.title}</Text>
@@ -37,14 +37,25 @@ console.log("Hello")
 
       <View style={styles.serviceListContain}>
         <Text style={[styles.serviceListHeadTxt,{color : theme.textPrimary}]}>Service List</Text>
-       {item.serviceList?.map((service, index) => (
-  <View key={index} style={styles.ServiceListTxtContain}>
-    <Text>✅</Text>
-    <Text style={[styles.serviceListTxt,{color : theme.textPrimary}]}>{service}</Text>
-  </View>
-)) || (
-  <Text style={{color: theme.textPrimary}}>No services available</Text>
-)}
+       {(() => {
+  let services = [];
+  try {
+    services = JSON.parse(item.serviceList);
+  } catch (e) {
+    services = [];
+  }
+
+  return services.length > 0 ? (
+    services.map((service, index) => (
+      <View key={index} style={styles.ServiceListTxtContain}>
+        <Text>✅</Text>
+        <Text style={[styles.serviceListTxt, { color: theme.textPrimary }]}>{service}</Text>
+      </View>
+    ))
+  ) : (
+    <Text style={{ color: theme.textPrimary }}>No services available</Text>
+  );
+})()}
       </View>
 
       <View style={styles.ratContain}>
