@@ -6,16 +6,17 @@ import { useTheme } from "../context/ThemeContext";
 import COLORS from "../utils/Colors";
 
 interface TimeSelectProps {
-  selectedDate?: Date; // ✅ Accept selected date as prop
+  selectedDate?: Date;
+  onTimeSelect?: (time: string) => void; // ✅ new prop
 }
 
-const TimeSelect = ({ selectedDate }: TimeSelectProps) => {
+const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
   const { theme } = useTheme();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
-  
+
   const slotArray = [
-    "9.00", "10.00", "11.00", "12.00", "13.00", "14.00", "15.00", "16.00", "17.00", "18.00", "19.00",
+    "09.00", "09.30", "10.00", "10.30", "11.00", "11.30", "12.00", "12.30", "01.00", "01.30", "02.00", "02.30", "03.30"
   ];
 
   // ✅ Update current time periodically
@@ -54,7 +55,7 @@ const TimeSelect = ({ selectedDate }: TimeSelectProps) => {
   // ✅ Check if the selected date is today
   const isToday = () => {
     if (!selectedDate) return true; // If no date selected, assume today
-    
+
     const today = new Date();
     return (
       selectedDate.getDate() === today.getDate() &&
@@ -74,9 +75,7 @@ const TimeSelect = ({ selectedDate }: TimeSelectProps) => {
     const slotTime = parseSlot(slot);
     return slotTime <= currentTime;
   };
-
-
-    return (
+  return (
     <View style={{ paddingHorizontal: wp("2%") }}>
       <FlatList
         data={slotArray}
@@ -89,31 +88,39 @@ const TimeSelect = ({ selectedDate }: TimeSelectProps) => {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const isSelected = selectedSlot === item; // ✅ check if selected
-          const isPast =  isSlotDisabled(item);
+          const isPast = isSlotDisabled(item);
           return (
             <Shadow
               distance={3}
               startColor={COLORS.shadow} // yellow if selected
               offset={[4, 0]}
-              style={[styles.shadowContainer, { width: wp("18%") , height: hp("4.5%")}]}
-              paintInside={isSelected ? true : false} 
+              style={[styles.shadowContainer, { width: wp("20%"), height: hp("4.5%") }]}
+              paintInside={isSelected ? true : false}
             >
               <TouchableOpacity
-              disabled={isPast}
+                disabled={isPast}
                 style={[
                   styles.slotButton,
                   {
                     backgroundColor: isSelected ? COLORS.primary : theme.cardBackground, // ✅ yellow if selected             
                   },
                 ]}
-                onPress={() => setSelectedSlot(isSelected ? null : item)} // ✅ update state on press
+                onPress={() => {
+                  const newValue = isSelected ? null : item;
+                  setSelectedSlot(newValue);
+                  if (newValue && onTimeSelect) {
+                    onTimeSelect(newValue); // ✅ send selected time back to parent
+                  }
+                }} // ✅ update state on press
               >
                 <Text
                   style={[
                     styles.slotText,
-                    { color: isPast ? 
-                      "#8a8787ff" : 
-                      isSelected ? '#000' : theme.textPrimary }, // text color contrast
+                    {
+                      color: isPast ?
+                        "#8a8787ff" :
+                        isSelected ? '#000' : theme.textPrimary
+                    }, // text color contrast
                   ]}
                 >
                   {formatSlot(item)}
@@ -138,7 +145,7 @@ const styles = StyleSheet.create({
   slotButton: {
     borderRadius: wp("2%"),
     paddingVertical: hp("1.3%"),
-    paddingHorizontal: wp("3%"),
+    paddingHorizontal: wp("2%"),
     justifyContent: "center",
     alignItems: "center",
     width: "100%",

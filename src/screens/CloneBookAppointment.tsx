@@ -22,26 +22,33 @@ import COLORS from '../utils/Colors';
 import Popup from '../components/PopUp';
 
 type RootStackParamList = {
-  BookAppointmentScreen: { image?: any; showTab?: boolean; from?: any };
+  BookAppointmentScreen: {
+    image?: any;
+    showTab?: boolean;
+    from?: any;
+    serviceName?: string;
+    price?: string;
+  };
+  PaymentScreen: {
+    serviceName?: string;
+    price?: string;
+    date?: string;
+    time?: string;
+  };
 };
 
 export default function BookAppointmentScreen() {
   const { theme } = useTheme();
-  const route =
-    useRoute<
-      RouteProp<
-        { BookAppointmentScreen: { showTab?: boolean; from?: any; image?: any } },
-        'BookAppointmentScreen'
-      >
-    >();
-
-  const { image, showTab = false } = route.params || {};
-  const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'BookAppointmentScreen'>>();
+  const navigation = useNavigation<any>();
+  const { image, showTab = false, serviceName, price } = route.params || {};
   const showBack = !showTab; // if tab visible → back button hide, else show
 
   // Popup state - can be removed since no validation needed now
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
 
   const data = [
     'image',
@@ -54,12 +61,22 @@ export default function BookAppointmentScreen() {
 
   // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
-  if (route.params?.from === 'bottomBar') {
-    navigation.navigate('BookAppoinment2');
-  } else {
-    navigation.navigate('PaymentScreen');
-  }
-};
+    console.log("🧾 Service params:", route.params);
+    console.log("📅 Selected Date (string):", selectedDate?.toISOString());
+    console.log("🕒 Selected Time (state):", selectedTime);
+
+    if (!selectedDate) {
+      console.log("❌ No date selected yet");
+      return;
+    }
+
+    navigation.navigate('PaymentScreen', {
+      serviceName,
+      price,
+      date: selectedDate.toDateString(),
+      time: selectedTime,
+    });
+  };
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
@@ -90,7 +107,12 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.calenderContainer}>
             {/* Removed any onMonthChange prop */}
-            <Calender  onDateSelect={setSelectedDate}/>
+            <Calender
+              onDateSelect={(date) => {
+                console.log("📅 Received from Calender:", date.toDateString());
+                setSelectedDate(date);
+              }}
+            />
           </View>
         );
       case 'selectTime':
@@ -103,7 +125,7 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.timeContainer}>
             {/* Removed any onTimeChange prop */}
-            <TimeSelect selectedDate={selectedDate}/>
+            <TimeSelect selectedDate={selectedDate} onTimeSelect={setSelectedTime} />
           </View>
         );
       case 'nextButton':
@@ -138,10 +160,8 @@ export default function BookAppointmentScreen() {
         }}
         showsVerticalScrollIndicator={false}
       />
-
       {/* Popup component retained but not used */}
       <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
-      
     </SafeAreaView>
   );
 }
@@ -176,8 +196,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontWeight: '800'
   },
-  calenderContainer: { marginHorizontal: wp('2%'), marginBottom: hp('0.5%') },
-  timeContainer: { marginHorizontal: wp('1%'), marginBottom: hp('1%') },
+  calenderContainer: { 
+    marginHorizontal: wp('2%'), 
+    marginBottom: hp('0.5%') 
+  },
+  timeContainer: { 
+    marginHorizontal: wp('1%'), 
+    marginBottom: hp('1%') 
+  },
   nxt: {
     marginHorizontal: wp('2%'),
     marginTop: hp('2%'),

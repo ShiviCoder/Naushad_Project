@@ -78,9 +78,19 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                             });
                         }}
                     >
-                        <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
+                    <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={()=>navigation.navigate('PaymentScreen')} style={[styles.buyButton, { backgroundColor: COLORS.primary }]}>
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('PaymentScreen', {
+                                serviceName: product.name,   // 🧾 product name as service name
+                                price: product.price,        // 💰 product price
+                                date: new Date().toDateString(), // optional (for now)
+                                time: null,                  // optional
+                            })
+                        }
+                        style={[styles.buyButton, { backgroundColor: COLORS.primary }]}
+                    >
                         <Text style={styles.buyTxt}>Buy Now</Text>
                     </TouchableOpacity>
                 </View>

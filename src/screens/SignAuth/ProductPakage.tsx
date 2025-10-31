@@ -73,7 +73,7 @@ const ProductPackages = ({ navigation }) => {
               {item.name || 'No title'}
             </Text>
             <Text style={[styles.price, { color: theme.textPrimary }]}>
-             ₹{item.price || 'N/A'}
+              ₹{item.price || 'N/A'}
             </Text>
           </View>
 
@@ -178,7 +178,12 @@ const ProductPackages = ({ navigation }) => {
       </View>
 
       <View style={styles.bottomContainer}>
-        <TouchableOpacity onPress={()=>navigation.navigate('PaymentScreen')} style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
+        <TouchableOpacity onPress={() =>
+          navigation.navigate('PaymentScreen', {
+            serviceName: item.name || 'Product',
+            price: item.price || 0,
+          })
+        } style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>

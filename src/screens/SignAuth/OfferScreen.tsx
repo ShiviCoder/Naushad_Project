@@ -84,7 +84,7 @@ const OfferScreen = () => {
               <Text style={styles.offerBig}>{item.title}</Text>
               <Text style={styles.offerSmall}>{item.discount}</Text>
               <Text style={styles.offerDate}>{item.date}</Text>
-              <Text style={styles.offerDesc}>{item.desc}</Text>
+              <Text style={styles.offerDesc}>{item.description}</Text>
               <TouchableOpacity style={styles.codeBtn} onPress={()=>navigation.navigate('Services')}>
                 <Text style={styles.codeText}>Get Now</Text>
               </TouchableOpacity>

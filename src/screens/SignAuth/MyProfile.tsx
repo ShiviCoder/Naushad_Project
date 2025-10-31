@@ -9,17 +9,16 @@ import Head from '../../components/Head';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 
-
-
 const MyProfile = () => {
     const [gender, setGender] = useState('')
     const [filePath, setFilePath] = useState({});
     const [modal, setModal] = useState(false);
     const navigation = useNavigation<any>();
-      const [dob, setDob] = useState("");
+    const [dob, setDob] = useState("");
+    console.log("🧩 MyProfile screen mounted");
 
     const { theme } = useTheme();
-
+    console.log("THeme : ", theme)
     const chooseFile = () => {
         let options = {
             mediaType: 'photo',
@@ -37,100 +36,102 @@ const MyProfile = () => {
             }
         });
     };
-  const handleChange = (text) => {
-  // Remove non-digit characters
-  let cleaned = text.replace(/\D/g, "");
+    const handleChange = (text) => {
+        // Remove non-digit characters
+        let cleaned = text.replace(/\D/g, "");
 
-  // Limit to 8 digits (DDMMYYYY)
-  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+        // Limit to 8 digits (DDMMYYYY)
+        if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
-  // Format with slashes
-  let formatted = "";
-  if (cleaned.length <= 2) {
-    formatted = cleaned;
-  } else if (cleaned.length <= 4) {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-  } else {
-    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
-  }
+        // Format with slashes
+        let formatted = "";
+        if (cleaned.length <= 2) {
+            formatted = cleaned;
+        } else if (cleaned.length <= 4) {
+            formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+        } else {
+            formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+        }
 
-  setDob(formatted);
-};
+        setDob(formatted);
+    };
     return (
-        <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-            <Head title='My Profile' rightComponent={
-                <TouchableOpacity>
-                    <Text style={[styles.saveText, { color: theme.textPrimary }]}>Save</Text>
-                </TouchableOpacity>} />
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <ScrollView >
+                <Head title='My Profile' rightComponent={
+                    <TouchableOpacity>
+                        <Text style={[styles.saveText, { color: theme.textPrimary }]}>Save</Text>
+                    </TouchableOpacity>} />
 
-
-            <View style={styles.photoContainer}>
-                <TouchableOpacity onPress={() => setModal(true)}>
-                    <Image
-                        style={styles.profilePic}
-                        source={filePath.uri ? { uri: filePath.uri } : require('../../assets/images/profilepic.png')}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.cameraContainer} onPress={chooseFile}>
-                    <Icon name="camera" size={wp('5%')} color="#3E4347" />
-                </TouchableOpacity>
-            </View>
-
-            <Modal visible={modal} transparent={true}>
-                <View style={styles.modalBackground}>
-                    <TouchableOpacity style={styles.closeArea} onPress={() => setModal(false)}>
+                <View style={styles.photoContainer}>
+                    <TouchableOpacity onPress={() => setModal(true)}>
                         <Image
-                            style={styles.fullImage}
-                            resizeMode="contain"
+                            style={styles.profilePic}
                             source={filePath.uri ? { uri: filePath.uri } : require('../../assets/images/profilepic.png')}
                         />
                     </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.cameraContainer} onPress={chooseFile}>
+                        <Icon name="camera" size={wp('5%')} color="#3E4347" />
+                    </TouchableOpacity>
                 </View>
-            </Modal>
 
-
-            <View style={[styles.inputContainer, { backgroundColor: theme.background }]}>
-
-                <Text style={[styles.label, { color: theme.textPrimary }]}>Full Name</Text>
-                <TextInput placeholder='Enter your name' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} />
-
-                <Text style={[styles.label, { color: theme.textPrimary }]}>Email</Text>
-                <TextInput placeholder='Enter your email' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} keyboardType='email-address' />
-
-                <Text style={[styles.label, { color: theme.textPrimary }]}>Phone Number</Text>
-                <TextInput placeholder='Enter your number' placeholderTextColor={'gray'}style={[styles.input, { color: theme.textPrimary }]} keyboardType='phone-pad' />
-
-                <Text style={[styles.label, { color: theme.textPrimary }]}>Date of Birth</Text>
-                <TextInput placeholder='Enter your date of birth' onChangeText={handleChange}   value={dob} placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} />
-
-                <Text style={[styles.label, { color: theme.textPrimary }]}>Address</Text>
-                <TextInput placeholder='Enter your address' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} multiline />
-
-                <Text style={[styles.label, { color: theme.textPrimary }]}>Gender</Text>
-                <View style={styles.radioContainer}>
-                    {['male', 'female', 'other'].map((option) => (
-                        <TouchableOpacity
-                            key={option}
-                            style={[styles.radioOption]}
-                            onPress={() => setGender(option)}
-                        >
-                            <View
-                                style={[
-                                    styles.radioCircle,
-                                    gender === option && { borderColor: COLORS.primary, borderWidth: wp('1.5%') }
-                                ]}
-                            >
-                            </View>
-                            <Text style={{ color: theme.textPrimary }}>
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </Text>
+                <Modal visible={modal} transparent={true}>
+                    <View style={styles.modalBackground}>
+                        <TouchableOpacity style={styles.closeArea} onPress={() => setModal(false)}>
+                            <Image
+                                style={styles.fullImage}
+                                resizeMode="contain"
+                                source={filePath.uri ? { uri: filePath.uri } : require('../../assets/images/profilepic.png')}
+                            />
                         </TouchableOpacity>
-                    ))}
+                    </View>
+                </Modal>
+
+
+                <View style={[styles.inputContainer, { backgroundColor: theme.background }]}>
+
+                    <Text style={[styles.label, { color: theme.textPrimary }]}>Full Name</Text>
+                    <TextInput placeholder='Enter your name' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} />
+
+                    <Text style={[styles.label, { color: theme.textPrimary }]}>Email</Text>
+                    <TextInput placeholder='Enter your email' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} keyboardType='email-address' />
+
+                    <Text style={[styles.label, { color: theme.textPrimary }]}>Phone Number</Text>
+                    <TextInput placeholder='Enter your number' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} keyboardType='phone-pad' />
+
+                    <Text style={[styles.label, { color: theme.textPrimary }]}>Date of Birth</Text>
+                    <TextInput placeholder='Enter your date of birth' onChangeText={handleChange} value={dob} placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} />
+
+                    <Text style={[styles.label, { color: theme.textPrimary }]}>Address</Text>
+                    <TextInput placeholder='Enter your address' placeholderTextColor={'gray'} style={[styles.input, { color: theme.textPrimary }]} multiline />
+
+                    <Text style={[styles.label, { color: theme.textPrimary }]}>Gender</Text>
+                    <View style={styles.radioContainer}>
+                        {['male', 'female', 'other'].map((option) => (
+                            <TouchableOpacity
+                                key={option}
+                                style={[styles.radioOption]}
+                                onPress={() => setGender(option)}
+                            >
+                                <View
+                                    style={[
+                                        styles.radioCircle,
+                                        gender === option && { borderColor: COLORS.primary, borderWidth: wp('1.5%') }
+                                    ]}
+                                >
+                                </View>
+                                <Text style={{ color: theme.textPrimary }}>
+                                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </SafeAreaView>
     )
+
 }
 
 const styles = StyleSheet.create({

@@ -11,32 +11,27 @@ interface HeadProps {
   showBack?: boolean; 
 }
 
-const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true }) => {
+const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true, onBackPress }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
   return (
     <View style={[styles.head, { backgroundColor: theme.background }]}>
-      {/* Left - Back button */}
       {showBack && (
         <TouchableOpacity
           onPress={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
-            }
+            if (onBackPress) onBackPress();
+            else if (navigation.canGoBack()) navigation.goBack();
           }}
           style={styles.backButton}
         >
           <Icon name="chevron-back" size={wp('7%')} color={theme.textPrimary} />
         </TouchableOpacity>
-      )}
-
-      {/* Center - Title */}
+      )}  
       <Text style={[styles.title, { color: theme.textPrimary }]} numberOfLines={1}>
         {title}
       </Text>
 
-      {/* Right - Custom button(s) */}
       <View style={styles.right}>{rightComponent}</View>
     </View>
   );

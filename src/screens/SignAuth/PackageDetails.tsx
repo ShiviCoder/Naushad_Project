@@ -19,43 +19,40 @@ const PackageDetails = () => {
   const route = useRoute<PackageDetailsRouteProp>()
   const navigation = useNavigation<any>()
   const { item } = route.params
-  const {theme} = useTheme();
-console.log("Hello")
+  const { theme } = useTheme();
+  console.log("Hello")
   return (
-   
-      <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title='Our Packages' />
-      <Image style={styles.img} source={{uri : item.image}} />
+      <Image style={styles.img} source={{ uri: item.image }} />
       <View style={styles.detail}>
         <View style={styles.titleContain}>
-          <Text style={[styles.titleTxt,{color : theme.textPrimary}]}>{item.title}</Text>
-          <Text style={[styles.priceTxt,{color : theme.textPrimary}]}>{item.price}</Text>
+          <Text style={[styles.titleTxt, { color: theme.textPrimary }]}>{item.title}</Text>
+          <Text style={[styles.priceTxt, { color: theme.textPrimary }]}>{item.price}</Text>
         </View>
-        <Text style={[styles.aboutTxt,{color : theme.textPrimary}]}>"{item.about}"</Text>
-        <Text style={[styles.discountTxt,{color : theme.textPrimary}]}>{item.discount}</Text>
+        <Text style={[styles.aboutTxt, { color: theme.textPrimary }]}>"{item.about}"</Text>
+        <Text style={[styles.discountTxt, { color: theme.textPrimary }]}>{item.discount}</Text>
       </View>
-
       <View style={styles.serviceListContain}>
-        <Text style={[styles.serviceListHeadTxt,{color : theme.textPrimary}]}>Service List</Text>
-       {(() => {
-  let services = [];
-  try {
-    services = JSON.parse(item.serviceList);
-  } catch (e) {
-    services = [];
-  }
-
-  return services.length > 0 ? (
-    services.map((service, index) => (
-      <View key={index} style={styles.ServiceListTxtContain}>
-        <Text>✅</Text>
-        <Text style={[styles.serviceListTxt, { color: theme.textPrimary }]}>{service}</Text>
-      </View>
-    ))
-  ) : (
-    <Text style={{ color: theme.textPrimary }}>No services available</Text>
-  );
-})()}
+        <Text style={[styles.serviceListHeadTxt, { color: theme.textPrimary }]}>Service List</Text>
+        {(() => {
+          let services = [];
+          try {
+            services = JSON.parse(item.serviceList);
+          } catch (e) {
+            services = [];
+          }
+          return services.length > 0 ? (
+            services.map((service, index) => (
+              <View key={index} style={styles.ServiceListTxtContain}>
+                <Text>✅</Text>
+                <Text style={[styles.serviceListTxt, { color: theme.textPrimary }]}>{service}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ color: theme.textPrimary }}>No services available</Text>
+          );
+        })()}
       </View>
 
       <View style={styles.ratContain}>
@@ -64,22 +61,25 @@ console.log("Hello")
           ratingCount={5}
           imageSize={wp('5%')}
           startingValue={item.rating}
-           tintColor={theme.dark ? '#111' : '#fff'}  
+          tintColor={theme.dark ? '#111' : '#fff'}
           readonly
         />
-        <Text style={[styles.ratTxt,{color : theme.textPrimary}]}>({item.review} reviews)</Text>
+        <Text style={[styles.ratTxt, { color: theme.textPrimary }]}>({item.review} reviews)</Text>
       </View>
 
       <TouchableOpacity
-        style={[styles.bookAppoint,{backgroundColor : COLORS.primary}]}
-       onPress={() => {
-          navigation.navigate('CloneBookAppointment'
-); }}
+        style={[styles.bookAppoint, { backgroundColor: COLORS.primary }]}
+        onPress={() => {
+          navigation.navigate('CloneBookAppointment',{
+            serviceName: item.title,
+            price: item.price,
+          });
+        }}
       >
         <Text style={styles.bookAppointTxt}>Book Appointment</Text>
       </TouchableOpacity>
     </SafeAreaView>
-   
+
   )
 }
 
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
   titleContain: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom : hp('2%')
+    marginBottom: hp('2%')
   },
   aboutTxt: {
     color: '#00000075',
     fontSize: wp('4%'),
     fontWeight: '500',
-    marginBottom : hp('0.5%')
+    marginBottom: hp('0.5%')
   },
   discountTxt: {
     fontSize: wp('3.9%'),
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   serviceListTxt: {
     fontSize: wp('4%'),
     color: '#00000075',
-    fontWeight : '400'
+    fontWeight: '400'
   },
   ServiceListTxtContain: {
     flexDirection: 'row',

@@ -15,30 +15,26 @@ export default function Calender({ onDateSelect }: CalenderProps) {
   // Custom locale
   LocaleConfig.locales["en"] = {
     monthNames: [
-      "January","February","March","April","May","June","July","August","September","October","November","December",
+      "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
     ],
-    monthNamesShort: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-    dayNames: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-    dayNamesShort: ["S","M","T","W","T","F","S"],
+    monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    dayNamesShort: ["S", "M", "T", "W", "T", "F", "S"],
   };
   LocaleConfig.defaultLocale = "en";
 
-    const handleDatePress = (dateString: string) => {
-    const isAlreadySelected = selected === dateString;
-    
-    if (isAlreadySelected) {
-      setSelected("");
-      // Reset to today's date when deselecting
-      if (onDateSelect) {
-        onDateSelect(new Date());
-      }
-    } else {
-      setSelected(dateString);
-      // Call callback with selected date
-      if (onDateSelect) {
-        const selectedDate = new Date(dateString);
-        onDateSelect(selectedDate);
-      }
+  const handleDatePress = (dateString: string) => {
+    console.log("📅 handleDatePress called with:", dateString);
+
+    // Split and create date safely
+    const [year, month, day] = dateString.split("-").map(Number);
+    const selectedDate = new Date(year, month - 1, day);
+
+    setSelected(dateString);
+    console.log("✅ Sending date to parent:", selectedDate.toDateString());
+
+    if (onDateSelect) {
+      onDateSelect(selectedDate);
     }
   };
   return (
@@ -57,23 +53,20 @@ export default function Calender({ onDateSelect }: CalenderProps) {
         }
         dayComponent={({ date }) => {
           if (!date) return null;
-
           const isSelected = selected === date.dateString;
           const today = new Date();
-          const currentDate = new Date(date.year , date.month - 1, date.day);
+          const currentDate = new Date(date.year, date.month - 1, date.day);
           const isToday =
             today.getFullYear() === date.year &&
             today.getMonth() + 1 === date.month &&
             today.getDate() === date.day;
 
-            const isPast = currentDate < new Date(new Date().setHours(0,0,0,0));
+          const isPast = currentDate < new Date(new Date().setHours(0, 0, 0, 0));
 
           return (
             <TouchableOpacity
-            disabled={isPast}
-               onPress={() =>
-        handleDatePress(isSelected ? "" : date.dateString) // ✅ toggle selection
-      }
+              disabled={isPast}
+              onPress={() => handleDatePress(date.dateString)}
               activeOpacity={0.7}
               style={{
                 justifyContent: "center",
@@ -88,12 +81,12 @@ export default function Calender({ onDateSelect }: CalenderProps) {
               <Text
                 style={{
                   color: isPast
-            ? "#dadada" // past date color
-            : isSelected
-            ? theme.textPrimary
-            : isToday
-            ? COLORS.primary
-            : theme.textSecondary,
+                    ? "#dadada" // past date color
+                    : isSelected
+                      ? theme.textPrimary
+                      : isToday
+                        ? COLORS.primary
+                        : theme.textSecondary,
                   fontWeight: isSelected || isToday ? "700" : "600",
                   fontSize: wp("3.5%"),
                 }}
@@ -133,7 +126,7 @@ export default function Calender({ onDateSelect }: CalenderProps) {
               fontSize: wp("4%"),
               fontWeight: "600",
               color: theme.textPrimary,
-                  fontFamily: "Poppins-Medium",
+              fontFamily: "Poppins-Medium",
 
             },
             dayHeader: {
@@ -143,7 +136,7 @@ export default function Calender({ onDateSelect }: CalenderProps) {
               textAlign: "center",
               fontSize: wp("3.2%"),
               color: theme.textSecondary,
-                  fontFamily: "Poppins-Medium",
+              fontFamily: "Poppins-Medium",
 
             },
           },

@@ -36,31 +36,38 @@ const PrivacyPolicy = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Privacy Policy" />
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={[styles.heading, { color: theme.textPrimary }]}>{privacy?.title}</Text>
-
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-         {privacy?.content}
+        <Text style={[styles.heading, { color: theme.textSecondary }]}>
+         {privacy?.title}
         </Text>
 
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>1. Information Collection</Text>
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-          {privacy?.content}
-        </Text>
-
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>2. Use of Information</Text>
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-         {privacy?.content}
-        </Text>
-
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>3. Security</Text>
+        <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Information Collection</Text>
         <Text style={[styles.text, { color: theme.textSecondary }]}>
           {privacy?.content}
         </Text>
+        </View>
 
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>4. Changes to Policy</Text>
+        <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Use of Information</Text>
         <Text style={[styles.text, { color: theme.textSecondary }]}>
          {privacy?.content}
         </Text>
+        </View>
+
+
+        <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Security</Text>
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+          {privacy?.content}
+        </Text>
+        </View>
+
+        <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Changes to Policy</Text>
+        <Text style={[styles.text, { color: theme.textSecondary }]}>
+         {privacy?.content}
+        </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -79,13 +86,18 @@ const styles = StyleSheet.create({
     fontSize: wp('6%'),
     fontWeight: '700',
     marginBottom: hp('2%'),
-    textAlign: 'center',
+    textAlign: 'left',
   },
   subHeading: {
     fontSize: wp('5%'),
     fontWeight: '600',
-    marginTop: hp('2%'),
     marginBottom: hp('1%'),
+  },
+   card: {
+    padding: wp('4%'),
+    borderRadius: wp('3%'),
+    marginBottom: hp('2%'),
+    elevation: 3,
   },
   text: {
     fontSize: wp('4%'),

@@ -31,8 +31,7 @@ const OurProducts = ({ navigation }: OurProductsProps) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Head
-        title="Our Products"
-      
+        title="Our Products" 
       />
       <FlatListComp
         products={filteredProducts}

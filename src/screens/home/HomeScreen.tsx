@@ -269,7 +269,7 @@ const HomeScreen = () => {
   const fetchServices = async () => {
     try {
       //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/ourservice', {
         method: "GET",
         headers: {
@@ -277,7 +277,7 @@ const HomeScreen = () => {
           "Authorization": `Bearer ${token}`,
         },
       })
-
+      
       const data = await response.json();
       setServices(data);
       console.log("Services data", data);
@@ -293,7 +293,7 @@ const HomeScreen = () => {
   const [products, setProducts] = useState([]);
   const fetchProducts = async () => {
     try {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
 
       const res = await fetch("https://naushad.onrender.com/api/products", {
         method: "GET",
@@ -313,10 +313,9 @@ const HomeScreen = () => {
   // Videos row (thumbnails with play)
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
-
   const fetchVideos = async () => {
     try {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
 
       const res = await fetch("https://naushad.onrender.com/api/youtube", {
         method: "GET",
@@ -342,7 +341,7 @@ const HomeScreen = () => {
   const fetchCertificates = async () => {
     try {
       //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
@@ -479,7 +478,7 @@ const HomeScreen = () => {
   const fetchPackages = async () => {
     try {
       //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/packages', {
         method: 'GET',
         headers: {
@@ -502,7 +501,7 @@ const HomeScreen = () => {
   const fetchProductPackages = async () => {
     try {
       //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/product-packages', {
         method: 'GET',
         headers: {
@@ -560,7 +559,7 @@ const HomeScreen = () => {
   const fetchSpecialOffers = async () => {
     try {
       //const token =await  getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/offers', {
         method: 'GET',
         headers: {
@@ -581,7 +580,7 @@ const HomeScreen = () => {
   const fetchHomeServices = async () => {
     try {
       //const token =await  getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/home-services/', {
         method: 'GET',
         headers: {
@@ -592,6 +591,7 @@ const HomeScreen = () => {
       const json = await response.json();
       console.log("Home service token : ", token)
       console.log("Home services : ", json);
+      console.log(json.data[0].image)
       setHomeService(json.data);
     } catch (error) {
       console.log("Home services error : ", error)
@@ -603,7 +603,7 @@ const HomeScreen = () => {
   const fetchAboutData = async () => {
     try {
       //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/about-salon', {
         method: 'GET',
         headers: {
@@ -619,10 +619,9 @@ const HomeScreen = () => {
       console.log("About Data : ", error)
     }
   }
-
+  
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-
       {showLiked ? (
         likedItems.length > 0 ? (
           <View
@@ -630,11 +629,11 @@ const HomeScreen = () => {
               flex: 1,
               backgroundColor: theme.dark ? '#000' : '#fff',
               paddingVertical: hp('2%'),
-              paddingHorizontal: wp('3%'),
+              paddingHorizontal: wp('1%'),
             }}
           >
             {/* 🔹 Header (only once) */}
-            <Head title="Liked Products" />
+            <Head title="Liked Products" onBackPress={() => setShowLiked(false)} />
 
             {/* 🔹 Liked products list */}
             <FlatList
@@ -779,36 +778,7 @@ const HomeScreen = () => {
               paddingHorizontal: wp('3%'),
             }}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                gap: wp('25%'),
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => navigation.replace('MainTabs', { from: 'Home' })}
-                style={{ width: wp('5%'), height: wp('10%') }}
-              >
-                <Icon
-                  name="chevron-back"
-                  size={wp('7%')}
-                  color={theme.textPrimary}
-                />
-              </TouchableOpacity>
-
-              <Text
-                style={{
-                  fontSize: wp('5%'),
-                  fontWeight: 'bold',
-                  color: theme.textPrimary,
-                }}
-              >
-                Liked Products
-              </Text>
-            </View>
-
+            <Head title="Liked Product" onBackPress={() => setShowLiked(false)} />
             <Text
               style={{
                 paddingVertical: hp('2%'),
@@ -1147,12 +1117,13 @@ const HomeScreen = () => {
               keyExtractor={(item) => item._id}
               horizontal
               showsHorizontalScrollIndicator={false}
+              
               renderItem={({ item }) => {
                 return (
                   <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
                     <Image
-                      source={{ uri: `https://naushad.onrender.com${item.image.replace(/\\/g, "/")}` }}
-                      style={{ width: wp("10%"), height: wp("10%"), borderRadius: wp("2%") }}
+                      source={{ uri: item.image }}
+                      style={{ width: wp("6%"), height: wp("6%"), borderRadius: wp("1%") }}
                       resizeMode="contain"
                     />
                     <Text style={[styles.aboutTop, { color: theme.background }]}>
@@ -1168,7 +1139,7 @@ const HomeScreen = () => {
             />
           </View>
 
-
+          
           {/* Our Packages (2-up grid) with navigation */}
           <SectionTitle
             title="Our Packages"
@@ -1325,17 +1296,20 @@ const HomeScreen = () => {
             keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('2%') }}
             renderItem={({ item }) => (
+              
               <View style={styles.serviceCard}>
-                <Image source={
-                  item.image
-                } style={styles.serviceImage} />
+                <Image
+                  source={{
+                    uri: item.image
+                  }}
+                  style={styles.serviceImage}
+                />
                 <View style={styles.nameItem}>
                   <Text style={styles.serviceName}>{item.name}</Text>
                   <Text style={styles.servicePrice}>₹ {item.price}</Text>
                 </View>
                 <Text style={styles.serviceDesc}>{item.description}</Text>
                 <View style={{ flex: 1 }} />
-
                 <TouchableOpacity
                   style={[styles.bookBtn, { backgroundColor: COLORS.primary, }]}
                   onPress={() =>
@@ -1750,7 +1724,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('3%'),
     elevation: 1,
     flexDirection: 'column',
-    gap: hp('1%')
+    gap: hp('1%'),
+    marginHorizontal : wp('1%')
   },
   aboutTop: {
     fontSize: wp('3.5%'),

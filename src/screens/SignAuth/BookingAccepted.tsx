@@ -8,6 +8,7 @@ import {
 } from "react-native-responsive-screen";
 import { useTheme } from "../../context/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
 // :white_check_mark: import theme
 export default function BookingAccepted() {
   const { theme } = useTheme(); // :white_check_mark: get current theme
@@ -16,7 +17,7 @@ export default function BookingAccepted() {
   // Open system dialer with number prefilled
   const dialCall = (num: string) => {
     const url = `tel:${num}`;
-    Linking.openURL(url).catch(() => {});
+    Linking.openURL(url).catch(() => { });
   };
   // Open WhatsApp chat; fallback to wa.me if scheme not available
   const openWhatsApp = async (num: string, text: string) => {
@@ -28,10 +29,10 @@ export default function BookingAccepted() {
         await Linking.openURL(waScheme);
         return;
       }
-    } catch {}
+    } catch { }
     const digits = num.replace(/[^\d]/g, "");
     const waMe = `https://wa.me/${digits}?text=${encoded}`;
-    Linking.openURL(waMe).catch(() => {});
+    Linking.openURL(waMe).catch(() => { });
   };
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -73,14 +74,14 @@ export default function BookingAccepted() {
         {/* Actions */}
         <View style={styles.buttonSection}>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.primary, flex: 1 }]}
+            style={[styles.actionBtn, { backgroundColor: COLORS.primary }]}
             onPress={() => dialCall(phoneNumber)}
           >
             <Text style={styles.actionText}>Call</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.secondary, flex: 1, marginLeft: wp("4%") }]}
-            onPress={() => openWhatsApp(phoneNumber, "Hello Rahul :wave:")}
+            style={[styles.actionBtn, { backgroundColor: COLORS.primary, flex: 1, marginLeft: wp("4%") }]}
+            onPress={() => openWhatsApp(phoneNumber, "Hello Rahul ")}
           >
             <Text style={styles.actionText}>Message</Text>
           </TouchableOpacity>
@@ -90,11 +91,13 @@ export default function BookingAccepted() {
   );
 }
 const styles = StyleSheet.create({
-  screen: { flex: 1,
+  screen: {
+    flex: 1,
   },
-  container: { padding: wp("4%"),
-    paddingBottom : hp('5%')
-   },
+  container: {
+    padding: wp("4%"),
+    paddingBottom: hp('5%')
+  },
   // Status Card
   statusCard: {
     padding: wp("4%"),
@@ -153,18 +156,25 @@ const styles = StyleSheet.create({
   },
   locationText: { fontSize: wp("4.5%"), marginLeft: wp("2%") },
   // Action Buttons
-  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginTop: hp('4%'),
-    marginBottom : hp('5%')
-   },
-  actionBtn: {
-    paddingVertical: hp("1.2%"),
-    paddingHorizontal: wp("6%"),
-    borderRadius: wp("3%"),
-    alignItems: "center",
-  },
-  actionText: {
-    color: "#fff",
-    fontSize: wp("4.5%"),
-    fontWeight: "600",
-  },
+ buttonSection: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: hp("4%"),
+  marginBottom: hp("5%"),
+  gap: wp("2%"), // adds equal spacing between buttons (modern RN)
+},
+
+actionBtn: {
+  flex: 1, // 👈 makes both buttons equal width
+  paddingVertical: hp("1.2%"),
+  borderRadius: wp("3%"),
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+actionText: {
+  color: "#fff",
+  fontSize: wp("4.5%"),
+  fontWeight: "600",
+},
 });

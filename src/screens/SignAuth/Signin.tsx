@@ -64,7 +64,6 @@ const Signin = ({ navigation }) => {
       if (response.ok && data.token) {
         console.log('Token :' , data.token);
         await AsyncStorage.setItem('userToken', data.token);
-        // Save login state persistently
         await AsyncStorage.setItem('userData', JSON.stringify(data));
         setPopupMessage('Login successful!');
         setNextRoute({
@@ -77,7 +76,8 @@ const Signin = ({ navigation }) => {
         setNextRoute(null);
         setPopupVisible(true);
       }
-    } catch (error) {
+    } 
+    catch (error) {
       console.error('Login Error:', error);
       setPopupMessage('Something went wrong. Please try again.');
       setNextRoute(null);
@@ -85,6 +85,14 @@ const Signin = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+
+
+    // setPopupMessage('Login successful!');
+    //     setNextRoute({
+    //       name: 'MainTabs',
+    //       params: { from: 'Home'},
+    //     });
+    //     setPopupVisible(true);
   };
 
   const handlePopupClose = () => {

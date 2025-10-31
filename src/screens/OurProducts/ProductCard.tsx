@@ -42,16 +42,15 @@ const ProductCard:
                     </Text>
                     <View style={styles.OurterPriceContainer}>
                         <View style={styles.InnerPriceContainer}>
-                            <Text style={[styles.priceStyle, { color: '#000' }]}>{product.price}</Text>
-                            <Text style={[styles.oldPriceStyle, { color: '#ccc' }]}>{product.oldPrice}</Text>
+                            <Text style={[styles.priceStyle, { color: '#000' }]}>₹{product.price}</Text>
+                            <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>({product.offer})
+                            </Text>
                         </View>
-                        <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>{product.discount}
-                        </Text>
                     </View>
                     <View style={styles.descContain}>
                         <Image
                             resizeMode='contain'
-                            source={product.featureIcon}
+                            source={{ uri: 'http://naushad.onrender.com/uploads/icons/1761913753959-Leaf1.png' }}
                             style={styles.featureIconStyle} />
                         <Text style={[styles.DescStyle, { color: '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
                     </View>
@@ -64,7 +63,9 @@ const ProductCard:
                             style={styles.starStyle}
                             source={require('../../assets/OurProduct/star1.png')} />
                     </View>
-                    <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]} >({product.reviews})</Text>
+                    <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]}>
+                        ({product.reviews?.[0] || 0})
+                    </Text>
                 </View>
                 <TouchableOpacity
                     style={[
@@ -111,7 +112,8 @@ const styles = StyleSheet.create({
     },
     InnerPriceContainer: {
         flexDirection: 'row',
-        gap: wp('1.5%')
+        gap: wp('4%'),
+
 
     },
     priceStyle: {

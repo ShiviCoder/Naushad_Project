@@ -161,7 +161,7 @@ const ServiceDetails = () => {
                       price: parseFloat(item.price),
                       qty: 1, // default quantity
                     });
-                    navigation.navigate('ServiceDetails',{
+                    navigation.navigate('ServiceDetails', {
                       item: {
                         ...item,
                         image: item.image
@@ -217,9 +217,12 @@ const ServiceDetails = () => {
                     });
                   }
                 });
-
+                                                                        
                 // Navigate to payment
-                navigation.navigate('CloneBookAppointment');
+                navigation.navigate('CloneBookAppointment', {
+                  serviceName: item.title,
+                  price: item.price,
+                });
               }}
             >
               <Text style={[styles.BookAppointBtnTxt, { color: '#fff' }]}>

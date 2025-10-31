@@ -58,13 +58,13 @@ const settingData = [
     icon: "terms",
     image: require('../assets/terms.png')
   },  
-  {
-    id: 9,
-    title: "App Version: v1.0.0",
-    description: "Latest stable release",
-    icon: "version",
-    image: require('../assets/version.png')
-  },  
+  // {
+  //   id: 9,
+  //   title: "App Version: v1.0.0",
+  //   description: "Latest stable release",
+  //   icon: "version",
+  //   image: require('../assets/version.png')
+  // },  
   {
     id: 10,
     title: "Logout",

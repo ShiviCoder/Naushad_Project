@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from 'react-native';
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -54,11 +55,11 @@ const AccountScreen = () => {
             labels={[
               <Image
                 source={require('../../assets/sun.png')}
-                style={[styles.themeIcon,{tintColor:COLORS.primary}]}
+                style={[styles.themeIcon, { tintColor: COLORS.primary }]}
               />,
               <Image
                 source={require('../../assets/moon.png')}
-                style={[styles.themeIcon,{tintColor:COLORS.primary}]}
+                style={[styles.themeIcon, { tintColor: COLORS.primary }]}
               />,
             ]}
             onSelect={isDark => {
@@ -92,67 +93,51 @@ const AccountScreen = () => {
       </View>
 
 
-      <View style={[styles.separator,{backgroundColor :COLORS.primary}]} />
+      <View style={[styles.separator, { backgroundColor: COLORS.primary }]} />
 
 
       {/* Settings List */}
-      <FlatList
-        data={settingData}
-        style={styles.detailsContainer}
-        contentContainerStyle={{
-          margin: wp('2%'),
-          paddingBottom: hp('15%'),
-        }}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => {
-          return (
-            <>
-              {/* Left Icon */}
-              <TouchableOpacity
-                style={styles.detailsCon}
-                onPress={() => {
-                  if (item.title === 'Edit Profile') {
-                    navigation.push('MyProfile');
-                  } else if (item.title === 'Cart') {
-                    navigation.navigate('Cart');
-                  } else if (item.title === 'Catalog') {
-                    navigation.navigate('Catelog');
-                  } else if (item.title === 'Refer a friend') {
-                    navigation.navigate('ReferFriend');
-                  } else if (item.title === 'About us') {
-                    navigation.navigate('AboutUs');
-                  } else if (item.title === 'Privacy Policy') {
-                    navigation.navigate('PrivacyPolicy');
-                  } else if (item.title === 'Terms & Conditions') {
-                    navigation.navigate('TermsAndConditions');
-                  } 
-                  // else if (item.title === 'App Version: v1.0.0') {
-                  //   navigation.navigate('AppVersion');
-                  // } 
-                  else if (item.title === 'Logout') {
-                    setShowLogout(true);
-                  }
-                }}
-              >
-                {/* Left Icon */}
-                <Image style={[styles.leftIcon,{tintColor : COLORS.primary}]} source={item.image} />
-
-
-                {/* Right Content */}
-                <View style={styles.textCon}>
-                  <Text style={[styles.text, { color: textColor }]}>
-                    {item.title}
-                  </Text>
-                  <Text style={[styles.subText, { color: subTextColor }]}>
-                    {item.description}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </>
-          );
-        }}
-      />
-
+      <ScrollView>
+        <FlatList
+          data={settingData}
+          scrollEnabled={false}
+          style={styles.detailsContainer}
+          contentContainerStyle={{
+            margin: wp('2%'),
+            paddingBottom: hp('6%'),
+          }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.detailsCon}
+              onPress={() => {
+                if (item.title === 'Edit Profile') {
+                  console.log("profile screen");
+                  navigation.getParent()?.navigate('MyProfile');
+                }
+                else if (item.title === 'Cart') navigation.navigate('Cart');
+                else if (item.title === 'Catalog') navigation.navigate('Catelog');
+                else if (item.title === 'Refer a friend') navigation.navigate('ReferFriend');
+                else if (item.title === 'About us') navigation.navigate('AboutUs');
+                else if (item.title === 'Privacy Policy') navigation.navigate('PrivacyPolicy');
+                else if (item.title === 'Terms & Conditions') navigation.navigate('TermsAndConditions');
+                else if (item.title === 'Logout') setShowLogout(true);
+              }}
+            >
+              <Image style={[styles.leftIcon, { tintColor: COLORS.primary }]} source={item.image} />
+              <View style={styles.textCon}>
+                <Text style={[styles.text, { color: textColor }]}>{item.title}</Text>
+                <Text style={[styles.subText, { color: subTextColor }]}>{item.description}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={
+            <Text style={{ textAlign: 'center', color: subTextColor, marginTop: hp('0.2%') }}>
+              App Version: v1.0.0
+            </Text>
+          }
+        />
+      </ScrollView>
       {/* Confirm Logout Modal */}
       <Modal
         visible={showLogout}
@@ -166,8 +151,6 @@ const AccountScreen = () => {
             <Text style={styles.popupMessage}>
               Are you sure you want to logout?
             </Text>
-
-
             <View style={styles.popupActions}>
               <TouchableOpacity
                 onPress={() => setShowLogout(false)}
@@ -175,8 +158,6 @@ const AccountScreen = () => {
               >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
-
-
               <TouchableOpacity
                 style={[styles.popupBtn, styles.logoutBtn]}
                 onPress={handleLogoutConfirm}
