@@ -18,16 +18,16 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   const thumbSize = wp("3.5%");
   const trackWidth = wp("12%");
   const trackHeight = hp("3%");
-  const padding = wp("1.5%");
+  const padding = wp("1%");
 
   const acceptTranslateX = AcceptedOffset.interpolate({
     inputRange: [0, 1],
-    outputRange: [padding, trackWidth - thumbSize - padding],
+    outputRange: [padding, trackWidth - thumbSize - padding * 2],
   });
 
   const pendingTranslateX = PendingOffset.interpolate({
     inputRange: [0, 1],
-    outputRange: [padding, trackWidth - thumbSize - padding],
+    outputRange: [padding, trackWidth - thumbSize - padding * 2],
   });
 
   const toggleSwitchAccepted = () => {
@@ -35,47 +35,54 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
     setIsAccepted(newValue);
     setIsPending(false);
     Animated.timing(AcceptedOffset, {
-      toValue: isAccepted ? 0 : 1,
+      toValue: newValue ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-      Animated.timing(PendingOffset, { toValue: 0, duration: 200, useNativeDriver: false }).start();
-
-      if(onSelect) onSelect(newValue ? "accept" : "all");
-
+    Animated.timing(PendingOffset, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+    if (onSelect) onSelect(newValue ? "accept" : "all");
   };
 
   const toggleSwitchPending = () => {
-     const newValue = !isPending;
-  setIsPending(newValue);
-  setIsAccepted(false); 
+    const newValue = !isPending;
+    setIsPending(newValue);
+    setIsAccepted(false);
     Animated.timing(PendingOffset, {
-      toValue: isPending ? 0 : 1,
+      toValue: newValue ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-      Animated.timing(AcceptedOffset, { toValue: 0, duration: 200, useNativeDriver: false }).start();
-  if(onSelect) onSelect(newValue ? "pending" : "all");
-
+    Animated.timing(AcceptedOffset, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+    if (onSelect) onSelect(newValue ? "pending" : "all");
   };
 
-  // 🔹 Colors according to theme
-  const inactiveColor = COLORS.primary; // black in light, white in dark
-  const activeColor = COLORS.primary; // green
+  const primary = COLORS.primary;
 
   return (
     <View style={styles.checkContainer}>
+      {/* ✅ Accepted */}
       <View style={styles.checkBox}>
-<Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>
-  {labels[0] || "Accepted"}
-</Text>        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchAccepted}>
+        <Text style={{ fontSize: wp("3.5%"), color: primary }}>
+          {labels[0] || "Accepted"}
+        </Text>
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitchAccepted}>
           <View
             style={[
               styles.track,
               {
                 width: trackWidth,
                 height: trackHeight,
-                backgroundColor: isAccepted ? activeColor : inactiveColor,
+                backgroundColor: isAccepted ? primary : "#FFF",
+                borderColor: primary,
+                borderWidth: 1.5,
               },
             ]}
           >
@@ -87,7 +94,7 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
                   height: thumbSize,
                   borderRadius: thumbSize / 2,
                   transform: [{ translateX: acceptTranslateX }],
-                  backgroundColor: theme.background,
+                  backgroundColor: isAccepted ? "#FFF" : primary,
                 },
               ]}
             />
@@ -95,17 +102,21 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
         </TouchableOpacity>
       </View>
 
+      {/* ✅ Pending */}
       <View style={styles.checkBox}>
-<Text style={{ fontSize: wp("3.5%"), color: inactiveColor }}>
-  {labels[1] || "Pending"}
-</Text>        <TouchableOpacity activeOpacity={1} onPress={toggleSwitchPending}>
+        <Text style={{ fontSize: wp("3.5%"), color: primary }}>
+          {labels[1] || "Pending"}
+        </Text>
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitchPending}>
           <View
             style={[
               styles.track,
               {
                 width: trackWidth,
                 height: trackHeight,
-                backgroundColor: isPending ? activeColor : inactiveColor,
+                backgroundColor: isPending ? primary : "#FFF",
+                borderColor: primary,
+                borderWidth: 1.5,
               },
             ]}
           >
@@ -117,7 +128,7 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
                   height: thumbSize,
                   borderRadius: thumbSize / 2,
                   transform: [{ translateX: pendingTranslateX }],
-                  backgroundColor: theme.background,
+                  backgroundColor: isPending ? "#FFF" : primary,
                 },
               ]}
             />
@@ -127,6 +138,7 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
     </View>
   );
 }
+
 
   // ✅ Theme toggle (Light / Dark)
  if (type === "toggle") {

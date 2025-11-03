@@ -47,7 +47,14 @@ const AccountScreen = () => {
       {/* Header */}
       <Head
         title="Account"
-        showBack={false}
+        showBack={
+          <TouchableOpacity onPress={()=>navigation.navigate("WalletScreen")}>
+            <Image
+              source={require('../../assets/wallet.png')}
+              style={{ width: wp('7%'), height: wp('7%'), tintColor: COLORS.primary }}
+            />
+          </TouchableOpacity>
+        }
         rightComponent={
           <RadioButton
             type="toggle"
@@ -69,7 +76,6 @@ const AccountScreen = () => {
           />
         }
       />
-
 
       {/* Profile Section */}
       <View style={styles.profileSection}>

@@ -92,7 +92,7 @@ const TermsAndConditions = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ accepted: true }),
-      }).catch(() => {});
+      }).catch(() => { });
       await persistLocalAcceptance(terms, true);
       Alert.alert('Success', 'Thanks for accepting the Terms.');
     } catch {
@@ -122,14 +122,25 @@ const TermsAndConditions = () => {
             </Text>
           )}
           {/* Sections */}
-          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>1. Use of Services</Text>
-          <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
-          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>2. User Responsibilities</Text>
-          <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
-          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>3. Limitation of Liability</Text>
-          <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
-          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>4. Changes to Terms</Text>
-          <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
+          <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+            <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Use of Services</Text>
+            <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+            <Text style={[styles.subHeading, { color: theme.textPrimary }]}>User Responsibilities</Text>
+            <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+            <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Limitation of Liability</Text>
+            <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
+            <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Changes to Terms</Text>
+            <Text style={[styles.text, { color: theme.textSecondary }]}>{terms?.content}</Text>
+          </View>
           {/* Accept Checkbox */}
           <TouchableOpacity
             style={styles.checkboxContainer}
@@ -220,5 +231,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('4.5%'),
     fontWeight: '700',
+  },
+  card: {
+    padding: wp('4%'),
+    borderRadius: wp('3%'),
+    marginBottom: hp('2%'),
+    elevation: 3,
   },
 });

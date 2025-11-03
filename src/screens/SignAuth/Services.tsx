@@ -82,90 +82,95 @@ export default function ServicesScreen() {
   };
 
   return (
-    <Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
-          />
-        }
-        contentContainerStyle={{ paddingBottom: hp('10%') }}
-      >
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-          {/* Header */}
-          <Head title="Services" />
+     
+  <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <Animated.ScrollView
+      showsVerticalScrollIndicator={false}
+       style={{ transform: [{ translateY }] }}  
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[COLORS.primary]}
+          tintColor={COLORS.primary}
+        />
+      }
+      contentContainerStyle={{
+        paddingBottom: hp('4%'),
+      }}
+    >
+      {/* 🔹 Header (moves with scroll & refresh) */}
+      <Head title="Services" />
 
-          {/* Categories Section */}
-          <FlatList
-            horizontal
-            data={categories}
-            keyExtractor={(item, index) => index.toString()}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingVertical: hp('2%'),
-              paddingHorizontal: wp('3%'),
-            }}
-            renderItem={({ item, index }) => (
+      {/* 🔹 Categories Section */}
+      <FlatList
+        horizontal
+        data={categories}
+        keyExtractor={(item, index) => index.toString()}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingVertical: hp('2%'),
+          paddingHorizontal: wp('3%'),
+        }}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            style={styles.categoryItem}
+            onPress={() => setStorySelect(index)}
+          >
+            <View
+              style={[
+                styles.categoryCircle,
+                {
+                  borderColor:
+                    storySelect === index ? COLORS.primary : 'transparent',
+                  borderWidth: storySelect === index ? 2 : 0,
+                },
+              ]}
+            >
+              <Image source={item.image} style={styles.categoryImage} />
+            </View>
+            <Text style={[styles.categoryText, { color: theme.textPrimary }]}>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
+        )}
+      />
+
+      {/* 🔹 Services List */}
+      <FlatList
+        data={services}
+        keyExtractor={(item, index) => index.toString()}
+        scrollEnabled={false}
+        renderItem={({ item }) => (
+          <View style={[styles.MainView, { backgroundColor: theme.card }]}>
+            <View style={styles.imgContainer}>
+              <Image source={{ uri: item.imageUrl }} style={styles.sectionImage} />
+            </View>
+            <View style={styles.rightContainer}>
+              <Text style={[styles.mainText, { color: theme.textPrimary }]}>
+                {item.title}
+              </Text>
+              <Text style={[styles.price, { color: theme.textSecondary }]}>
+                ₹{item.price}
+              </Text>
+              <Text style={[styles.desc, { color: theme.textSecondary }]}>
+                {item.serviceName}
+              </Text>
               <TouchableOpacity
-                style={styles.categoryItem}
-                onPress={() => setStorySelect(index)}
+                style={[styles.bookButton, { backgroundColor: COLORS.primary }]}
+                onPress={() => navigation.navigate('ServiceDetails', { item })}
               >
-                <View
-                  style={[
-                    styles.categoryCircle,
-                    {
-                      borderColor: storySelect === index ? COLORS.primary : 'transparent',
-                      borderWidth: storySelect === index ? 2 : 0,
-                    },
-                  ]}
-                >
-                  <Image source={item.image} style={styles.categoryImage} />
-                </View>
-                <Text style={[styles.categoryText, { color: theme.textPrimary }]}>
-                  {item.name}
-                </Text>
+                <Text style={styles.bookButtonText}>Book Now</Text>
               </TouchableOpacity>
-            )}
-          />
+            </View>
+          </View>
+        )}
+      />
+    </Animated.ScrollView>
+  </SafeAreaView>
+);
 
-          {/* Services List */}
-          <FlatList
-            data={services}
-            keyExtractor={(item, index) => index.toString()}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <View style={[styles.MainView, { backgroundColor: theme.card }]}>
-                <View style={styles.imgContainer}>
-                  <Image source={{ uri: item.imageUrl }} style={styles.sectionImage} />
-                </View>
-                <View style={styles.rightContainer}>
-                  <Text style={[styles.mainText, { color: theme.textPrimary }]}>
-                    {item.title}
-                  </Text>
-                  <Text style={[styles.price, { color: theme.textSecondary }]}>
-                    ₹{item.price}
-                  </Text>
-                  <Text style={[styles.desc, { color: theme.textSecondary }]}>
-                    {item.serviceName}
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.bookButton, { backgroundColor: COLORS.primary }]}
-                    onPress={() => navigation.navigate('ServiceDetails', { item })}
-                  >
-                    <Text style={styles.bookButtonText}>Book Now</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          />
-        </SafeAreaView>
-      </ScrollView>
-    </Animated.View>
-  );
+
 }
 
 const styles = StyleSheet.create({
@@ -182,6 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: wp('9%'),
     justifyContent: 'center',
     alignItems: 'center',
+    padding : wp("1%"),
     overflow: 'hidden',
   },
   categoryImage: {
@@ -251,4 +257,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Poppins-Medium',
   },
+  fixedHeader: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 10,
+  backgroundColor: '#fff',
+},
 });

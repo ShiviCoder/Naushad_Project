@@ -256,12 +256,18 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useRoute } from '@react-navigation/native';
+
 
 const BookAppointmentScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null); // For popup
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal toggle
+  const route = useRoute();
+  const { selectedDate, selectedTime } = route.params || {};
+  console.log(selectedDate, selectedTime);
 
   const services = [
     { id: 1, name: 'Shampoo', price: 499, includes: 'Wash, Cut, Blowdry', image: require('../../assets/SHH.png'), description: 'Professional shampoo service including wash, cut, and blowdry.' },
@@ -353,11 +359,21 @@ const BookAppointmentScreen = ({ navigation }) => {
             <Text style={[styles.price, { color: theme.textPrimary }]}>
               ₹ {service.price}
             </Text>
-            <View style={[styles.checkbox, { borderColor: theme.textSecondary }]}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                setSelectedServices((prevSelected) =>
+                  prevSelected.includes(service.id)
+                    ? prevSelected.filter((id) => id !== service.id)
+                    : [...prevSelected, service.id]
+                );
+              }}
+              style={[styles.checkbox, { borderColor: theme.textSecondary }]}
+            >
               {isSelected && (
-                <View style={[styles.checkboxFill, { backgroundColor: COLORS.primary }]} />
+                <Icon name="checkmark" size={wp('5%')} color={COLORS.primary} />
               )}
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
@@ -375,7 +391,22 @@ const BookAppointmentScreen = ({ navigation }) => {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate('PaymentScreen')}
+        onPress={() => {
+          const selectedServiceDetails = services
+            .filter(service => selectedServices.includes(service.id))
+            .map(srv => ({
+              serviceName: srv.serviceName || srv.name || srv.title || 'Unnamed',
+              price: srv.price || 0,
+            }));
+
+          navigation.navigate('PaymentScreen', {
+            services: selectedServiceDetails, // ✅ only name & price sent
+            selectedDate,
+            selectedTime,
+          });
+
+          console.log(selectedServiceDetails)
+        }}
         style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}
       >
         <Text style={[styles.proceedButtonText, { color: theme.textOnAccent }]}>
@@ -486,11 +517,11 @@ const styles = StyleSheet.create({
   },
   price: { fontSize: wp('3.8%'), fontWeight: '600', fontFamily: 'Poppins-Medium' },
   checkbox: {
-    width: wp('4.5%'),
-    height: wp('4.5%'),
+    width: wp('6%'),
+    height: wp('6%'),
     backgroundColor: '#D9D9D9',
     borderRadius: wp('1%'),
-    alignSelf: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxFill: {
@@ -522,15 +553,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
-    height : hp('80%'),
-    justifyContent : 'center'
+    height: hp('80%'),
+    justifyContent: 'center'
   },
   modalImage: {
     width: wp('70%'),
     height: hp('40%'),
     borderRadius: 10,
     marginBottom: 10,
-    resizeMode : 'contain'
+    resizeMode: 'contain'
   },
   modalTitle: {
     fontSize: wp('6%'),

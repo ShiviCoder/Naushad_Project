@@ -170,6 +170,7 @@ actionBtn: {
   borderRadius: wp("3%"),
   alignItems: "center",
   justifyContent: "center",
+  paddingHorizontal: wp("6%"),
 },
 
 actionText: {

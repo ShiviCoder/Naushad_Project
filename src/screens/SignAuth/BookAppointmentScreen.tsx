@@ -51,17 +51,29 @@ export default function BookAppointmentScreen() {
 
   // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
+  const formattedDate = selectedDate ? selectedDate.toISOString() : null; // ✅ make it serializable
+
   if (route.params?.from === 'bottomBar') {
-    navigation.navigate('BookAppoinment2');
+    navigation.navigate('BookAppoinment2', {
+      selectedDate: formattedDate,
+      selectedTime,
+    });
   } else {
-    navigation.navigate('PaymentScreen');
+    navigation.navigate('PaymentScreen', {
+      selectedDate: formattedDate,
+      selectedTime,
+    });
   }
+
+  console.log('📅', formattedDate, '🕒', selectedTime);
 };
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTime, setSelectedTime] = useState(null);
+
   const renderItem = ({ item }: { item: string }) => {
     switch (item) {
       case 'image':
@@ -100,7 +112,7 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.timeContainer}>
             {/* Removed any onTimeChange prop */}
-            <TimeSelect selectedDate={selectedDate}/>
+            <TimeSelect selectedDate={selectedDate} onTimeSelect={setSelectedTime} />
           </View>
         );
       case 'nextButton':

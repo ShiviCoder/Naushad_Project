@@ -149,13 +149,12 @@ export default function BookAppointmentScreen() {
       style={[styles.mainContainer, { backgroundColor: theme.background }]}
     >
       <Head title="Bookings" showBack={showBack} />
-
       <FlatList
         data={data}
         renderItem={renderItem}
         keyExtractor={(item) => item}
         contentContainerStyle={{
-          paddingBottom: hp('15%'),
+          paddingBottom: hp('3%'),
           paddingHorizontal: wp('3%')
         }}
         showsVerticalScrollIndicator={false}

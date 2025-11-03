@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -14,7 +14,7 @@ const BottomNavbar = (props: any) => {
   const { state, navigation } = props;
   const handlePress = (tab: any) => {
     if (tab.name === 'BookAppointmentScreen') {
-      navigation.navigate('BookAppointmentScreen', { from: 'bottomBar'});
+      navigation.navigate('BookAppointmentScreen', { from: 'bottomBar' });
     } else {
       navigation.navigate(tab.name);
     }
@@ -23,16 +23,24 @@ const BottomNavbar = (props: any) => {
   const tabs = [
     { name: 'HomeScreen', icon: <Icon name="home" /> },
     { name: 'BookingScreen', icon: <MySvgIcon /> },
-    { name: 'BookAppointmentScreen', icon: (
-        <View style={[styles.fabCircle,{backgroundColor : COLORS.primary}]}>
+    {
+      name: 'BookAppointmentScreen', icon: (
+        <View style={[styles.fabCircle, { backgroundColor: COLORS.primary }]}>
           <Icon name="add" size={wp('7%')} color="#000" />
         </View>
       )
     },
-    { name: 'BlankScreen', icon: <StarSvgIcon /> },
+    {
+      name: 'BlankScreen',
+      icon: (
+        <Image
+          source={require('../assets/referall.png')}
+          style={{ width: wp('9%'), height: wp('9%'), resizeMode: 'contain' }}
+        />
+      ),
+    },
     { name: 'AccountScreen', icon: <Icon name="person-outline" /> },
   ];
-
   return (
     <View style={styles.bottomBarWrap}>
       <View style={styles.bottomNav}>
@@ -46,12 +54,22 @@ const BottomNavbar = (props: any) => {
             } else if (tab.name === 'BookingScreen') {
               iconElement = <MySvgIcon width={wp('7%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
             } else if (tab.name === 'BlankScreen') {
-              iconElement = <StarSvgIcon width={hp('5%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
+              iconElement = (
+                <Image
+                  source={require('../assets/referral.png')}
+                  style={{
+                    width: wp('9%'),
+                    height: wp('9%'),
+                    tintColor: isActive ? COLORS.primary : '#fff', // optional tint
+                    resizeMode: 'contain',
+                  }}
+                />
+              );
             } else if (tab.name === 'AccountScreen') {
               iconElement = <Icon name="person-outline" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
             }
-          }
-
+          }  
+             
           return (
             <TouchableOpacity key={tab.name} onPress={() => handlePress(tab)}>
               <View style={[styles.iconWrapper, isActive && tab.name !== 'BookAppointmentScreen' ? styles.activeWrapper : {}]}>

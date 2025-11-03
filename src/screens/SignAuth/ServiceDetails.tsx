@@ -106,12 +106,25 @@ const ServiceDetails = () => {
 
         <View style={{ gap: hp('2%') }}>
           {/* Main Image */}
-          <Image style={styles.image} source={item.image} />
+         <Image
+  style={styles.image}
+  source={
+    Array.isArray(item.image)
+      ? item.image[0] // if image is an array (from local services array)
+      : typeof item.image === 'number'
+      ? item.image // local require()
+      : item.image
+      ? { uri: item.image } // remote URL from API
+      : item.imageUrl
+      ? { uri: item.imageUrl } // alternate field
+      : require('../../assets/images/refer.png') // fallback
+  }
+/>
 
           {/* Name and Price */}
           <View style={styles.nameCont}>
             <Text style={[styles.name, { color: theme.textPrimary }]}>
-              {item.serviceName}
+              {item.serviceName || item.name}
             </Text>
             <Text style={[styles.price, { color: theme.textPrimary }]}>
               ₹{item.price}
@@ -120,11 +133,11 @@ const ServiceDetails = () => {
 
           {/* Description */}
           <Text style={[styles.desc, { color: theme.subtext }]}>
-            "{item.title}"
+            "{item.title || item.description}"
           </Text>
 
           {/* Highlights */}
-          <View style={styles.highlightCont}>
+          {item.highlights && <View style={styles.highlightCont}>
             <Text style={[styles.hightlightHead, { color: theme.textPrimary }]}>
               Highlights
             </Text>
@@ -136,6 +149,7 @@ const ServiceDetails = () => {
               </View>
             ))}
           </View>
+          }
           {/* Extra Services Section */}
           <View style={styles.extra}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -181,7 +195,6 @@ const ServiceDetails = () => {
                   </View>
                   <Text style={styles.serviceDesc}>{item.desc}</Text>
                   <View style={{ flex: 1 }} />
-
                   <TouchableOpacity
                     style={[
                       styles.bookBtn,
@@ -206,9 +219,12 @@ const ServiceDetails = () => {
               style={[styles.BookAppointBtn, { backgroundColor: COLORS.primary }]}
               onPress={() => {
                 // Map selected services to cart items
+                const mainPrice = parseFloat(item.price);
+                let extraTotal = 0;
                 selectedServices.forEach(serviceId => {
                   const service = services.find(s => s.id === serviceId);
                   if (service) {
+                    extraTotal += parseFloat(service.price);
                     addToCart({
                       id: service.id,
                       name: service.name,
@@ -217,11 +233,14 @@ const ServiceDetails = () => {
                     });
                   }
                 });
-                                                                        
+
+                const totalPrice = mainPrice + extraTotal;
+
                 // Navigate to payment
                 navigation.navigate('CloneBookAppointment', {
-                  serviceName: item.title,
-                  price: item.price,
+                  serviceName: item.serviceName || item.title || item.name,
+                  title: item.title || item.serviceName || item.name,
+                  price: totalPrice,
                 });
               }}
             >

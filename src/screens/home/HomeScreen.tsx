@@ -623,12 +623,11 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {showLiked ? (
-        likedItems.length > 0 ? (
+        likedProducts.length > 0 ? (
           <View
             style={{
               flex: 1,
               backgroundColor: theme.dark ? '#000' : '#fff',
-              paddingVertical: hp('2%'),
               paddingHorizontal: wp('1%'),
             }}
           >
@@ -637,11 +636,11 @@ const HomeScreen = () => {
 
             {/* 🔹 Liked products list */}
             <FlatList
-              data={likedItems}
+              data={products.filter((p)=>likedProducts.includes(p._id))}
               showsHorizontalScrollIndicator={false}
               numColumns={2}
-              keyExtractor={(item) => item.id.toString()}
-
+              contentContainerStyle={{paddingVertical : hp('2%')}}
+              keyExtractor={(item) => item._id.toString()}
               renderItem={({ item }) => {
                 const selectedImage = Array.isArray(item.image)
                   ? typeof item.image[0] === 'string'
@@ -1348,7 +1347,7 @@ const SectionTitle = ({
       </Text>
       {showSeeAll && (
         <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-          <Text style={[styles.seeAll, { color: '#3939ebff' }]}>
+          <Text style={[styles.seeAll, { color: COLORS.primary }]}>
             See all
           </Text>
         </TouchableOpacity>

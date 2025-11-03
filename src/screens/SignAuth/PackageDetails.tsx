@@ -28,7 +28,7 @@ const PackageDetails = () => {
       <View style={styles.detail}>
         <View style={styles.titleContain}>
           <Text style={[styles.titleTxt, { color: theme.textPrimary }]}>{item.title}</Text>
-          <Text style={[styles.priceTxt, { color: theme.textPrimary }]}>{item.price}</Text>
+          <Text style={[styles.priceTxt, { color: theme.textPrimary }]}>₹{item.price}</Text>
         </View>
         <Text style={[styles.aboutTxt, { color: theme.textPrimary }]}>"{item.about}"</Text>
         <Text style={[styles.discountTxt, { color: theme.textPrimary }]}>{item.discount}</Text>
