@@ -68,7 +68,7 @@ const WalletScreen = () => {
                     )}
                     showsVerticalScrollIndicator={false}
                 />
-            </View>
+            </View> 
         </>
     );
 };

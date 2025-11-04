@@ -277,7 +277,7 @@ const HomeScreen = () => {
           "Authorization": `Bearer ${token}`,
         },
       })
-      
+
       const data = await response.json();
       setServices(data);
       console.log("Services data", data);
@@ -619,178 +619,10 @@ const HomeScreen = () => {
       console.log("About Data : ", error)
     }
   }
-  
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {showLiked ? (
-        likedProducts.length > 0 ? (
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: theme.dark ? '#000' : '#fff',
-              paddingHorizontal: wp('1%'),
-            }}
-          >
-            {/* 🔹 Header (only once) */}
-            <Head title="Liked Products" onBackPress={() => setShowLiked(false)} />
-
-            {/* 🔹 Liked products list */}
-            <FlatList
-              data={products.filter((p)=>likedProducts.includes(p._id))}
-              showsHorizontalScrollIndicator={false}
-              numColumns={2}
-              contentContainerStyle={{paddingVertical : hp('2%')}}
-              keyExtractor={(item) => item._id.toString()}
-              renderItem={({ item }) => {
-                const selectedImage = Array.isArray(item.image)
-                  ? typeof item.image[0] === 'string'
-                    ? { uri: item.image[0] }
-                    : item.image[0]
-                  : typeof item.image === 'string'
-                    ? { uri: item.image }
-                    : item.image;
-
-                return (
-                  <View
-                    style={[
-                      styles.likedProductCard,
-                      {
-                        backgroundColor: '#FFFFFF',
-                        borderColor: theme.dark ? '#333' : '#ddd',
-                      },
-                    ]}
-                  >
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate('ProductDetails', { product: item })
-                      }
-                    >
-                      <Image
-                        resizeMode="cover"
-                        source={selectedImage}
-                        style={styles.ImageStyle}
-                      />
-
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.likedProductName,
-
-                        ]}
-                      >
-                        {item.name}
-                      </Text>
-
-                      <View style={styles.OurterPriceContainer}>
-                        <View style={styles.InnerPriceContainer}>
-                          <Text
-                            style={[
-                              styles.priceStyle,
-                            ]}
-                          >
-                            {item.price}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.oldPriceStyle,
-
-                            ]}
-                          >
-                            {item.oldPrice}
-                          </Text>
-                        </View>
-                        <Text
-                          style={[
-                            styles.DiscountStyle,
-                            { color: '#42BA86' },
-                          ]}
-                        >
-                          {item.discount}
-                        </Text>
-                      </View>
-
-                      <View style={styles.descContain}>
-                        <Image
-                          resizeMode="contain"
-                          source={item.featureIcon}
-                          style={styles.featureIconStyle}
-                        />
-                        <Text
-                          style={[
-                            styles.DescStyle,
-
-                          ]}
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                        >
-                          {item.description}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-
-                    <View style={styles.OutRatContain}>
-                      <View
-                        style={[
-                          styles.InnerRatContain,
-                          {
-                            backgroundColor: theme.dark
-                              ? '#0f8a43'
-                              : '#09932B',
-                          },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.ratingTextStyle,
-                            { color: '#fff' },
-                          ]}
-                        >
-                          {item.rating}
-                        </Text>
-                        <Image
-                          resizeMode="contain"
-                          style={styles.starStyle}
-                          source={require('../../assets/OurProduct/star1.png')}
-                        />
-                      </View>
-                      <Text
-                        style={[
-                          styles.reviewStyle,
-                          { color: theme.dark ? '#ccc' : '#ACACAC' },
-                        ]}
-                      >
-                        ({item.reviews})
-                      </Text>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          </View>
-        ) : (
-          // 🔹 Empty state
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: theme.dark ? '#000' : '#fff',
-              paddingVertical: hp('2%'),
-              paddingHorizontal: wp('3%'),
-            }}
-          >
-            <Head title="Liked Product" onBackPress={() => setShowLiked(false)} />
-            <Text
-              style={{
-                paddingVertical: hp('2%'),
-                paddingHorizontal: wp('3%'),
-                fontSize: wp('5%'),
-                color: theme.textPrimary,
-              }}
-            >
-              No liked products yet ❤️
-            </Text>
-          </View>
-        )
-      ) : (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
+      (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -844,7 +676,7 @@ const HomeScreen = () => {
                 />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => setShowLiked(!showLiked)}>
+              <TouchableOpacity onPress={() => navigation.navigate("LikedProductScreen", { likedProducts, products, theme })}>
                 <View
                   style={{
                     width: wp('7%'),
@@ -921,7 +753,7 @@ const HomeScreen = () => {
                     </TouchableOpacity>
                   </View>
                   <Image
-                    source={{ uri: item.imageUrl }}
+                    source={{ uri: item.imageUrl.replace('http://', 'https://') }}
                     style={styles.offerRightImage}
                   />
                 </View>
@@ -943,7 +775,7 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>
                 <Image
-                  source={{ uri: item.imageUrl }}
+                  source={{ uri: item.imageUrl}}
                   style={styles.serviceImage}
                 />
                 <View style={styles.nameItem}>
@@ -965,8 +797,8 @@ const HomeScreen = () => {
                     navigation.navigate('ServiceDetails', {
                       item: {
                         ...item,
-                        image: item.imageUrl
-                      }
+                        image: item.image, // ✅ Corrected line
+                      },
                     })
                   }
                   }
@@ -1021,8 +853,7 @@ const HomeScreen = () => {
                   <Image
 
                     // gender === 'Male' ? item.image[0] : item.image[1]
-                    source={{ uri: item.image }}
-
+                    source={{ uri: item.image}}
                     style={styles.productImage} />
                   <Text style={styles.productName} numberOfLines={2}>
                     {/* {gender === 'Male' ? item.name[0] : item.name[1]} */}
@@ -1097,7 +928,7 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.certItem}>
                 <Image
-                  source={{ uri: item.imageUrl }}
+                  source={{ uri: item.imageUrl.replace('http://', 'https://') }}
                   style={styles.certImage}
                 />
                 <Text numberOfLines={2} style={styles.certCaption}>
@@ -1116,7 +947,7 @@ const HomeScreen = () => {
               keyExtractor={(item) => item._id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              
+
               renderItem={({ item }) => {
                 return (
                   <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
@@ -1138,7 +969,7 @@ const HomeScreen = () => {
             />
           </View>
 
-          
+
           {/* Our Packages (2-up grid) with navigation */}
           <SectionTitle
             title="Our Packages"
@@ -1295,12 +1126,10 @@ const HomeScreen = () => {
             keyExtractor={(item) => item._id}
             contentContainerStyle={{ paddingHorizontal: wp('2%') }}
             renderItem={({ item }) => (
-              
+
               <View style={styles.serviceCard}>
                 <Image
-                  source={{
-                    uri: item.image
-                  }}
+                  source={{ uri: item.image}}
                   style={styles.serviceImage}
                 />
                 <View style={styles.nameItem}>
@@ -1323,7 +1152,7 @@ const HomeScreen = () => {
             )}
           />
         </ScrollView>
-      </Animated.View>)}
+      </Animated.View>)
     </SafeAreaView>
   );
 };
@@ -1361,7 +1190,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingBottom: hp('4%')
+    paddingBottom: hp('2%')
   },
   header: {
     flexDirection: 'row',
@@ -1724,7 +1553,7 @@ const styles = StyleSheet.create({
     elevation: 1,
     flexDirection: 'column',
     gap: hp('1%'),
-    marginHorizontal : wp('1%')
+    marginHorizontal: wp('1%')
   },
   aboutTop: {
     fontSize: wp('3.5%'),
