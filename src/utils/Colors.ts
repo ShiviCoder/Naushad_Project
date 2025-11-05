@@ -22,11 +22,11 @@ const COLORS = {
 
   //Lavender Bliss (Soft & Feminine)
 
-   primary: '#A47FD4',
-    secondary: '#F4EDFA',
-    shadow: '#A47FD440',
-    text: '#1E1E1E',
-    border: '#E3D9EF',
+  //  primary: '#A47FD4',
+  //   secondary: '#F4EDFA',
+  //   shadow: '#A47FD440',
+  //   text: '#1E1E1E',
+  //   border: '#E3D9EF',
 
   //Mint Serenity (Natural & Minimal)
 
@@ -56,5 +56,36 @@ const COLORS = {
   // shadow: '#5A3E2B40', // subtle brown shadow
   // text: '#1E1E1E', // readable dark text
   // border: '#E2D3C6', // beige border tone
+
+  //  primary: '#7B3FA0',     // rich royal plum
+  // secondary: '#EFE3F8',   // soft lavender background
+  // shadow: '#7B3FA040',    // matching shadow tone
+  // text: '#1E1E1E',        // readable dark gray
+  // border: '#D4C1E8', 
+
+
+  //  primary: '#B45C79',     // dark rose mauve
+  // secondary: '#F9E6EC',   // light blush background
+  // shadow: '#B45C7940',    // translucent shadow
+  // text: '#2B2B2B',
+  // border: '#E7C9D4',
+
+  //   primary: '#3A3A3A',     // dark charcoal
+  // secondary: '#F5F5F5',   // clean light gray background
+  // shadow: '#00000033',
+  // text: '#1E1E1E',
+  // border: '#CFCFCF',
+
+  //  primary: '#2E62A9',     // deep sapphire blue
+  // secondary: '#E7F0FA',   // very light cool blue background
+  // shadow: '#2E62A940',    // translucent shadow
+  // text: '#1E1E1E',        // readable dark gray
+  // border: '#C7D9EE',     
+
+  primary: '#053975ff',     // dark navy blue
+  secondary: '#E8F1FA',   // pale sky background
+  shadow: '#1A4B8440',
+  text: '#1E1E1E',
+  border: '#C8D8EA',
 };
 export default COLORS;

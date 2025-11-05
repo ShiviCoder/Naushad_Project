@@ -48,6 +48,7 @@ import VideosScreen from '../screens/SignAuth/VideosScreen';
 import CloneBookAppointment from '../screens/CloneBookAppointment'
 import WalletScreen from '../screens/SignAuth/WalletScreen';
 import LikedProductScreen from '../screens/SignAuth/LikedProductScreen';
+import SettingScreen from '../screens/SignAuth/SettingScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -96,6 +97,7 @@ export type RootStackParamList = {
   CloneBookAppointment : undefined;
   WalletScreen : undefined;
   LikedProductScreen : undefined;
+  SettingScreen : undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -172,6 +174,7 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="CloneBookAppointment" component={CloneBookAppointment}/>
         <Stack.Screen name="WalletScreen" component={WalletScreen}/>
         <Stack.Screen name="LikedProductScreen" component={LikedProductScreen}/>
+        <Stack.Screen name="SettingScreen" component={SettingScreen}/>
          
       </Stack.Navigator>
     </NavigationContainer>

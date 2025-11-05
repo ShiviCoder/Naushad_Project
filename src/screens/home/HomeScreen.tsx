@@ -110,6 +110,25 @@ const HomeScreen = () => {
 
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('userData');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          console.log("📦 Loaded user from AsyncStorage:", parsed);
+
+          // Handle both structures: flat or nested user
+          const userInfo = parsed?.user ? parsed.user : parsed;
+          setUser(userInfo);
+        }
+      } catch (error) {
+        console.log("❌ Error loading user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     requestAppPermissions();
@@ -631,7 +650,7 @@ const HomeScreen = () => {
           contentContainerStyle={{ paddingBottom: hp('10%') }}
         >
           {/* Fixed Header */}
-          <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+          <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}]}>
             {/* Left Section */}
             <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
               <TouchableOpacity>
@@ -646,14 +665,16 @@ const HomeScreen = () => {
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  Hi {gender === 'Male' ? 'Rahul' : 'Aanchal'} !
+                  {user
+                ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
+                : 'User Name'}
                 </Text>
                 <Text style={[styles.locationText, { color: theme.textPrimary }]}>
-                  {gender === 'Male' ? 'Pune' : 'Indore'}
+                 Indore
                 </Text>
               </View>
             </View>
-
+            
             {/* Center Logo */}
             <Image
               source={require('../../assets/images/logo.png')}
@@ -708,11 +729,10 @@ const HomeScreen = () => {
               onSelect={(value) => setGender(value)}
               labels={["Male", "Female"]}
             />
+            
 
           </View>
-
-
-
+          
           {/* Search Bar with filter */}
           <View style={styles.searchFilContain}>
             {/* Search Bar */}
@@ -753,7 +773,7 @@ const HomeScreen = () => {
                     </TouchableOpacity>
                   </View>
                   <Image
-                    source={{ uri: item.imageUrl.replace('http://', 'https://') }}
+                    source={{ uri: item.imageUrl }}
                     style={styles.offerRightImage}
                   />
                 </View>
@@ -827,7 +847,7 @@ const HomeScreen = () => {
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate("CloneBookAppointment")}
                 style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
-                <Text style={[styles.bookBtnText, { color: '#111', fontWeight: 'bold' }]}>Book Appointment</Text>
+                <Text style={[styles.bookBtnText, { color: '#fff', fontWeight: 'bold' }]}>Book Appointment</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>
@@ -931,7 +951,7 @@ const HomeScreen = () => {
                   source={{ uri: item.imageUrl.replace('http://', 'https://') }}
                   style={styles.certImage}
                 />
-                <Text numberOfLines={2} style={styles.certCaption}>
+                <Text numberOfLines={2} style={[styles.certCaption,{color : '#fff'}]}>
                   {item.title}
                 </Text>
               </View>
@@ -1530,7 +1550,6 @@ const styles = StyleSheet.create({
   certCaption: {
     fontSize: wp('3%'),
     textAlign: 'center',
-    color: '#0d0d0dff',
     fontStyle: 'italic',
     fontWeight: 'bold',
     fontFamily: "Poppins-Medium"

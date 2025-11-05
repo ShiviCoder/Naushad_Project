@@ -18,10 +18,9 @@ const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
   const slotArray = [
     "09.00", "09.30", "10.00", "10.30",
     "11.00", "11.30", "12.00", "12.30",
-    "13.00", "13.30", "14.00", "14.30", "15.30"
+    "13.00", "13.30", "14.00", "14.30", "15.30", "16.00"
   ];
 
-  // 🕒 Update current time every minute
   useEffect(() => {
     const update = () => {
       const now = new Date();
@@ -35,12 +34,12 @@ const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
     return () => clearInterval(interval);
   }, []);
 
-  // 🔄 Reset selection when date changes
+  //  Reset selection when date changes
   useEffect(() => {
     setSelectedSlot(null);
   }, [selectedDate]);
 
-  // ⏰ Convert slot string like "09.30" → 9.5 hours
+  // Convert slot string like "09.30" → 9.5 hours
   const parseSlot = (slot: string) => {
     const [h, m] = slot.split(".");
     return parseInt(h, 10) + (m ? parseInt(m, 10) / 60 : 0);
@@ -54,59 +53,42 @@ const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
     return `${hour}${minute ? `:${minute}` : ""} ${ampm}`;
   };
 
-  // 🚫 Determine if slot should be disabled
- const isSlotDisabled = (slot: string) => {
-  if (!selectedDate) return false;
+  const isSlotDisabled = (slot: string) => {
+    const now = new Date();
 
-  const now = new Date();
-  const selected = new Date(selectedDate);
+    // ❌ If no date selected → disable all slots
+    if (!selectedDate) return true;
 
-  // ---- DATE COMPARISON ----
-  const todayYear = now.getFullYear();
-  const todayMonth = now.getMonth();
-  const todayDate = now.getDate();
+    const selected = new Date(selectedDate);
+    const isSameDate =
+      selected.getFullYear() === now.getFullYear() &&
+      selected.getMonth() === now.getMonth() &&
+      selected.getDate() === now.getDate();
 
-  const selYear = selected.getFullYear();
-  const selMonth = selected.getMonth();
-  const selDate = selected.getDate();
+    const selectedDayStart = new Date(selected).setHours(0, 0, 0, 0);
+    const todayStart = new Date().setHours(0, 0, 0, 0);
 
-  const isPastMonth =
-    selYear < todayYear ||
-    (selYear === todayYear && selMonth < todayMonth);
+    // 🔹 Past date → all disabled
+    if (selectedDayStart < todayStart) return true;
 
-  const isFutureMonth =
-    selYear > todayYear ||
-    (selYear === todayYear && selMonth > todayMonth);
+    // 🔹 Future date → all enabled
+    if (selectedDayStart > todayStart) return false;
 
-  const isToday =
-    selYear === todayYear &&
-    selMonth === todayMonth &&
-    selDate === todayDate;
+    // 🔹 Today → disable past slots only
+    const slotTime = parseSlot(slot);
+    return slotTime <= currentTime;
+  };
 
-  const isPastDate =
-    selYear === todayYear &&
-    selMonth === todayMonth &&
-    selDate < todayDate;
-
-  // ---- LOGIC ----
-  if (isPastMonth || isPastDate) return true;      // disable all in past
-  if (isFutureMonth || selDate > todayDate) return false;  // enable all in future
-
-  // ---- TODAY ----
-  if (isToday) {
-    const slotTime = parseSlot(slot); // convert to decimal hours
-    return slotTime <= currentTime;   // disable past times
-  }
-
-  return false;
-};
   return (
     <View style={{ paddingHorizontal: wp("2%") }}>
       <FlatList
         data={slotArray}
         numColumns={4}
         keyExtractor={(item, index) => index.toString()}
-        columnWrapperStyle={{ justifyContent: "flex-start", marginVertical: hp("0.8%") }}
+        columnWrapperStyle={{
+          justifyContent: "flex-start",
+          marginVertical: hp("0.8%"),
+        }}
         renderItem={({ item }) => {
           const isSelected = selectedSlot === item;
           const isDisabled = isSlotDisabled(item);
@@ -115,7 +97,10 @@ const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
               distance={3}
               startColor={COLORS.shadow}
               offset={[4, 0]}
-              style={[styles.shadowContainer, { width: wp("20%"), height: hp("4.5%") }]}
+              style={[
+                styles.shadowContainer,
+                { width: wp("20%"), height: hp("4.5%") },
+              ]}
             >
               <TouchableOpacity
                 disabled={isDisabled}
@@ -125,7 +110,7 @@ const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
                     backgroundColor: isSelected
                       ? COLORS.primary
                       : theme.cardBackground,
-                    opacity: isDisabled ? 0.6 : 1
+                    opacity: isDisabled ? 0.5 : 1,
                   },
                 ]}
                 onPress={() => {
@@ -139,10 +124,10 @@ const TimeSelect = ({ selectedDate, onTimeSelect }: TimeSelectProps) => {
                     styles.slotText,
                     {
                       color: isDisabled
-                        ? "#8a8787ff"
+                        ? "#8a8787"
                         : isSelected
-                        ? "#000"
-                        : theme.textPrimary,
+                          ? "#000"
+                          : theme.textPrimary,
                     },
                   ]}
                 >

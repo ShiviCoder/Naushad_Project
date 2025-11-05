@@ -1,138 +1,7 @@
-// import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
-// import React, { useEffect, useState } from 'react'
-// import { useNavigation, useRoute } from '@react-navigation/native';
-// import Icon from 'react-native-vector-icons/Ionicons';
-// import { MySvgIcon } from '../components/Svg';
-// import { StarSvgIcon } from '../components/Svg';
-// import {
-//   widthPercentageToDP as wp,
-//   heightPercentageToDP as hp,
-// } from 'react-native-responsive-screen';
-// import COLORS from '../utils/Colors';
-
-// const BottomNavbar = (props: any) => {
-//   const { state, navigation } = props;
-//   const handlePress = (tab: any) => {
-//     if (tab.name === 'BookAppointmentScreen') {
-//       navigation.navigate('BookAppointmentScreen', { from: 'bottomBar' });
-//     } else {
-//       navigation.navigate(tab.name);
-//     }
-//   };
-//   // Fixed order of tabs
-//   const tabs = [
-//     { name: 'HomeScreen', icon: <Icon name="home" /> },
-//     { name: 'BookingScreen', icon: <MySvgIcon /> },
-//     {
-//       name: 'BookAppointmentScreen', icon: (
-//         <View style={[styles.fabCircle, { backgroundColor: COLORS.primary }]}>
-//           <Icon name="add" size={wp('7%')} color="#000" />
-//         </View>
-//       )
-//     },
-//     {
-//       name: 'BlankScreen',
-//       icon: (
-//         <Image
-//           source={require('../assets/referall.png')}
-//           style={{ width: wp('9%'), height: wp('9%'), resizeMode: 'contain' }}
-//         />
-//       ),
-//     },
-//     { name: 'AccountScreen', icon: <Icon name="person-outline" /> },
-//   ];
-//   return (
-//     <View style={styles.bottomBarWrap}>
-//       <View style={styles.bottomNav}>
-//         {tabs.map((tab, index) => {
-//           const isActive = state?.routes?.[state.index]?.name === tab.name;
-//           let iconElement = tab.icon;
-//           // Set dynamic color for icons except FAB
-//           if (tab.name !== 'BookAppointmentScreen') {
-//             if (tab.name === 'HomeScreen') {
-//               iconElement = <Icon name="home" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
-//             } else if (tab.name === 'BookingScreen') {
-//               iconElement = <MySvgIcon width={wp('7%')} height={hp('3%')} fill={isActive ? COLORS.primary : '#fff'} />;
-//             } else if (tab.name === 'BlankScreen') {
-//               iconElement = (
-//                 <Image
-//                   source={require('../assets/referral.png')}
-//                   style={{
-//                     width: wp('9%'),
-//                     height: wp('9%'),
-//                     tintColor: isActive ? COLORS.primary : '#fff', // optional tint
-//                     resizeMode: 'contain',
-//                   }}
-//                 />
-//               );
-//             } else if (tab.name === 'AccountScreen') {
-//               iconElement = <Icon name="person-outline" size={wp('7%')} color={isActive ? COLORS.primary : '#fff'} />;
-//             }
-//           }  
-
-//           return (
-//             <TouchableOpacity key={tab.name} onPress={() => handlePress(tab)}>
-//               <View style={[styles.iconWrapper, isActive && tab.name !== 'BookAppointmentScreen' ? styles.activeWrapper : {}]}>
-//                 {iconElement}
-//               </View>
-//             </TouchableOpacity>
-//           );
-//         })}
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   bottomBarWrap: {
-//     position: 'absolute',
-//     left: 0,
-//     right: 0,
-//     bottom: hp('4%'), // Increased from 16
-//     alignItems: 'center',
-//   },
-//   bottomNav: {
-//     backgroundColor: '#1A1A1A', // Darker
-//     width: '90%', // Reduced from 92%
-//     height: hp('8%'), // Increased from 54
-//     borderRadius: wp('205'), // Increased from 28
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'space-around',
-//     elevation: 8,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 4 },
-//     shadowOpacity: 0.3,
-//     shadowRadius: 8,
-//   },
-//   fabCircle: {
-//     width: wp('13%'),
-//     height: wp('13%'),
-//     borderRadius: wp('50%'),
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginTop: 0,
-//   },
-//   iconWrapper: {
-//     width: wp('11%'),
-//     height: wp('11%'),
-//     borderRadius: wp('50%'),
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   activeWrapper: {
-//     backgroundColor: '#fff',
-//     borderRadius: '50%'
-//   },
-// })
-
-
-// export default BottomNavbar;
-
-
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
+  Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
@@ -147,14 +16,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { MySvgIcon } from '../components/Svg';
 import COLORS from '../utils/Colors';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const TAB_META = {
   HomeScreen: {
     icon: (isActive: boolean) => (
-      <Icon name="home" size={wp('8%')} color={isActive ? '#fff' : COLORS.primary} />
+      <Icon name="home" size={wp('8%')} color={'#fff'} />
     ),
     label: 'Home',
   },
@@ -163,21 +35,31 @@ const TAB_META = {
       <MySvgIcon
         width={wp('8%')}
         height={hp('3.3%')}
-        fill={isActive ? '#fff' : COLORS.primary}
+        fill={'#fff'}
       />
     ),
     label: 'Bookings',
   },
   BookAppointmentScreen: {
-    icon: () => (
-      <View
-        style={[
-          styles.fabCircle,
-          { backgroundColor: COLORS.primary },
-        ]}>
-        <Icon name="add" size={wp('9%')} color="#000" />
-      </View>
-    ),
+    icon: (isActive: boolean) =>
+      isActive ? (
+        // When active → icon only (inside floating circle)
+        <Icon name="add" size={wp('8%')} color="#fff" />
+      ) : (
+        // When inactive → circle with primary bg and white icon
+        <View
+          style={{
+            width: wp('12%'),
+            height: wp('12%'),
+            borderRadius: wp('6%'),
+            backgroundColor: COLORS.primary,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Icon name="add" size={wp('8%')} color="#fff" />
+        </View>
+      ),
     label: 'Book',
   },
   BlankScreen: {
@@ -185,9 +67,9 @@ const TAB_META = {
       <Image
         source={require('../assets/referral.png')}
         style={{
-          width: wp('9%'),
-          height: wp('9%'),
-          tintColor: isActive ? '#fff' : COLORS.primary,
+          width: wp('8%'),
+          height: wp('8%'),
+          tintColor: '#fff' ,
           resizeMode: 'contain',
         }}
       />
@@ -199,14 +81,14 @@ const TAB_META = {
       <Icon
         name="person-outline"
         size={wp('8%')}
-        color={isActive ? '#fff' : COLORS.primary}
+        color={'#fff'}
       />
     ),
     label: 'Account',
   },
 };
 
-const useExitAppBackHandler = selectedTab => {
+const useExitAppBackHandler = (selectedTab) => {
   const [exitApp, setExitApp] = useState(false);
   const exitTimerRef = useRef(null);
 
@@ -216,7 +98,7 @@ const useExitAppBackHandler = selectedTab => {
       if (!exitApp) {
         setExitApp(true);
         ToastAndroid.show('Press again to exit', ToastAndroid.SHORT);
-        exitTimerRef.current = setTimeout(() => setExitApp(false), 200);
+        exitTimerRef.current = setTimeout(() => setExitApp(false), 2000);
         return true;
       } else {
         BackHandler.exitApp();
@@ -224,10 +106,7 @@ const useExitAppBackHandler = selectedTab => {
       }
     };
 
-    const handler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
+    const handler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => {
       handler.remove();
       clearTimeout(exitTimerRef.current);
@@ -273,19 +152,19 @@ const BottomNavbar = ({ navigation }) => {
     Animated.parallel([
       Animated.timing(circleTranslateX, {
         toValue: target,
-        duration: 100,
+        duration: 150,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.sequence([
         Animated.timing(circleScale, {
           toValue: 1.05,
-          duration: 50,
+          duration: 80,
           useNativeDriver: true,
         }),
         Animated.timing(circleScale, {
           toValue: 1,
-          duration: 50,
+          duration: 80,
           useNativeDriver: true,
         }),
       ]),
@@ -293,24 +172,20 @@ const BottomNavbar = ({ navigation }) => {
   };
 
   const handleTabPress = (tabName) => {
-  if (selectedTab === tabName) return;
+    if (selectedTab === tabName) return;
+    setSelectedTab(tabName);
+    animateToTab(tabName);
+    requestAnimationFrame(() => {
+      navigation.navigate(tabName, { from: 'bottomBar' });
+    });
+  };
 
-  setSelectedTab(tabName); // 🔹 Immediate state update (icon changes instantly)
-  
-  // 🔹 Start animation at the same time
-  animateToTab(tabName);
-
-  // 🔹 Trigger navigation after a short delay — to avoid layout jank
-  requestAnimationFrame(() => {
-    navigation.navigate(tabName, { from: 'bottomBar' });
-  });
-};
   if (keyboardVisible) return null;
 
   return (
     <View style={[styles.bottomNavContainer, { paddingBottom: insets.bottom }]}>
       <View style={styles.tabBar}>
-        {/* 🔹 Animated Circle for Active Tab */}
+        {/* 🔹 Floating Active Circle */}
         <Animated.View
           style={[
             styles.activeCircle,
@@ -326,19 +201,30 @@ const BottomNavbar = ({ navigation }) => {
           {TAB_META[selectedTab]?.icon(true)}
         </Animated.View>
 
-        {/* 🔹 All Tabs */}
+        {/* 🔹 Tabs */}
         <View style={styles.tabsContainer}>
           {tabs.map(tab => {
             const meta = TAB_META[tab];
             const isActive = selectedTab === tab;
+
             return (
               <TouchableOpacity
                 key={tab}
                 onPress={() => handleTabPress(tab)}
                 style={[styles.tabItem, { width: screenWidth / tabs.length }]}
-                activeOpacity={0.8}>
-                {/* Render icons normally — circle will overlay active */}
-                {meta.icon(isActive)}
+                activeOpacity={0.8}
+              >
+                {/* Always render icon to preserve space */}
+                <View style={{ opacity: isActive ? 0 : 1 }}>
+                  {meta.icon(false)}
+                </View>
+
+                {/* Label only when active */}
+                {isActive && (
+                  <View style={{ position: 'absolute', top: selectedTab === 'BookAppointmentScreen' ? wp('7.5%') : wp('4%'), }}>
+                    <Text style={styles.labelActive}>{meta.label}</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             );
           })}
@@ -367,7 +253,7 @@ const styles = StyleSheet.create({
   },
   activeCircle: {
     position: 'absolute',
-    top: -25,
+    top: -28,
     left: 0,
     width: 64,
     height: 64,
@@ -394,13 +280,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fabCircle: {
-    width: wp('13%'),
-    height: wp('13%'),
-    borderRadius: wp('50%'),
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: hp('-1%')
+  labelActive: {
+    color: '#fff',
+    fontSize: wp('3.2%'),
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
+
 export default BottomNavbar;

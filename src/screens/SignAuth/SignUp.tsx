@@ -269,7 +269,7 @@
 //             <Icon name="create-outline" size={wp('4%')} color="#fff" />
 //           </View>
 //         </TouchableOpacity>
-        
+
 //           <View style={styles.nameRow}>
 //             <Text style={styles.nameText}>Upload your picture</Text>
 //           </View>  
@@ -433,7 +433,7 @@
 //     borderRadius: 12,
 //     padding: hp('0.2%'),
 //     alignSelf : 'center',
-    
+
 //   },
 //   nameRow: {
 //     flex: 1,
@@ -469,6 +469,7 @@ import COLORS from "../../utils/Colors";
 import Popup from "../../components/PopUp";
 import { launchImageLibrary } from "react-native-image-picker";
 import Icon from "react-native-vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
@@ -513,86 +514,98 @@ export default function SignupScreen({ navigation }) {
       }
     );
   };
-
-  // 🧠 Signup logic
+  
   const handleSignup = async () => {
-    // ✅ Validation
-    if (
-      !fullName ||
-      !emailOrPhone ||
-      !password ||
-      !confirmPassword ||
-      !dob ||
-      !address ||
-      !gender
-    ) {
-      setPopupMessage("All fields are required.");
-      setPopupVisible(true);
-      return;
-    }
+  if (
+    !fullName ||
+    !emailOrPhone ||
+    !password ||
+    !confirmPassword ||
+    !dob ||
+    !address ||
+    !gender
+  ) {
+    setPopupMessage("All fields are required.");
+    setPopupVisible(true);
+    return;
+  }
 
-    const nameParts = fullName.trim().split(/\s+/);
-    if (nameParts.length < 2) {
-      setPopupMessage("Please enter your full name (first and last).");
-      setPopupVisible(true);
-      return;
-    }
+  const nameParts = fullName.trim().split(/\s+/);
+  if (nameParts.length < 2) {
+    setPopupMessage("Please enter your full name (first and last).");
+    setPopupVisible(true);
+    return;
+  }
 
-    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
-      setPopupMessage("Please enter a valid Gmail address.");
-      setPopupVisible(true);
-      return;
-    }
+  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
+    setPopupMessage("Please enter a valid Gmail address.");
+    setPopupVisible(true);
+    return;
+  }
 
-    if (password.length < 8) {
-      setPopupMessage("Password must be at least 8 characters long.");
-      setPopupVisible(true);
-      return;
-    }
+  if (password.length < 8) {
+    setPopupMessage("Password must be at least 8 characters long.");
+    setPopupVisible(true);
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      setPopupMessage("Passwords do not match.");
-      setPopupVisible(true);
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await fetch("https://naushad.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName,
-          email: emailOrPhone,
-          password,
-          confirmPassword,
-          dob,
-          address,
-          gender,
-          referal,
-          photo,
-        }),
+  if (password !== confirmPassword) {
+    setPopupMessage("Passwords do not match.");
+    setPopupVisible(true);
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // ✅ Prepare FormData
+    const formData = new FormData();
+    formData.append("fullName", fullName);
+    formData.append("email", emailOrPhone);
+    formData.append("password", password);
+    formData.append("confirmPassword", confirmPassword);
+    formData.append("dob", dob);
+    formData.append("address", address);
+    formData.append("gender", gender);
+    formData.append("referal", referal);
+
+    // ✅ Append image only if selected
+    if (photo && photo.uri) {
+      formData.append("photo", {
+        uri: photo.uri,
+        type: "image/jpeg", // or "image/png"
+        name: "profile.jpg",
       });
+    }
 
-      const data = await response.json();
-      setLoading(false);
-      console.log("Signup Response:", data);
+    const response = await fetch("https://naushad.onrender.com/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      body: formData,
+    });
 
-      if (response.ok) {
-        setPopupMessage("Signup successful! Please sign in.");
-        setNextRoute({ name: "Signin" });
-        setPopupVisible(true);
-      } else {
-        setPopupMessage(data.message || "Signup failed. Try again.");
-        setPopupVisible(true);
-      }
-    } catch (error) {
-      console.log("Signup Error:", error);
-      setLoading(false);
-      setPopupMessage("Unable to connect to the server.");
+    const data = await response.json();
+    setLoading(false);
+    console.log("Signup Response:", data);
+
+    if (response.ok) {
+      await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+      setPopupMessage("Signup successful! Please sign in.");
+      setNextRoute({ name: "Signin" });
+      setPopupVisible(true);
+    } else {
+      setPopupMessage(data.message || "Signup failed. Try again.");
       setPopupVisible(true);
     }
-  };
-
+  } catch (error) {
+    console.log("Signup Error:", error);
+    setLoading(false);
+    setPopupMessage("Unable to connect to the server.");
+    setPopupVisible(true);
+  }
+};
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) navigation.navigate(nextRoute.name);

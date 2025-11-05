@@ -206,8 +206,8 @@ const styles = StyleSheet.create({
   nxt: {
     marginHorizontal: wp('2%'),
     marginTop: hp('2%'),
-    width: '30%',
-    alignSelf: 'flex-end'
+    width: '93%',
+    alignSelf : 'center'
   },
   nxtButton: {
     paddingVertical: hp('1%'),

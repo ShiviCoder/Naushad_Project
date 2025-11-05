@@ -83,6 +83,9 @@ export default function ServicesScreen() {
       >
         {/* Header */}
         <Head title="Home Services" />
+        <Text style={styles.Head2}>
+          Services only for older clients
+        </Text>
 
         {/* Services List */}
         <View style={styles.servicesContainer}>
@@ -95,7 +98,7 @@ export default function ServicesScreen() {
                 <Text style={styles.cardDesc}>{item.description}</Text>
                 <TouchableOpacity
                   style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
-                   onPress={() => navigation.navigate('ServiceDetails', { item })}  
+                  onPress={() => navigation.navigate('ServiceDetails', { item })}
                 >
                   <Text style={styles.bookBtnText}>Book now</Text>
                 </TouchableOpacity>
@@ -115,7 +118,7 @@ const styles = StyleSheet.create({
   servicesContainer: {
     paddingHorizontal: wp("4%"),
     paddingVertical: hp("2%"),
-  
+
   },
   card: {
     flexDirection: "row",
@@ -168,4 +171,12 @@ const styles = StyleSheet.create({
     fontSize: hp("1.6%"),
     fontWeight: "bold",
   },
+  Head2: {
+    fontSize: wp('5%'),
+    fontWeight: 'bold',
+    color: COLORS.primary,      
+    marginTop: hp('0.7%'),
+    textAlign: 'center',
+    opacity: 0.9,
+  }
 });

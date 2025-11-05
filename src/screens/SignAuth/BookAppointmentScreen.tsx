@@ -9,7 +9,7 @@ import {
 import React, { useState } from 'react';
 import Calender from '../../components/Calender';
 import TimeSelect from '../../components/TImeSelect';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import BottomNavbar from '../../components/BottomNavbar';
@@ -51,22 +51,22 @@ export default function BookAppointmentScreen() {
 
   // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
-  const formattedDate = selectedDate ? selectedDate.toISOString() : null; // ✅ make it serializable
+    const formattedDate = selectedDate ? selectedDate.toISOString() : null; // ✅ make it serializable
 
-  if (route.params?.from === 'bottomBar') {
-    navigation.navigate('BookAppoinment2', {
-      selectedDate: formattedDate,
-      selectedTime,
-    });
-  } else {
-    navigation.navigate('PaymentScreen', {
-      selectedDate: formattedDate,
-      selectedTime,
-    });
-  }
+    if (route.params?.from === 'bottomBar') {
+      navigation.navigate('BookAppoinment2', {
+        selectedDate: formattedDate,
+        selectedTime,
+      });
+    } else {
+      navigation.navigate('PaymentScreen', {
+        selectedDate: formattedDate,
+        selectedTime,
+      });
+    }
 
-  console.log('📅', formattedDate, '🕒', selectedTime);
-};
+    console.log('📅', formattedDate, '🕒', selectedTime);
+  };
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
@@ -99,7 +99,12 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.calenderContainer}>
             {/* Removed any onMonthChange prop */}
-            <Calender  onDateSelect={setSelectedDate}/>
+            <Calender
+              onDateSelect={(date) => {
+                console.log("📅 Received from Calender:", date.toDateString());
+                setSelectedDate(date);
+              }}
+            />
           </View>
         );
       case 'selectTime':
@@ -190,13 +195,14 @@ const styles = StyleSheet.create({
   nxt: {
     marginHorizontal: wp('2%'),
     marginTop: hp('2%'),
-    width: '30%',
-    alignSelf: 'flex-end'
+    width: '93%',
+    alignSelf: 'center'
+
   },
   nxtButton: {
     paddingVertical: hp('1%'),
     paddingHorizontal: wp('4%'),
-    borderRadius: wp('2%')
+    borderRadius: wp('2%'),
   },
   nxtText: {
     fontSize: wp('5%'),

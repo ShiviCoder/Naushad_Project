@@ -198,18 +198,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('5%'),
   },
   label: {
-    fontSize: wp('4%'),
-    fontWeight: '500',
-    marginBottom: hp('0.5%'),
+    fontSize: wp("3.6%"),
+    fontWeight: "600",
+    marginBottom: hp("1%"),
+    marginTop: hp("0.5%"),
+    color: "#000",
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: wp('3%'),
-    paddingVertical: hp('1%'),
-    fontSize: wp('3.5%'),
-    marginBottom: hp('2%'),
+    height: hp("6%"),
+    borderWidth: 0.5,
+    borderColor: COLORS.primary,
+    borderRadius: wp("2%"),
+    paddingHorizontal: wp("4%"),
+    fontSize: wp("3.5%"),
+    backgroundColor: "#fff",
+    color: "black",
   },
   radioContainer: {
     flexDirection: 'row',
@@ -246,5 +249,4 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
-
 export default MyProfile;

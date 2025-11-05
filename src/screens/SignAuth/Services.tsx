@@ -35,6 +35,7 @@ export default function ServicesScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { theme } = useTheme();
   const [storySelect, setStorySelect] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null); // 🟢 new
   const [services, setServices] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
@@ -50,6 +51,7 @@ export default function ServicesScreen() {
       });
       const data = await res.json();
       setServices(data.data || []);
+      console.log("Service screen data : ",data)
     } catch (err) {
       console.log('Fetch error:', err);
     }
@@ -58,125 +60,134 @@ export default function ServicesScreen() {
   useEffect(() => {
     fetchServices();
   }, []);
-
+  
   const onRefresh = async () => {
     setRefreshing(true);
-
-    // Pull down animation
-    Animated.spring(translateY, {
-      toValue: 60,
-      useNativeDriver: true,
-    }).start();
-
+    Animated.spring(translateY, { toValue: 60, useNativeDriver: true }).start();
     await fetchServices();
-    console.log("Fetch data on refresh")
-
-    // Push back up animation
-    Animated.timing(translateY, {
-      toValue: 0,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-
+    Animated.timing(translateY, { toValue: 0, duration: 400, useNativeDriver: true }).start();
     setRefreshing(false);
   };
 
+  // 🟢 Filtered services based on selected category
+ const filteredServices = selectedCategory
+  ? services.filter(srv =>
+      srv.title?.toLowerCase().includes(selectedCategory.toLowerCase())
+    )
+  : services;
+
   return (
-     
-  <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-    <Animated.ScrollView
-      showsVerticalScrollIndicator={false}
-       style={{ transform: [{ translateY }] }}  
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[COLORS.primary]}
-          tintColor={COLORS.primary}
-        />
-      }
-      contentContainerStyle={{
-        paddingBottom: hp('4%'),
-      }}
-    >
-      {/* 🔹 Header (moves with scroll & refresh) */}
-      <Head title="Services" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ transform: [{ translateY }] }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
+        contentContainerStyle={{ paddingBottom: hp('4%') }}
+      >
+        {/* 🔹 Header */}
+        <Head title="Services" />
 
-      {/* 🔹 Categories Section */}
-      <FlatList
-        horizontal
-        data={categories}
-        keyExtractor={(item, index) => index.toString()}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingVertical: hp('2%'),
-          paddingHorizontal: wp('3%'),
-        }}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            style={styles.categoryItem}
-            onPress={() => setStorySelect(index)}
-          >
-            <View
-              style={[
-                styles.categoryCircle,
-                {
-                  borderColor:
-                    storySelect === index ? COLORS.primary : 'transparent',
-                  borderWidth: storySelect === index ? 2 : 0,
-                },
-              ]}
+        {/* 🔹 Categories */}
+        <FlatList
+          horizontal
+          data={categories}
+          keyExtractor={(item, index) => index.toString()}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingVertical: hp('2%'),
+            paddingHorizontal: wp('3%'),
+          }}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              style={styles.categoryItem}
+              onPress={() => {
+                setStorySelect(index);
+                setSelectedCategory(item.name); // 🟢 set category
+              }}
             >
-              <Image source={item.image} style={styles.categoryImage} />
-            </View>
-            <Text style={[styles.categoryText, { color: theme.textPrimary }]}>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-
-      {/* 🔹 Services List */}
-      <FlatList
-        data={services}
-        keyExtractor={(item, index) => index.toString()}
-        scrollEnabled={false}
-        renderItem={({ item }) => (
-          <View style={[styles.MainView, { backgroundColor: theme.card }]}>
-            <View style={styles.imgContainer}>
-              <Image source={{ uri: item.imageUrl }} style={styles.sectionImage} />
-            </View>
-            <View style={styles.rightContainer}>
-              <Text style={[styles.mainText, { color: theme.textPrimary }]}>
-                {item.title}
-              </Text>
-              <Text style={[styles.price, { color: theme.textSecondary }]}>
-                ₹{item.price}
-              </Text>
-              <Text style={[styles.desc, { color: theme.textSecondary }]}>
-                {item.serviceName}
-              </Text>
-              <TouchableOpacity
-                style={[styles.bookButton, { backgroundColor: COLORS.primary }]}
-                onPress={() => navigation.navigate('ServiceDetails', { item })}
+              <View
+                style={[
+                  styles.categoryCircle,
+                  {
+                    borderColor:
+                      storySelect === index ? COLORS.primary : 'transparent',
+                    borderWidth: storySelect === index ? 2 : 0,
+                  },
+                ]}
               >
-                <Text style={styles.bookButtonText}>Book Now</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+                <Image source={item.image} style={styles.categoryImage} />
+              </View>
+              <Text style={[styles.categoryText, { color: theme.textPrimary }]}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+
+        {/* 🔹 Services */}
+        {filteredServices.length > 0 ? (
+          <FlatList
+            data={filteredServices}
+            keyExtractor={(item, index) => index.toString()}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <View style={[styles.MainView, { backgroundColor: theme.card }]}>
+                <View style={styles.imgContainer}>
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.sectionImage}
+                  />
+                </View>
+                <View style={styles.rightContainer}>
+                  <Text style={[styles.mainText, { color: theme.textPrimary }]}>
+                    {item.title}
+                  </Text>
+                  <Text style={[styles.price, { color: theme.textSecondary }]}>
+                    ₹{item.price}
+                  </Text>
+                  <Text style={[styles.desc, { color: theme.textSecondary }]}>
+                    {item.serviceName}
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.bookButton,
+                      { backgroundColor: COLORS.primary },
+                    ]}
+                    onPress={() =>
+                      navigation.navigate('ServiceDetails', { item })
+                    }
+                  >
+                    <Text style={styles.bookButtonText}>Book Now</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          />
+        ) : (
+          <Text
+            style={{
+              textAlign: 'center',
+              color: theme.textSecondary,
+              marginTop: hp('2%'),
+            }}
+          >
+            No services found for {selectedCategory || 'this category'}.
+          </Text>
         )}
-      />
-    </Animated.ScrollView>
-  </SafeAreaView>
-);
-
-
+      </Animated.ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
-  // 🔹 Categories
   categoryItem: {
     alignItems: 'center',
     marginRight: wp('5%'),
@@ -187,7 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: wp('9%'),
     justifyContent: 'center',
     alignItems: 'center',
-    padding : wp("1%"),
+    padding: wp('1%'),
     overflow: 'hidden',
   },
   categoryImage: {
@@ -202,8 +213,6 @@ const styles = StyleSheet.create({
     marginTop: hp('0.5%'),
     textAlign: 'center',
   },
-
-  // 🔹 Services
   MainView: {
     borderRadius: wp('3%'),
     paddingHorizontal: wp('2%'),
@@ -257,12 +266,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Poppins-Medium',
   },
-  fixedHeader: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 10,
-  backgroundColor: '#fff',
-},
 });
