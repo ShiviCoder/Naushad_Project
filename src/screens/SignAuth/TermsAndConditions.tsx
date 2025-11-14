@@ -23,8 +23,16 @@ const TermsAndConditions = () => {
   const [terms, setTerms] = useState<TermsDoc | undefined>();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const token =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+
+   const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
+  // const token =
+  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
   const loadLocalAcceptance = useCallback(async (remote?: TermsDoc) => {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY); // { termsId, updatedAt, accepted }
@@ -45,6 +53,7 @@ const TermsAndConditions = () => {
   const fetchTerms = useCallback(async () => {
     try {
       setLoading(true);
+      const token = await getToken();
       const response = await fetch('https://naushad.onrender.com/api/terms-and-conditions', {
         headers: {
           'Content-Type': 'application/json',
@@ -55,6 +64,7 @@ const TermsAndConditions = () => {
       const doc: TermsDoc | undefined = data?.data;
       setTerms(doc);
       await loadLocalAcceptance(doc);
+      console.log('Terms token : ',token)
       // console.log('Terms Data:', data);
     } catch (err) {
       // console.log('Error loading:', err);
@@ -67,6 +77,7 @@ const TermsAndConditions = () => {
     fetchTerms();
   }, [fetchTerms]);
   const persistLocalAcceptance = async (doc: TermsDoc, value: boolean) => {
+     const token = await getToken();
     try {
       const payload = JSON.stringify({
         termsId: doc._id,
@@ -79,6 +90,7 @@ const TermsAndConditions = () => {
     }
   };
   const submitAcceptance = async () => {
+     const token = await getToken();
     if (!terms) return;
     try {
       setSubmitting(true);

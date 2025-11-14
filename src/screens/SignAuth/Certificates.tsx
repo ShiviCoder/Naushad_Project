@@ -22,8 +22,10 @@ const Certificates = () => {
 
   const fetchCertificates = async () => {
     try {
-      const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      // const token =
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+
+      const token = await getToken();
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
@@ -33,6 +35,7 @@ const Certificates = () => {
       });
       const json = await response.json();
       console.log('Certificate Response:', json);
+      console.log('Certificate tokens ',token)
       setCertificates(json.data);
     } catch (error) {
       console.error('Error fetching certificates:', error);

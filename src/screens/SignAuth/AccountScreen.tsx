@@ -62,7 +62,7 @@ const AccountScreen = () => {
               source={
                 user?.photo?.uri
                   ? { uri: user.photo.uri }
-                  : require('../../assets/images/user-img.png')
+                  : require('../../assets/user.png')
               }
               style={styles.userImg}
               resizeMode="contain"
@@ -74,9 +74,11 @@ const AccountScreen = () => {
               {user
                 ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
                 : 'User Name'}
+                {/* Anchal Jain */}
             </Text>
             <Text style={[styles.email, { color: theme.textPrimary }]}>
               {user?.email || 'user@example.com'}
+              {/* anchal11@gmail.com */}
             </Text>
           </View>
         </View>
@@ -170,8 +172,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imgSection: {
-    width: wp('14%'),
-    height: wp('14%'),
+    width: wp('15%'),
+    height: wp('15%'),
     borderRadius: wp('7%'),
     overflow: 'hidden',
   },

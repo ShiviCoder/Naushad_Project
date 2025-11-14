@@ -211,86 +211,89 @@ const RadioButton = ({ type = "status", selected, onSelect, labels = [] }) => {
   }
 
   if (type === "gender") {
-    const [isMale, setIsMale] = useState(selected === "Male");
-    const Offset = useState(new Animated.Value(isMale ? 0 : 1))[0];
+  // Normalize selected value to lowercase
+  const [isMale, setIsMale] = useState(
+    selected?.toLowerCase() === "male"
+  );
 
-    const thumbSize = wp("3.5%");
-    const trackWidth = wp("12%");
-    const trackHeight = hp("3%");
-    const padding = wp("1%");
+  const Offset = useState(new Animated.Value(isMale ? 0 : 1))[0];
 
+  const thumbSize = wp("3.5%");
+  const trackWidth = wp("12%");
+  const trackHeight = hp("3%");
+  const padding = wp("1%");
 
-    const translateX = Offset.interpolate({
-      inputRange: [0, 1],
-      outputRange: [padding, trackWidth - thumbSize - padding * 1.5],
-    });
+  const translateX = Offset.interpolate({
+    inputRange: [0, 1],
+    outputRange: [padding, trackWidth - thumbSize - padding * 1.5],
+  });
 
-    const toggleGender = () => {
-      const newValue = !isMale;
-      setIsMale(newValue);
+  const toggleGender = () => {
+    const newValue = !isMale;
+    setIsMale(newValue);
 
-      Animated.timing(Offset, {
-        toValue: newValue ? 0 : 1,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
+    Animated.timing(Offset, {
+      toValue: newValue ? 0 : 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
 
-      if (onSelect) onSelect(newValue ? "Male" : "Female");
-    };
+    if (onSelect) onSelect(newValue ? "male" : "female"); // lowercase for API
+  };
 
-    const maleColor = COLORS.primary;
-    const femaleColor = COLORS.primary;
+  const maleColor = COLORS.primary;
+  const femaleColor = COLORS.primary;
 
-    return (
-      <View style={styles.genderToggleContainer}>
-        <Text
+  return (
+    <View style={styles.genderToggleContainer}>
+      <Text
+        style={[
+          styles.genderLabel,
+          { color: isMale ? maleColor : theme.textPrimary },
+        ]}
+      >
+        Male
+      </Text>
+
+      <TouchableOpacity activeOpacity={0.8} onPress={toggleGender}>
+        <View
           style={[
-            styles.genderLabel,
-            { color: isMale ? maleColor : theme.textPrimary },
+            styles.track,
+            {
+              width: trackWidth,
+              height: trackHeight,
+              backgroundColor: isMale ? theme.background : COLORS.primary,
+              borderColor: COLORS.primary,
+              borderWidth: 1.5,
+            },
           ]}
         >
-          Male
-        </Text>
-
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleGender}>
-          <View
+          <Animated.View
             style={[
-              styles.track,
+              styles.thumb,
               {
-                width: trackWidth,
-                height: trackHeight,
-                backgroundColor: isMale ? theme.background : COLORS.primary,
-                borderColor: COLORS.primary,
-                borderWidth: 1.5,
+                width: thumbSize,
+                height: thumbSize,
+                borderRadius: thumbSize / 1,
+                transform: [{ translateX: translateX }],
+                backgroundColor: isMale ? COLORS.primary : theme.background,
               },
             ]}
-          >
-            <Animated.View
-              style={[
-                styles.thumb,
-                {
-                  width: thumbSize,
-                  height: thumbSize,
-                  borderRadius: thumbSize / 1,
-                  transform: [{ translateX: translateX }],
-                  backgroundColor: isMale ? COLORS.primary : theme.background,
-                },
-              ]}
-            />
-          </View>
-        </TouchableOpacity>
-        <Text
-          style={[
-            styles.genderLabel,
-            { color: !isMale ? femaleColor : theme.textPrimary },
-          ]}
-        >
-          Female
-        </Text>
-      </View>
-    );
-  }
+          />
+        </View>
+      </TouchableOpacity>
 
+      <Text
+        style={[
+          styles.genderLabel,
+          { color: !isMale ? femaleColor : theme.textPrimary },
+        ]}
+      >
+        Female
+      </Text>
+    </View>
+  );
+}
   return null;
 };
 

@@ -13,6 +13,7 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import COLORS from '../../utils/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const YoutubeComponent = () => {
   const [videos, setVideos] = useState([]);
@@ -21,10 +22,19 @@ const YoutubeComponent = () => {
   const translateY = useRef(new Animated.Value(0)).current;
   const { theme } = useTheme();
 
+ const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
+  
   const fetchVideos = async () => {
     try {
-      const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      // const token =
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
 
       const res = await fetch('https://naushad.onrender.com/api/youtube', {
         method: 'GET',
@@ -37,6 +47,7 @@ const YoutubeComponent = () => {
       const data = await res.json();
       setVideos(data);
       console.log('✅ Youtube Data:', data);
+      console.log("Youtube token : ",token)
     } catch (err) {
       console.log('❌ Error loading:', err);
     } finally {

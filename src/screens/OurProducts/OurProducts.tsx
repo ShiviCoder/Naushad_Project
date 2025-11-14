@@ -12,17 +12,25 @@ import { useLikedProducts } from '../../context/LikedProductsContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OurProducts = () => {
   const { likedProducts, toggleLike } = useLikedProducts();
   const [products, setProducts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+ const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
 
   const fetchProducts = async () => {
     try {
-      const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // your token here
+      // const token =
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // your token here
+      const token = await getToken();
       const res = await fetch('https://naushad.onrender.com/api/products', {
         method: 'GET',
         headers: {
@@ -32,6 +40,7 @@ const OurProducts = () => {
       });
       const data = await res.json();
       setProducts(data.data);
+      console.log("Product token",token)
     } catch (err) {
       console.log('Error fetching products:', err);
     }

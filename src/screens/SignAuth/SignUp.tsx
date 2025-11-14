@@ -514,98 +514,99 @@ export default function SignupScreen({ navigation }) {
       }
     );
   };
-  
+
   const handleSignup = async () => {
-  if (
-    !fullName ||
-    !emailOrPhone ||
-    !password ||
-    !confirmPassword ||
-    !dob ||
-    !address ||
-    !gender
-  ) {
-    setPopupMessage("All fields are required.");
-    setPopupVisible(true);
-    return;
-  }
+    if (
+      !fullName ||
+      !emailOrPhone ||
+      !password ||
+      !confirmPassword ||
+      !dob ||
+      !address ||
+      !gender
+    ) {
+      setPopupMessage("All fields are required.");
+      setPopupVisible(true);
+      return;
+    }
 
-  const nameParts = fullName.trim().split(/\s+/);
-  if (nameParts.length < 2) {
-    setPopupMessage("Please enter your full name (first and last).");
-    setPopupVisible(true);
-    return;
-  }
+    const nameParts = fullName.trim().split(/\s+/);
+    if (nameParts.length < 2) {
+      setPopupMessage("Please enter your full name (first and last).");
+      setPopupVisible(true);
+      return;
+    }
 
-  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
-    setPopupMessage("Please enter a valid Gmail address.");
-    setPopupVisible(true);
-    return;
-  }
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
+      setPopupMessage("Please enter a valid Gmail address.");
+      setPopupVisible(true);
+      return;
+    }
 
-  if (password.length < 8) {
-    setPopupMessage("Password must be at least 8 characters long.");
-    setPopupVisible(true);
-    return;
-  }
+    if (password.length < 8) {
+      setPopupMessage("Password must be at least 8 characters long.");
+      setPopupVisible(true);
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    setPopupMessage("Passwords do not match.");
-    setPopupVisible(true);
-    return;
-  }
+    if (password !== confirmPassword) {
+      setPopupMessage("Passwords do not match.");
+      setPopupVisible(true);
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    // ✅ Prepare FormData
-    const formData = new FormData();
-    formData.append("fullName", fullName);
-    formData.append("email", emailOrPhone);
-    formData.append("password", password);
-    formData.append("confirmPassword", confirmPassword);
-    formData.append("dob", dob);
-    formData.append("address", address);
-    formData.append("gender", gender);
-    formData.append("referal", referal);
+    try {
+      // ✅ Prepare FormData
+      const formData = new FormData();
+      formData.append("fullName", fullName);
+      formData.append("email", emailOrPhone);
+      formData.append("password", password);
+      formData.append("confirmPassword", confirmPassword);
+      formData.append("dob", dob);
+      formData.append("address", address);
+      formData.append("gender", gender);
+      formData.append("referal", referal);
 
-    // ✅ Append image only if selected
-    if (photo && photo.uri) {
-      formData.append("photo", {
-        uri: photo.uri,
-        type: "image/jpeg", // or "image/png"
-        name: "profile.jpg",
+      // ✅ Append image only if selected
+      if (photo && photo.uri) {
+        formData.append("avatar", {
+          uri: photo.uri,
+          type: "image/jpeg",
+          name: "profile.jpg",
+        });
+      }
+
+      const response = await fetch("https://naushad.onrender.com/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
       });
-    }
 
-    const response = await fetch("https://naushad.onrender.com/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      body: formData,
-    });
+      const data = await response.json();
+      setLoading(false);
+      console.log("Signup Response:", data);
 
-    const data = await response.json();
-    setLoading(false);
-    console.log("Signup Response:", data);
-
-    if (response.ok) {
-      await AsyncStorage.setItem("userData", JSON.stringify(data.user));
-      setPopupMessage("Signup successful! Please sign in.");
-      setNextRoute({ name: "Signin" });
-      setPopupVisible(true);
-    } else {
-      setPopupMessage(data.message || "Signup failed. Try again.");
+      if (response.ok) {
+        await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+        await AsyncStorage.setItem("userId", data.user._id);
+        setPopupMessage("Signup successful! Please sign in.");
+        setNextRoute({ name: "Signin" });
+        setPopupVisible(true);
+      } else {
+        setPopupMessage(data.message || "Signup failed. Try again.");
+        setPopupVisible(true);
+      }
+    } catch (error) {
+      console.log("Signup Error:", error);
+      setLoading(false);
+      setPopupMessage("Unable to connect to the server.");
       setPopupVisible(true);
     }
-  } catch (error) {
-    console.log("Signup Error:", error);
-    setLoading(false);
-    setPopupMessage("Unable to connect to the server.");
-    setPopupVisible(true);
-  }
-};
+  };
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) navigation.navigate(nextRoute.name);
@@ -706,7 +707,7 @@ export default function SignupScreen({ navigation }) {
           <TouchableOpacity onPress={handleChoosePhoto}>
             <Image
               source={
-                photo ? photo : require("../../assets/user-img.png")
+                photo ? photo : require("../../assets/user.png")
               }
               style={styles.profileImage}
             />

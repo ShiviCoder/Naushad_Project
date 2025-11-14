@@ -4,13 +4,24 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PrivacyPolicy = () => {
   const { theme } = useTheme();
   const [privacy,setPrivacy] = useState();
+ 
+   const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
+
  const fetchPrivacy = async () => {
     try {
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg'
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg'
+      const token = await getToken();
       const res = await fetch("https://naushad.onrender.com/api/privacy-policy", {
         method: "GET",
         headers: {

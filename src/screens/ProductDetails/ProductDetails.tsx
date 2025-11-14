@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native'
 import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,9 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Popup from '../../components/PopUp';
+
 
 type RootStackParamList = {
     OurProducts: undefined;
@@ -23,6 +26,14 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
     const { product } = route.params;
     const [count, setCount] = useState(1);
     const { theme } = useTheme();
+     const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+
+   const showPopup = (message: string) => {
+    setPopupMessage(message);
+    setPopupVisible(true);
+  };
+
 
     const getImageSource = (img: any) => {
         if (!img) return null;
@@ -42,7 +53,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                 <Image style={styles.image} source={displayImage} />
                 <View style={styles.detailContain}>
                     <Text style={[styles.prodName, { color: theme.dark ? '#fff' : '#000' }]}>{product.name}</Text>
-                    <Text style={[styles.prodPrice, { color: theme.dark ? '#fff' : '#000' }]}>{product.price}</Text>
+                    <Text style={[styles.prodPrice, { color: theme.dark ? '#fff' : '#000' }]}>₹{product.price}</Text>
                     <View style={styles.ratingContain}>
                         <View style={styles.starContain}>
                             {[...Array(5)].map((_, i) => (
@@ -70,16 +81,46 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                 </View>
 
                 <View style={styles.btnContain}>
-                    <TouchableOpacity
-                        style={[styles.cartButton, { borderColor: theme.dark ? '#fff' : '#000' }]}
-                        onPress={() => {
-                            navigation.navigate('Cart', {
-                                product: { ...product, qty: count, cartImage: product.image }
-                            });
-                        }}
-                    >
-                    <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
-                    </TouchableOpacity>
+                  <TouchableOpacity
+            style={[styles.cartButton, { borderColor: theme.dark ? '#fff' : '#000' }]}
+            onPress={async () => {
+              const userId = await AsyncStorage.getItem('userId');
+              try {
+                const response = await fetch('https://naushad.onrender.com/api/cart', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    userId: userId,
+                    productId: product._id || product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: Array.isArray(product.image) ? product.image[0] : product.image,
+                    quantity: count,
+                  }),
+                });
+
+                const res = await response.json();
+                console.log('API Response:', res);
+
+                if (response.ok && res.success) {
+                  showPopup('Product added to cart!');
+                  setTimeout(() => {
+                    setPopupVisible(false);
+                    navigation.navigate('Cart');
+                  }, 1500);
+                } else {
+                  showPopup(res.message || '❌ Something went wrong');
+                }
+              } catch (error) {
+                console.log('Error:', error);
+                showPopup('❌ Failed to add product to cart');
+              }
+            }}
+          >
+            <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
+          </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() =>
                             navigation.navigate('PaymentScreen', {
@@ -95,8 +136,13 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </SafeAreaView>
 
+            <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={() => setPopupVisible(false)}
+      />
+        </SafeAreaView>
     )
 }
 

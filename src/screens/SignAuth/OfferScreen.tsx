@@ -17,6 +17,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OfferScreen = () => {
   const { theme } = useTheme();
@@ -25,10 +26,19 @@ const OfferScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
 
+ const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
+
   const fetchOffers = async () => {
     try {
-      const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      // const token =
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = await getToken();
 
       const response = await fetch('https://naushad.onrender.com/api/offers', {
         method: 'GET',
@@ -41,6 +51,7 @@ const OfferScreen = () => {
       const json = await response.json();
       setOffers(json.data || []);
       console.log('Special offer data:', json);
+      console.log("Special offers token ",token)
     } catch (error) {
       console.log('special offer error:', error);
     }

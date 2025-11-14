@@ -15,6 +15,7 @@ import Head from "../../components/Head";
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
 import { useTheme } from "../../context/ThemeContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ServicesScreen() {
   const navigation = useNavigation();
@@ -23,19 +24,27 @@ export default function ServicesScreen() {
   const [services, setServices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+ const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
 
   const fetchHomeServices = async () => {
     try {
+      const token = await getToken();
       const response = await fetch("https://naushad.onrender.com/api/home-services/", {
         method: "GET",
         headers: {
           Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE",
+            `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
       const json = await response.json();
       console.log("Home services:", json);
+      console.log('Home service token : ',token)
       setServices(json.data);
     } catch (error) {
       console.log("Home services error:", error);

@@ -98,7 +98,7 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
 
 
 const HomeScreen = () => {
-  const [gender, setGender] = useState<'Male' | 'Female'>('Male');
+  const [gender, setGender] = useState("male");
   const navigation = useNavigation();
   const { theme } = useTheme(); // ✅ get current theme
   // Fixed Navigation handler function
@@ -136,7 +136,6 @@ const HomeScreen = () => {
 
   const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
-    console.log('API Token: ', token);
     console.log("token accept")
     return token;
   }
@@ -145,7 +144,6 @@ const HomeScreen = () => {
     try {
       await Promise.all([
         fetchServices(),
-        fetchProductPackages(),
         fetchHomeServices(),
         fetchCertificates(),
         fetchAboutData(),
@@ -171,7 +169,7 @@ const HomeScreen = () => {
       useNativeDriver: true,
     }).start();
 
-    await fetchAllData(); // wait for APIs
+    await fetchAllData();
 
     Animated.timing(translateY, {
       toValue: 0,
@@ -287,8 +285,8 @@ const HomeScreen = () => {
   const [services, setServices] = useState([]);
   const fetchServices = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/ourservice', {
         method: "GET",
         headers: {
@@ -312,7 +310,8 @@ const HomeScreen = () => {
   const [products, setProducts] = useState([]);
   const fetchProducts = async () => {
     try {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+      const token = await getToken();
 
       const res = await fetch("https://naushad.onrender.com/api/products", {
         method: "GET",
@@ -334,7 +333,8 @@ const HomeScreen = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const fetchVideos = async () => {
     try {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+      const token = await getToken();
 
       const res = await fetch("https://naushad.onrender.com/api/youtube", {
         method: "GET",
@@ -359,8 +359,8 @@ const HomeScreen = () => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const fetchCertificates = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
@@ -496,8 +496,8 @@ const HomeScreen = () => {
   const [packages, setPackages] = useState([]);
   const fetchPackages = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/packages', {
         method: 'GET',
         headers: {
@@ -516,27 +516,48 @@ const HomeScreen = () => {
 
 
   // Product packages (small horizontal cards)
-  const [productPackages, setProductPackage] = useState([]);
-  const fetchProductPackages = async () => {
+  const [productPackages, setProductPackages] = useState([]);
+  const fetchProductPackages = async (selectedGender?: string) => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
-      const response = await fetch('https://naushad.onrender.com/api/product-packages', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const json = await response.json();
-      console.log("Product package response : ", json);
-      console.log('Product package token : ', token)
-      setProductPackage(json.data);
-    } catch (err) {
-      console.log("Product package error : ", err)
-    }
-  }
+      const token = await getToken();
+      if (!token) return;
 
+      const g = (selectedGender || gender || "male").toLowerCase();
+
+      const response = await fetch(
+        `https://naushad.onrender.com/api/product-packages?gender=${g}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const json = await response.json();
+      console.log("📦 Product package response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // FRONTEND fallback filter because backend has mixed case ("Male", "")
+      data = data.filter(
+        (item) =>
+          item.gender?.toLowerCase() === g // match lowercase
+      );
+
+      setProductPackages(data);
+    } catch (err) {
+      console.log("🔥 Product package error:", err);
+    }
+  };
+
+  // Fetch automatically when gender changes
+  useEffect(() => {
+    fetchProductPackages(gender);
+  }, [gender]);
 
 
   // const offers = [
@@ -574,11 +595,12 @@ const HomeScreen = () => {
   //   },
   // ];
 
+
   const [offers, setOffers] = useState([]);
   const fetchSpecialOffers = async () => {
     try {
-      //const token =await  getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/offers', {
         method: 'GET',
         headers: {
@@ -598,8 +620,8 @@ const HomeScreen = () => {
   const [homeServices, setHomeService] = useState([]);
   const fetchHomeServices = async () => {
     try {
-      //const token =await  getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/home-services/', {
         method: 'GET',
         headers: {
@@ -621,8 +643,8 @@ const HomeScreen = () => {
   const [aboutData, setAboutData] = useState([]);
   const fetchAboutData = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/about-salon', {
         method: 'GET',
         headers: {
@@ -650,7 +672,7 @@ const HomeScreen = () => {
           contentContainerStyle={{ paddingBottom: hp('10%') }}
         >
           {/* Fixed Header */}
-          <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}]}>
+          <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
             {/* Left Section */}
             <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
               <TouchableOpacity>
@@ -666,15 +688,16 @@ const HomeScreen = () => {
                   ellipsizeMode="tail"
                 >
                   {user
-                ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
-                : 'User Name'}
+                    ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
+                    : 'User Name'}
+                  {/* Hi Anchal ! */}
                 </Text>
                 <Text style={[styles.locationText, { color: theme.textPrimary }]}>
-                 Indore
+                  Indore
                 </Text>
               </View>
             </View>
-            
+
             {/* Center Logo */}
             <Image
               source={require('../../assets/images/logo.png')}
@@ -720,19 +743,35 @@ const HomeScreen = () => {
             </View>
           </View>
 
-
-          <View style={styles.genderToggleContainer}>
-            {/* Label Row */}
+          {/* <View style={styles.genderToggleContainer}>
+            {/* Label Row 
             <RadioButton
               type="gender"
-              selected={gender}
-              onSelect={(value) => setGender(value)}
+              selected={gender}           // Male / female / Male / Female etc.
+              onSelect={(value) => {
+                setGender(value);         // value as-is
+                fetchProductPackages(value); // API call with exact value
+              }}
               labels={["Male", "Female"]}
+            /> 
+             </View>*/}
+          <View style={styles.genderToggleContainer}>
+            <RadioButton
+              type="gender"
+              selected={gender}                  // "male" or "female"
+              onSelect={(value) => {
+                const formatted = value.toLowerCase();
+                setGender(formatted);            // always lowercase
+                fetchProductPackages(formatted); // direct API call
+              }}
+              labels={["Male", "Female"]}        // UI only
+              values={["male", "female"]}        // actual data
             />
-            
-
           </View>
-          
+
+
+
+
           {/* Search Bar with filter */}
           <View style={styles.searchFilContain}>
             {/* Search Bar */}
@@ -795,7 +834,7 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>
                 <Image
-                  source={{ uri: item.imageUrl}}
+                  source={{ uri: item.imageUrl }}
                   style={styles.serviceImage}
                 />
                 <View style={styles.nameItem}>
@@ -873,7 +912,7 @@ const HomeScreen = () => {
                   <Image
 
                     // gender === 'Male' ? item.image[0] : item.image[1]
-                    source={{ uri: item.image}}
+                    source={{ uri: item.image }}
                     style={styles.productImage} />
                   <Text style={styles.productName} numberOfLines={2}>
                     {/* {gender === 'Male' ? item.name[0] : item.name[1]} */}
@@ -951,7 +990,7 @@ const HomeScreen = () => {
                   source={{ uri: item.imageUrl.replace('http://', 'https://') }}
                   style={styles.certImage}
                 />
-                <Text numberOfLines={2} style={[styles.certCaption,{color : '#fff'}]}>
+                <Text numberOfLines={2} style={[styles.certCaption, { color: '#fff' }]}>
                   {item.title}
                 </Text>
               </View>
@@ -989,7 +1028,6 @@ const HomeScreen = () => {
             />
           </View>
 
-
           {/* Our Packages (2-up grid) with navigation */}
           <SectionTitle
             title="Our Packages"
@@ -1004,7 +1042,7 @@ const HomeScreen = () => {
               <View style={[styles.packageCard, { backgroundColor: COLORS.secondary }]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Text style={styles.packageTitle} numberOfLines={2}>{item.title}</Text>
-                  <Text style={styles.packagePrice}>{item.price}</Text>
+                  <Text style={styles.packagePrice}>₹{item.price}</Text>
                 </View>
                 <View style={{ marginTop: hp('2%') }}>
                   <Text style={styles.packageLabel}>
@@ -1031,7 +1069,7 @@ const HomeScreen = () => {
           <FlatList
             data={productPackages}
             horizontal
-            keyExtractor={(item) => item._id}// ✅ fallback
+            keyExtractor={(item) => item._id}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 10 }}
             renderItem={({ item }) => (
@@ -1149,7 +1187,7 @@ const HomeScreen = () => {
 
               <View style={styles.serviceCard}>
                 <Image
-                  source={{ uri: item.image}}
+                  source={{ uri: item.image }}
                   style={styles.serviceImage}
                 />
                 <View style={styles.nameItem}>
@@ -1204,8 +1242,8 @@ const SectionTitle = ({
     </View>
   );
 };
-export default HomeScreen;
 
+export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1339,8 +1377,9 @@ const styles = StyleSheet.create({
   },
   offerLeft: {
     paddingHorizontal: wp('4%'), // Increased from 14
-    justifyContent: 'flex-start',
-    width: '50%'
+    // justifyContent: 'flex-start',
+    width: '50%',
+    justifyContent: 'space-between',
   },
   offerBig: {
     fontSize: wp('6%'),
@@ -1373,7 +1412,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: hp('1.5%'),
     borderRadius: wp('10%'),
-    marginTop: hp('4%'),
+    marginBottom: hp('1.3%'),
     paddingHorizontal: wp('2%'),
     alignItems: 'center',
     justifyContent: 'center',

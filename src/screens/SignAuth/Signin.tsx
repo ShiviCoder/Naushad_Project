@@ -16,11 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
-
-
-// const ADMIN_EMAIL = 'shivani123@gmail.com';
-// const ADMIN_PASSWORD = 'shi123';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -28,8 +24,8 @@ const Signin = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
-  const [nextRoute, setNextRoute] = useState(null); // For navigation after popup
-
+  const [nextRoute, setNextRoute] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -38,15 +34,6 @@ const Signin = ({ navigation }) => {
       setPopupVisible(true);
       return;
     }
-
-
-    // if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-    //   setPopupMessage('Access Denied. Only admin can login.');
-    //   setNextRoute(null);
-    //   setPopupVisible(true);
-    //   return;
-    // }
-
 
     setLoading(true);
     try {
@@ -62,7 +49,7 @@ const Signin = ({ navigation }) => {
       );
       const data = await response.json();
       if (response.ok && data.token) {
-        console.log('Token :' , data.token);
+        console.log('Token :', data.token);
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data));
         setPopupMessage('Login successful!');
@@ -76,8 +63,7 @@ const Signin = ({ navigation }) => {
         setNextRoute(null);
         setPopupVisible(true);
       }
-    } 
-    catch (error) {
+    } catch (error) {
       console.error('Login Error:', error);
       setPopupMessage('Something went wrong. Please try again.');
       setNextRoute(null);
@@ -85,14 +71,6 @@ const Signin = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-
-
-    // setPopupMessage('Login successful!');
-    //     setNextRoute({
-    //       name: 'MainTabs',
-    //       params: { from: 'Home'},
-    //     });
-    //     setPopupVisible(true);
   };
 
   const handlePopupClose = () => {
@@ -109,7 +87,8 @@ const Signin = ({ navigation }) => {
         style={styles.logo}
         resizeMode="contain"
       />
-      
+
+      {/* Email Field */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -123,20 +102,30 @@ const Signin = ({ navigation }) => {
         />
       </View>
 
-
+      {/* Password Field */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter password"
-          placeholderTextColor="gray"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={[styles.input, { flex: 1, borderWidth: 0.5, borderLeftWidth : 0, borderRightWidth : 0 , marginBottom: 0 }]}
+            placeholder="Enter password"
+            placeholderTextColor="gray"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Icon
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={22}
+              color={showPassword ? COLORS.primary : 'gray'}
+              style={{ marginLeft: wp('2%') }}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
-
+      {/* Forgot Password */}
       <TouchableOpacity
         style={styles.forgotPasswordContainer}
         onPress={() => navigation.navigate('ForgetPassword')}
@@ -144,7 +133,7 @@ const Signin = ({ navigation }) => {
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
 
-
+      {/* Signin Button */}
       <TouchableOpacity
         style={[styles.signinButton, { backgroundColor: COLORS.primary }]}
         onPress={handleSignIn}
@@ -157,7 +146,7 @@ const Signin = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
-
+      {/* Signup Link */}
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don’t have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -168,8 +157,7 @@ const Signin = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-
-      {/* Popup Component */}
+      {/* Popup */}
       <Popup
         visible={popupVisible}
         message={popupMessage}
@@ -179,9 +167,7 @@ const Signin = ({ navigation }) => {
   );
 };
 
-
 export default Signin;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -214,10 +200,20 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: COLORS.primary,
     borderRadius: wp('2%'),
-    paddingHorizontal: wp('4%'),
+    paddingHorizontal: wp('2%'),
     fontSize: wp('3.5%'),
     backgroundColor: '#fff',
     color: 'black',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: COLORS.primary,
+    borderRadius: wp('2%'),
+    backgroundColor: '#fff',
+    height: hp('6%'),
+    paddingHorizontal: wp('3%'),
   },
   forgotPasswordContainer: {
     width: '100%',

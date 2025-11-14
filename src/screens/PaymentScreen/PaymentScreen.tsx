@@ -295,7 +295,6 @@ const styles = StyleSheet.create({
   addOnText: { fontSize: wp('3.8%'), fontWeight: '500' },
   price: { fontSize: wp('4%'), fontWeight: '700' },
   divider: { height: 1, backgroundColor: '#EEE', marginTop: hp('1.2%') },
-
   sectionTitle: { fontSize: wp('4.5%'), fontWeight: '700', marginTop: hp('2.5%') },
   radioRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: hp('1.5%') },
   radioOuter: {

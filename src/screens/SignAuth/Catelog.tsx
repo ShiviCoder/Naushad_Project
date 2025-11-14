@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import { useCart } from '../../context/CartContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const products = [
 //   {
@@ -218,10 +219,18 @@ const Catelog = () => {
   const [products,setProducts] = useState([]);
   const { addToCart } = useCart();
   
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
+
   const fetchServices = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/ourservice', {
         method: "GET",
         headers: {
@@ -233,7 +242,7 @@ const Catelog = () => {
       const data = await response.json();
       setServices(data);
       console.log("Services data", data);
-      console.log("Services token", token);
+      console.log(" Catelog Services token", token);
     } catch (error) {
       console.log("Error loading:", error);
     }
@@ -245,8 +254,8 @@ const Catelog = () => {
 
   const fetchProducts = async () => {
      try {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
-
+      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+      const token = await getToken();
       const res = await fetch("https://naushad.onrender.com/api/products", {
         method: "GET",
         headers: {
@@ -257,6 +266,7 @@ const Catelog = () => {
       const data = await res.json();
       setProducts(data.data);
       console.log("Product data : ", data);
+      console.log('catelog product token ',token);
     } catch(error){
       console.log("Catelog Product Error : ", error);
     }

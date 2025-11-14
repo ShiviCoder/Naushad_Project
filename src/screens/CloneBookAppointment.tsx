@@ -70,7 +70,7 @@ export default function BookAppointmentScreen() {
       return;
     }
 
-    navigation.navigate('PaymentScreen', {
+    navigation.navigate('BookingSeats', {
       serviceName,
       price,
       date: selectedDate.toDateString(),

@@ -250,6 +250,7 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+  Alert,
 } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
@@ -258,6 +259,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRoute } from '@react-navigation/native';
+import Popup from '../../components/PopUp';
 
 
 const BookAppointmentScreen = ({ navigation }) => {
@@ -267,6 +269,8 @@ const BookAppointmentScreen = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal toggle
   const route = useRoute();
   const { selectedDate, selectedTime } = route.params || {};
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
   console.log(selectedDate, selectedTime);
 
   const services = [
@@ -335,6 +339,70 @@ const BookAppointmentScreen = ({ navigation }) => {
     setIsModalVisible(false);
   };
 
+  const sendData = async () => {
+    try {
+      const selectedServiceDetails = services
+        .filter((service) => selectedServices.includes(service.id))
+        .map((srv) => ({
+          serviceName: srv.name,
+          price: srv.price,
+        }));
+
+      if (selectedServiceDetails.length === 0) {
+        setPopupMessage('Please select at least one service.');
+        setPopupVisible(true);
+        return;
+      }
+
+      // ✅ Calculate total price
+      const totalPrice = selectedServiceDetails.reduce((sum, item) => sum + item.price, 0);
+
+      const formattedDate = new Date(selectedDate).toISOString().split('T')[0]; // YYYY-MM-DD
+      const formattedTime = selectedTime.replace('.', ':');
+
+      const payload = {
+        date: formattedDate,
+        time: formattedTime,
+        services: selectedServiceDetails.map((s) => s.serviceName),
+        totalPrice,
+      };
+
+      console.log('📦 API Payload:', payload);
+
+      const response = await fetch('https://naushad.onrender.com/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      console.log('✅ API Response:', data);
+
+      if (response.ok) {
+        setPopupMessage('Appointment booked successfully!');
+        setPopupVisible(true);
+
+        // ✅ Send all service details + total to PaymentScreen
+        navigation.navigate('PaymentScreen', {
+          services: selectedServiceDetails,
+          totalPrice,
+          selectedDate,
+          selectedTime,
+        });
+      } else {
+        setPopupMessage('Failed to book appointment.');
+        setPopupVisible(true);
+      }
+
+    } catch (error) {
+      console.error('❌ API Error:', error.message);
+      setPopupMessage('Failed to book appointment. Try again.');
+      setPopupVisible(true);
+
+    }
+  };
+
+
   const renderService = (service) => {
     const isSelected = selectedServices.includes(service.id);
     return (
@@ -391,29 +459,18 @@ const BookAppointmentScreen = ({ navigation }) => {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={() => {
-          const selectedServiceDetails = services
-            .filter(service => selectedServices.includes(service.id))
-            .map(srv => ({
-              serviceName: srv.serviceName || srv.name || srv.title || 'Unnamed',
-              price: srv.price || 0,
-            }));
-
-          navigation.navigate('PaymentScreen', {
-            services: selectedServiceDetails, // ✅ only name & price sent
-            selectedDate,
-            selectedTime,
-          });
-
-          console.log(selectedServiceDetails)
-        }}
+        onPress={sendData}
         style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}
       >
         <Text style={[styles.proceedButtonText, { color: theme.textOnAccent }]}>
           Proceed to Pay
         </Text>
       </TouchableOpacity>
-
+      <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={() => setPopupVisible(false)}
+      />
       {/* Popup Modal */}
       <Modal
         transparent
@@ -435,7 +492,6 @@ const BookAppointmentScreen = ({ navigation }) => {
                 <Text style={[styles.modalPrice, { color: theme.textPrimary }]}>
                   ₹ {selectedService.price}
                 </Text>
-
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     onPress={() => setIsModalVisible(false)}

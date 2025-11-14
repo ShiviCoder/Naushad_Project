@@ -16,6 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Head from '../../components/Head';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
   Home: undefined;
@@ -35,15 +36,23 @@ export default function ServicesScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { theme } = useTheme();
   const [storySelect, setStorySelect] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null); // 🟢 new
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [services, setServices] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+ const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
 
   const fetchServices = async () => {
     try {
-      const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      // const token =
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const token = await getToken();
       const res = await fetch('https://naushad.onrender.com/api/ourservice', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -52,6 +61,7 @@ export default function ServicesScreen() {
       const data = await res.json();
       setServices(data.data || []);
       console.log("Service screen data : ",data)
+      console.log("Service screen token ",token)
     } catch (err) {
       console.log('Fetch error:', err);
     }

@@ -1,252 +1,383 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Modal, ScrollView } from 'react-native';
-import React, { useState } from 'react';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  Modal,
+  ScrollView,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import Icon from "react-native-vector-icons/Ionicons";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+import { launchImageLibrary } from "react-native-image-picker";
+import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../context/ThemeContext";
-import Head from '../../components/Head';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import COLORS from '../../utils/Colors';
+import Head from "../../components/Head";
+import { SafeAreaView } from "react-native-safe-area-context";
+import COLORS from "../../utils/Colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MyProfile = () => {
-  const [gender, setGender] = useState('');
   const [filePath, setFilePath] = useState({});
   const [modal, setModal] = useState(false);
-  const [dob, setDob] = useState('');
-  const navigation = useNavigation<any>();
+  const [editModal, setEditModal] = useState(false);
+  const [user, setUser] = useState(null);
+  const [editingField, setEditingField] = useState(null);
+  const [tempValue, setTempValue] = useState("");
+  const [editLabel, setEditLabel] = useState("");
+  const navigation = useNavigation();
   const { theme } = useTheme();
 
   const chooseFile = () => {
-    let options = {
-      mediaType: 'photo',
-      quality: 1,
-    };
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorCode) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        setFilePath(response.assets[0]);
-      }
+    launchImageLibrary({ mediaType: "photo", quality: 1 }, (response) => {
+      if (response.assets?.[0]) setFilePath(response.assets[0]);
     });
   };
 
-  const handleChange = (text) => {
-    let cleaned = text.replace(/\D/g, '');
-    if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
-    let formatted = '';
-    if (cleaned.length <= 2) formatted = cleaned;
-    else if (cleaned.length <= 4) formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    else formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
-    setDob(formatted);
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem("userData");
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser.user);
+        }
+      } catch (error) {
+        console.log("Error loading user:", error);
+      }
+    };
+    loadUserData();
+  }, []);
+
+  const openEditModal = (label, field) => {
+    setEditLabel(label);
+    setEditingField(field);
+    setTempValue(user?.[field] || "");
+    setEditModal(true);
   };
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ✅ Fixed Header */}
-      <View style={[styles.fixedHeader, { backgroundColor: theme.background }]}>
-        <Head
-          title="My Profile"
-          rightComponent={
-            <TouchableOpacity>
-              <Text style={[styles.saveText, { color: theme.textPrimary }]}>Save</Text>
-            </TouchableOpacity>
-          }
-        />
-      </View>
+  const handleSaveField = async () => {
+    if (!user || !editingField) return;
+    const updatedUser = { ...user, [editingField]: tempValue };
+    setUser(updatedUser);
+    setEditModal(false);
 
-      {/* ✅ Scrollable content below header */}
-      <ScrollView
-        contentContainerStyle={{
-          paddingTop: hp('10%'), // give space for fixed header
-          paddingBottom: hp('4%'),
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.photoContainer}>
+    // Save to AsyncStorage
+    try {
+      const storedData = await AsyncStorage.getItem("userData");
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        parsed.user = updatedUser;
+        await AsyncStorage.setItem("userData", JSON.stringify(parsed));
+      }
+    } catch (err) {
+      console.log("Error saving updated user:", err);
+    }
+  };
+
+  if (!user) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={{ color: COLORS.primary, fontSize: wp("4%") }}>
+          Loading profile...
+        </Text>
+      </View>
+    );
+  }
+
+ const renderInfoRow = (icon, label, fieldKey, disabled = false) => (
+  <TouchableOpacity
+    style={styles.infoRow}
+    activeOpacity={disabled ? 1 : 0.8}
+    onPress={() => {
+      if (!disabled) openEditModal(label, fieldKey);
+    }}
+  >
+    <Icon
+      name={icon}
+      size={22}
+      color={COLORS.primary}
+      style={{ marginTop: hp("1%") }}
+    />
+    <View style={styles.infoTextContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{user?.[fieldKey] || "Not available"}</Text>
+    </View>
+  </TouchableOpacity>
+);
+
+  return (
+  <SafeAreaView
+    style={[styles.container, { backgroundColor: theme.background }]}
+  >
+    {/* Header */}
+    <View style={[styles.fixedHeader, { backgroundColor: theme.background }]}>
+      <Head
+        title="My Profile"
+        rightComponent={
+          <TouchableOpacity>
+            <Text style={[styles.saveText, { color: theme.textPrimary }]}>
+              Save
+            </Text>
+          </TouchableOpacity>
+        }
+      />
+    </View>
+
+    {/* Scrollable content */}
+    <ScrollView
+      contentContainerStyle={{
+        paddingTop: hp("10%"),
+        paddingBottom: hp("5%"),
+      }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Profile Section */}
+      <View style={styles.profileSection}>
+        <View style={styles.profileImageWrapper}>
           <TouchableOpacity onPress={() => setModal(true)}>
             <Image
               style={styles.profilePic}
-              source={filePath.uri ? { uri: filePath.uri } : require('../../assets/images/profilepic.png')}
+              source={
+                filePath.uri
+                  ? { uri: filePath.uri }
+                  : require("../../assets/user.png")
+              }
             />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.cameraContainer} onPress={chooseFile}>
-            <Icon name="camera" size={wp('5%')} color="#3E4347" />
+            <Icon name="camera" size={wp("5%")} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
 
-        <Modal visible={modal} transparent={true}>
-          <View style={styles.modalBackground}>
-            <TouchableOpacity style={styles.closeArea} onPress={() => setModal(false)}>
-              <Image
-                style={styles.fullImage}
-                resizeMode="contain"
-                source={filePath.uri ? { uri: filePath.uri } : require('../../assets/images/profilepic.png')}
-              />
+        <Text style={styles.userName}>
+          {user?.fullName || "Your Name"}
+        </Text>
+        <Text style={styles.userEmail}>
+          {user?.email || "yourmail@email.com"}
+        </Text>
+      </View>
+
+      {/* Info Card */}
+      <View style={styles.infoCard}>
+        <Text style={styles.sectionTitle}>Personal Information</Text>
+        {renderInfoRow("person-outline", "Full Name", "fullName")}
+        {renderInfoRow("mail-outline", "Email", "email", true)}
+        {renderInfoRow("male-female-outline", "Gender", "gender")}
+        {renderInfoRow("call-outline", "Phone", "phone")}
+        {renderInfoRow("location-outline", "Address", "address")}
+      </View>
+    </ScrollView>
+
+    {/* Image Modal */}
+    <Modal visible={modal} transparent animationType="fade">
+      <View style={styles.modalBackground}>
+        <TouchableOpacity
+          style={styles.closeArea}
+          onPress={() => setModal(false)}
+        >
+          <Image
+            style={styles.fullImage}
+            resizeMode="contain"
+            source={
+                filePath.uri
+                  ? { uri: filePath.uri }
+                  : require("../../assets/user.png")
+              }
+          />
+        </TouchableOpacity>
+      </View>
+    </Modal>
+
+    {/* Edit Field Popup */}
+    <Modal visible={editModal} transparent animationType="fade">
+      <View style={styles.popupOverlay}>
+        <View style={styles.popupContainer}>
+          <Text style={styles.popupTitle}>Edit {editLabel}</Text>
+          <TextInput
+            value={tempValue}
+            onChangeText={setTempValue}
+            placeholder={`Enter ${editLabel}`}
+            placeholderTextColor="#aaa"
+            style={styles.popupInput}
+          />
+
+          <View style={styles.popupButtons}>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => setEditModal(false)}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSaveField}>
+              <Text style={styles.saveTextBtn}>Save</Text>
             </TouchableOpacity>
           </View>
-        </Modal>
-
-        <View style={[styles.inputContainer, { backgroundColor: theme.background }]}>
-          <Text style={[styles.label, { color: theme.textPrimary }]}>Full Name</Text>
-          <TextInput
-            placeholder="Enter your name"
-            placeholderTextColor="gray"
-            style={[styles.input, { color: theme.textPrimary }]}
-          />
-
-          <Text style={[styles.label, { color: theme.textPrimary }]}>Email</Text>
-          <TextInput
-            placeholder="Enter your email"
-            placeholderTextColor="gray"
-            style={[styles.input, { color: theme.textPrimary }]}
-            keyboardType="email-address"
-          />
-
-          <Text style={[styles.label, { color: theme.textPrimary }]}>Phone Number</Text>
-          <TextInput
-            placeholder="Enter your number"
-            placeholderTextColor="gray"
-            style={[styles.input, { color: theme.textPrimary }]}
-            keyboardType="phone-pad"
-          />
-
-          <Text style={[styles.label, { color: theme.textPrimary }]}>Date of Birth</Text>
-          <TextInput
-            placeholder="Enter your date of birth"
-            onChangeText={handleChange}
-            value={dob}
-            placeholderTextColor="gray"
-            style={[styles.input, { color: theme.textPrimary }]}
-          />
-
-          <Text style={[styles.label, { color: theme.textPrimary }]}>Address</Text>
-          <TextInput
-            placeholder="Enter your address"
-            placeholderTextColor="gray"
-            style={[styles.input, { color: theme.textPrimary }]}
-            multiline
-          />
-
-          <Text style={[styles.label, { color: theme.textPrimary }]}>Gender</Text>
-          <View style={styles.radioContainer}>
-            {['male', 'female', 'other'].map((option) => (
-              <TouchableOpacity
-                key={option}
-                style={styles.radioOption}
-                onPress={() => setGender(option)}
-              >
-                <View
-                  style={[
-                    styles.radioCircle,
-                    gender === option && { borderColor: COLORS.primary, borderWidth: wp('1.5%') },
-                  ]}
-                />
-                <Text style={{ color: theme.textPrimary }}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+      </View>
+    </Modal>
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   fixedHeader: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
-    width: '100%',
+    width: "100%",
     zIndex: 10,
   },
-  saveText: {
-    fontSize: wp('4%'),
-    fontWeight: '700',
+  saveText: { fontSize: wp("4%"), fontWeight: "700" },
+
+  // Profile Section
+  profileSection: {
+    alignItems: "center",
+    marginBottom: hp("3%"),
   },
-  photoContainer: {
-    width: wp('30%'),
-    height: wp('30%'),
-    alignSelf: 'center',
-    marginVertical: hp('3%'),
+  profileImageWrapper: {
+    width: wp("30%"),
+    height: wp("30%"),
+    borderRadius: wp("15%"),
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: COLORS.primary,
+    elevation: 5,
+    backgroundColor: "#fff",
   },
   profilePic: {
-    width: '100%',
-    height: '100%',
-    borderRadius: wp('50%'),
+    width: "100%",
+    height: "100%",
+    borderRadius: wp("15%"),
   },
   cameraContainer: {
-    position: 'absolute',
-    bottom: 5,
-    right: 5,
-    backgroundColor: '#fff',
+    position: "absolute",
+    bottom: 7,
+    right: 7,
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 5,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
-  inputContainer: {
-    paddingHorizontal: wp('5%'),
+  userName: {
+    fontSize: wp("5%"),
+    fontWeight: "700",
+    color: COLORS.primary,
+    marginTop: hp("1%"),
   },
-  label: {
-    fontSize: wp("3.6%"),
-    fontWeight: "600",
-    marginBottom: hp("1%"),
-    marginTop: hp("0.5%"),
-    color: "#000",
+  userEmail: {
+    fontSize: wp("3.8%"),
+    color: "#666",
+    marginTop: 2,
   },
-  input: {
-    height: hp("6%"),
-    borderWidth: 0.5,
-    borderColor: COLORS.primary,
-    borderRadius: wp("2%"),
-    paddingHorizontal: wp("4%"),
-    fontSize: wp("3.5%"),
+
+  // Info Card
+  infoCard: {
     backgroundColor: "#fff",
-    color: "black",
+    borderRadius: wp("4%"),
+    paddingVertical: hp("2%"),
+    paddingHorizontal: wp("4%"),
+    marginHorizontal: wp("5%"),
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  radioContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp('5%'),
-    marginTop: hp('1%'),
+  sectionTitle: {
+    fontSize: wp("4.5%"),
+    fontWeight: "600",
+    color: COLORS.primary,
+    marginBottom: hp("1.5%"),
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: hp("1%"),
   },
-  radioOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: hp("2%"),
   },
-  radioCircle: {
-    width: wp('5%'),
-    height: wp('5%'),
-    borderRadius: wp('2.5%'),
-    borderWidth: wp('1.5%'),
-    borderColor: '#3E4347',
-    marginRight: wp('2%'),
+  infoTextContainer: { marginLeft: wp("3%"), flex: 1 },
+  label: {
+    fontSize: wp("3.5%"),
+    fontWeight: "600",
+    color: COLORS.primary,
   },
+  value: {
+    fontSize: wp("4%"),
+    color: "#333",
+    marginTop: 2,
+  },
+
+  // Image Modal
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  closeArea: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  closeArea: { flex: 1, justifyContent: "center", alignItems: "center" },
   fullImage: {
-    width: wp('90%'),
-    height: hp('70%'),
+    width: wp("90%"),
+    height: hp("70%"),
     borderRadius: 10,
   },
+
+  // Edit Popup
+  popupOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  popupContainer: {
+    width: wp("85%"),
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: wp("6%"),
+    elevation: 10,
+  },
+  popupTitle: {
+    fontSize: wp("4.5%"),
+    fontWeight: "600",
+    color: COLORS.primary,
+    marginBottom: hp("2%"),
+    textAlign: "center",
+  },
+  popupInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: wp("3%"),
+    fontSize: wp("3.8%"),
+    color: "#000",
+  },
+  popupButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: hp("3%"),
+  },
+  cancelBtn: {
+    backgroundColor: "#ccc",
+    paddingVertical: hp("1%"),
+    paddingHorizontal: wp("6%"),
+    borderRadius: 8,
+  },
+  saveBtn: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: hp("1%"),
+    paddingHorizontal: wp("6%"),
+    borderRadius: 8,
+  },
+  cancelText: { color: "#000", fontWeight: "600" },
+  saveTextBtn: { color: "#fff", fontWeight: "600" },
 });
+
 export default MyProfile;

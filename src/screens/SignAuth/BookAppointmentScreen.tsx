@@ -54,7 +54,7 @@ export default function BookAppointmentScreen() {
     const formattedDate = selectedDate ? selectedDate.toISOString() : null; // ✅ make it serializable
 
     if (route.params?.from === 'bottomBar') {
-      navigation.navigate('BookAppoinment2', {
+      navigation.navigate('BookingSeats1', {
         selectedDate: formattedDate,
         selectedTime,
       });
@@ -141,7 +141,6 @@ export default function BookAppointmentScreen() {
       style={[styles.mainContainer, { backgroundColor: theme.background }]}
     >
       <Head title="Bookings" showBack={false} />
-
       <FlatList
         data={data}
         renderItem={renderItem}

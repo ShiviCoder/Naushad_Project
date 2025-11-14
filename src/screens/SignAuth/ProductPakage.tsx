@@ -17,12 +17,15 @@ import Head from '../../components/Head';
 import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Popup from '../../components/PopUp';
 const ProductPackages = ({ navigation }) => {
   const [quantity, setQuantity] = useState(1);
   const { theme } = useTheme();
   const route = useRoute();
   const { item } = route.params || {};
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
 
   if (!item) {
     return (
@@ -38,26 +41,75 @@ const ProductPackages = ({ navigation }) => {
   const decreaseQuantity = () => quantity > 1 && setQuantity(quantity - 1);
 
   const renderStars = () => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Icon
-          key={i}
-          name={i <= 4 ? "star" : "star-outline"}
-          size={10}
-          color="#F6B745"
-          style={styles.star}
-        />
-      );
+    return [...Array(5)].map((_, i) => (
+      <Icon
+        key={i}
+        name={i < 4 ? "star" : "star-outline"}
+        size={10}
+        color="#F6B745"
+        style={styles.star}
+      />
+    ));
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      if (!userId) {
+        setPopupMessage("Please log in first.");
+        setPopupVisible(true);
+        return;
+      }
+
+      const product = {
+        id: 1,
+        name: item.title || "Product",
+        price: item.price || 0,
+        oldPrice: 0,
+        discount: 0,
+        image: "https://via.placeholder.com/150",
+      };
+
+      const response = await fetch("https://naushad.onrender.com/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          qty: quantity,
+          image: product.image,
+        }),
+      });
+
+      const res = await response.json();
+      console.log("Add to Cart Response:", res);
+
+      if (response.ok && res.success) {
+        setPopupMessage("Product added to cart!");
+        setPopupVisible(true);
+        setTimeout(() => {
+          setPopupVisible(false);
+          navigation.navigate("Cart");
+        }, 1500);
+      } else {
+        setPopupMessage(res.message || "Failed to add product to cart");
+        setPopupVisible(true);
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      setPopupMessage("Something went wrong while adding to cart");
+      setPopupVisible(true);
     }
-    return stars;
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Product Package" />
       <ScrollView style={styles.scrollView}>
-        {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image
             source={require('../../assets/newPic.png')}
@@ -66,7 +118,6 @@ const ProductPackages = ({ navigation }) => {
           />
         </View>
 
-        {/* Product Info */}
         <View style={styles.productInfo}>
           <View style={styles.titlePriceRow}>
             <Text style={[styles.productTitle, { color: theme.textPrimary }]}>
@@ -77,7 +128,6 @@ const ProductPackages = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* Rating */}
           <View style={styles.ratingContainer}>
             <View style={styles.starsContainer}>{renderStars()}</View>
             <Text style={[styles.reviewText, { color: theme.textSecondary }]}>
@@ -85,12 +135,10 @@ const ProductPackages = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* Description */}
           <Text style={[styles.description, { color: theme.textSecondary }]}>
             {item.description || 'No description available.'}
           </Text>
 
-          {/* Offer */}
           {item.offer && (
             <View style={styles.offerContainer}>
               <Text style={[styles.offerText, { color: theme.textPrimary }]}>
@@ -100,45 +148,6 @@ const ProductPackages = ({ navigation }) => {
           )}
         </View>
 
-        {/* Items List */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Items list
-          </Text>
-          <View style={styles.itemsList}>
-            {item.itemsList?.length > 0 ? (
-              item.itemsList.map((i, index) => (
-                <View style={styles.itemRow} key={index}>
-                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>
-                    {i}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={{ color: theme.textSecondary }}>-</Text>
-            )}
-          </View>
-        </View>
-
-        {/* Usage Instructions */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Usage Instruction
-          </Text>
-          <View style={styles.instructionsList}>
-            {item.usage?.length > 0 ? (
-              item.usage.map((u, index) => (
-                <Text key={index} style={[styles.instructionText, { color: theme.textSecondary }]}>
-                  {item.usageInstructions}
-                </Text>
-              ))
-            ) : (
-              <Text style={{ color: theme.textSecondary }}>-</Text>
-            )}
-          </View>
-        </View>
-
-        {/* Quantity Selector */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Quantity Selector
@@ -157,36 +166,37 @@ const ProductPackages = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* Bottom Buttons */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          style={[styles.addToCartButton, { backgroundColor: theme.background, borderColor: theme.textPrimary }]}
-          onPress={() => {
-            const product = {
-              id: 1,
-              name: item.title || "Product",
-              price: item.price || 0,
-              oldPrice: 0,
-              discount: 0,
-              image: require("../../assets/newPic.png"),
-            };
-            navigation.navigate('Cart', { product: { ...product, qty: quantity } });
-          }}
+          style={[styles.addToCartButton, { borderColor: theme.textPrimary }]}
+          onPress={handleAddToCart}
         >
-          <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>Add to cart</Text>
+          <Text style={[styles.addToCartText, { color: theme.textPrimary }]}>
+            Add to cart
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.bottomContainer}>
-        <TouchableOpacity onPress={() =>
-          navigation.navigate('PaymentScreen', {
-            serviceName: item.name || 'Product',
-            price: item.price || 0,
-          })
-        } style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('PaymentScreen', {
+              serviceName: item.name || 'Product',
+              price: item.price || 0,
+            })
+          }
+          style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}
+        >
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ✅ Popup integration */}
+      <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={() => setPopupVisible(false)}
+      />
     </SafeAreaView>
   );
 };
