@@ -8,7 +8,6 @@ import {
   Alert,
   StatusBar,
   ScrollView,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Head from '../../components/Head';
@@ -70,24 +69,25 @@ const ReferFriendScreen = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar
         barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={theme.background}
       />
-      {/* <Head title="Refer a Friend" showBack={false} /> */}
 
+      {/* Fixed Header */}
+      <View style={[styles.fixedHeader, { backgroundColor: theme.background }]}>
+        <Text style={[styles.mainTitle, { color: theme.textPrimary }]}>
+          Share Salon Luxury
+        </Text>
+      </View>
+
+      {/* Scrollable Content */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: hp('5%') }}
+        contentContainerStyle={{ paddingBottom: hp('5%'), paddingTop: hp('10%') }} // added top padding for header space
       >
         <View style={styles.content}>
-          <Text style={[styles.mainTitle, { color: theme.textPrimary }]}>
-            Share Salon Luxury
-          </Text>
-
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
             Invite your friends to experience the finest hair, beauty, and spa
             services from our professional stylists. Let them enjoy the same
@@ -97,19 +97,13 @@ const ReferFriendScreen = () => {
           <View
             style={[
               styles.referralCodeCard,
-              {
-                backgroundColor: COLORS.primary,
-                shadowColor: theme.shadow,
-              },
+              { backgroundColor: COLORS.primary, shadowColor: theme.shadow },
             ]}
           >
-            <Text style={[styles.referralCodeLabel, { color: theme.text }]}>
+            <Text style={[styles.referralCodeLabel, { color:'#fff' }]}>
               Your Referral Code
             </Text>
-            <Text
-              style={[styles.referralCodeText, { color: theme.text }]}
-              selectable
-            >
+            <Text style={[styles.referralCodeText, { color: '#fff' }]} selectable>
               {referralCode}
             </Text>
 
@@ -135,55 +129,37 @@ const ReferFriendScreen = () => {
             <Text style={styles.shareButtonText}>Share with Friends</Text>
           </TouchableOpacity>
 
+          {/* How It Works Section */}
           <View style={styles.howItWorksSection}>
             <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
               How It Works
             </Text>
 
-            <View style={styles.stepContainer}>
-              <Text style={[styles.stepNumber, { color: COLORS.primary }]}>
-                1
-              </Text>
-              <View style={styles.stepTextContainer}>
-                <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>
-                  Share Your Code
-                </Text>
-                <Text style={[styles.stepText, { color: theme.textSecondary }]}>
-                  Send your unique referral code to friends directly through the
-                  app or via social platforms like WhatsApp, Instagram, or SMS.
-                </Text>
+            {[ 
+              {
+                step: '1',
+                title: 'Share Your Code',
+                text: 'Send your unique referral code to friends directly through the app or via social platforms like WhatsApp, Instagram, or SMS.',
+              },
+              {
+                step: '2',
+                title: 'Friends Join',
+                text: 'When your friends sign up using your referral code, they’ll get instant access to exclusive salon services and offers.',
+              },
+              {
+                step: '3',
+                title: 'Enjoy Together',
+                text: 'Book appointments together and experience our personalized beauty and spa treatments with your friends.',
+              },
+            ].map(({ step, title, text }) => (
+              <View key={step} style={styles.stepContainer}>
+                <Text style={[styles.stepNumber, { color: COLORS.primary }]}>{step}</Text>
+                <View style={styles.stepTextContainer}>
+                  <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>{title}</Text>
+                  <Text style={[styles.stepText, { color: theme.textSecondary }]}>{text}</Text>
+                </View>
               </View>
-            </View>
-
-            <View style={styles.stepContainer}>
-              <Text style={[styles.stepNumber, { color: COLORS.primary }]}>
-                2
-              </Text>
-              <View style={styles.stepTextContainer}>
-                <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>
-                  Friends Join
-                </Text>
-                <Text style={[styles.stepText, { color: theme.textSecondary }]}>
-                  When your friends sign up using your referral code, they’ll
-                  get instant access to exclusive salon services and offers.
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.stepContainer}>
-              <Text style={[styles.stepNumber, { color: COLORS.primary }]}>
-                3
-              </Text>
-              <View style={styles.stepTextContainer}>
-                <Text style={[styles.stepTitle, { color: theme.textPrimary }]}>
-                  Enjoy Together
-                </Text>
-                <Text style={[styles.stepText, { color: theme.textSecondary }]}>
-                  Book appointments together and experience our personalized
-                  beauty and spa treatments with your friends.
-                </Text>
-              </View>
-            </View>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -195,16 +171,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  fixedHeader: {
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    zIndex: 10,
+    paddingVertical: hp('2%'),
+    justifyContent: 'center',
+    alignItems: 'center',
+  
+  },
   content: {
     paddingHorizontal: wp('5%'),
-    paddingTop: hp('1%'),
     paddingBottom: hp('5%'),
   },
   mainTitle: {
     fontSize: wp('6%'),
     fontWeight: 'bold',
-    marginBottom: hp('1.5%'),
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: wp('4%'),
@@ -218,9 +201,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('5%'),
     marginBottom: hp('3%'),
     elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
     alignItems: 'center',
   },
   referralCodeLabel: {
@@ -247,8 +227,6 @@ const styles = StyleSheet.create({
     paddingVertical: hp('1.3%'),
     borderRadius: wp('2%'),
     alignItems: 'center',
-    marginTop: hp('0%'),
-    marginBottom: hp('0%'),
     width: '98%',
     alignSelf: 'center',
   },
@@ -256,7 +234,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('4.5%'),
     fontWeight: '600',
-    textAlign: 'center',
   },
   howItWorksSection: {
     marginTop: hp('4%'),
@@ -270,7 +247,6 @@ const styles = StyleSheet.create({
   stepContainer: {
     flexDirection: 'row',
     marginBottom: hp('2.5%'),
-    alignItems: 'flex-start',
   },
   stepNumber: {
     fontSize: wp('6%'),

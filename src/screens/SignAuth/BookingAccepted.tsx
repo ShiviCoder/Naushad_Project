@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Linking, Platform } from "react-native";
 import React from "react";
 import Head from "../../components/Head";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -8,20 +8,39 @@ import {
 } from "react-native-responsive-screen";
 import { useTheme } from "../../context/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
- // ✅ import theme
-
+import COLORS from "../../utils/Colors";
+// :white_check_mark: import theme
 export default function BookingAccepted() {
-  const { theme } = useTheme(); // ✅ get current theme
-
+  const { theme } = useTheme(); // :white_check_mark: get current theme
+  // Phone to use for Call/WhatsApp (taken from your UI)
+  const phoneNumber = "+919876543210";
+  // Open system dialer with number prefilled
+  const dialCall = (num: string) => {
+    const url = `tel:${num}`;
+    Linking.openURL(url).catch(() => { });
+  };
+  // Open WhatsApp chat; fallback to wa.me if scheme not available
+  const openWhatsApp = async (num: string, text: string) => {
+    const encoded = encodeURIComponent(text);
+    const waScheme = `whatsapp://send?phone=${num}&text=${encoded}`;
+    try {
+      const supported = await Linking.canOpenURL(waScheme);
+      if (supported) {
+        await Linking.openURL(waScheme);
+        return;
+      }
+    } catch { }
+    const digits = num.replace(/[^\d]/g, "");
+    const waMe = `https://wa.me/${digits}?text=${encoded}`;
+    Linking.openURL(waMe).catch(() => { });
+  };
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <Head title="Booking Details" />
-
       <ScrollView style={styles.container}>
         {/* Status Section */}
         <View style={[styles.statusCard, { backgroundColor: theme.background }]}>
           <Text style={[styles.statusText, { color: theme.textPrimary }]}>Accepted</Text>
-
           <View style={styles.dateRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: hp('2%') }}>
               <Icon name="calendar-outline" size={hp("3%")} color={theme.textPrimary} />
@@ -31,13 +50,11 @@ export default function BookingAccepted() {
               <Text style={[styles.actionText]}>Accepted</Text>
             </TouchableOpacity>
           </View>
-
           <Text style={[styles.price, { color: theme.textPrimary }]}>₹ 500</Text>
           <Text style={[styles.desc, { color: theme.textPrimary }]}>
             Professional haircut with styling included.
           </Text>
         </View>
-
         {/* User Info */}
         <View style={[styles.userCard, { backgroundColor: theme.background }]}>
           <Image
@@ -49,23 +66,22 @@ export default function BookingAccepted() {
             <Text style={[styles.userPhone, { color: theme.textPrimary }]}>+91 9876543210</Text>
           </View>
         </View>
-
         {/* Location */}
         <View style={styles.locationRow}>
           <Icon name="location" size={hp("2.6%")} color={theme.textPrimary} />
           <Text style={[styles.locationText, { color: theme.textPrimary }]}>123, Main Street, City</Text>
         </View>
-
         {/* Actions */}
         <View style={styles.buttonSection}>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.primary, flex: 1 }]}
+            style={[styles.actionBtn, { backgroundColor: COLORS.primary }]}
+            onPress={() => dialCall(phoneNumber)}
           >
             <Text style={styles.actionText}>Call</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.secondary, flex: 1, marginLeft: wp("4%") }]}
+            style={[styles.actionBtn, { backgroundColor: COLORS.primary, flex: 1, marginLeft: wp("4%") }]}
+            onPress={() => openWhatsApp(phoneNumber, "Hello Rahul ")}
           >
             <Text style={styles.actionText}>Message</Text>
           </TouchableOpacity>
@@ -74,15 +90,14 @@ export default function BookingAccepted() {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
-  screen: { flex: 1 ,
-    
+  screen: {
+    flex: 1,
   },
-  container: { padding: wp("4%"),
-    paddingBottom : hp('5%')
-   },
-
+  container: {
+    padding: wp("4%"),
+    paddingBottom: hp('5%')
+  },
   // Status Card
   statusCard: {
     padding: wp("4%"),
@@ -103,7 +118,6 @@ const styles = StyleSheet.create({
   desc: {
     fontSize: wp("5%"),
   },
-
   // Date Row
   dateRow: {
     flexDirection: "column",
@@ -115,7 +129,6 @@ const styles = StyleSheet.create({
     fontSize: wp("4%"),
     fontWeight: '500',
   },
-
   // User Card
   userCard: {
     flexDirection: "row",
@@ -134,7 +147,6 @@ const styles = StyleSheet.create({
   },
   userName: { fontSize: wp("4.5%"), fontWeight: "600" },
   userPhone: { fontSize: wp("4.5%"), marginTop: hp("0.3%"), fontWeight: "600" },
-
   // Location
   locationRow: {
     flexDirection: "row",
@@ -143,20 +155,27 @@ const styles = StyleSheet.create({
     marginLeft: wp("1%"),
   },
   locationText: { fontSize: wp("4.5%"), marginLeft: wp("2%") },
-
   // Action Buttons
-  buttonSection: { flexDirection: "row", justifyContent: "space-between", marginTop: hp('4%'),
-    marginBottom : hp('5%')
-   },
-  actionBtn: {
-    paddingVertical: hp("1.2%"),
-    paddingHorizontal: wp("6%"),
-    borderRadius: wp("3%"),
-    alignItems: "center",
-  },
-  actionText: {
-    color: "#fff",
-    fontSize: wp("4.5%"),
-    fontWeight: "600",
-  },
+ buttonSection: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: hp("4%"),
+  marginBottom: hp("5%"),
+  gap: wp("2%"), // adds equal spacing between buttons (modern RN)
+},
+
+actionBtn: {
+  flex: 1, // 👈 makes both buttons equal width
+  paddingVertical: hp("1.2%"),
+  borderRadius: wp("3%"),
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: wp("6%"),
+},
+
+actionText: {
+  color: "#fff",
+  fontSize: wp("4.5%"),
+  fontWeight: "600",
+},
 });

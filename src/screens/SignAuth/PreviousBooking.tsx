@@ -9,9 +9,12 @@ import {
 import { useTheme } from "../../context/ThemeContext"; // ✅ import theme
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
+import { useNavigation } from "@react-navigation/native";
 
 export default function BookingAccepted() {
   const { theme } = useTheme(); // ✅ get current theme
+  const navigation = useNavigation();
+
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -58,6 +61,7 @@ export default function BookingAccepted() {
         {/* Actions */}
         <View style={styles.buttonSection}>
           <TouchableOpacity
+            onPress={()=>navigation.navigate('CloneBookAppointment')}
             style={[styles.actionBtn, {
               backgroundColor: COLORS.primary, width: '100%', paddingVertical: hp('2%')
             }]}

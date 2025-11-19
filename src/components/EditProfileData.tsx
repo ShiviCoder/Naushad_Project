@@ -39,34 +39,48 @@ const settingData = [
   },
   {
     id: 6,
+    title: "Wallet",
+    description: "Add money on your wallet",
+    icon: "info",
+    image: require('../assets/wallet.png')
+  },  
+   {
+    id: 7,
+    title: "Settings",
+    description: "Adjust theme and Account",
+    icon: "info",
+    image: require('../assets/settings.png')
+  },  
+  {
+    id: 8,
     title: "About us",
     description: "Know more about us",
     icon: "info",
     image: require('../assets/about.png')
   },  
   {
-    id: 7,
+    id: 9,
     title: "Privacy Policy",
     description: "Your data, our priority",
     icon: "privacy",
     image: require('../assets/privacy.png')
   },  
   {
-    id: 8,
+    id: 10,
     title: "Terms & Conditions",
     description: "Read our service rules",
     icon: "terms",
     image: require('../assets/terms.png')
   },  
+  // {
+  //   id: 9,
+  //   title: "App Version: v1.0.0",
+  //   description: "Latest stable release",
+  //   icon: "version",
+  //   image: require('../assets/version.png')
+  // },  
   {
-    id: 9,
-    title: "App Version: v1.0.0",
-    description: "Latest stable release",
-    icon: "version",
-    image: require('../assets/version.png')
-  },  
-  {
-    id: 10,
+    id: 11,
     title: "Logout",
     description: "Sign out from your account",
     icon: "logout",

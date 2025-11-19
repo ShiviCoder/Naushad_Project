@@ -1,103 +1,121 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Image,
   TouchableOpacity,
-  FlatList,
-
-  Alert,
+  Animated,
+  RefreshControl,
+  ScrollView,
 } from "react-native";
-import Icon from 'react-native-vector-icons/Ionicons';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import Head from "../../components/Head";
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
 import { useTheme } from "../../context/ThemeContext";
-
-type RootStackParamList = {
-  Home: undefined;
-  ServicesScreen: undefined;
-};
-
-
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ServicesScreen() {
-  //   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const navigation = useNavigation();
-  const [services , setServices] = useState([]);
-  const {theme} = useTheme();
-const fetchHomeServices = async() => {
-  try {
-     const response = await fetch('https://naushad.onrender.com/api/home-services/', {
-        method: 'GET',
+  const { theme } = useTheme();
+
+  const [services, setServices] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const translateY = useRef(new Animated.Value(0)).current;
+ const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log("token accept")
+    return token;
+  }
+
+  const fetchHomeServices = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch("https://naushad.onrender.com/api/home-services/", {
+        method: "GET",
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MDUyMTE4OCwiZXhwIjoxNzYxMTI1OTg4fQ.haFkDaIdOrq85-Z1LMnweYsEXT8CrB0aavDdkargyi8', // Postman me jo token use kiya tha
-          'Content-Type': 'application/json',
+          Authorization:
+            `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
       const json = await response.json();
-      console.log("Home services : ", json);
+      console.log("Home services:", json);
+      console.log('Home service token : ',token)
       setServices(json.data);
-  }catch(error){
-    console.log("Home services error , ", error);
-  }
-}
-
-useEffect(()=>{
-   fetchHomeServices();
-},[])
-
-  // Multiple back button methods
-  const handleBackPress = () => {
-    console.log('Back button pressed');
-
-    try {
-      // Method 1: Try goBack first
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-      } else {
-        // Method 2: Navigate directly to Home if can't go back
-        navigation.navigate('HomeScreen');
-      }
     } catch (error) {
-      console.log('Navigation error:', error);
-      // Method 3: Reset navigation stack as fallback
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      });
+      console.log("Home services error:", error);
     }
   };
 
+  useEffect(() => {
+    fetchHomeServices();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    // Animate full screen down
+    Animated.spring(translateY, {
+      toValue: 60,
+      useNativeDriver: true,
+    }).start();
+
+    await fetchHomeServices();
+
+    // Animate back up
+    Animated.timing(translateY, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+
+    setRefreshing(false);
+  };
+
   return (
-    <SafeAreaView style={[styles.container,{backgroundColor : theme.background}]}>
-      {/* Header */}
-      <Head title='Home Services' />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <Animated.ScrollView
+        style={{ transform: [{ translateY }] }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
+      >
+        {/* Header */}
+        <Head title="Home Services" />
+        <Text style={styles.Head2}>
+          Services only for older clients
+        </Text>
 
-
-      {/* Services List */}
-      <ScrollView style={styles.servicesContainer}>
-        {services.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <Image source={item.image} style={styles.cardImage} />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{item.name}</Text>
-              <Text style={styles.cardPrice}>₹{item.price}.00</Text>
-              <Text style={styles.cardDesc}>{item.description}</Text>
-              <TouchableOpacity style={[styles.bookBtn,{backgroundColor : COLORS.primary}]} onPress={() => navigation.navigate('ServiceDetails', {
-                item: { ...item, image: item.image }
-              })}>
-                <Text style={styles.bookBtnText}>Book now</Text>
-              </TouchableOpacity>
+        {/* Services List */}
+        <View style={styles.servicesContainer}>
+          {services.map((item, index) => (
+            <View key={index} style={styles.card}>
+              <Image source={{ uri: item.image }} style={styles.cardImage} />
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{item.name}</Text>
+                <Text style={styles.cardPrice}>₹{item.price}.00</Text>
+                <Text style={styles.cardDesc}>{item.description}</Text>
+                <TouchableOpacity
+                  style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
+                  onPress={() => navigation.navigate('ServiceDetails', { item })}
+                >
+                  <Text style={styles.bookBtnText}>Book now</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          ))}
+        </View>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
@@ -105,89 +123,69 @@ useEffect(()=>{
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff"
   },
-  // Categories
-  categoryScroll: {
-    marginVertical: hp('2%'),
-    paddingHorizontal: wp('5%'),
-  },
-  categoryItem: {
-    alignItems: "center",
-    marginRight: wp('4%'),
-    width: wp('18%'),
-  },
-  categoryImage: {
-    width: wp('15%'),
-    height: wp('15%'),
-    borderRadius: wp('7.5%'),
-    marginBottom: hp('1%'),
-  },
-  categoryText: {
-    fontSize: hp('1.5%'),
-    color: "#333",
-    textAlign: "center",
-    fontWeight: '500',
-    lineHeight: hp('2%'),
-  },
-
-  // Services Container
   servicesContainer: {
-    paddingHorizontal: wp('4%'),
-    paddingBottom: hp('12%'), // space for bottom navigation
-  },
+    paddingHorizontal: wp("4%"),
+    paddingVertical: hp("2%"),
 
-  // Service Cards
+  },
   card: {
     flexDirection: "row",
-    backgroundColor: "#fff",
-    marginBottom: hp('2%'),
-    borderRadius: wp('4%'),
+    backgroundColor: "#faf7f7ff",
+    marginBottom: hp("2%"),
+    borderRadius: wp("4%"),
     elevation: 3,
-    padding: wp('4%'),
+    padding: wp("4%"),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: wp('2%'),
+    shadowRadius: wp("2%"),
   },
   cardImage: {
-    width: wp('25%'),
-    height: wp('31%'),
-    borderRadius: wp('3%'),
+    width: wp("25%"),
+    height: wp("31%"),
+    borderRadius: wp("3%"),
   },
   cardContent: {
     flex: 1,
-    paddingLeft: wp('4%'),
+    paddingLeft: wp("4%"),
     justifyContent: "center",
   },
   cardTitle: {
-    fontSize: hp('2.5%'),
+    fontSize: hp("2.5%"),
     fontWeight: "bold",
     color: "#333",
-    marginBottom: hp('0.5%'),
+    marginBottom: hp("0.5%"),
   },
   cardPrice: {
-    fontSize: hp('2%'),
+    fontSize: hp("2%"),
     fontWeight: "600",
     color: "#333",
-    marginBottom: hp('1%'),
+    marginBottom: hp("1%"),
   },
   cardDesc: {
-    fontSize: hp('1.6%'),
+    fontSize: hp("1.6%"),
     color: "#666",
-    marginBottom: hp('1.5%'),
-    lineHeight: hp('2%'),
+    marginBottom: hp("1.5%"),
+    lineHeight: hp("2%"),
   },
   bookBtn: {
     alignSelf: "flex-start",
-    paddingHorizontal: wp('4%'),
-    paddingVertical: hp('1%'),
-    borderRadius: wp('2%'),
+    paddingHorizontal: wp("4%"),
+    paddingVertical: hp("1%"),
+    borderRadius: wp("2%"),
   },
   bookBtnText: {
     color: "#fff",
-    fontSize: hp('1.6%'),
+    fontSize: hp("1.6%"),
     fontWeight: "bold",
   },
+  Head2: {
+    fontSize: wp('5%'),
+    fontWeight: 'bold',
+    color: COLORS.primary,      
+    marginTop: hp('0.7%'),
+    textAlign: 'center',
+    opacity: 0.9,
+  }
 });
-

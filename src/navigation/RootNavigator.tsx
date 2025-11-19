@@ -44,6 +44,13 @@ import ForgotPassword from '../screens/SignAuth/ForgetPassword';
 import BottomNavbarWrapper from '../components/BottomNavbarWrapper';
 import PaymentScreen from '../screens/PaymentScreen/PaymentScreen';
 import PaymentSuccessScreen from '../screens/PaymentScreen/PaymentSuccessScreen';
+import VideosScreen from '../screens/SignAuth/VideosScreen';
+import CloneBookAppointment from '../screens/CloneBookAppointment'
+import WalletScreen from '../screens/SignAuth/WalletScreen';
+import LikedProductScreen from '../screens/SignAuth/LikedProductScreen';
+import SettingScreen from '../screens/SignAuth/SettingScreen';
+import BookingSeats from '../screens/SignAuth/BookingSeats';
+import BookingSeats1 from '../screens/SignAuth/BookingSeats1';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -88,6 +95,14 @@ export type RootStackParamList = {
   Certificates: undefined;
   HomeServices: undefined;
   ForgetPassword: undefined;
+  VidoesScreen : undefined;
+  CloneBookAppointment : undefined;
+  WalletScreen : undefined;
+  LikedProductScreen : undefined;
+  SettingScreen : undefined;
+  BookingSeats : undefined;
+    BookingSeats1 : undefined;
+
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -95,18 +110,18 @@ const Tab = createBottomTabNavigator();
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{ headerShown: false }}
-      tabBar={props => <BottomNavbarWrapper {...props} />}
-      initialRouteName="HomeScreen"
-    >
+  screenOptions={{ headerShown: false }}
+  tabBar={props => <BottomNavbarWrapper {...props} />}  
+  initialRouteName="HomeScreen"
+>
       <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="BookingScreen" component={BookingScreen} />
       <Tab.Screen name="BlankScreen" component={BlankScreen} />
+      <Tab.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
       <Tab.Screen name="AccountScreen" component={AccountScreen} />
     </Tab.Navigator>
   );
 }
-
 export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <NavigationContainer>
@@ -115,6 +130,7 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
       >
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Signin" component={Signin} />
+        
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen
@@ -155,13 +171,18 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="AppVersion" component={AppVersion} />
         <Stack.Screen name="Certificates" component={Certificates} />
         <Stack.Screen name="HomeServices" component={HomeServices} />
-        <Stack.Screen
-          name="BookAppointmentScreen"
-          component={BookAppointmentScreen}
-        />
+        
         <Stack.Screen name="ForgetPassword" component={ForgotPassword} />
         <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
         <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />
+        <Stack.Screen name="VideosScreen" component={VideosScreen}/>
+        <Stack.Screen name="CloneBookAppointment" component={CloneBookAppointment}/>
+        <Stack.Screen name="WalletScreen" component={WalletScreen}/>
+        <Stack.Screen name="LikedProductScreen" component={LikedProductScreen}/>
+        <Stack.Screen name="SettingScreen" component={SettingScreen}/>
+        <Stack.Screen name="BookingSeats" component={BookingSeats}/>
+        <Stack.Screen name="BookingSeats1" component={BookingSeats1}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );

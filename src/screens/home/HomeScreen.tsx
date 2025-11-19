@@ -20,12 +20,31 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const { width } = Dimensions.get("window");
+const extractVideoId = (url) => {
+  if (!url) return null;
 
+  // Case 1: Normal YouTube link
+  const regex1 = /v=([^&]+)/;
+  const match1 = url.match(regex1);
+  if (match1) return match1[1];
 
-const VideoCard = ({ videoId }: { videoId: string }) => {
+  // Case 2: Shortened youtu.be link
+  const regex2 = /youtu\.be\/([^?]+)/;
+  const match2 = url.match(regex2);
+  if (match2) return match2[1];
+
+  // Case 3: If already ID
+  if (url.length === 11) return url;
+
+  return null;
+};
+
+const VideoCard = ({ videoId }) => {
   const cardWidth = wp("40%");
-  const cardHeight = hp('40%') // 16:9 ratio
-  const [playing, setPlaying] = useState(false);
+  const cardHeight = hp("40%");
+
+  // EXTRACT ID SAFELY (always safe)
+  const finalVideoId = extractVideoId(videoId);
 
   const html = `
    <html>
@@ -37,20 +56,20 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
             padding: 0;
             overflow: hidden;
             background-color: transparent;
-            height : '100%',
-            width : '100%'
+            height:100%;
+            width:100%;
           }
-           .video-container {
+          .video-container {
             position: relative;
             width: 100%;
             height: 100%;
             overflow: hidden;
           }
           iframe {
-           position: absolute;
+            position: absolute;
             top: 50%;
             left: 50%;
-            width: 177.77%; /* 100 / (9/16) to maintain cover */
+            width: 177.77%;
             height: 100%;
             transform: translate(-50%, -50%);
             border: 0;
@@ -59,14 +78,14 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
       </head>
       <body>
         <iframe
-          src="https://www.youtube.com/embed/${videoId}?controls=0&modestbranding=1&rel=0&fs=0&autoplay=${playing ? 1 : 0}"
+          src="https://www.youtube.com/embed/${finalVideoId}?controls=0&modestbranding=1&rel=0&fs=0&autoplay=1"
           frameborder="0"
           allow="autoplay; encrypted-media"
           allowfullscreen
         ></iframe>
       </body>
     </html>
-  `
+  `;
 
   try {
     return (
@@ -85,35 +104,12 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
           source={{ html }}
           style={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
           scrollEnabled={false}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
         />
-
-        {!playing && (
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: [{ translateX: -25 }, { translateY: -25 }],
-              zIndex: 10,
-            }}
-            onPress={() => setPlaying(true)}
-          >
-            <View
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: "rgba(255,255,255,0.8)",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>▶</Text>
-            </View>
-          </TouchableOpacity>
-        )}
       </View>
-
     );
   } catch (e) {
     console.log("Error rendering YouTubePlayer:", e);
@@ -122,9 +118,12 @@ const VideoCard = ({ videoId }: { videoId: string }) => {
 };
 
 
+
 const HomeScreen = () => {
-  const [gender, setGender] = useState<'Male' | 'Female'>('Male');
+  const [gender, setGender] = useState("male");
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
+
   const { theme } = useTheme(); // ✅ get current theme
   // Fixed Navigation handler function
   const { addToCart } = useCart();
@@ -135,6 +134,25 @@ const HomeScreen = () => {
 
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('userData');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          console.log("📦 Loaded user from AsyncStorage:", parsed);
+
+          // Handle both structures: flat or nested user
+          const userInfo = parsed?.user ? parsed.user : parsed;
+          setUser(userInfo);
+        }
+      } catch (error) {
+        console.log("❌ Error loading user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     requestAppPermissions();
@@ -142,25 +160,51 @@ const HomeScreen = () => {
 
   const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
-    console.log('API Token: ', token);
     console.log("token accept")
     return token;
   }
 
-  const onRefresh = () => {
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);   // start loading
+
+      await Promise.all([
+        fetchServices(),
+        fetchHomeServices(),
+        fetchCertificates(),
+        fetchAboutData(),
+        fetchVideos(),
+        fetchProducts(),
+        fetchPackages(),
+        fetchSpecialOffers(),
+      ]);
+
+      console.log("✅ All APIs loaded");
+    } catch (error) {
+      console.error("Error fetching all data:", error);
+    } finally {
+      setLoading(false);  // stop loading
+    }
+  };
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+  const onRefresh = async () => {
     setRefreshing(true);
     Animated.timing(translateY, {
       toValue: 50,
       duration: 300,
       useNativeDriver: true,
     }).start();
-    setTimeout(() => {
-      setRefreshing(false);
-      Animated.timing(translateY, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
-    }, 1500);
+
+    await fetchAllData();
+
+    Animated.timing(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+
+    setRefreshing(false);
   };
 
   const handleSectionNavigation = (section: string) => {
@@ -173,9 +217,6 @@ const HomeScreen = () => {
         break;
       case 'products':
         navigation.navigate('OurProducts');
-        break;
-      case 'videos':
-        navigation.navigate('Videos')
         break;
       case 'certificates':
         navigation.navigate('Certificates')
@@ -191,86 +232,19 @@ const HomeScreen = () => {
         navigation.navigate('HomeServices');
         console.log('Navigate to Product Packages Screen');
         break;
+      case 'videos':
+        navigation.navigate('VideosScreen');
+        break;
       default:
         console.log('Unknown section');
     }
   };
 
-  // Services (added short description)
-  // const services = [
-  //   {
-  //     id: '1',
-  //     name: 'Hair Cut',
-  //     price: '350.00',
-  //     desc: 'Stylish cut with blow dry',
-  //     image: [require('../../assets/images/haircut1.png'),
-  //     require('../../assets/images/man-service1.jpg')
-  //     ],
-  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  //   },
-  //   {
-  //     id: '2',
-  //     name: 'Hair Coloring',
-  //     price: '400.00',
-  //     desc: 'Long-lasting shades',
-  //     image: [require('../../assets/images/haircolor1.png'),
-  //     require('../../assets/images/man-service2.jpg')
-  //     ],
-  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  //   },
-  //   {
-  //     id: '3',
-  //     name: 'Facial',
-  //     price: '600.00',
-  //     desc: 'Glow facial therapy',
-  //     image: [require('../../assets/images/facial.jpg'),
-  //     require('../../assets/images/man-service3.jpg'),
-  //     ],
-  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  //   },
-  //   {
-  //     id: '4',
-  //     name: 'Hair Cut',
-  //     price: '350.00',
-  //     desc: 'Stylish cut with blow dry',
-  //     image: [require('../../assets/images/haircut1.png'),
-  //     require('../../assets/images/man-service4.jpg')
-  //     ],
-  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  //   },
-  //   {
-  //     id: '5',
-  //     name: 'Hair Coloring',
-  //     price: '400.00',
-  //     desc: 'Long-lasting shades',
-  //     image: [require('../../assets/images/haircolor1.png'),
-  //     require('../../assets/images/man-service5.jpg')
-  //     ],
-  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  //   },
-  //   {
-  //     id: '6',
-  //     name: 'Facial',
-  //     price: '600.00',
-  //     desc: 'Glow facial therapy',
-  //     image: [require('../../assets/images/facial.jpg'),
-  //     require('../../assets/images/man-service6.jpg')
-  //     ],
-  //     highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-  //     extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  //   },
-  // ];
-
   const [services, setServices] = useState([]);
   const fetchServices = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/ourservice', {
         method: "GET",
         headers: {
@@ -289,125 +263,85 @@ const HomeScreen = () => {
   }
 
 
-  useEffect(() => {
-    fetchServices();
-  }, [])
+
   // Products (added rating + tag)
-  const products = [
-    {
-      id: '1',
-      name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product1.jpg'),
-      require('../../assets/images/female-product1.jpg')
-      ],
-      description: '100% natural oil',
-      reviews: 5802,
-    },
-    {
-      id: '2',
-      name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product2.jpg')],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '3',
-      name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
-      price: '₹299',
-      offer: '20%OFF',
-      rating: '4.1',
-      tag: 'Salon grade',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Detox & deep clean',
-      reviews: 2750,
-    },
-    {
-      id: '4',
-      name: ['Shave Cream ', 'MediCube Hair Mask'],
-      price: '₹299',
-      offer: '25%OFF',
-      rating: '4.1',
-      tag: '100% natural oil',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product3.jpg')
-      ],
-      description: 'Anti-dandruff formula',
-      reviews: 3300,
-    },
-    {
-      id: '5',
-      name: ['Detan — Face', 'Foaming Face Wash Gel'],
-      price: '₹299',
-      offer: '33%OFF',
-      rating: '4.1',
-      tag: 'Instant visible result',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product4.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-    {
-      id: '6',
-      name: ['Nivea Hair spa', "Plum FaceWash - 500ml"],
-      price: '₹299',
-      offer: '20%OFF',
-      rating: '4.1',
-      tag: 'Salon grade',
-      image: [require('../../assets/images/male-product11.jpg'),
-      require('../../assets/images/female-product2.jpg')
-      ],
-      description: 'Smooth & shiny hair',
-      reviews: 3100,
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const fetchProducts = async (selectedGender) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      // 🔥 Final Gender (priority → function param > state > default)
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender (Products):", g);
+
+      const res = await fetch("https://naushad.onrender.com/api/products", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const json = await res.json();
+      console.log("📦 Product Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER (exact same as product-packages)
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Products:", data);
+
+      setProducts(data);
+    } catch (error) {
+      console.log("🔥 Product error:", error);
+    }
+  };
+  useEffect(() => {
+    fetchProducts(gender);
+  }, [gender]);
+
 
   // Videos row (thumbnails with play)
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg";
+  const fetchVideos = async () => {
+    try {
+      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+      const token = await getToken();
 
-        const res = await fetch("https://naushad.onrender.com/api/youtube", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+      const res = await fetch("https://naushad.onrender.com/api/youtube", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-        const data = await res.json();
-        setVideos(data);
-        console.log("Youtube Token : ", token);
-        console.log("Youtube Data:", data);
-      } catch (err) {
-        console.log("Error loading:", err);
-      }
-    };
+      const data = await res.json();
+      setVideos(data);
+      //console.log("Youtube Token : ", token);
+      console.log("Youtube Data:", data);
+    } catch (err) {
+      console.log("Error loading:", err);
+    }
+  };
 
-    fetchVideos();
-  }, []);
 
 
   // Certificates (two items like the mock)
   const [certificates, setCertificates] = useState<any[]>([]);
   const fetchCertificates = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
@@ -427,128 +361,139 @@ const HomeScreen = () => {
     }
   }
 
+  const [packages, setPackages] = useState([]);
+  const fetchPackages = async (selectedGender) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      // 🔥 SAME LOGIC — param > state > default
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender (Packages):", g);
+
+      const response = await fetch("https://naushad.onrender.com/api/packages", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const json = await response.json();
+      console.log("📦 Packages Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Packages:", data);
+
+      setPackages(data);
+    } catch (err) {
+      console.log("🔥 Packages error:", err);
+    }
+  };
   useEffect(() => {
-    fetchCertificates();
-  }, []);
-  // Packages (two-column cards)
-  const packages = [
-    {
-      id: '1',
-      title: 'Basic hair cut package',
-      price: '₹ 499',
-      services: 'Haircut , Shampoo',
-      about: 'Perfect for daily grooming',
-      image: require('../../assets/pkgImage2.png'),
-      discount: '🔖 Save ₹300 on festive booking',
-      review: 23,
-      rating: 4.5,
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '2',
-      title: 'Deluxe Facial package',
-      price: '₹ 899',
-      services: 'Exfoliation , Massage',
-      about: 'Refresh & glow routine',
-      image: require('../../assets/pkgImage1.png'),
-      discount: '🔖 Save ₹300 on festive booking',
-      review: 23,
-      rating: 4.5,
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '3',
-      title: 'Basic hair cut package',
-      price: '₹ 499',
-      services: 'Haircut , Shampoo',
-      about: 'Perfect for daily grooming',
-      image: require('../../assets/pkgImage3.png'),
-      discount: '🔖 Save ₹300 on festive booking',
-      review: 23,
-      rating: 4.5,
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '4',
-      title: 'Deluxe Facial package',
-      price: '₹ 899',
-      services: 'Exfoliation , Massage',
-      about: 'Refresh & glow routine',
-      image: require('../../assets/pkgImage1.png'),
-      review: 23,
-      rating: 4.5,
-      discount: '🔖 Save ₹300 on festive booking',
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '5',
-      title: 'Basic hair cut package',
-      price: '₹ 499',
-      services: 'Haircut , Shampoo',
-      about: 'Perfect for daily grooming',
-      image: require('../../assets/pkgImage1.png'),
-      review: 23,
-      rating: 4.5,
-      discount: '🔖 Save ₹300 on festive booking',
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-    {
-      id: '6',
-      title: 'Deluxe Facial package',
-      price: '₹ 899',
-      services: 'Exfoliation , Massage',
-      about: 'Refresh & glow routine',
-      image: require('../../assets/pkgImage1.png'),
-      review: 23,
-      rating: 4.5,
-      discount: '🔖 Save ₹300 on festive booking',
-      serviceList: [
-        'Cleansing & Scrubbing',
-        'Steam & Blackhead Removal',
-        'Relaxing Massage',
-        'Hydrating Mask',
-        'Skin Brightening Serum',
-      ],
-    },
-  ];
+    fetchPackages(gender);
+  }, [gender]);
+
 
   // Product packages (small horizontal cards)
-  const [productPackages, setProductPackage] = useState([]);
-  const fetchProductPackages = async () => {
+  const [productPackages, setProductPackages] = useState([]);
+  const fetchProductPackages = async (selectedGender) => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
-      const response = await fetch('https://naushad.onrender.com/api/product-packages', {
+      const token = await getToken();
+      if (!token) return;
+
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender:", g);
+
+      const response = await fetch(
+        `https://naushad.onrender.com/api/product-packages`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const json = await response.json();
+      console.log("📦 Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Data:", data);
+
+      setProductPackages(data);
+    } catch (err) {
+      console.log("🔥 Product package error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductPackages(gender); // whenever gender changes
+  }, [gender]);
+
+  const [offers, setOffers] = useState([]);
+  const fetchSpecialOffers = async (selectedGender) => {
+    try {
+      const token = await getToken();
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender for special offers:", g);
+
+      const response = await fetch(`https://naushad.onrender.com/api/offers?gender=${gender}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const json = await response.json();
+      console.log("📦 Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Special Filtered Data:", data);
+      setOffers(data);
+    } catch (error) {
+      console.log("special offer error : ", error)
+    }
+  };
+
+  const [homeServices, setHomeService] = useState([]);
+  const fetchHomeServices = async () => {
+    try {
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      const response = await fetch('https://naushad.onrender.com/api/home-services/', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -556,82 +501,21 @@ const HomeScreen = () => {
         },
       });
       const json = await response.json();
-      console.log("Product package response : ", json);
-      console.log('Product package token : ', token)
-      setProductPackage(json.data);
-    } catch (err) {
-      console.log("Product package error : ", err)
-    }
-  }
-
-  useEffect(() => {
-    fetchProductPackages();
-  }, [])
-
-  const offers = [
-    {
-      id: "1",
-      title: "Haircut",
-      discount: "20% off",
-      date: "July 16 - July 24",
-      imageMale: require('../../assets/images/man-offer.jpg'),
-      imageFemale: require("../../assets/images/specialhaircut.png"),
-    },
-    {
-      id: "2",
-      title: "Facial",
-      discount: "15% off",
-      date: "July 20 - July 28",
-      imageMale: require('../../assets/images/male-offer1.jpg'),
-      imageFemale: require("../../assets/images/female-offer1.jpg"),
-    },
-    {
-      id: "3",
-      title: "Spa",
-      discount: "25% off",
-      date: "Aug 1 - Aug 10",
-      imageMale: require('../../assets/images/male-offer2.jpg'),
-      imageFemale: require("../../assets/images/female-offer2.jpg"),
-    },
-    {
-      id: "4",
-      title: "Shaving",
-      discount: "10% off",
-      date: "Aug 5 - Aug 15",
-      imageMale: require('../../assets/images/male-offer3.jpg'),
-      imageFemale: require('../../assets/images/female-offer3.jpg'),
-    },
-  ];
-
-  const [homeServices, setHomeService] = useState([]);
-  const fetchHomeServices = async () => {
-    try {
-      //const token =await  getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
-      const response = await fetch('https://naushad.onrender.com/api/home-services/', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`, // Postman me jo token use kiya tha
-          'Content-Type': 'application/json',
-        },
-      });
-      const json = await response.json();
       console.log("Home service token : ", token)
       console.log("Home services : ", json);
+      console.log(json.data[0].image)
       setHomeService(json.data);
     } catch (error) {
       console.log("Home services error : ", error)
     }
   }
-  useEffect(() => {
-    fetchHomeServices();
-  }, [])
+
 
   const [aboutData, setAboutData] = useState([]);
   const fetchAboutData = async () => {
     try {
-      //const token = await getToken();
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
+      const token = await getToken();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/about-salon', {
         method: 'GET',
         headers: {
@@ -640,742 +524,587 @@ const HomeScreen = () => {
         },
       });
       const json = await response.json();
-      console.log("About Data token : ", token)
-      console.log("About Data : ", json);
+      console.log("About Salon Data token : ", token)
+      console.log("About Salon Data : ", json);
       setAboutData(json.data);
     } catch (error) {
       console.log("About Data : ", error)
     }
   }
-  useEffect(() => {
-    fetchAboutData();
-  }, [])
+
+  const onGenderSelect = async (value) => {
+    const g = value.toLowerCase();
+    await AsyncStorage.setItem("selectedGender", g);
+    setGender(g);       // UI update (home screen)
+  };
+
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-
-      {showLiked ? (
-        likedItems.length > 0 ? (
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: theme.dark ? '#000' : '#fff',
-              paddingVertical: hp('2%'),
-              paddingHorizontal: wp('3%'),
-            }}
+    loading ? (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    ) : (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} tintColor={COLORS.primary} />
+            }
+            contentContainerStyle={{ paddingBottom: hp('10%') }}
           >
-            {/* 🔹 Header (only once) */}
-            <Head title="Liked Products" />
-
-            {/* 🔹 Liked products list */}
-            <FlatList
-              data={likedItems}
-              showsHorizontalScrollIndicator={false}
-              numColumns={2}
-              keyExtractor={(item) => item.id.toString()}
-
-              renderItem={({ item }) => {
-                const selectedImage = Array.isArray(item.image)
-                  ? typeof item.image[0] === 'string'
-                    ? { uri: item.image[0] }
-                    : item.image[0]
-                  : typeof item.image === 'string'
-                    ? { uri: item.image }
-                    : item.image;
-
-                return (
-                  <View
-                    style={[
-                      styles.likedProductCard,
-                      {
-                        backgroundColor: '#FFFFFF',
-                        borderColor: theme.dark ? '#333' : '#ddd',
-                      },
-                    ]}
+            {/* Fixed Header */}
+            <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+              {/* Left Section */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
+                <TouchableOpacity>
+                  <Image
+                    source={require('../../assets/location.png')}
+                    style={[styles.locationbtn, { tintColor: theme.textPrimary }]}
+                  />
+                </TouchableOpacity>
+                <View style={{ flexDirection: 'column', marginLeft: wp('3%'), width: wp('20%') }}>
+                  <Text
+                    style={[styles.welcomeText, { color: theme.textPrimary }]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                   >
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate('ProductDetails', { product: item })
-                      }
-                    >
-                      <Image
-                        resizeMode="cover"
-                        source={selectedImage}
-                        style={styles.ImageStyle}
-                      />
+                    {user
+                      ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
+                      : 'User Name'}
+                    {/* Hi Anchal ! */}
+                  </Text>
+                  <Text style={[styles.locationText, { color: theme.textPrimary }]}>
+                    Indore
+                  </Text>
+                </View>
+              </View>
 
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.likedProductName,
+              {/* Center Logo */}
+              <Image
+                source={require('../../assets/images/logo.png')}
+                style={[styles.logo, { tintColor: theme.textPrimary }]}
+              />
 
-                        ]}
+              {/* Right Icons */}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+                  <Image
+                    source={require('../../assets/cart2.png')}
+                    style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%') }}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => navigation.navigate('Notification')}>
+                  <Image
+                    source={require('../../assets/notification3.png')}
+                    style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%') }}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => navigation.navigate("LikedProductScreen", { likedProducts, products, theme })}>
+                  <View
+                    style={{
+                      width: wp('7%'),
+                      height: wp('7%'),
+                      borderRadius: wp('5%'),
+                      borderWidth: wp('0.4%'),
+                      borderColor: '#aca6a6ff',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginLeft: wp('2%'),
+                      backgroundColor: '#fff',
+                    }}
+                  >
+                    <Image
+                      source={require('../../assets/heart.png')}
+                      style={{ width: wp('3.5%'), height: wp('3.5%') }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.genderToggleContainer}>
+              {/* Label Row 
+            <RadioButton
+              type="gender"
+              selected={gender}           // Male / female / Male / Female etc.
+              onSelect={(value) => {
+                setGender(value);         // value as-is
+                fetchProductPackages(value); // API call with exact value
+              }}
+              labels={["Male", "Female"]}
+            /> */}
+              <RadioButton
+                type="gender"
+                selected={gender}
+                onSelect={async (value) => {
+                  const formatted = value.toLowerCase();
+
+                  // 1️⃣ Save gender in AsyncStorage (GLOBAL FILTER)
+                  await AsyncStorage.setItem("selectedGender", formatted);
+
+                  // 2️⃣ Update local state
+                  setGender(formatted);
+
+                  // 3️⃣ Call all APIs with new gender
+                  fetchProductPackages(formatted);
+                  fetchSpecialOffers(formatted);
+                  fetchProducts(formatted);
+                  fetchPackages(formatted);
+                }}
+                labels={["Male", "Female"]}
+                values={["male", "female"]}
+              />
+            </View>
+
+            {/* Search Bar with filter */}
+            <View style={styles.searchFilContain}>
+              {/* Search Bar */}
+              <View style={[styles.searchBar]}>
+                <Icon name="search" size={wp('5%')} color="#9E9E9E" />
+                <TextInput
+                  placeholder="Search"
+                  placeholderTextColor="#9E9E9E"
+                  style={styles.searchInput}
+                />
+              </View>
+            </View>
+            {/* Special Offers header with navigation */}
+            <SectionTitle title="Special Offers" showSeeAll={false} color={theme.textPrimary} />
+
+            {/* Special Offer split card */}
+            <View style={{ height: hp('27%'), marginBottom: hp('4%') }}>
+              <Swiper
+                key={offers.length} // forces re-render when offers change
+                autoplay
+                autoplayTimeout={3}
+                showsPagination
+                dotStyle={{ backgroundColor: "#ccc" }}
+                activeDotStyle={{ backgroundColor: COLORS.primary }}
+                paginationStyle={{ top: hp('28%') }}
+              >
+                {offers.map((item, index) => (
+                  <View key={index} style={[styles.offerCard, { backgroundColor: COLORS.primary }]}>
+                    <View style={[styles.offerLeft, { backgroundColor: COLORS.primary }]}>
+                      <Text style={styles.offerBig}>{item.title}</Text>
+                      <Text style={styles.offerSmall}>{item.discount}%</Text>
+                      <Text style={styles.offerDate}>Date : {item.date}</Text>
+                      <TouchableOpacity
+                        style={styles.offerBtn}
+                        onPress={() => navigation.navigate("OfferScreen")}
                       >
-                        {item.name}
-                      </Text>
+                        <Text style={styles.offerBtnText}>Offer now</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      style={styles.offerRightImage}
+                    />
+                  </View>
+                ))}
+              </Swiper>
+            </View>
 
-                      <View style={styles.OurterPriceContainer}>
-                        <View style={styles.InnerPriceContainer}>
-                          <Text
-                            style={[
-                              styles.priceStyle,
-                            ]}
-                          >
-                            {item.price}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.oldPriceStyle,
+            {/* Services Section with navigation */}
+            <SectionTitle
+              title="Our services"
+              onPress={() => handleSectionNavigation('services')}
+            />
+            <FlatList
+              data={services.data}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={item => item._id}
+              contentContainerStyle={{ paddingHorizontal: wp('2%') }}
+              renderItem={({ item }) => (
+                <View style={styles.serviceCard}>
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.serviceImage}
+                  />
+                  <View style={styles.nameItem}>
+                    <Text style={styles.serviceName}>{item.serviceName}</Text>
+                    <Text style={styles.servicePrice}>₹{item.price}</Text>
+                  </View>
+                  <Text style={styles.serviceDesc}>{item.title}</Text>
+                  <View style={{ flex: 1 }} />
 
-                            ]}
-                          >
-                            {item.oldPrice}
-                          </Text>
-                        </View>
+                  <TouchableOpacity
+                    style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
+                    onPress={() => {
+                      addToCart({
+                        id: item._id.toString(),
+                        name: item.name,
+                        price: item.price,
+                        qty: 1, // default quantity
+                      });
+                      navigation.navigate('ServiceDetails', {
+                        item: {
+                          ...item,
+                          image: item.image, // ✅ Corrected line
+                        },
+                      })
+                    }
+                    }
+                  >
+                    <Text style={styles.bookBtnText}>Book now</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+
+            {/* Appointment Banner */}
+            <ImageBackground
+              resizeMode='cover'
+              source={
+                gender === 'male'
+                  ? require('../../assets/images/man-banner.jpg')
+                  : require('../../assets/images/image1.jpg')
+              }
+              style={styles.appointmentBanner}
+
+            >
+              <View style={styles.overlay}>
+                <Text style={styles.bannerText}>Book your appointment today</Text>
+                <Text style={styles.bannerText}>
+                  and take your look to the next level
+                </Text>
+                <TouchableOpacity onPress={() => navigation.navigate("CloneBookAppointment")}
+                  style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
+                  <Text style={[styles.bookBtnText, { color: '#fff', fontWeight: 'bold' }]}>Book Appointment</Text>
+                </TouchableOpacity>
+              </View>
+            </ImageBackground>
+            {/* Products Section with navigation */}
+            <SectionTitle
+              title="Get our products"
+              onPress={() => handleSectionNavigation('products')}
+            />
+            <FlatList
+              data={products}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={{ paddingHorizontal: wp('1.5%') }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: item.image } })}
+                  android_ripple={{ color: 'transparent' }}
+                  activeOpacity={1}
+
+                >
+                  <View style={styles.productCard}>
+                    <Image
+
+                      // gender === 'Male' ? item.image[0] : item.image[1]
+                      source={{ uri: item.image }}
+                      style={styles.productImage} />
+                    <Text style={styles.productName} numberOfLines={2}>
+                      {/* {gender === 'Male' ? item.name[0] : item.name[1]} */}
+                      {item.name}
+                    </Text>
+                    <Text style={styles.productPrice}>
+                      ₹{item.price}{' '}
+                      <Text style={{ color: '#29A244' }}>({item.offer})</Text>
+                    </Text>
+                    {/* rating + tag pills */}
+                    <View
+                      style={{
+                        flexDirection: 'column',
+                        gap: wp('2%'),
+                        marginTop: hp('1%'),
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <View style={styles.pill}>
+                        <Icon name="star" size={wp('3%')} color="#29A244" />
+                        <Text style={styles.pillText}>{item.rating}</Text>
+                      </View>
+                      <View style={[styles.pill, { backgroundColor: '#E8F6EF' }]}>
                         <Text
-                          style={[
-                            styles.DiscountStyle,
-                            { color: '#42BA86' },
-                          ]}
+                          style={[styles.pillText, { color: '#29A244' }]}
+                          numberOfLines={1}
                         >
-                          {item.discount}
+                          {item.tag}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+
+            {/* Videos with navigation */}
+            <SectionTitle
+              title="Videos"
+              onPress={() => handleSectionNavigation('videos')}
+            />
+            <FlatList
+              data={videos.data}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={{ paddingHorizontal: wp('3%'), marginVertical: hp('2%') }}
+              renderItem={({ item }) =>
+                <VideoCard videoId={item.videoId} />
+              }
+            />
+
+            {/* Certificates with navigation */}
+            <SectionTitle
+              title="Our Certificates"
+              onPress={() => handleSectionNavigation('certificates')}
+            />
+            <FlatList
+              data={certificates}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={{
+                paddingHorizontal: wp('2%'),
+                backgroundColor: COLORS.primary,
+                borderRadius: wp('3%'),
+                marginVertical: hp('2%')
+              }}
+              style={{
+                marginHorizontal: wp('3%'), // FlatList ke bahar spacing
+              }}
+              renderItem={({ item }) => (
+                <View style={styles.certItem}>
+                  <Image
+                    source={{ uri: item.imageUrl.replace('http://', 'https://') }}
+                    style={styles.certImage}
+                  />
+                  <Text numberOfLines={2} style={[styles.certCaption, { color: '#fff' }]}>
+                    {item.title}
+                  </Text>
+                </View>
+              )}
+            />
+
+            {/* About our salon - No "See all" button needed */}
+            <SectionTitle title="About our salon" showSeeAll={false} />
+
+            <View style={[styles.aboutContainer, { backgroundColor: theme.background }]}>
+              <FlatList
+                data={aboutData}
+                keyExtractor={(item) => item._id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+
+                renderItem={({ item }) => {
+                  return (
+                    <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
+                      <Image
+                        source={{ uri: item.image }}
+                        style={{ width: wp("6%"), height: wp("6%"), borderRadius: wp("1%") }}
+                        resizeMode="contain"
+                      />
+                      <Text style={[styles.aboutTop, { color: theme.background }]}>
+                        {item.title}
+                      </Text>
+                      <Text style={[styles.aboutBottom, { color: theme.background }]}>
+                        {item.description}
+                      </Text>
+                    </View>
+                  );
+                }}
+                contentContainerStyle={{ paddingHorizontal: wp("2%") }}
+              />
+            </View>
+
+            {/* Our Packages (2-up grid) with navigation */}
+            <SectionTitle
+              title="Our Packages"
+              onPress={() => handleSectionNavigation('packages')}
+            />
+            <FlatList data={packages}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ paddingHorizontal: wp('2%') }}
+              renderItem={({ item }) => (
+                <View style={[styles.packageCard, { backgroundColor: COLORS.secondary }]}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Text style={styles.packageTitle} numberOfLines={2}>{item.title}</Text>
+                    <Text style={styles.packagePrice}>₹{item.price}</Text>
+                  </View>
+                  <View style={{ marginTop: hp('2%') }}>
+                    <Text style={styles.packageLabel}>
+                      <Text style={styles.packageLabelText}>Services:- </Text>
+                      <Text style={styles.packageValue}>{item.services}</Text>
+                    </Text>
+                    <Text style={[styles.packageLabel, { marginTop: 4 }]}>
+                      <Text style={styles.packageLabelText}>About:- </Text>
+                      <Text style={styles.packageValue}>{item.about}</Text>
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={[styles.packageBtn, { backgroundColor: COLORS.primary }]} onPress={() => navigation.navigate('PackageDetails', { item })}>
+                    <Text style={styles.packageBtnText}>Book now</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+
+            {/* Product Packages (horizontal small cards) with navigation */}
+            <SectionTitle
+              title="Product Packages"
+              onPress={() => handleSectionNavigation('productPackages')}
+            />
+            <FlatList
+              data={productPackages}
+              horizontal
+              keyExtractor={(item) => item._id}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 10 }}
+              renderItem={({ item }) => (
+                <View style={{ marginHorizontal: wp("2%"), paddingVertical: hp('2%'), marginBottom: hp('2%') }}>
+                  <Shadow
+                    distance={3}
+                    startColor={COLORS.shadow}
+                    offset={[0, 13]}
+                    style={{ borderRadius: wp("4%") }}
+                  >
+                    <View
+                      style={{
+                        width: wp("35%"),
+                        height: hp("23%"),
+                        backgroundColor: "#EDEDED",
+                        borderRadius: wp("4%"),
+                        overflow: "hidden",
+                        alignItems: "center",
+                      }}
+                    >
+                      {/* === Folded Top Corners === */}
+                      <Svg
+                        height={hp("25%")}
+                        width={wp("35%")}
+                        style={{ position: "absolute", top: 0, left: 0 }}
+                      >
+                        {/* Left Fold */}
+                        <Polygon
+                          points={`0,0 ${wp("6%")},0 0,${wp("6%")}`}
+                          fill={theme.background}
+                        />
+                        {/* Right Fold */}
+                        <Polygon
+                          points={`${wp("35%")},0 ${wp("35%") - wp("6%")},0 ${wp("35%")},${wp("6%")}`}
+                          fill={theme.background}
+                        />
+
+                      </Svg>
+
+                      {/* === Header Hexagon === */}
+                      <View style={{ position: "absolute", top: 0, alignItems: "center", justifyContent: 'center' }}>
+                        <Svg height={hp("6%")} width={wp("22%")}>
+                          <Polygon
+                            points={`0,0 ${wp("22%")},0 ${wp("22%")},${hp("3%")} ${wp("11%")},${hp("6%")} 0,${hp("3%")}`}
+                            fill={COLORS.primary}
+                          />
+                        </Svg>
+                        <Text
+                          style={{
+                            position: "absolute",
+                            top: hp("1%"),
+                            color: "white",
+                            fontWeight: "600",
+                            fontSize: hp("1%"),
+                            alignSelf: 'center'
+                          }}
+                        >
+                          {item.name}
                         </Text>
                       </View>
 
-                      <View style={styles.descContain}>
-                        <Image
-                          resizeMode="contain"
-                          source={item.featureIcon}
-                          style={styles.featureIconStyle}
-                        />
+                      {/* === Content === */}
+                      <View style={{ marginTop: hp("8%"), width: "85%" }}>
+                        <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
+                          Rate:- <Text style={{ fontWeight: "700" }}>₹ {item.price}</Text>
+                        </Text>
+                        <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
+                          Products:-{""}
+                          <Text style={{ fontWeight: "700" }}>
+                            {Array.isArray(item.items) ? item.items.join(", ") : item.items}
+                          </Text>
+                        </Text>
                         <Text
-                          style={[
-                            styles.DescStyle,
-
-                          ]}
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
+                          style={{
+                            marginTop: hp("1%"),
+                            fontStyle: "italic",
+                            fontSize: hp("1.3%"),
+                            color: COLORS.primary,
+                            textAlign: "center",
+                          }}
                         >
                           {item.description}
                         </Text>
                       </View>
-                    </TouchableOpacity>
 
-                    <View style={styles.OutRatContain}>
-                      <View
-                        style={[
-                          styles.InnerRatContain,
-                          {
-                            backgroundColor: theme.dark
-                              ? '#0f8a43'
-                              : '#09932B',
-                          },
-                        ]}
+                      {/* === Button === */}
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('ProductPakage', { item })}
+                        style={{
+                          backgroundColor: COLORS.primary,
+                          paddingVertical: hp("0.8%"),
+                          paddingHorizontal: wp("5%"),
+                          borderRadius: wp("5%"),
+                          marginTop: hp("1.5%"),
+                        }}
                       >
-                        <Text
-                          style={[
-                            styles.ratingTextStyle,
-                            { color: '#fff' },
-                          ]}
-                        >
-                          {item.rating}
+                        <Text style={{ color: "white", fontWeight: "600", fontSize: hp("1.3%") }}>
+                          Book now
                         </Text>
-                        <Image
-                          resizeMode="contain"
-                          style={styles.starStyle}
-                          source={require('../../assets/OurProduct/star1.png')}
-                        />
-                      </View>
-                      <Text
-                        style={[
-                          styles.reviewStyle,
-                          { color: theme.dark ? '#ccc' : '#ACACAC' },
-                        ]}
-                      >
-                        ({item.reviews})
-                      </Text>
+                      </TouchableOpacity>
                     </View>
-                  </View>
-                );
-              }}
-            />
-          </View>
-        ) : (
-          // 🔹 Empty state
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: theme.dark ? '#000' : '#fff',
-              paddingVertical: hp('2%'),
-              paddingHorizontal: wp('3%'),
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                gap: wp('25%'),
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => navigation.replace('MainTabs', { from: 'Home' })}
-                style={{ width: wp('5%'), height: wp('10%') }}
-              >
-                <Icon
-                  name="chevron-back"
-                  size={wp('7%')}
-                  color={theme.textPrimary}
-                />
-              </TouchableOpacity>
-
-              <Text
-                style={{
-                  fontSize: wp('5%'),
-                  fontWeight: 'bold',
-                  color: theme.textPrimary,
-                }}
-              >
-                Liked Products
-              </Text>
-            </View>
-
-            <Text
-              style={{
-                paddingVertical: hp('2%'),
-                paddingHorizontal: wp('3%'),
-                fontSize: wp('5%'),
-                color: theme.textPrimary,
-              }}
-            >
-              No liked products yet ❤️
-            </Text>
-          </View>
-        )
-      ) : (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} tintColor={COLORS.primary} />
-          }
-          contentContainerStyle={{ paddingBottom: hp('10%') }}
-        >
-          {/* Fixed Header */}
-          <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
-            {/* Left Section */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
-              <TouchableOpacity>
-                <Image
-                  source={require('../../assets/location.png')}
-                  style={[styles.locationbtn, { tintColor: theme.textPrimary }]}
-                />
-              </TouchableOpacity>
-              <View style={{ flexDirection: 'column', marginLeft: wp('3%'), width: wp('20%') }}>
-                <Text
-                  style={[styles.welcomeText, { color: theme.textPrimary }]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  Hi {gender === 'Male' ? 'Rahul' : 'Aanchal'} !
-                </Text>
-                <Text style={[styles.locationText, { color: theme.textPrimary }]}>
-                  {gender === 'Male' ? 'Pune' : 'Indore'}
-                </Text>
-              </View>
-            </View>
-
-            {/* Center Logo */}
-            <Image
-              source={require('../../assets/images/logo.png')}
-              style={[styles.logo, { tintColor: theme.textPrimary }]}
+                  </Shadow>
+                </View>
+              )}
             />
 
-            {/* Right Icons */}
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
-                <Image
-                  source={require('../../assets/cart2.png')}
-                  style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%') }}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => navigation.navigate('Notification')}>
-                <Image
-                  source={require('../../assets/notification3.png')}
-                  style={{ marginLeft: wp('2%'), width: wp('7%'), height: wp('7%') }}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => setShowLiked(!showLiked)}>
-                <View
-                  style={{
-                    width: wp('7%'),
-                    height: wp('7%'),
-                    borderRadius: wp('5%'),
-                    borderWidth: wp('0.4%'),
-                    borderColor: '#aca6a6ff',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginLeft: wp('2%'),
-                    backgroundColor: '#fff',
-                  }}
-                >
-                  <Image
-                    source={require('../../assets/heart.png')}
-                    style={{ width: wp('3.5%'), height: wp('3.5%') }}
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-
-          <View style={styles.genderToggleContainer}>
-            {/* Label Row */}
-            <RadioButton
-              type="gender"
-              selected={gender}
-              onSelect={(value) => setGender(value)}
-              labels={["Male", "Female"]}
+            <SectionTitle
+              title="Home services"
+              onPress={() => handleSectionNavigation('homeServices')}
             />
-
-          </View>
-
-
-
-          {/* Search Bar with filter */}
-          <View style={styles.searchFilContain}>
-            {/* Search Bar */}
-            <View style={[styles.searchBar]}>
-              <Icon name="search" size={wp('5%')} color="#9E9E9E" />
-              <TextInput
-                placeholder="Search"
-                placeholderTextColor="#9E9E9E"
-                style={styles.searchInput}
-              />
-            </View>
-          </View>
-          {/* Special Offers header with navigation */}
-          <SectionTitle title="Special Offers" showSeeAll={false} color={theme.textPrimary} />
-
-          {/* Special Offer split card */}
-          <View style={{ height: hp('27%'), marginBottom: hp('4%') }}>
-            <Swiper
-              autoplay
-              autoplayTimeout={3}
-              showsPagination
-              dotStyle={{ backgroundColor: "#ccc", }}
-              activeDotStyle={{ backgroundColor: COLORS.primary, }}
-              paginationStyle={{ top: hp('28%') }}
-            >
-              {offers.map((item) => (
-                <View key={item.id} style={[styles.offerCard, { backgroundColor: COLORS.primary }]}>
-                  <View style={[styles.offerLeft, { backgroundColor: COLORS.primary }]}>
-                    <Text style={styles.offerBig}>{item.title}</Text>
-                    <Text style={styles.offerSmall}>{item.discount}</Text>
-                    <Text style={styles.offerDate}>{item.date}</Text>
-                    <TouchableOpacity
-                      style={styles.offerBtn}
-                      onPress={() => navigation.navigate("OfferScreen")}
-                    >
-                      <Text style={styles.offerBtnText}>Offer now</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <Image
-                    source={gender === "Male" ? item.imageMale : item.imageFemale}
-                    style={styles.offerRightImage}
-                  />
-                </View>
-              ))}
-            </Swiper>
-          </View>
-
-          {/* Services Section with navigation */}
-          <SectionTitle
-            title="Our services"
-            onPress={() => handleSectionNavigation('services')}
-          />
-          <FlatList
-            data={services.data}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item._id}
-            contentContainerStyle={{ paddingHorizontal: wp('2%') }}
-            renderItem={({ item }) => (
-              <View style={styles.serviceCard}>
-                <Image
-                  source={{ uri: `https://naushad.onrender.com${item.imageUrl}` }}
-                  style={styles.serviceImage}
-                />
-                <View style={styles.nameItem}>
-                  <Text style={styles.serviceName}>{item.serviceName}</Text>
-                  <Text style={styles.servicePrice}>₹{item.price}</Text>
-                </View>
-                <Text style={styles.serviceDesc}>{item.title}</Text>
-                <View style={{ flex: 1 }} />
-
-                <TouchableOpacity
-                  style={[styles.bookBtn, { backgroundColor: COLORS.primary }]}
-                  onPress={() => {
-                    addToCart({
-                      id: item._id.toString(),
-                      name: item.name,
-                      price: item.price,
-                      qty: 1, // default quantity
-                    });
-                    navigation.navigate('ServiceDetails', {
-                      item: {
-                        ...item,
-                      image: item.imageUrl
-                      }
-                    })
-                  }
-                  }
-                >
-                  <Text style={styles.bookBtnText}>Book now</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-
-          {/* Appointment Banner */}
-          <ImageBackground
-            resizeMode='cover'
-            source={
-              gender === 'Male'
-                ? require('../../assets/images/man-banner.jpg')
-                : require('../../assets/images/image1.jpg')
-            }
-            style={styles.appointmentBanner}
-
-          >
-            <View style={styles.overlay}>
-              <Text style={styles.bannerText}>Book your appointment today</Text>
-              <Text style={styles.bannerText}>
-                and take your look to the next level
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("BookAppointmentScreen", { from: 'bottomBar', showTab: true })}
-                style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
-                <Text style={[styles.bookBtnText, { color: '#111', fontWeight: 'bold' }]}>Book Appointment</Text>
-              </TouchableOpacity>
-            </View>
-          </ImageBackground>
-
-          {/* Products Section with navigation */}
-          <SectionTitle
-            title="Get our products"
-            onPress={() => handleSectionNavigation('products')}
-          />
-          <FlatList
-            data={products}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingHorizontal: wp('1.5%') }}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => navigation.navigate("ProductDetails", { product: { ...item, image: gender === 'Male' ? item.image[0] : item.image[1] } })}
-                android_ripple={{ color: 'transparent' }}
-                activeOpacity={1}
-
-              >
-                <View style={styles.productCard}>
-                  <Image
-                    source={
-                      gender === 'Male' ? item.image[0] : item.image[1]
-                    }
-                    style={styles.productImage} />
-                  <Text style={styles.productName} numberOfLines={2}>
-                    {gender === 'Male' ? item.name[0] : item.name[1]}
-                  </Text>
-                  <Text style={styles.productPrice}>
-                    {item.price}{' '}
-                    <Text style={{ color: '#29A244' }}>({item.offer})</Text>
-                  </Text>
-
-                  {/* rating + tag pills */}
-                  <View
-                    style={{
-                      flexDirection: 'column',
-                      gap: wp('2%'),
-                      marginTop: hp('1%'),
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <View style={styles.pill}>
-                      <Icon name="star" size={wp('3%')} color="#29A244" />
-                      <Text style={styles.pillText}>{item.rating}</Text>
-                    </View>
-                    <View style={[styles.pill, { backgroundColor: '#E8F6EF' }]}>
-                      <Text
-                        style={[styles.pillText, { color: '#29A244' }]}
-                        numberOfLines={1}
-                      >
-                        {item.tag}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-
-          {/* Videos with navigation */}
-          <SectionTitle
-            title="Videos"
-            onPress={() => handleSectionNavigation('videos')}
-          />
-          <FlatList
-            data={videos.data}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingHorizontal: wp('3%'), marginVertical: hp('2%') }}
-            renderItem={({ item }) =>
-              <VideoCard videoId={item.videoId} />
-            }
-          />
-
-          {/* Certificates with navigation */}
-          <SectionTitle
-            title="Our Certificates"
-            onPress={() => handleSectionNavigation('certificates')}
-          />
-          <FlatList
-            data={certificates}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item._id}
-            contentContainerStyle={{
-              paddingHorizontal: wp('2%'),
-              backgroundColor: COLORS.primary,
-              borderRadius: wp('3%'),
-              marginVertical: hp('2%')
-            }}
-            style={{
-              marginHorizontal: wp('3%'), // FlatList ke bahar spacing
-            }}
-            renderItem={({ item }) => (
-              <View style={styles.certItem}>
-                <Image
-                  source={{ uri: `https://naushad.onrender.com/${item.imageUrl}` }}
-                  style={styles.certImage}
-                />
-                <Text numberOfLines={2} style={styles.certCaption}>
-                  {item.title}
-                </Text>
-              </View>
-            )}
-          />
-
-          {/* About our salon - No "See all" button needed */}
-          <SectionTitle title="About our salon" showSeeAll={false} />
-
-          <View style={[styles.aboutContainer, { backgroundColor: theme.background }]}>
             <FlatList
-              data={aboutData}
-              keyExtractor={(item) => item.id}
+              data={homeServices}
               horizontal
               showsHorizontalScrollIndicator={false}
-              renderItem={(item) => {
-                return (
-                  <View style={[styles.aboutBox, { backgroundColor: theme.textPrimary }]}>
-                    <Image source={item.icon} style={{ width: wp("5%"), height: wp("5%") }} />
-                    <Text style={[styles.aboutTop, { color: theme.background }]}>{item.title}</Text>
-                    <Text style={[styles.aboutBottom, { color: theme.background }]}>{item.value}</Text>
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={{ paddingHorizontal: wp('2%') }}
+              renderItem={({ item }) => (
+
+                <View style={styles.serviceCard}>
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.serviceImage}
+                  />
+                  <View style={styles.nameItem}>
+                    <Text style={styles.serviceName}>{item.name}</Text>
+                    <Text style={styles.servicePrice}>₹ {item.price}</Text>
                   </View>
-                )
-              }
-
-              }
-              contentContainerStyle={{ paddingHorizontal: wp("2%") }}
-            />
-          </View>
-
-
-          {/* Our Packages (2-up grid) with navigation */}
-          <SectionTitle
-            title="Our Packages"
-            onPress={() => handleSectionNavigation('packages')}
-          />
-          <FlatList data={packages}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingHorizontal: wp('2%') }}
-            renderItem={({ item }) => (
-              <View style={[styles.packageCard, { backgroundColor: COLORS.secondary }]}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Text style={styles.packageTitle} numberOfLines={2}>{item.title}</Text>
-                  <Text style={styles.packagePrice}>{item.price}</Text>
-                </View>
-                <View style={{ marginTop: hp('2%') }}>
-                  <Text style={styles.packageLabel}>
-                    <Text style={styles.packageLabelText}>Services:- </Text>
-                    <Text style={styles.packageValue}>{item.services}</Text>
-                  </Text>
-                  <Text style={[styles.packageLabel, { marginTop: 4 }]}>
-                    <Text style={styles.packageLabelText}>About:- </Text>
-                    <Text style={styles.packageValue}>{item.about}</Text>
-                  </Text>
-                </View>
-                <TouchableOpacity style={[styles.packageBtn, { backgroundColor: COLORS.primary }]} onPress={() => navigation.navigate('PackageDetails', { item })}>
-                  <Text style={styles.packageBtnText}>Book now</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-
-          {/* Product Packages (horizontal small cards) with navigation */}
-          <SectionTitle
-            title="Product Packages"
-            onPress={() => handleSectionNavigation('productPackages')}
-          />
-          <FlatList
-            data={productPackages}
-            horizontal
-            keyExtractor={(item, index) => item.id?.toString() || index.toString()} // ✅ fallback
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
-            renderItem={({ item }) => (
-              <View style={{ marginHorizontal: wp("2%"), paddingVertical: hp('2%'), marginBottom: hp('2%') }}>
-                <Shadow
-                  distance={3}
-                  startColor={COLORS.shadow}
-                  offset={[0, 13]}
-                  style={{ borderRadius: wp("4%") }}
-                >
-                  <View
-                    style={{
-                      width: wp("35%"),
-                      height: hp("23%"),
-                      backgroundColor: "#EDEDED",
-                      borderRadius: wp("4%"),
-                      overflow: "hidden",
-                      alignItems: "center",
-                    }}
+                  <Text style={styles.serviceDesc}>{item.description}</Text>
+                  <View style={{ flex: 1 }} />
+                  <TouchableOpacity
+                    style={[styles.bookBtn, { backgroundColor: COLORS.primary, }]}
+                    onPress={() =>
+                      navigation.navigate('ServiceDetails', {
+                        item: { ...item, image: item.image },
+                      })
+                    }
                   >
-                    {/* === Folded Top Corners === */}
-                    <Svg
-                      height={hp("25%")}
-                      width={wp("35%")}
-                      style={{ position: "absolute", top: 0, left: 0 }}
-                    >
-                      {/* Left Fold */}
-                      <Polygon
-                        points={`0,0 ${wp("6%")},0 0,${wp("6%")}`}
-                        fill={theme.background}
-                      />
-                      {/* Right Fold */}
-                      <Polygon
-                        points={`${wp("35%")},0 ${wp("35%") - wp("6%")},0 ${wp("35%")},${wp("6%")}`}
-                        fill={theme.background}
-                      />
-
-                    </Svg>
-
-                    {/* === Header Hexagon === */}
-                    <View style={{ position: "absolute", top: 0, alignItems: "center" }}>
-                      <Svg height={hp("6%")} width={wp("22%")}>
-                        <Polygon
-                          points={`0,0 ${wp("22%")},0 ${wp("22%")},${hp("3%")} ${wp("11%")},${hp("6%")} 0,${hp("3%")}`}
-                          fill={COLORS.primary}
-                        />
-                      </Svg>
-                      <Text
-                        style={{
-                          position: "absolute",
-                          top: hp("1%"),
-                          color: "white",
-                          fontWeight: "600",
-                          fontSize: hp("1.1%"),
-                          alignSelf: 'center'
-                        }}
-                      >
-                        {item.name}
-                      </Text>
-                    </View>
-
-                    {/* === Content === */}
-                    <View style={{ marginTop: hp("8%"), width: "85%" }}>
-                      <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
-                        Rate:- <Text style={{ fontWeight: "700" }}>₹ {item.price}</Text>
-                      </Text>
-                      <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
-                        Products:- <Text style={{ fontWeight: "700" }}>{item.products}</Text>
-                      </Text>
-                      <Text
-                        style={{
-                          marginTop: hp("1%"),
-                          fontStyle: "italic",
-                          fontSize: hp("1.3%"),
-                          color: COLORS.primary,
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.tagline}
-                      </Text>
-                    </View>
-
-                    {/* === Button === */}
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate('ProductPakage', { item })}
-                      style={{
-                        backgroundColor: COLORS.primary,
-                        paddingVertical: hp("0.8%"),
-                        paddingHorizontal: wp("5%"),
-                        borderRadius: wp("5%"),
-                        marginTop: hp("1.5%"),
-                      }}
-                    >
-                      <Text style={{ color: "white", fontWeight: "600", fontSize: hp("1.3%") }}>
-                        Book now
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </Shadow>
-              </View>
-            )}
-          />
-
-          <SectionTitle
-            title="Home services"
-            onPress={() => handleSectionNavigation('homeServices')}
-          />
-          <FlatList
-            data={homeServices}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-            contentContainerStyle={{ paddingHorizontal: wp('2%') }}
-            renderItem={({ item }) => (
-              <View style={styles.serviceCard}>
-                <Image source={
-                  item.image
-                } style={styles.serviceImage} />
-                <View style={styles.nameItem}>
-                  <Text style={styles.serviceName}>{item.name}</Text>
-                  <Text style={styles.servicePrice}>₹ {item.price}</Text>
+                    <Text style={styles.bookBtnText}>Book now</Text>
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.serviceDesc}>{item.description}</Text>
-                <View style={{ flex: 1 }} />
-
-                <TouchableOpacity
-                  style={[styles.bookBtn, { backgroundColor: COLORS.primary, }]}
-                  onPress={() =>
-                    navigation.navigate('ServiceDetails', {
-                      item: { ...item, image: item.image },
-                    })
-                  }
-                >
-                  <Text style={styles.bookBtnText}>Book now</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        </ScrollView>
-      </Animated.View>)}
-    </SafeAreaView>
-  );
+              )}
+            />
+          </ScrollView>
+        </Animated.View>)
+      </SafeAreaView>
+    )
+  )
 };
 
 // Updated SectionTitle component with navigation support
@@ -1397,7 +1126,7 @@ const SectionTitle = ({
       </Text>
       {showSeeAll && (
         <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-          <Text style={[styles.seeAll, { color: '#3939ebff' }]}>
+          <Text style={[styles.seeAll, { color: COLORS.primary }]}>
             See all
           </Text>
         </TouchableOpacity>
@@ -1405,13 +1134,13 @@ const SectionTitle = ({
     </View>
   );
 };
-export default HomeScreen;
 
+export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingBottom: hp('4%')
+    paddingBottom: hp('2%')
   },
   header: {
     flexDirection: 'row',
@@ -1431,8 +1160,8 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: wp('4%'),         // ↓ smaller than name
     fontWeight: '500',       // regular weight
-    color: '#090909ff'
-    , fontFamily: "Poppins-Medium"         // lighter grey (#8E8E93 ≈ iOS system grey)
+    color: '#090909ff',
+    fontFamily: "Poppins-Medium"         // lighter grey (#8E8E93 ≈ iOS system grey)
   },
   locationbtn: {
     width: wp('7%'),
@@ -1540,8 +1269,9 @@ const styles = StyleSheet.create({
   },
   offerLeft: {
     paddingHorizontal: wp('4%'), // Increased from 14
-    justifyContent: 'flex-start',
-    width: '50%'
+    // justifyContent: 'flex-start',
+    width: '50%',
+    justifyContent: 'space-between',
   },
   offerBig: {
     fontSize: wp('6%'),
@@ -1574,7 +1304,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: hp('1.5%'),
     borderRadius: wp('10%'),
-    marginTop: hp('4%'),
+    marginBottom: hp('1.3%'),
     paddingHorizontal: wp('2%'),
     alignItems: 'center',
     justifyContent: 'center',
@@ -1751,7 +1481,6 @@ const styles = StyleSheet.create({
   certCaption: {
     fontSize: wp('3%'),
     textAlign: 'center',
-    color: '#0d0d0dff',
     fontStyle: 'italic',
     fontWeight: 'bold',
     fontFamily: "Poppins-Medium"
@@ -1773,7 +1502,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('3%'),
     elevation: 1,
     flexDirection: 'column',
-    gap: hp('1%')
+    gap: hp('1%'),
+    marginHorizontal: wp('1%')
   },
   aboutTop: {
     fontSize: wp('3.5%'),
@@ -1788,22 +1518,29 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Medium"
   },
   packageCard: {
-    width: wp('65%'),              // screen width ka 65%
-    height: hp('22%'),             // screen height ka 22%
-    borderRadius: wp('3%'),        // borderRadius bhi responsive
-    borderWidth: wp('0.3%'),       // borderWidth responsive
+    width: wp('65%'),               // horizontal width fixed
+    // height: hp('22%'),           ❌ REMOVE THIS LINE
+    borderRadius: wp('3%'),
+    borderWidth: wp('0.3%'),
     borderColor: '#E5D4B1',
-    paddingHorizontal: wp('4%'),   // horizontal padding responsive
-    paddingVertical: hp('2%'),     // vertical padding responsive
-    marginHorizontal: wp('1%'),    // horizontal margin responsive
-    marginVertical: hp('2%'),      // vertical margin responsive
+
+    paddingHorizontal: wp('4%'),
+    paddingVertical: hp('2%'),
+
+    marginHorizontal: wp('1%'),
+    marginVertical: hp('2%'),
+
     elevation: 4,
-    shadowOffset: { width: 0, height: hp('0.1%') }, // responsive shadow
+    shadowOffset: { width: 0, height: hp('0.1%') },
     shadowOpacity: 0.08,
-    shadowRadius: wp('5%'),        // shadow radius responsive
+    shadowRadius: wp('5%'),
+
     borderTopRightRadius: wp('1%'),
     borderBottomLeftRadius: wp('1%'),
+
+    overflow: "hidden",
   },
+
   packageTitle: {
     fontSize: wp('4%'),
     fontWeight: '800',

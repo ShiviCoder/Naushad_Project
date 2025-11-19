@@ -102,11 +102,11 @@ const ReferFriendScreen = () => {
               },
             ]}
           >
-            <Text style={[styles.referralCodeLabel, { color: theme.text }]}>
+            <Text style={[styles.referralCodeLabel, { color: '#fff' }]}>
               Your Referral Code
             </Text>
             <Text
-              style={[styles.referralCodeText, { color: theme.text }]}
+              style={[styles.referralCodeText, { color: '#fff' }]}
               selectable
             >
               {referralCode}

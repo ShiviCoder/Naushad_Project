@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Keyboard, Animated } from 'react-native';
-import BottomNavbar from './BottomNavbar'; // existing BottomNavbar
+import BottomNavbar from './BottomNavbar';
 
 const BottomNavbarWrapper = (props: any) => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const bottomAnim = new Animated.Value(1); // for fade animation
-
+  const bottomAnim = useRef(new Animated.Value(1)).current; // useRef is better for Animated.Value
+  
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => {
       setKeyboardVisible(true);
@@ -31,9 +31,15 @@ const BottomNavbarWrapper = (props: any) => {
     };
   }, []);
 
-  if (keyboardVisible) return null;
-
-  return <BottomNavbar {...props} />;
+  return (
+    <Animated.View
+      style={{
+        opacity: bottomAnim,
+        transform: [{ scale: bottomAnim }],
+      }}>
+      {!keyboardVisible && <BottomNavbar {...props} />}
+    </Animated.View>
+  );
 };
 
 export default BottomNavbarWrapper;

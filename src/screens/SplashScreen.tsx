@@ -66,5 +66,6 @@ const styles = StyleSheet.create({
   logo: {
     width: wp('60%'),
     height: hp('20%'),
+    tintColor : '#fff'
   },
 });

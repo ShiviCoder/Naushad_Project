@@ -9,10 +9,7 @@ import {
 import React, { useState } from 'react';
 import Calender from '../../components/Calender';
 import TimeSelect from '../../components/TImeSelect';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import BottomNavbar from '../../components/BottomNavbar';
@@ -54,17 +51,29 @@ export default function BookAppointmentScreen() {
 
   // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
-  if (route.params?.from === 'bottomBar') {
-    navigation.navigate('BookAppoinment2');
-  } else {
-    navigation.navigate('PaymentScreen');
-  }
-};
+    const formattedDate = selectedDate ? selectedDate.toISOString() : null; // ✅ make it serializable
+
+    if (route.params?.from === 'bottomBar') {
+      navigation.navigate('BookingSeats1', {
+        selectedDate: formattedDate,
+        selectedTime,
+      });
+    } else {
+      navigation.navigate('PaymentScreen', {
+        selectedDate: formattedDate,
+        selectedTime,
+      });
+    }
+
+    console.log('📅', formattedDate, '🕒', selectedTime);
+  };
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTime, setSelectedTime] = useState(null);
+
   const renderItem = ({ item }: { item: string }) => {
     switch (item) {
       case 'image':
@@ -90,7 +99,12 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.calenderContainer}>
             {/* Removed any onMonthChange prop */}
-            <Calender  onDateSelect={setSelectedDate}/>
+            <Calender
+              onDateSelect={(date) => {
+                console.log("📅 Received from Calender:", date.toDateString());
+                setSelectedDate(date);
+              }}
+            />
           </View>
         );
       case 'selectTime':
@@ -103,7 +117,7 @@ export default function BookAppointmentScreen() {
         return (
           <View style={styles.timeContainer}>
             {/* Removed any onTimeChange prop */}
-            <TimeSelect selectedDate={selectedDate}/>
+            <TimeSelect selectedDate={selectedDate} onTimeSelect={setSelectedTime} />
           </View>
         );
       case 'nextButton':
@@ -126,8 +140,7 @@ export default function BookAppointmentScreen() {
     <SafeAreaView
       style={[styles.mainContainer, { backgroundColor: theme.background }]}
     >
-      <Head title="Bookings" showBack={showBack} />
-
+      <Head title="Bookings" showBack={false} />
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -181,13 +194,14 @@ const styles = StyleSheet.create({
   nxt: {
     marginHorizontal: wp('2%'),
     marginTop: hp('2%'),
-    width: '30%',
-    alignSelf: 'flex-end'
+    width: '93%',
+    alignSelf: 'center'
+
   },
   nxtButton: {
     paddingVertical: hp('1%'),
     paddingHorizontal: wp('4%'),
-    borderRadius: wp('2%')
+    borderRadius: wp('2%'),
   },
   nxtText: {
     fontSize: wp('5%'),

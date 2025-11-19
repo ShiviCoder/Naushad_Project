@@ -8,35 +8,40 @@ import { useTheme } from '../context/ThemeContext';
 interface HeadProps {
   title: string;
   rightComponent?: React.ReactNode;
-  showBack?: boolean; 
+  showBack?: boolean | React.ReactNode; // 👈 allow React node also
+  onBackPress?: () => void;
 }
 
-const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true }) => {
+const Head: React.FC<HeadProps> = ({ title, rightComponent, showBack = true, onBackPress }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
   return (
     <View style={[styles.head, { backgroundColor: theme.background }]}>
-      {/* Left - Back button */}
+      {/* LEFT SIDE */}
       {showBack && (
         <TouchableOpacity
           onPress={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
-            }
+            if (typeof showBack !== 'boolean') return; // if it's a custom image, no back press
+            if (onBackPress) onBackPress();
+            else if (navigation.canGoBack()) navigation.goBack();
           }}
           style={styles.backButton}
         >
-          <Icon name="chevron-back" size={wp('7%')} color={theme.textPrimary} />
+          {typeof showBack === 'boolean' ? (
+            <Icon name="chevron-back" size={wp('7%')} color={theme.textPrimary} />
+          ) : (
+            showBack // 👈 directly render the image component
+          )}
         </TouchableOpacity>
       )}
 
-      {/* Center - Title */}
+      {/* CENTER TITLE */}
       <Text style={[styles.title, { color: theme.textPrimary }]} numberOfLines={1}>
         {title}
       </Text>
 
-      {/* Right - Custom button(s) */}
+      {/* RIGHT SIDE */}
       <View style={styles.right}>{rightComponent}</View>
     </View>
   );

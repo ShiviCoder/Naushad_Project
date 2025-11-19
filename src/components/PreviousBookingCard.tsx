@@ -61,7 +61,7 @@ const PreviousBookingCard = ({ item }) => {
       </View>
 
       {/* Rebook Button */}
-      <TouchableOpacity>
+      <TouchableOpacity onPress={()=>navigation.navigate('CloneBookAppointment')}>
         <Text style={[styles.button, { color: theme.textPrimary ,backgroundColor : COLORS.primary}]} >Rebook</Text>
       </TouchableOpacity>
     </TouchableOpacity>

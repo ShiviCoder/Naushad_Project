@@ -12,77 +12,77 @@ type Props = {
     onToggleLike: () => void;
 }
 const ProductCard:
-React.FC<Props> = ({ product, liked, onToggleLike }) => {
-    const navigation = useNavigation<any>();
-    const { theme } = useTheme();
-    const getImageSource = (img: any) => {
-        if (!img) return null;
-        if (typeof img === 'string') {
-            return { uri: img };
+    React.FC<Props> = ({ product, liked, onToggleLike }) => {
+        const navigation = useNavigation<any>();
+        const { theme } = useTheme();
+        const getImageSource = (img: any) => {
+            if (!img) return null;
+            if (typeof img === 'string') {
+                return { uri: img };
+            }
+            return img; // assume it's require()
         }
-        return img; // assume it's require()
-    }
 
-    const selectedImage = Array.isArray(product.image) ? getImageSource(product.image[0]) : getImageSource(product.image);
-    return (
-        <SafeAreaView
-            style={[
-                styles.productCard,
-                { backgroundColor: '#fff' },
-            ]}
-        >
-            <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product })}>
-
-                <Image
-                    resizeMode='cover'
-                    source={selectedImage}
-                    style={styles.ImageStyle} />
-                <Text
-                    numberOfLines={1}
-                    style={[styles.productName, { color: '#000' }]}>{product.name}</Text>
-                <View style={styles.OurterPriceContainer}>
-                    <View style={styles.InnerPriceContainer}>
-                        <Text style={[styles.priceStyle, { color: '#000' }]}>{product.price}</Text>
-                        <Text style={[styles.oldPriceStyle, { color: '#ccc' }]}>{product.oldPrice}</Text>
-                    </View>
-                    <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>{product.discount}</Text>
-                </View>
-                <View style={styles.descContain}>
-                    <Image
-                        resizeMode='contain'
-                        source={product.featureIcon}
-                        style={styles.featureIconStyle} />
-                    <Text style={[styles.DescStyle, { color: '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
-                </View>
-            </TouchableOpacity>
-
-            <View style={styles.OutRatContain} >
-                <View style={[styles.InnerRatContain, { backgroundColor: theme.dark ? '#0f8a43' : '#09932B' }]}>
-                    <Text style={[styles.ratingTextStyle, { color: theme.dark ? '#861919ff' : '#e6e2e2ff' }]}>{product.rating}</Text>
-                    <Image
-                        resizeMode='contain'
-                        style={styles.starStyle}
-                        source={require('../../assets/OurProduct/star1.png')} />
-                </View>
-                <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]} >({product.reviews})</Text>
-            </View>
-
-            <TouchableOpacity
+        const selectedImage = Array.isArray(product.image) ? getImageSource(product.image[0]) : getImageSource(product.image);
+        return (
+            <SafeAreaView
                 style={[
-                    styles.likeImgContainer,
-                    { backgroundColor: '#f5eeeeff', alignItems: 'center' }
+                    styles.productCard,
+                    { backgroundColor: '#fff' },
                 ]}
-                onPress={onToggleLike} // ✅ toggle state
             >
-                <Icon
-                    name={liked ? "heart" : "heart-outline"}
-                    size={wp('6%')}
-                    color={liked ? "red" : "gray"}
-                />
-            </TouchableOpacity>
-        </SafeAreaView>
-    )
-}
+                <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product })}>
+                    <Image
+                        resizeMode='cover'
+                        source={selectedImage}
+                        style={styles.ImageStyle} />
+                    <Text
+                        numberOfLines={1}
+                        style={[styles.productName, { color: '#000' }]}>{product.name}
+                    </Text>
+                    <View style={styles.OurterPriceContainer}>
+                        <View style={styles.InnerPriceContainer}>
+                            <Text style={[styles.priceStyle, { color: '#000' }]}>₹{product.price}</Text>
+                            <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>({product.offer}% OFF)
+                            </Text>
+                        </View>
+                    </View>
+                    <View style={styles.descContain}>
+                        <Image
+                            resizeMode='contain'
+                            source={{ uri: 'http://naushad.onrender.com/uploads/icons/1761913753959-Leaf1.png' }}
+                            style={styles.featureIconStyle} />
+                        <Text style={[styles.DescStyle, { color: '#000' }]} numberOfLines={1} ellipsizeMode="tail"> {product.description}</Text>
+                    </View>
+                </TouchableOpacity>
+                <View style={styles.OutRatContain} >
+                    <View style={[styles.InnerRatContain, { backgroundColor: theme.dark ? '#0f8a43' : '#09932B' }]}>
+                        <Text style={[styles.ratingTextStyle, { color: theme.dark ? '#861919ff' : '#e6e2e2ff' }]}>{product.rating}</Text>
+                        <Image
+                            resizeMode='contain'
+                            style={styles.starStyle}
+                            source={require('../../assets/OurProduct/star1.png')} />
+                    </View>
+                    <Text style={[styles.reviewStyle, { color: theme.dark ? '#ccc' : '#ACACAC' }]}>
+                        ({product.reviews?.[0] || 0})
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    style={[
+                        styles.likeImgContainer,
+                        { backgroundColor: '#f5eeeeff', alignItems: 'center' }
+                    ]}
+                    onPress={onToggleLike} // ✅ toggle state
+                >
+                    <Icon
+                        name={liked ? "heart" : "heart-outline"}
+                        size={wp('6%')}
+                        color={liked ? "red" : "gray"}
+                    />
+                </TouchableOpacity>
+            </SafeAreaView>
+        )
+    }
 
 export default ProductCard
 
@@ -112,7 +112,8 @@ const styles = StyleSheet.create({
     },
     InnerPriceContainer: {
         flexDirection: 'row',
-        gap: wp('1.5%')
+        gap: wp('4%'),
+
 
     },
     priceStyle: {

@@ -36,11 +36,6 @@ const AboutUs = () => {
       <Head title="About Us" />
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={[styles.heading, { color: theme.textPrimary }]}>Welcome to Our App!</Text>
-        <Text style={[styles.description, { color: theme.textSecondary }]}>
-          {aboutUs?.title}
-        </Text>
-
-
         <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
           <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Our Vision</Text>
           <Text style={[styles.cardText, { color: theme.textSecondary }]}>
@@ -51,7 +46,7 @@ const AboutUs = () => {
         <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
           <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Our Values</Text>
           <Text style={[styles.cardText, { color: theme.textSecondary }]}>
-            Innovation, Integrity, Customer First, Excellence, and Continuous Improvement.
+            {aboutUs?.content}
           </Text>
         </View>
       </ScrollView>
