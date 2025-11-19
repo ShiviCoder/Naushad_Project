@@ -19,37 +19,76 @@ const OurProducts = () => {
   const [products, setProducts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
- const getToken = async () => {
+  const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
     console.log('API Token: ', token);
     console.log("token accept")
     return token;
   }
 
-  const fetchProducts = async () => {
-    try {
-      // const token =
-      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // your token here
-      const token = await getToken();
-      const res = await fetch('https://naushad.onrender.com/api/products', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      setProducts(data.data);
-      console.log("Product token",token)
-    } catch (err) {
-      console.log('Error fetching products:', err);
-    }
-  };
+  const [gender, setGender] = useState("male");
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    const loadGender = async () => {
+      const savedGender = await AsyncStorage.getItem("selectedGender");
 
+      console.log("Loaded Gender:", savedGender);
+
+      // Fallback to male if null/undefined/"null"
+      if (!savedGender || savedGender === "null") {
+        setGender("male");
+      } else {
+        setGender(savedGender);
+      }
+
+      // ⭐ Remove saved gender so next time fresh value will be used
+      await AsyncStorage.removeItem("selectedGender");
+      console.log("Old gender removed from AsyncStorage");
+    };
+
+    loadGender();
+  }, []);
+  const fetchProducts = async (selectedGender) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      // 🔥 Final Gender (priority → function param > state > default)
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender (Products):", g);
+
+      const res = await fetch("https://naushad.onrender.com/api/products", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const json = await res.json();
+      console.log("📦 Product Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER (exact same as product-packages)
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Products:", data);
+
+      setProducts(data);
+    } catch (error) {
+      console.log("🔥 Product error:", error);
+    }
+  };
+  useEffect(() => {
+    fetchProducts(gender);
+  }, [gender]);
   const onRefresh = async () => {
     setRefreshing(true);
 

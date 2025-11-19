@@ -22,14 +22,14 @@ const YoutubeComponent = () => {
   const translateY = useRef(new Animated.Value(0)).current;
   const { theme } = useTheme();
 
- const getToken = async () => {
+  const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
     console.log('API Token: ', token);
     console.log("token accept")
     return token;
   }
 
-  
+
   const fetchVideos = async () => {
     try {
       // const token =
@@ -47,7 +47,7 @@ const YoutubeComponent = () => {
       const data = await res.json();
       setVideos(data);
       console.log('✅ Youtube Data:', data);
-      console.log("Youtube token : ",token)
+      console.log("Youtube token : ", token)
     } catch (err) {
       console.log('❌ Error loading:', err);
     } finally {
@@ -76,39 +76,33 @@ const YoutubeComponent = () => {
     }).start();
   };
 
+  const extractVideoId = (url) => {
+    const regex = /v=([^&]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
   const VideoCard = ({ videoId }) => {
     const cardWidth = wp('44%');
     const cardHeight = hp('40%');
 
     const html = `
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body, html {
-              margin: 0;
-              padding: 0;
-              overflow: hidden;
-              background-color: black;
-              height: 100%;
-              width: 100%;
-            }
-            iframe {
-              width: 100%;
-              height: 100%;
-              border: none;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe
-            src="https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&rel=0&fs=1"
-            allow="autoplay; encrypted-media; fullscreen"
-            allowfullscreen
-          ></iframe>
-        </body>
-      </html>`;
-
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body { margin:0; background:black; }
+      iframe { width:100%; height:100%; border:0; }
+    </style>
+  </head>
+  <body>
+    <iframe
+      src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=http://localhost"
+      allow="autoplay; encrypted-media; fullscreen"
+      allowfullscreen
+    ></iframe>
+  </body>
+</html>`;
     return (
       <Animated.View style={{ transform: [{ translateY }] }}>
         <View
@@ -161,7 +155,9 @@ const YoutubeComponent = () => {
           paddingTop: hp('2%'),
           backgroundColor: theme.background, // ✅ Full background
         }}
-        renderItem={({ item }) => <VideoCard videoId={item.videoUrl} />}
+        renderItem={({ item }) => (
+          <VideoCard videoId={extractVideoId(item.videoUrl)} />
+        )}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

@@ -95,7 +95,7 @@ const BookingSeats = () => {
           }}
           showsVerticalScrollIndicator={false}
         />
-
+        
         <View style={styles.nxt}>
           <TouchableOpacity
             onPress={onNextPress}

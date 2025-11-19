@@ -43,7 +43,7 @@ const ProductCard:
                     <View style={styles.OurterPriceContainer}>
                         <View style={styles.InnerPriceContainer}>
                             <Text style={[styles.priceStyle, { color: '#000' }]}>₹{product.price}</Text>
-                            <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>({product.offer})
+                            <Text style={[styles.DiscountStyle, { color: theme.dark ? '#42BA86' : '#42BA86' }]}>({product.offer}% OFF)
                             </Text>
                         </View>
                     </View>

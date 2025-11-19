@@ -26,21 +26,44 @@ const AccountScreen = () => {
 
   // ✅ Fetch stored user data
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserFromAPI = async () => {
       try {
-        const stored = await AsyncStorage.getItem('userData');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          console.log("📦 Loaded user from AsyncStorage:", parsed);
-          const userInfo = parsed?.user ? parsed.user : parsed;
-          setUser(userInfo);
+        const token = await AsyncStorage.getItem("userToken");
+
+        if (!token) {
+          console.log("❌ No token found");
+          return;
         }
+
+        const response = await fetch("https://naushad.onrender.com/api/auth/profile", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const json = await response.json();
+        console.log("📡 API User Response:", json);
+
+        const userData = json.data || json.user || json;
+
+        setUser(userData);
+
+        if (userData) {
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        } else {
+          console.log("⚠ No user data received from API");
+        }
+
       } catch (error) {
-        console.log("❌ Error loading user data:", error);
+        console.log("❌ API Fetch Error:", error);
       }
     };
-    fetchUserData();
+
+    fetchUserFromAPI();
   }, []);
+
 
   const handleLogoutConfirm = async () => {
     setShowLogout(false);
@@ -58,15 +81,17 @@ const AccountScreen = () => {
       <View style={styles.profileSection}>
         <View style={styles.con}>
           <View style={styles.imgSection}>
-            <Image
-              source={
-                user?.photo?.uri
-                  ? { uri: user.photo.uri }
-                  : require('../../assets/user.png')
-              }
-              style={styles.userImg}
-              resizeMode="contain"
-            />
+           <Image
+  style={styles.userImg}
+  source={
+    user?.avatar && user?.avatar !== "" && user?.avatar !== "null"
+      ? { uri: user.avatar }
+      : user?.image && user?.image !== "" && user?.image !== "null"
+        ? { uri: user.image }
+        : require('../../assets/user.png')
+  }
+/>
+
           </View>
 
           <View style={styles.profileText}>
@@ -74,7 +99,7 @@ const AccountScreen = () => {
               {user
                 ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
                 : 'User Name'}
-                {/* Anchal Jain */}
+              {/* Anchal Jain */}
             </Text>
             <Text style={[styles.email, { color: theme.textPrimary }]}>
               {user?.email || 'user@example.com'}

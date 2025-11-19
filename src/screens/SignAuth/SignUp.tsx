@@ -449,7 +449,7 @@
 // });
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -459,59 +459,72 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
-} from "react-native";
+} from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
-import { SafeAreaView } from "react-native-safe-area-context";
-import COLORS from "../../utils/Colors";
-import Popup from "../../components/PopUp";
-import { launchImageLibrary } from "react-native-image-picker";
-import Icon from "react-native-vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react-native-responsive-screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
+import Popup from '../../components/PopUp';
+import { launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAppRegistrationCode } from '../../utils/appRegistrationCode/appRegistrationCode';
 
 export default function SignupScreen({ navigation }) {
-  const [fullName, setFullName] = useState("");
-  const [emailOrPhone, setEmailOrPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [dob, setDob] = useState("");
-  const [address, setAddress] = useState("");
-  const [gender, setGender] = useState("");
-  const [referal, setReferal] = useState("");
+  const [fullName, setFullName] = useState('');
+  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [dob, setDob] = useState('');
+  const [address, setAddress] = useState('');
+  const [gender, setGender] = useState('');
+  const [referal, setReferal] = useState('');
   const [photo, setPhoto] = useState(null);
+  const [appRegistrationCode, setAppRegistrationCode] = useState('');
 
   const [loading, setLoading] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
+  const [popupMessage, setPopupMessage] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
   const [nextRoute, setNextRoute] = useState(null);
 
+  // 🔑 Fetch App Registration Code on component mount
+  useEffect(() => {
+    const fetchCode = () => {
+      const code = getAppRegistrationCode();
+      setAppRegistrationCode(code);
+      console.log('✅ App Registration Code fetched and set:', code);
+    };
+
+    fetchCode();
+  }, []);
+
   // 📆 Format DOB
-  const handleChange = (text) => {
-    let cleaned = text.replace(/\D/g, "");
+  const handleChange = text => {
+    let cleaned = text.replace(/\D/g, '');
     if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
-    let formatted = "";
+    let formatted = '';
     if (cleaned.length <= 2) formatted = cleaned;
     else if (cleaned.length <= 4)
       formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
     else
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(
+        2,
         4,
-        8
-      )}`;
+      )}/${cleaned.slice(4, 8)}`;
     setDob(formatted);
   };
 
   // 🖼️ Pick Image
   const handleChoosePhoto = () => {
     launchImageLibrary(
-      { mediaType: "photo", maxWidth: 300, maxHeight: 300, quality: 0.7 },
-      (response) => {
+      { mediaType: 'photo', maxWidth: 300, maxHeight: 300, quality: 0.7 },
+      response => {
         if (!response.didCancel && !response.errorMessage && response.assets) {
           setPhoto({ uri: response.assets[0].uri });
         }
-      }
+      },
     );
   };
 
@@ -525,32 +538,32 @@ export default function SignupScreen({ navigation }) {
       !address ||
       !gender
     ) {
-      setPopupMessage("All fields are required.");
+      setPopupMessage('All fields are required.');
       setPopupVisible(true);
       return;
     }
 
     const nameParts = fullName.trim().split(/\s+/);
     if (nameParts.length < 2) {
-      setPopupMessage("Please enter your full name (first and last).");
+      setPopupMessage('Please enter your full name (first and last).');
       setPopupVisible(true);
       return;
     }
 
     if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
-      setPopupMessage("Please enter a valid Gmail address.");
+      setPopupMessage('Please enter a valid Gmail address.');
       setPopupVisible(true);
       return;
     }
 
     if (password.length < 8) {
-      setPopupMessage("Password must be at least 8 characters long.");
+      setPopupMessage('Password must be at least 8 characters long.');
       setPopupVisible(true);
       return;
     }
 
     if (password !== confirmPassword) {
-      setPopupMessage("Passwords do not match.");
+      setPopupMessage('Passwords do not match.');
       setPopupVisible(true);
       return;
     }
@@ -560,63 +573,94 @@ export default function SignupScreen({ navigation }) {
     try {
       // ✅ Prepare FormData
       const formData = new FormData();
-      formData.append("fullName", fullName);
-      formData.append("email", emailOrPhone);
-      formData.append("password", password);
-      formData.append("confirmPassword", confirmPassword);
-      formData.append("dob", dob);
-      formData.append("address", address);
-      formData.append("gender", gender);
-      formData.append("referal", referal);
+      formData.append('fullName', fullName);
+      formData.append('email', emailOrPhone);
+      formData.append('password', password);
+      formData.append('confirmPassword', confirmPassword);
+      formData.append('dob', dob);
+      formData.append('address', address);
+      formData.append('gender', gender);
+      formData.append('referal', referal);
+
+      // 🔑 Append App Registration Code
+      formData.append('appRegistrationCode', appRegistrationCode);
+      console.log(
+        '🔑 Sending App Registration Code with request:',
+        appRegistrationCode,
+      );
 
       // ✅ Append image only if selected
       if (photo && photo.uri) {
-        formData.append("avatar", {
+        formData.append('avatar', {
           uri: photo.uri,
-          type: "image/jpeg",
-          name: "profile.jpg",
+          type: 'image/jpeg',
+          name: 'profile.jpg',
         });
       }
 
-      const response = await fetch("https://naushad.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
+      console.log('📤 Sending registration request with data:');
+      console.log('- Full Name:', fullName);
+      console.log('- Email:', emailOrPhone);
+      console.log('- DOB:', dob);
+      console.log('- Address:', address);
+      console.log('- Gender:', gender);
+      console.log('- Referral:', referal);
+      console.log('- App Registration Code:', appRegistrationCode);
+
+      const response = await fetch(
+        'https://naushad.onrender.com/api/auth/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
         },
-        body: formData,
-      });
+      );
 
       const data = await response.json();
       setLoading(false);
-      console.log("Signup Response:", data);
+
+      console.log('📥 Signup Response received:');
+      console.log('- Status:', response.status);
+      console.log('- Response Data:', JSON.stringify(data, null, 2));
+      console.log(
+        '- App Registration Code in response:',
+        data.appRegistrationCode || 'Not returned',
+      );
 
       if (response.ok) {
-        await AsyncStorage.setItem("userData", JSON.stringify(data.user));
-        await AsyncStorage.setItem("userId", data.user._id);
-        setPopupMessage("Signup successful! Please sign in.");
-        setNextRoute({ name: "Signin" });
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+        await AsyncStorage.setItem('userId', data.user._id);
+        console.log('✅ User data saved to AsyncStorage');
+        console.log('✅ User ID:', data.user._id);
+        setPopupMessage('Signup successful! Please sign in.');
+        setNextRoute({ name: 'Signin' });
         setPopupVisible(true);
       } else {
-        setPopupMessage(data.message || "Signup failed. Try again.");
+        console.error('❌ Signup failed:', data.message);
+        setPopupMessage(data.message || 'Signup failed. Try again.');
         setPopupVisible(true);
       }
     } catch (error) {
-      console.log("Signup Error:", error);
+      console.error('❌ Signup Error:', error);
+      console.error('Error details:', error.message);
       setLoading(false);
-      setPopupMessage("Unable to connect to the server.");
+      setPopupMessage('Unable to connect to the server.');
       setPopupVisible(true);
     }
   };
+
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) navigation.navigate(nextRoute.name);
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Image
-          source={require("../../assets/images/logo.png")}
+          source={require('../../assets/images/logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -681,7 +725,7 @@ export default function SignupScreen({ navigation }) {
 
         <Text style={styles.label}>Gender</Text>
         <View style={styles.radioContainer}>
-          {["male", "female", "other"].map((option) => (
+          {['male', 'female', 'other'].map(option => (
             <TouchableOpacity
               key={option}
               style={styles.radioOption}
@@ -692,7 +736,7 @@ export default function SignupScreen({ navigation }) {
                   styles.radioCircle,
                   gender === option && {
                     borderColor: COLORS.primary,
-                    borderWidth: wp("1.5%"),
+                    borderWidth: wp('1.5%'),
                   },
                 ]}
               />
@@ -706,13 +750,11 @@ export default function SignupScreen({ navigation }) {
         <View style={styles.imageContainer}>
           <TouchableOpacity onPress={handleChoosePhoto}>
             <Image
-              source={
-                photo ? photo : require("../../assets/user.png")
-              }
+              source={photo ? photo : require('../../assets/user.png')}
               style={styles.profileImage}
             />
             <View style={styles.editIcon}>
-              <Icon name="create-outline" size={wp("4%")} color="#fff" />
+              <Icon name="create-outline" size={wp('4%')} color="#fff" />
             </View>
           </TouchableOpacity>
           <View style={styles.nameRow}>
@@ -743,16 +785,20 @@ export default function SignupScreen({ navigation }) {
 
         <View style={styles.signinContainer}>
           <Text style={styles.signinText}>Already have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Signin")}>
+          <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
             <Text style={[styles.signinLink, { color: COLORS.primary }]}>
-              {" "}
+              {' '}
               Sign In
             </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
+      <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={handlePopupClose}
+      />
     </SafeAreaView>
   );
 }
@@ -760,86 +806,86 @@ export default function SignupScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    paddingHorizontal: wp("5%"),
+    paddingHorizontal: wp('5%'),
   },
   logo: {
-    width: wp("70%"),
-    height: hp("15%"),
-    alignSelf: "center",
-    marginTop: hp("1%"),
+    width: wp('70%'),
+    height: hp('15%'),
+    alignSelf: 'center',
+    marginTop: hp('1%'),
   },
   label: {
-    fontSize: wp("3.6%"),
-    fontWeight: "600",
-    marginBottom: hp("1%"),
-    marginTop: hp("0.5%"),
-    color: "#000",
+    fontSize: wp('3.6%'),
+    fontWeight: '600',
+    marginBottom: hp('1%'),
+    marginTop: hp('0.5%'),
+    color: '#000',
   },
   input: {
-    height: hp("6%"),
+    height: hp('6%'),
     borderWidth: 0.5,
     borderColor: COLORS.primary,
-    borderRadius: wp("2%"),
-    paddingHorizontal: wp("4%"),
-    fontSize: wp("3.5%"),
-    backgroundColor: "#fff",
-    color: "black",
+    borderRadius: wp('2%'),
+    paddingHorizontal: wp('4%'),
+    fontSize: wp('3.5%'),
+    backgroundColor: '#fff',
+    color: 'black',
   },
   button: {
-    paddingVertical: hp("1.5%"),
-    borderRadius: wp("2%"),
-    alignItems: "center",
-    marginTop: hp("3%"),
-    marginBottom: hp("2%"),
+    paddingVertical: hp('1.5%'),
+    borderRadius: wp('2%'),
+    alignItems: 'center',
+    marginTop: hp('3%'),
+    marginBottom: hp('2%'),
   },
   buttonText: {
-    color: "#fff",
-    fontSize: wp("4%"),
-    fontWeight: "bold",
+    color: '#fff',
+    fontSize: wp('4%'),
+    fontWeight: 'bold',
   },
   signinContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: hp("1%"),
-    marginBottom: hp("3%"),
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: hp('1%'),
+    marginBottom: hp('3%'),
   },
   signinText: {
-    fontSize: wp("3.5%"),
-    color: "#000",
+    fontSize: wp('3.5%'),
+    color: '#000',
   },
   signinLink: {
-    fontWeight: "bold",
-    fontSize: wp("3.5%"),
+    fontWeight: 'bold',
+    fontSize: wp('3.5%'),
   },
   radioContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: wp("5%"),
-    marginTop: hp("1%"),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp('5%'),
+    marginTop: hp('1%'),
   },
   radioOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: hp("1.5%"),
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp('1.5%'),
   },
   radioCircle: {
-    width: wp("5%"),
-    height: wp("5%"),
-    borderRadius: wp("2.5%"),
-    borderWidth: wp("1.5%"),
-    borderColor: "#3E4347",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: wp("2%"),
+    width: wp('5%'),
+    height: wp('5%'),
+    borderRadius: wp('2.5%'),
+    borderWidth: wp('1.5%'),
+    borderColor: '#3E4347',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: wp('2%'),
   },
   radioLabel: {
-    fontSize: wp("3.5%"),
+    fontSize: wp('3.5%'),
   },
   imageContainer: {
-    position: "relative",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   profileImage: {
     width: 60,
@@ -847,26 +893,22 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   editIcon: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     right: 0,
     backgroundColor: COLORS.primary,
     borderRadius: 12,
-    padding: hp("0.2%"),
+    padding: hp('0.2%'),
   },
   nameRow: {
     flex: 1,
-    marginLeft: wp("3%"),
-    flexDirection: "row",
-    alignItems: "center",
+    marginLeft: wp('3%'),
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   nameText: {
-    fontSize: wp("4%"),
-    fontWeight: "600",
-    color: "#000",
+    fontSize: wp('4%'),
+    fontWeight: '600',
+    color: '#000',
   },
 });
-
-
-
-

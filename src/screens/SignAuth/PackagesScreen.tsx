@@ -35,30 +35,71 @@ const PackagesScreen = () => {
     console.log("token accept")
     return token;
   }
+   const [gender, setGender] = useState("male");
 
-const fetchPackages = async () => {
+useEffect(() => {
+  const loadGender = async () => {
+    const savedGender = await AsyncStorage.getItem("selectedGender");
+
+    console.log("Loaded Gender:", savedGender);
+
+    // Fallback to male if null/undefined/"null"
+    if (!savedGender || savedGender === "null") {
+      setGender("male");
+    } else {
+      setGender(savedGender);
+    }
+
+
+      // ⭐ Remove saved gender so next time fresh value will be used
+    await AsyncStorage.removeItem("selectedGender");
+    console.log("Old gender removed from AsyncStorage");
+  };
+
+  loadGender();
+}, []);
+
+ const fetchPackages = async (selectedGender) => {
     try {
       const token = await getToken();
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
-      const response = await fetch('https://naushad.onrender.com/api/packages', {
-        method: 'GET',
+      if (!token) return;
+
+      // 🔥 SAME LOGIC — param > state > default
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender (Packages):", g);
+
+      const response = await fetch("https://naushad.onrender.com/api/packages", {
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
-      const json = await response.json();
-      console.log("Package response : ", json);
-      console.log('Package token : ', token)
-      setPackages(json.data);
-    } catch (err) {
-      console.log("Package error : ", err)
-    }
-  }
 
-  useEffect(()=>{
-    fetchPackages();
-  },[])
+      const json = await response.json();
+      console.log("📦 Packages Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Packages:", data);
+
+      setPackages(data);
+    } catch (err) {
+      console.log("🔥 Packages error:", err);
+    }
+  };
+  useEffect(() => {
+    fetchPackages(gender);
+  }, [gender]);
 
   const onRefresh = async () => {
     setRefreshing(true);

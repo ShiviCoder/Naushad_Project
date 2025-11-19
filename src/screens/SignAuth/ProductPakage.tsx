@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,10 @@ const ProductPackages = ({ navigation }) => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
 
+  useEffect(() => {
+    console.log("Route Params ---->", route.params);
+    console.log("Item Data ---->", item);
+  }, []);
   if (!item) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -112,10 +116,15 @@ const ProductPackages = ({ navigation }) => {
       <ScrollView style={styles.scrollView}>
         <View style={styles.imageContainer}>
           <Image
-            source={require('../../assets/newPic.png')}
+            source={
+              item.image
+                ? { uri: item.image }
+                : require('../../assets/newPic.png') // fallback
+            }
             style={styles.productImage}
             resizeMode="cover"
           />
+
         </View>
 
         <View style={styles.productInfo}>
@@ -139,14 +148,34 @@ const ProductPackages = ({ navigation }) => {
             {item.description || 'No description available.'}
           </Text>
 
-          {item.offer && (
+
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+            Items list
+          </Text>
+          {Array.isArray(item.items) && item.items.length > 0 && (
             <View style={styles.offerContainer}>
-              <Text style={[styles.offerText, { color: theme.textPrimary }]}>
-                {item.offer}
-              </Text>
+              {item.items.map((val, index) => (
+                <Text
+                  key={index}
+                  style={[styles.offerText, { color: theme.textPrimary }]}
+                >
+                  ✅ {val}
+                </Text>
+              ))}
             </View>
           )}
+
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+            Usage Instruction
+          </Text>
+                <Text
+                  style={[styles.offerText, { color: theme.textPrimary }]}
+                >
+                  - {item.usage}
+                </Text>
         </View>
+
+
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
@@ -276,20 +305,22 @@ const styles = StyleSheet.create({
     color: '#00000075',
   },
   description: {
-    fontSize: hp('1.875%'),
+    fontSize: hp('2%'),
     fontWeight: '500',
     color: '#00000075',
     marginBottom: hp('1.5%'),
   },
   offerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginBottom: hp('2%')
   },
   offerText: {
     fontSize: hp('1.875%'),
     color: '#000',
     marginLeft: wp('1.67%'),
     fontWeight: '500',
+    marginBottom: hp('0.7%')
   },
   section: {
     paddingHorizontal: wp('4.44%'),

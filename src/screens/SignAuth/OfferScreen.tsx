@@ -33,33 +33,70 @@ const OfferScreen = () => {
     return token;
   }
 
+  const [gender, setGender] = useState("male");
 
-  const fetchOffers = async () => {
+useEffect(() => {
+  const loadGender = async () => {
+    const savedGender = await AsyncStorage.getItem("selectedGender");
+
+    console.log("Loaded Gender:", savedGender);
+
+    // Fallback to male if null/undefined/"null"
+    if (!savedGender || savedGender === "null") {
+      setGender("male");
+    } else {
+      setGender(savedGender);
+    }
+
+      // ⭐ Remove saved gender so next time fresh value will be used
+    await AsyncStorage.removeItem("selectedGender");
+    console.log("Old gender removed from AsyncStorage");
+  };
+
+  
+
+  loadGender();
+}, []);
+
+
+const fetchSpecialOffers = async (selectedGender) => {
     try {
-      // const token =
-      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
       const token = await getToken();
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender for special offers:", g);
 
-      const response = await fetch('https://naushad.onrender.com/api/offers', {
+      const response = await fetch(`https://naushad.onrender.com/api/offers?gender=${g}`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
       const json = await response.json();
-      setOffers(json.data || []);
-      console.log('Special offer data:', json);
-      console.log("Special offers token ",token)
+      console.log("📦 Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Special Filtered Data:", data);
+      setOffers(data);
     } catch (error) {
-      console.log('special offer error:', error);
+      console.log("special offer error : ", error)
     }
   };
 
   useEffect(() => {
-    fetchOffers();
-  }, []);
+    fetchSpecialOffers(gender);
+  }, [gender]);
 
   const onRefresh = async () => {
     setRefreshing(true);

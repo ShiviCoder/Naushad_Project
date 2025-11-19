@@ -31,28 +31,42 @@ const PackageDetails = () => {
           <Text style={[styles.priceTxt, { color: theme.textPrimary }]}>₹{item.price}</Text>
         </View>
         <Text style={[styles.aboutTxt, { color: theme.textPrimary }]}>"{item.about}"</Text>
-        <Text style={[styles.discountTxt, { color: theme.textPrimary }]}>{item.discount}</Text>
+        <Text style={[styles.discountTxt, { color: theme.textPrimary }]}>🔖 Save Upto {item.discount}%</Text>
       </View>
       <View style={styles.serviceListContain}>
         <Text style={[styles.serviceListHeadTxt, { color: theme.textPrimary }]}>Service List</Text>
-        {(() => {
-          let services = [];
-          try {
-            services = JSON.parse(item.serviceList);
-          } catch (e) {
-            services = [];
-          }
-          return services.length > 0 ? (
-            services.map((service, index) => (
-              <View key={index} style={styles.ServiceListTxtContain}>
-                <Text>✅</Text>
-                <Text style={[styles.serviceListTxt, { color: theme.textPrimary }]}>{service}</Text>
-              </View>
-            ))
-          ) : (
-            <Text style={{ color: theme.textPrimary }}>No services available</Text>
-          );
-        })()}
+    {(() => {
+  let services = [];
+
+  try {
+    // If string is like: "Haircut , Haircolor"
+    if (typeof item.services === "string") {
+      services = item.services
+        .split(",")           // Separate by comma
+        .map(s => s.trim())   // Remove spaces
+        .filter(s => s);      // Remove empty values
+    } else {
+      services = JSON.parse(item.services);
+    }
+  } catch (e) {
+    services = [];
+  }
+
+  return services.length > 0 ? (
+    <View style={{ flexDirection: "column", alignItems : 'flex-start' }}>
+      {services.map((service, index) => (
+        <View key={index} style={styles.ServiceListTxtContain}>
+            <Text style={[styles.serviceListTxt, { color: theme.textPrimary }]}>
+            ✅  {service}
+          </Text>
+        </View>
+      ))}
+    </View>
+  ) : (
+    <Text style={{ color: theme.textPrimary }}>No services available</Text>
+  );
+})()}
+
       </View>
 
       <View style={styles.ratContain}>
@@ -113,8 +127,8 @@ const styles = StyleSheet.create({
     marginBottom: hp('2%')
   },
   aboutTxt: {
-    color: '#00000075',
-    fontSize: wp('4%'),
+    color: '#4b484875',
+    fontSize: wp('4.5%'),
     fontWeight: '500',
     marginBottom: hp('0.5%')
   },
@@ -141,7 +155,7 @@ const styles = StyleSheet.create({
     fontWeight: '400'
   },
   ServiceListTxtContain: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: wp('2%'),
     alignItems: 'center',
     marginBottom: hp('0.8%')
@@ -154,7 +168,7 @@ const styles = StyleSheet.create({
   ratTxt: {
     fontSize: wp('4%'),
     fontWeight: '500',
-    color: '#0000006E'
+    color: '#6863636e'
   },
   ratContain: {
     flexDirection: 'row',

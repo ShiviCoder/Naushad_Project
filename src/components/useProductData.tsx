@@ -11,28 +11,76 @@ const getToken = async () => {
     console.log("token accept")
     return token;
   }
-  const fetchProductData = async () => {
-    try {
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE'
-      const token = getToken();
-      const response = await fetch('https://naushad.onrender.com/api/product-packages', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const json = await response.json();
-      console.log("✅ Product package response:", json);
-      setProductData(json.data || []);
-    } catch (err) {
-      console.log("❌ Product package error:", err);
+
+  const [gender, setGender] = useState("male");
+
+useEffect(() => {
+  const loadGender = async () => {
+    const savedGender = await AsyncStorage.getItem("selectedGender");
+
+    console.log("Loaded Gender:", savedGender);
+
+    // Fallback to male if null/undefined/"null"
+    if (!savedGender || savedGender === "null") {
+      setGender("male");
+    } else {
+      setGender(savedGender);
     }
+
+      // ⭐ Remove saved gender so next time fresh value will be used
+    await AsyncStorage.removeItem("selectedGender");
+    console.log("Old gender removed from AsyncStorage");
   };
 
-  useEffect(() => {
-    fetchProductData();
-  }, []);
+  loadGender();
+}, []);
+
+
+  const fetchProductPackages = async (selectedGender) => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+  
+        const g = (selectedGender || gender || "male").toLowerCase().trim();
+        console.log("Selected Gender:", g);
+  
+        const response = await fetch(
+          `https://naushad.onrender.com/api/product-packages`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+  
+        const json = await response.json();
+        console.log("📦 Full Response:", json);
+  
+        if (!json?.success) return;
+  
+        let data = json.data || [];
+  
+        // 🔥 FINAL FILTER
+        data = data.filter((item) =>
+          String(item.gender || "")
+            .trim()
+            .toLowerCase() === g
+        );
+  
+        console.log("Filtered Data:", data);
+  
+        setProductData(data);
+      } catch (err) {
+        console.log("🔥 Product package error:", err);
+      }
+    };
+  
+    useEffect(() => {
+      fetchProductPackages(gender); // whenever gender changes
+    }, [gender]);
+  
   return productData;
 };
 

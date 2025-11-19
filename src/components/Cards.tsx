@@ -12,24 +12,24 @@ import COLORS from '../utils/Colors';
 const Card = ({ item }) => {
   // dynamic sizes
   const cardWidth = wp("40%");  // each card takes ~40% of screen width
-  const cardHeight = hp("20%"); // proportional height
-  const {theme} = useTheme();
+  const cardHeight = hp("22%"); // proportional height
+  const { theme } = useTheme();
   const navigation = useNavigation();
 
   return (
     <View style={[styles.cardWrapper, { width: cardWidth, height: cardHeight }]}>
       {/* Folded top corners */}
       <Svg height={hp("12%")} width={cardWidth} style={styles.foldSvg}>
-      <Polygon 
-  points={`0,0 ${wp("5%")},0 0,${wp("5%")}`} 
-  fill={theme.background} 
-/>
+        <Polygon
+          points={`0,0 ${wp("5%")},0 0,${wp("5%")}`}
+          fill={theme.background}
+        />
 
-<Polygon 
-  points={`${cardWidth},0 ${cardWidth - wp("5%")},0 ${cardWidth},${wp("5%")}`} 
-  fill={theme.background}  
-/>
-</Svg>
+        <Polygon
+          points={`${cardWidth},0 ${cardWidth - wp("5%")},0 ${cardWidth},${wp("5%")}`}
+          fill={theme.background}
+        />
+      </Svg>
 
       <Shadow distance={2} startColor={COLORS.shadow} offset={[0, hp("2%")]}>
         {/* Main Card */}
@@ -50,12 +50,15 @@ const Card = ({ item }) => {
             <Text style={styles.rate}>
               Rate: <Text style={styles.bold}>{item.price}</Text>
             </Text>
-            <Text style={styles.products}>
-              Products: <Text style={styles.bold}> {item.products}</Text>
+            <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
+              Products:-{""}
+              <Text style={{ fontWeight: "700" }}>
+                {Array.isArray(item.items) ? item.items.join(", ") : item.items}
+              </Text>
             </Text>
             <View style={styles.footerCon}>
-              <Text style={styles.about}>{item.tag}</Text>
-              <TouchableOpacity style={[styles.bookButton,{ backgroundColor: COLORS.primary}]} onPress={()=>navigation.navigate('ProductPakage',{item})}>
+              <Text style={styles.about}>{item.description}</Text>
+              <TouchableOpacity style={[styles.bookButton, { backgroundColor: COLORS.primary }]} onPress={() => navigation.navigate('ProductPakage', { item })}>
                 <Text style={styles.bookText}>Book now</Text>
               </TouchableOpacity>
             </View>
@@ -70,9 +73,9 @@ const styles = StyleSheet.create({
   cardWrapper: {
     // margin: wp("2%"),
     alignItems: 'center',
-     marginHorizontal : wp('3%'),
+    marginHorizontal: wp('3%'),
     overflow: 'visible',
-    justifyContent : 'space-evenly'
+    justifyContent: 'space-evenly'
   },
   foldSvg: {
     position: 'absolute',
@@ -98,7 +101,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     position: "absolute",
-    fontSize: wp("3%"),
+    fontSize: wp("2%"),
     fontWeight: '500',
     color: "#FFFFFF",
   },
