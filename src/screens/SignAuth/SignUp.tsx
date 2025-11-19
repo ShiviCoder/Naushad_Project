@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import {
@@ -35,50 +34,111 @@ export default function SignupScreen({ navigation }) {
   const [referal, setReferal] = useState('');
   const [photo, setPhoto] = useState(null);
 
+  // For red borders of missing or invalid fields
+  const [showError, setShowError] = useState({
+    fullName: false,
+    emailOrPhone: false,
+    password: false,
+    confirmPassword: false,
+  });
+
+  // Checks and sets which fields are empty for showing red border
+  const getIsEmpty = () => ({
+    fullName: fullName.trim() === "",
+    emailOrPhone: emailOrPhone.trim() === "",
+    password: password.trim() === "",
+    confirmPassword: confirmPassword.trim() === "",
+  });
 
   const handleSignup = async () => {
-    if (!fullName || !emailOrPhone || !password || !confirmPassword) {
+    const empty = getIsEmpty();
+    setShowError(empty);
+
+    // Validation: Any field empty
+    if (empty.fullName || empty.emailOrPhone || empty.password || empty.confirmPassword) {
       setPopupMessage("All fields are required.");
       setPopupVisible(true);
       setNextRoute(null);
       return;
     }
-    const normalize = (str) => str.replace(/\s+/g, ''); // remove ALL spaces
+    // Validation: Password length check
+    if (password.length < 8) {
+      setShowError((prev) => ({ ...prev, password: true, confirmPassword: true }));
+      setPopupMessage("Password must be at least 8 characters.");
+      setPopupVisible(true);
+      setNextRoute(null);
+      return;
+    }
+    // Validation: Passwords match check
+    const normalize = (str) => str.replace(/\s+/g, "");
     if (normalize(password) !== normalize(confirmPassword)) {
+      setShowError((prev) => ({ ...prev, password: true, confirmPassword: true }));
       setPopupMessage("Passwords do not match.");
       setPopupVisible(true);
       setNextRoute(null);
       return;
     }
+
     setLoading(true);
+
     try {
+      // Only send photo URI if an image is selected, else undefined
+      let formData = {
+        fullName: fullName,
+        email: emailOrPhone, // assuming backend accepts "email"
+        password: password,
+        confirmPassword: confirmPassword,
+        dob: dob,
+        address: address,
+        gender: gender,
+        referal: referal,
+        photo: photo ? photo.uri : undefined,
+      };
+
+      // Clean up any undefined fields
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] === undefined) delete formData[key];
+      });
+
+      console.log("Sending signup data:", formData);
+
       const response = await fetch("https://naushad.onrender.com/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          fullName: fullName,
-          email: emailOrPhone, // assuming backend accepts "email"
-          password: password,
-          confirmPassword: confirmPassword,
-          dob : dob,
-          address : address,
-          gender : gender,
-          referal : referal, 
-          photo : photo
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
       setLoading(false);
-      console.log("Signup Response:", data);
+
+      // Console for debugging API response
+      console.log("Signup API Response:", data);
+
+      // Handle various response patterns (array or string or field error keys)
       if (response.ok && data.token) {
         setPopupMessage("Signup successful!");
         setNextRoute({ name: "VerificationScreen" });
         setPopupVisible(true);
+      } else if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        // If errors array
+        setPopupMessage(data.errors[0].msg || "Signup failed. Try again.");
+        setPopupVisible(true);
+        setNextRoute(null);
+      } else if (typeof data.message === 'string') {
+        // Show specific backend message
+        setPopupMessage(data.message);
+        setPopupVisible(true);
+        setNextRoute(null);
+      } else if (data.error) {
+        // Sometimes backend sends error object
+        setPopupMessage(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+        setPopupVisible(true);
+        setNextRoute(null);
       } else {
-        setPopupMessage(data.message || "Signup failed. Try again.");
+        // Fallback generic error
+        setPopupMessage("Signup failed. Try again.");
         setPopupVisible(true);
         setNextRoute(null);
       }
@@ -89,28 +149,20 @@ export default function SignupScreen({ navigation }) {
       setPopupVisible(true);
       setNextRoute(null);
     }
-    console.log("Sending signup data:", {
-      name: fullName,
-      email: emailOrPhone,
-      password: password,
-      confirmPassword: confirmPassword,
-      dob:dob,
-      address : address,  
-    });
   };
+
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) {
       navigation.navigate(nextRoute.name, nextRoute.params);
     }
   };
+
   const handleChange = (text) => {
     // Remove non-digit characters
     let cleaned = text.replace(/\D/g, "");
-
     // Limit to 8 digits (DDMMYYYY)
     if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
-
     // Format with slashes
     let formatted = "";
     if (cleaned.length <= 2) {
@@ -137,7 +189,6 @@ export default function SignupScreen({ navigation }) {
         } else if (response.errorMessage) {
           console.log('ImagePicker Error: ', response.errorMessage);
         } else {
-          // iOS / Android me path thoda different ho sakta hai
           const source = { uri: response.assets[0].uri };
           setPhoto(source);
         }
@@ -158,44 +209,44 @@ export default function SignupScreen({ navigation }) {
         {/* Full Name */}
         <Text style={styles.label}>Full Name</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, showError.fullName && styles.inputError]}
           placeholder="Enter full name"
           placeholderTextColor={'gray'}
           value={fullName}
-          onChangeText={setFullName}
+          onChangeText={(val) => { setFullName(val); setShowError((s)=>({...s,fullName:false})) }}
         />
 
         {/* Email / Phone */}
         <Text style={styles.label}>Email</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, showError.emailOrPhone && styles.inputError]}
           placeholder="Enter your email"
           placeholderTextColor={'gray'}
           value={emailOrPhone}
-          onChangeText={setEmailOrPhone}
+          onChangeText={(val) => { setEmailOrPhone(val); setShowError((s)=>({...s,emailOrPhone:false})) }}
           keyboardType="email-address"
         />
 
         {/* Password */}
         <Text style={styles.label}>Password</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, showError.password && styles.inputError]}
           placeholder="Enter password"
           placeholderTextColor={'gray'}
           secureTextEntry
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(val) => { setPassword(val); setShowError((s)=>({...s,password:false})) }}
         />
 
         {/* Confirm Password */}
         <Text style={styles.label}>Confirm Password</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, showError.confirmPassword && styles.inputError]}
           placeholder="Confirm password"
           placeholderTextColor={'gray'}
           secureTextEntry
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          onChangeText={(val) => { setConfirmPassword(val); setShowError((s)=>({...s,confirmPassword:false})) }}
         />
 
         <Text style={styles.label}>Date of Birth</Text>
@@ -206,11 +257,14 @@ export default function SignupScreen({ navigation }) {
           value={dob}
           onChangeText={handleChange}
         />
+
         <Text style={[styles.label]}>Phone Number</Text>
         <TextInput
           placeholder='Enter your number'
           placeholderTextColor={'gray'}
-          style={[styles.input]} keyboardType='phone-pad' />
+          style={styles.input}
+          keyboardType='phone-pad'
+        />
 
         <Text style={styles.label}>Address</Text>
         <TextInput
@@ -226,7 +280,7 @@ export default function SignupScreen({ navigation }) {
           {['male', 'female', 'other'].map((option) => (
             <TouchableOpacity
               key={option}
-              style={[styles.radioOption]}
+              style={styles.radioOption}
               onPress={() => setGender(option)}
             >
               <View
@@ -244,33 +298,36 @@ export default function SignupScreen({ navigation }) {
         </View>
 
         <View style={styles.imageContainer}>
-           <TouchableOpacity onPress={handleChoosePhoto}>
-          <Image
-            source={
-              photo
-                ? photo
-                : require('../../assets/user-img.png') // fallback image
-            }
-            style={styles.profileImage}
-          />
-          <View style={styles.editIcon}>
-            <Icon name="create-outline" size={wp('4%')} color="#fff" />
-          </View>
-        </TouchableOpacity>
-        
+          <TouchableOpacity onPress={handleChoosePhoto}>
+            <Image
+              source={
+                photo
+                  ? photo
+                  : require('../../assets/user-img.png')
+              }
+              style={styles.profileImage}
+            />
+            <View style={styles.editIcon}>
+              <Icon name="create-outline" size={wp('4%')} color="#fff" />
+            </View>
+          </TouchableOpacity>
           <View style={styles.nameRow}>
             <Text style={styles.nameText}>Upload your picture</Text>
-          </View>  
+          </View>
         </View>
 
-        <Text style={styles.label}>Referal Code(Optional)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your referal code"
-          placeholderTextColor={'gray'}
-          value={referal}
-          onChangeText={setReferal}
-        />
+        {/* Added marginTop here before Referal Code */}
+        <View style={{ marginTop: hp('2%') }}>
+          <Text style={styles.label}>Referal Code (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your referal code"
+            placeholderTextColor={'gray'}
+            value={referal}
+            onChangeText={setReferal}
+          />
+        </View>
+
         {/* Signup Button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: COLORS.primary }]}
@@ -294,7 +351,6 @@ export default function SignupScreen({ navigation }) {
       </ScrollView>
 
       <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
-
     </SafeAreaView>
   );
 }
@@ -327,6 +383,10 @@ const styles = StyleSheet.create({
     fontSize: wp("3.5%"),
     backgroundColor: "#fff",
     color: "black"
+  },
+  inputError: {
+    borderColor: 'red',
+    borderWidth: 1.2,
   },
   button: {
     paddingVertical: hp("1.5%"),
@@ -402,11 +462,11 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 60,
   },
-   imageContainer: {
+  imageContainer: {
     position: "relative",
-    flexDirection : 'row',
-    alignItems : 'center',
-    justifyContent : 'center'
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   profileImage: {
     width: 60,
@@ -420,14 +480,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderRadius: 12,
     padding: hp('0.2%'),
-    alignSelf : 'center',
-    
+    alignSelf: 'center',
   },
   nameRow: {
     flex: 1,
     marginLeft: wp('3%'),
     flexDirection: "row",
-    alignItems : 'center'
+    alignItems: 'center'
   },
   nameText: {
     fontSize: wp('4%'),

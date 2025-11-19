@@ -17,10 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
 
-
 // const ADMIN_EMAIL = 'shivani123@gmail.com';
 // const ADMIN_PASSWORD = 'shi123';
-
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -30,7 +28,6 @@ const Signin = ({ navigation }) => {
   const [popupMessage, setPopupMessage] = useState('');
   const [nextRoute, setNextRoute] = useState(null); // For navigation after popup
 
-
   const handleSignIn = async () => {
     if (!email || !password) {
       setPopupMessage('Please enter both email and password.');
@@ -39,14 +36,12 @@ const Signin = ({ navigation }) => {
       return;
     }
 
-
     // if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
     //   setPopupMessage('Access Denied. Only admin can login.');
     //   setNextRoute(null);
     //   setPopupVisible(true);
     //   return;
     // }
-
 
     setLoading(true);
     try {
@@ -62,10 +57,13 @@ const Signin = ({ navigation }) => {
       );
       const data = await response.json();
       if (response.ok && data.token) {
-        console.log('Token :' , data.token);
+        console.log('Token from response:', data.token);
         await AsyncStorage.setItem('userToken', data.token);
         // Save login state persistently
         await AsyncStorage.setItem('userData', JSON.stringify(data));
+        // Retrieve and log the stored token for debugging
+        const storedToken = await AsyncStorage.getItem('userToken');
+        console.log('Stored token from AsyncStorage:', storedToken); // <-- DEBUG LOG HERE
         setPopupMessage('Login successful!');
         setNextRoute({
           name: 'MainTabs',
@@ -87,14 +85,12 @@ const Signin = ({ navigation }) => {
     }
   };
 
-
   const handlePopupClose = () => {
     setPopupVisible(false);
     if (nextRoute) {
       navigation.replace(nextRoute.name, nextRoute.params);
     }
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -103,7 +99,6 @@ const Signin = ({ navigation }) => {
         style={styles.logo}
         resizeMode="contain"
       />
-
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
@@ -118,7 +113,6 @@ const Signin = ({ navigation }) => {
         />
       </View>
 
-
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -131,14 +125,12 @@ const Signin = ({ navigation }) => {
         />
       </View>
 
-
       <TouchableOpacity
         style={styles.forgotPasswordContainer}
         onPress={() => navigation.navigate('ForgetPassword')}
       >
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
-
 
       <TouchableOpacity
         style={[styles.signinButton, { backgroundColor: COLORS.primary }]}
@@ -152,7 +144,6 @@ const Signin = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
-
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don’t have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -162,7 +153,6 @@ const Signin = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </View>
-
 
       {/* Popup Component */}
       <Popup
@@ -174,9 +164,7 @@ const Signin = ({ navigation }) => {
   );
 };
 
-
 export default Signin;
-
 
 const styles = StyleSheet.create({
   container: {
