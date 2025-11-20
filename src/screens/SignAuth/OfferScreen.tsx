@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import Head from '../../components/Head';
@@ -19,12 +20,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const OfferScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const [offers, setOffers] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+  const [loading, setLoading] = useState(false);
 
  const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
@@ -61,6 +64,7 @@ useEffect(() => {
 
 const fetchSpecialOffers = async (selectedGender) => {
     try {
+      setLoading(true);
       const token = await getToken();
       const g = (selectedGender || gender || "male").toLowerCase().trim();
       console.log("Selected Gender for special offers:", g);
@@ -92,6 +96,9 @@ const fetchSpecialOffers = async (selectedGender) => {
     } catch (error) {
       console.log("special offer error : ", error)
     }
+    finally {
+       setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -118,7 +125,13 @@ const fetchSpecialOffers = async (selectedGender) => {
 
     setRefreshing(false);
   };
-
+if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
   // ✅ Add return here
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>

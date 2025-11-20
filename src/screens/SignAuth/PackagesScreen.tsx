@@ -8,6 +8,7 @@ import {
   Animated,
   RefreshControl,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Shadow } from 'react-native-shadow-2';
 import {
@@ -28,6 +29,7 @@ const PackagesScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
   const [packages,setPackages] = useState([]);
+  const [loading,setLoading] = useState(false);
 
    const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
@@ -61,6 +63,7 @@ useEffect(() => {
 
  const fetchPackages = async (selectedGender) => {
     try {
+      setLoading(true);
       const token = await getToken();
       if (!token) return;
 
@@ -95,6 +98,8 @@ useEffect(() => {
       setPackages(data);
     } catch (err) {
       console.log("🔥 Packages error:", err);
+    } finally { 
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -123,6 +128,13 @@ useEffect(() => {
     setRefreshing(false);
   };
 
+  if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
   <Animated.ScrollView

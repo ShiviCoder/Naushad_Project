@@ -1,5 +1,5 @@
 // File: Certificates.js
-import { StyleSheet, Text, View, FlatList, Image, Animated, ScrollView, RefreshControl } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image, Animated, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +13,7 @@ const Certificates = () => {
   const [certificates, setCertificates] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+  const [loading , setLoading] = useState(false);
 
   const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
@@ -24,7 +25,7 @@ const Certificates = () => {
     try {
       // const token =
       //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
-
+      setLoading(true);
       const token = await getToken();
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
@@ -40,6 +41,9 @@ const Certificates = () => {
     } catch (error) {
       console.error('Error fetching certificates:', error);
       setCertificates([]);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -73,6 +77,15 @@ const Certificates = () => {
       </Text>
     </View>
   );
+
+  
+  if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
 
   return (
     <Animated.View style={{ flex: 1, transform: [{ translateY }] }}>

@@ -8,6 +8,7 @@ import {
   Animated,
   RefreshControl,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
@@ -23,6 +24,7 @@ export default function ServicesScreen() {
 
   const [services, setServices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
  const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
@@ -33,6 +35,7 @@ export default function ServicesScreen() {
 
   const fetchHomeServices = async () => {
     try {
+      setLoading(true);
       const token = await getToken();
       const response = await fetch("https://naushad.onrender.com/api/home-services/", {
         method: "GET",
@@ -48,6 +51,8 @@ export default function ServicesScreen() {
       setServices(json.data);
     } catch (error) {
       console.log("Home services error:", error);
+    } finally { 
+      setLoading(false);
     }
   };
 
@@ -75,6 +80,13 @@ export default function ServicesScreen() {
 
     setRefreshing(false);
   };
+  if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>

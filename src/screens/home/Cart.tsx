@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
@@ -17,29 +16,80 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-nat
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../utils/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Popup from "../../components/PopUp";
 
 const CartScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
+  const showPopup = (message) => {
+    setPopupMessage(message);
+    setPopupVisible(true);
+  };
+
+  // Fetch userId from AsyncStorage
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        console.log('🆔 CartScreen - Fetched userId from AsyncStorage:', storedUserId);
+        setUserId(storedUserId);
+      } catch (error) {
+        console.error('❌ CartScreen - Error fetching userId:', error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
   const fetchCart = async () => {
-    const userId = await AsyncStorage.getItem('userId');
     try {
-      console.log(userId);
+      // Get fresh userId from AsyncStorage
+      const freshUserId = await AsyncStorage.getItem('userId');
+      console.log('🛒 CartScreen - Fetching cart for userId:', freshUserId);
+      
+      if (!freshUserId) {
+        showPopup("Please sign in to view your cart");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
-      const response = await fetch(`https://naushad.onrender.com/api/cart/${userId}`);
+      const response = await fetch(`https://naushad.onrender.com/api/cart`);
       const data = await response.json();
-      console.log("Cart Data:", data);
+      console.log("📥 CartScreen - Full API Response:", JSON.stringify(data, null, 2));
+      console.log("🔍 CartScreen - Response Status:", response.status);
+      console.log("🔍 CartScreen - Success:", data.success);
 
       if (response.ok && data.success) {
-        setCartItems(data.cart.items || []);
+        // Cart items are in data.data array
+        const allCartItems = data.data || [];
+        console.log("📦 CartScreen - All cart items from API:", allCartItems);
+        
+        // Filter items for current user
+        const filteredItems = allCartItems.filter(item => {
+          const matchesUser = item.userId === freshUserId;
+          console.log(`🔍 CartScreen - Item ${item._id}: userId=${item.userId}, matches=${matchesUser}`);
+          return matchesUser;
+        });
+        
+        console.log("✅ CartScreen - Filtered items for current user:", filteredItems);
+        console.log("👤 CartScreen - Current userId:", freshUserId);
+        console.log("📊 CartScreen - Found items count:", filteredItems.length);
+        setCartItems(filteredItems);
       } else {
-        Alert.alert("Error", data.message || "Failed to load cart");
+        showPopup("Unable to load your cart. Please try again");
+        setCartItems([]);
       }
     } catch (error) {
-      console.error("Fetch cart error:", error);
-      Alert.alert("Error", "Unable to fetch cart data");
+      console.error("❌ CartScreen - Fetch cart error:", error);
+      showPopup("Network connection issue. Please check your internet");
+      setCartItems([]);
     } finally {
       setLoading(false);
     }
@@ -48,26 +98,38 @@ const CartScreen = () => {
   // ✅ Remove item from cart (API)
   const handleRemove = async (itemId) => {
     try {
-      const response = await fetch(`https://naushad.onrender.com/api/cart/${userId}/${itemId}`, {
+      const freshUserId = await AsyncStorage.getItem('userId');
+      if (!freshUserId) {
+        showPopup("Please sign in to manage your cart");
+        return;
+      }
+
+      console.log('🗑️ CartScreen - Removing item:', itemId, 'for user:', freshUserId);
+      
+      const response = await fetch(`https://naushad.onrender.com/api/cart/${itemId}`, {
         method: "DELETE",
       });
       const data = await response.json();
 
+      console.log("📥 CartScreen - Remove API Response:", JSON.stringify(data, null, 2));
+
       if (response.ok && data.success) {
-        Alert.alert("Removed", "Item removed from cart");
+        // Directly remove without showing popup
         fetchCart(); // Refresh list
       } else {
-        Alert.alert("Error", data.message || "Failed to remove item");
+        showPopup("Failed to remove item. Please try again");
       }
     } catch (error) {
-      console.error("Delete error:", error);
-      Alert.alert("Error", "Unable to remove item");
+      console.error("❌ CartScreen - Delete error:", error);
+      showPopup("Network issue. Please check your connection");
     }
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (userId) {
+      fetchCart();
+    }
+  }, [userId]);
 
   // ✅ Calculations
   const subtotal = cartItems.reduce((acc, item) => acc + Number(item.price || 0) * Number(item.quantity || 0), 0);
@@ -82,6 +144,9 @@ const CartScreen = () => {
       {loading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={{ marginTop: 10, color: theme.dark ? "#fff" : "#000" }}>
+            Loading cart items...
+          </Text>
         </View>
       ) : (
         <ScrollView
@@ -93,36 +158,50 @@ const CartScreen = () => {
               <Text style={{ fontSize: 18, color: theme.dark ? "#888" : "#aaa" }}>
                 Your cart is empty
               </Text>
+              <Text style={{ fontSize: 14, color: theme.dark ? "#666" : "#999", marginTop: 10 }}>
+                Add some products to your cart!
+              </Text>
+              <Text style={{ fontSize: 12, color: theme.dark ? "#555" : "#888", marginTop: 5 }}>
+                User ID: {userId}
+              </Text>
             </View>
           ) : (
             cartItems.map((item) => (
               <View
-                key={item._id.toString()}
+                key={item._id}
                 style={[
                   styles.card,
-                  { backgroundColor: "#dadada", borderColor: COLORS.shadow },
+                  { backgroundColor: theme.dark ? "#333" : "#f8f8f8", borderColor: COLORS.shadow },
                 ]}
               >
                 <Image
-                  source={{ uri: item.image }}
+                  source={{ uri: item.image || "https://via.placeholder.com/150" }}
                   style={styles.image}
                 />
                 <View style={styles.itemDetails}>
-                  <Text style={[styles.itemName, { color: "#000" }]}>{item.name}</Text>
+                  <View style={styles.headerRow}>
+                    <Text style={[styles.itemName, { color: theme.dark ? "#fff" : "#000" }]}>
+                      {item.name}
+                    </Text>
+                    {/* Remove button - top right corner */}
+                    <TouchableOpacity 
+                      style={styles.removeButton}
+                      onPress={() => handleRemove(item._id)}
+                    >
+                      <Icon name="close" size={20} color="red" />
+                    </TouchableOpacity>
+                  </View>
+                  
                   <View style={styles.priceRow}>
-                    <Text style={[styles.price, { color: "#000" }]}>₹{item.price}</Text>
+                    <Text style={[styles.price, { color: theme.dark ? "#fff" : "#000" }]}>
+                      ₹{item.price}
+                    </Text>
                   </View>
 
                   {/* Quantity */}
-                  <View style={[styles.qtyRow, { backgroundColor: "#000" }]}>
+                  <View style={[styles.qtyRow, { backgroundColor: theme.dark ? "#555" : "#000" }]}>
                     <Text style={styles.qtyValue}>Qty: {item.quantity}</Text>
                   </View>
-
-                  {/* Remove */}
-                  <TouchableOpacity style={styles.removeRow} onPress={() => handleRemove(item._id)}>
-                    <Icon name="close" size={16} color="red" style={{ marginRight: 4 }} />
-                    <Text style={styles.removeText}>Remove</Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             ))
@@ -132,19 +211,31 @@ const CartScreen = () => {
             <>
               <View style={styles.summary}>
                 <View style={styles.summaryRow}>
-                  <Text style={styles.summaryText}>Subtotal</Text>
-                  <Text style={styles.summaryText}>₹{subtotal}</Text>
+                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                    Subtotal
+                  </Text>
+                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                    ₹{subtotal}
+                  </Text>
                 </View>
                 <View style={styles.summaryRow}>
-                  <Text style={styles.summaryText}>GST (10%)</Text>
-                  <Text style={styles.summaryText}>₹{gst}</Text>
+                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                    GST (10%)
+                  </Text>
+                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                    ₹{gst}
+                  </Text>
                 </View>
               </View>
 
               <View style={[styles.stickyFooter, { backgroundColor: theme.dark ? "#222" : "#fff" }]}>
                 <View style={styles.totalRow}>
-                  <Text style={styles.totalText}>Total</Text>
-                  <Text style={styles.totalText}>₹{total}</Text>
+                  <Text style={[styles.totalText, { color: theme.dark ? "#fff" : "#000" }]}>
+                    Total
+                  </Text>
+                  <Text style={[styles.totalText, { color: theme.dark ? "#fff" : "#000" }]}>
+                    ₹{total}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("PaymentScreen")}
@@ -157,6 +248,13 @@ const CartScreen = () => {
           )}
         </ScrollView>
       )}
+
+      {/* Popup Component */}
+      <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={() => setPopupVisible(false)}
+      />
     </SafeAreaView>
   );
 };
@@ -170,6 +268,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: hp("1.5%"),
     elevation: 1,
+    position: 'relative',
   },
   image: {
     width: wp("32%"),
@@ -177,12 +276,26 @@ const styles = StyleSheet.create({
     borderRadius: wp("3%"),
     marginRight: wp("3%"),
   },
-  itemDetails: { flex: 1, 
+  itemDetails: { 
+    flex: 1, 
     justifyContent: "center" 
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: hp("0.5%"),
   },
   itemName: { 
     fontSize: wp("4%"), 
-    fontWeight: "700" 
+    fontWeight: "700",
+    flex: 1,
+    marginRight: wp("2%"),
+  },
+  removeButton: {
+    padding: wp("1%"),
+    borderRadius: wp("2%"),
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
   },
   priceRow: { 
     flexDirection: "row", 
@@ -198,9 +311,10 @@ const styles = StyleSheet.create({
     borderRadius: wp("3%"),
     paddingHorizontal: wp("3%"),
     paddingVertical: hp("0.5%"),
+    alignSelf: 'flex-start',
   },
   qtyValue: { 
-    fontSize: wp("4%"), 
+    fontSize: wp("3.5%"), 
     fontWeight: "bold", 
     color: "#fff" 
   },
@@ -223,7 +337,8 @@ const styles = StyleSheet.create({
     marginVertical: hp("1%") 
   },
   summaryText: { 
-    fontSize: wp("4.5%") 
+    fontSize: wp("4.5%"),
+    fontWeight: "500"
   },
   stickyFooter: {
     position: "absolute",
@@ -232,6 +347,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: wp("4%"),
     borderTopWidth: 1,
+    borderTopColor: '#ccc',
   },
   totalRow: { 
     flexDirection: "row", 
@@ -239,7 +355,7 @@ const styles = StyleSheet.create({
     marginBottom: hp("1%") 
   },
   totalText: { 
-    fontSize: wp("4%"), 
+    fontSize: wp("4.5%"), 
     fontWeight: "bold" 
   },
   checkoutBtn: { 

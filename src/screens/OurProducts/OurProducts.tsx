@@ -5,6 +5,7 @@ import {
   ScrollView,
   RefreshControl,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import Head from '../../components/Head';
 import FlatListComp from './FlatListComp';
@@ -19,6 +20,8 @@ const OurProducts = () => {
   const [products, setProducts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+  const [loading, setLoading] = useState(true);
+
   const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
     console.log('API Token: ', token);
@@ -50,6 +53,7 @@ const OurProducts = () => {
   }, []);
   const fetchProducts = async (selectedGender) => {
     try {
+      setLoading(true); 
       const token = await getToken();
       if (!token) return;
 
@@ -85,6 +89,9 @@ const OurProducts = () => {
     } catch (error) {
       console.log("🔥 Product error:", error);
     }
+    finally{
+      setLoading(false); // stop loader
+    }
   };
   useEffect(() => {
     fetchProducts(gender);
@@ -109,8 +116,16 @@ const OurProducts = () => {
 
     setRefreshing(false);
   };
+  if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
 
   return (
+    
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <Animated.ScrollView
         style={{ transform: [{ translateY }] }}

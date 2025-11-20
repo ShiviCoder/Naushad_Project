@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, useWindowDimensions, Image, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import FlatListComp from '../OurProducts/FlatListComp';
-import ProductData from '../../components/useProductData';
 import ProductCard from '../OurProducts/ProductCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -12,202 +11,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import { useCart } from '../../context/CartContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// const products = [
-//   {
-//     id: '1',
-//     name: ['Face Wash — 100 ml', "Golden Glow Peel Off"],
-//     price: '₹299',
-//     offer: '25%OFF',
-//     rating: '4.1',
-//     tag: '100% natural oil',
-//     image: [require('../../assets/images/male-product1.jpg'),
-//     require('../../assets/images/female-product1.jpg')
-//     ],
-//     description: '100% natural oil',
-//     reviews: 5802,
-//   },
-//   {
-//     id: '2',
-//     name: ['Det Fairness Cream', "Plum FaceWash - 500ml"],
-//     price: '₹299',
-//     offer: '33%OFF',
-//     rating: '4.1',
-//     tag: 'Instant visible result',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product2.jpg')
-//     ],
-//     description: 'Smooth & shiny hair',
-//     reviews: 3100,
-//   },
-//   {
-//     id: '3',
-//     name: ['Detan — Face', 'Foaming Face Wash Gel'],
-//     price: '₹299',
-//     offer: '33%OFF',
-//     rating: '4.1',
-//     tag: 'Instant visible result',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product4.jpg')
-//     ],
-//     description: 'Smooth & shiny hair',
-//     reviews: 3100,
-//   },
-//   {
-//     id: '4',
-//     name: ['Nivea Hair Cream', 'Foaming Fash Wash Gel'],
-//     price: '₹299',
-//     offer: '20%OFF',
-//     rating: '4.1',
-//     tag: 'Salon grade',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product4.jpg')
-//     ],
-//     description: 'Detox & deep clean',
-//     reviews: 2750,
-//   },
-//   {
-//     id: '5',
-//     name: ['Shave Cream ', 'MediCube Hair Mask'],
-//     price: '₹299',
-//     offer: '25%OFF',
-//     rating: '4.1',
-//     tag: '100% natural oil',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product3.jpg')
-//     ],
-//     description: 'Anti-dandruff formula',
-//     reviews: 3300,
-//   },
-//   {
-//     id: '6',
-//     name: ['Detan — Face', 'Foaming Face Wash'],
-//     price: '₹299',
-//     offer: '33%OFF',
-//     rating: '4.1',
-//     tag: 'Instant visible result',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product4.jpg')
-//     ],
-//     description: 'Smooth & shiny hair',
-//     reviews: 3100,
-//   },
-//   {
-//     id: '7',
-//     name: ['Nivea Hair spa', "Plum FaceWash 50ml"],
-//     price: '₹299',
-//     offer: '20%OFF',
-//     rating: '4.1',
-//     tag: 'Salon grade',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product2.jpg')
-//     ],
-//     description: 'Smooth & shiny hair',
-//     reviews: 3100,
-//   },
-//   {
-//     id: '8',
-//     name: ['Shave Cream ', 'MediCube Hair Mask'],
-//     price: '₹299',
-//     offer: '25%OFF',
-//     rating: '4.1',
-//     tag: '100% natural oil',
-//     image: [require('../../assets/images/male-product11.jpg'),
-//     require('../../assets/images/female-product3.jpg')
-//     ],
-//     description: 'Anti-dandruff formula',
-//     reviews: 3300,
-//   },
-// ];
-
-// const services = [
-//     {
-//       id: '1',
-//       name: 'Hair Cut',
-//       price: '₹350.00',
-//       desc: 'Stylish cut with blow dry',
-//       image: [require('../../assets/images/haircut1.png'),
-//       require('../../assets/images/man-service1.jpg')
-//       ],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//       {
-//       id: '2',
-//       name: 'Hair Coloring',
-//       price: '₹400.00',
-//       desc: 'Long-lasting shades',
-//       image: [require('../../assets/images/haircolor1.png'),
-//       require('../../assets/images/man-service5.jpg')],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//     {
-//       id: '3',
-//       name: 'Hair Coloring',
-//       price: '₹400.00',
-//       desc: 'Long-lasting shades',
-//       image: [require('../../assets/images/haircolor1.png'),
-//       require('../../assets/images/man-service2.jpg')
-//       ],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//     {
-//       id: '4',
-//       name: 'Facial',
-//       price: '₹600.00',
-//       desc: 'Glow facial therapy',
-//       image: [require('../../assets/images/facial.jpg'),
-//       require('../../assets/images/man-service3.jpg'),],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//     {
-//       id: '5',
-//       name: 'Hair Cut',
-//       price: '₹350.00',
-//       desc: 'Stylish cut with blow dry',
-//       image: [require('../../assets/images/haircut1.png'),
-//       require('../../assets/images/man-service4.jpg')
-//       ],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//     {
-//       id: '6',
-//       name: 'Hair Coloring',
-//       price: '₹400.00',
-//       desc: 'Long-lasting shades',
-//       image: [require('../../assets/images/haircolor1.png'),
-//       require('../../assets/images/man-service5.jpg')
-//       ],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//     {
-//       id: '7',
-//       name: 'Facial',
-//       price: '₹600.00',
-//       desc: 'Glow facial therapy',
-//       image: [require('../../assets/images/facial.jpg'),
-//       require('../../assets/images/man-service6.jpg')
-//       ],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//       {
-//       id: '8',
-//       name: 'Hair Coloring',
-//       price: '₹400.00',
-//       desc: 'Long-lasting shades',
-//       image: [require('../../assets/images/haircolor1.png'),
-//       require('../../assets/images/man-service5.jpg')
-//       ],
-//       highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-//       extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-//     },
-//   ];
 
 const Catelog = () => {
   const { theme } = useTheme();
@@ -217,6 +20,7 @@ const Catelog = () => {
   const navigation = useNavigation();
   const [services, setServices] = useState([]);
   const [products,setProducts] = useState([]);
+  const [loading ,setLoading] = useState(false);
   const { addToCart } = useCart();
   
   const getToken = async () => {
@@ -229,6 +33,7 @@ const Catelog = () => {
 
   const fetchServices = async () => {
     try {
+      setLoading(true);
       const token = await getToken();
       // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/ourservice', {
@@ -245,6 +50,8 @@ const Catelog = () => {
       console.log(" Catelog Services token", token);
     } catch (error) {
       console.log("Error loading:", error);
+    } finally { 
+      setLoading(false);
     }
   }
 
@@ -252,29 +59,81 @@ const Catelog = () => {
     fetchServices()
   }, [])
 
-  const fetchProducts = async () => {
-     try {
-      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
+  const [gender, setGender] = useState("male");
+
+  useEffect(() => {
+    const loadGender = async () => {
+      const savedGender = await AsyncStorage.getItem("selectedGender");
+
+      console.log("Loaded Gender:", savedGender);
+
+      // Fallback to male if null/undefined/"null"
+      if (!savedGender || savedGender === "null") {
+        setGender("male");
+      } else {
+        setGender(savedGender);
+      }
+
+      // ⭐ Remove saved gender so next time fresh value will be used
+      await AsyncStorage.removeItem("selectedGender");
+      console.log("Old gender removed from AsyncStorage");
+    };
+
+    loadGender();
+  }, []);
+  const fetchProducts = async (selectedGender) => {
+    try {
+      setLoading(true); 
       const token = await getToken();
+      if (!token) return;
+
+      // 🔥 Final Gender (priority → function param > state > default)
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender (Products):", g);
+
       const res = await fetch("https://naushad.onrender.com/api/products", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-      })
-      const data = await res.json();
-      setProducts(data.data);
-      console.log("Product data : ", data);
-      console.log('catelog product token ',token);
-    } catch(error){
-      console.log("Catelog Product Error : ", error);
-    }
-  }
+      });
 
-  useEffect(()=>{
-    fetchProducts();
-  },[])
+      const json = await res.json();
+      console.log("📦 Product Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER (exact same as product-packages)
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Products:", data);
+
+      setProducts(data);
+    } catch (error) {
+      console.log("🔥 Product error:", error);
+    }
+    finally{
+      setLoading(false); // stop loader
+    }
+  };
+  useEffect(() => {
+    fetchProducts(gender);
+  }, [gender]);
+
+  if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>

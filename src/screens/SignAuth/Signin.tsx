@@ -16,15 +16,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
-import Icon from 'react-native-vector-icons/Feather'; // Make sure this import is present
-
-// const ADMIN_EMAIL = 'shivani123@gmail.com';
-// const ADMIN_PASSWORD = 'shi123';
+import Icon from 'react-native-vector-icons/Feather';
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // <--- FIX added here
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
@@ -38,13 +35,6 @@ const Signin = ({ navigation }) => {
       return;
     }
 
-    // if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-    //   setPopupMessage('Access Denied. Only admin can login.');
-    //   setNextRoute(null);
-    //   setPopupVisible(true);
-    //   return;
-    // }
-
     setLoading(true);
     try {
       const response = await fetch(
@@ -57,14 +47,38 @@ const Signin = ({ navigation }) => {
           body: JSON.stringify({ email, password }),
         }
       );
+      
       const data = await response.json();
+      console.log('📥 Login API Response:', JSON.stringify(data, null, 2));
+      console.log('🔑 Response Status:', response.status);
+      
       if (response.ok && data.token) {
-        console.log('Token from response:', data.token);
+        console.log('✅ Login successful!');
+        console.log('🎯 User ID from response:', data.user?._id);
+        console.log('🔐 Token from response:', data.token);
+        console.log('👤 Full user data:', data.user);
+
+        // Store all necessary data in AsyncStorage
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data));
-        // Retrieve and log the stored token for debugging
+        
+        // Store userId separately for easy access
+        if (data.user && data.user._id) {
+          await AsyncStorage.setItem('userId', data.user._id);
+          console.log('💾 User ID stored in AsyncStorage:', data.user._id);
+        } else {
+          console.warn('⚠️ No user ID found in response');
+        }
+
+        // Verify stored data
         const storedToken = await AsyncStorage.getItem('userToken');
-        console.log('Stored token from AsyncStorage:', storedToken); // <-- DEBUG LOG HERE
+        const storedUserId = await AsyncStorage.getItem('userId');
+        const storedUserData = await AsyncStorage.getItem('userData');
+        
+        console.log('🔍 Verification - Stored Token:', storedToken);
+        console.log('🔍 Verification - Stored User ID:', storedUserId);
+        console.log('🔍 Verification - Stored User Data:', storedUserData);
+
         setPopupMessage('Login successful!');
         setNextRoute({
           name: 'MainTabs',
@@ -72,12 +86,13 @@ const Signin = ({ navigation }) => {
         });
         setPopupVisible(true);
       } else {
+        console.error('❌ Login failed:', data.message);
         setPopupMessage(data.message || 'Login Failed');
         setNextRoute(null);
         setPopupVisible(true);
       }
     } catch (error) {
-      console.error('Login Error:', error);
+      console.error('❌ Login Error:', error);
       setPopupMessage('Something went wrong. Please try again.');
       setNextRoute(null);
       setPopupVisible(true);
@@ -156,7 +171,7 @@ const Signin = ({ navigation }) => {
       </TouchableOpacity>
 
       <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>Don’t have an account?</Text>
+        <Text style={styles.signupText}>Don't have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
           <Text style={[styles.signupLink, { color: COLORS.primary }]}>
             {' '}

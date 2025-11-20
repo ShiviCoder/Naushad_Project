@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -11,7 +11,6 @@ import COLORS from '../../utils/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Popup from '../../components/PopUp';
 
-
 type RootStackParamList = {
     OurProducts: undefined;
     ProductDetails: undefined;
@@ -22,18 +21,33 @@ type ProductDetailsProps = {
 };
 
 const ProductDetails = ({ navigation }: ProductDetailsProps) => {
-    const route = useRoute<any>();          // ← Yahan daalo
+    const route = useRoute<any>();
     const { product } = route.params;
     const [count, setCount] = useState(1);
     const { theme } = useTheme();
-     const [popupVisible, setPopupVisible] = useState(false);
-  const [popupMessage, setPopupMessage] = useState('');
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
+    const [userId, setUserId] = useState<string | null>(null);
 
-   const showPopup = (message: string) => {
-    setPopupMessage(message);
-    setPopupVisible(true);
-  };
+    // Fetch userId from AsyncStorage on component mount
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const storedUserId = await AsyncStorage.getItem('userId');
+                console.log('🆔 Fetched userId from AsyncStorage:', storedUserId);
+                setUserId(storedUserId);
+            } catch (error) {
+                console.error('❌ Error fetching userId from AsyncStorage:', error);
+            }
+        };
 
+        fetchUserId();
+    }, []);
+
+    const showPopup = (message: string) => {
+        setPopupMessage(message);
+        setPopupVisible(true);
+    };
 
     const getImageSource = (img: any) => {
         if (!img) return null;
@@ -42,9 +56,61 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
         }
         return img; // assume it's require()
     }
+
     const displayImage = Array.isArray(product.image)
         ? getImageSource(product.image[0])
         : getImageSource(product.image);
+
+    const handleAddToCart = async () => {
+        if (!userId) {
+            showPopup('User not found. Please sign in again.');
+            return;
+        }
+
+        try {
+            console.log('🛒 Adding product to cart:');
+            console.log('- User ID:', userId);
+            console.log('- Product ID:', product._id || product.id);
+            console.log('- Product Name:', product.name);
+            console.log('- Price:', product.price);
+            console.log('- Quantity:', count);
+
+            const requestBody = {
+                userId: userId,
+                productId: product._id || product.id,
+                name: product.name,
+                price: product.price,
+                image: Array.isArray(product.image) ? product.image[0] : product.image,
+                quantity: count,
+            };
+
+            console.log('📤 Sending cart request with data:', JSON.stringify(requestBody, null, 2));
+
+            const response = await fetch('https://naushad.onrender.com/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            const res = await response.json();
+            console.log('📥 Cart API Response:', JSON.stringify(res, null, 2));
+            console.log('- Response Status:', response.status);
+            console.log('- Success:', res.success);
+            console.log('- Message:', res.message);
+
+            if (response.ok && res.success) {
+                showPopup('Product added to cart ✅');
+                // Stay on the same screen - no navigation
+            } else {
+                showPopup(res.message || '❌ Failed to add product to cart');
+            }
+        } catch (error) {
+            console.error('❌ Cart Error:', error);
+            showPopup('❌ Network error. Please try again.');
+        }
+    };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.dark ? '#121212' : '#fff' }]}>
@@ -81,46 +147,12 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                 </View>
 
                 <View style={styles.btnContain}>
-                  <TouchableOpacity
-            style={[styles.cartButton, { borderColor: theme.dark ? '#fff' : '#000' }]}
-            onPress={async () => {
-              const userId = await AsyncStorage.getItem('userId');
-              try {
-                const response = await fetch('https://naushad.onrender.com/api/cart', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    userId: userId,
-                    productId: product._id || product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: Array.isArray(product.image) ? product.image[0] : product.image,
-                    quantity: count,
-                  }),
-                });
-
-                const res = await response.json();
-                console.log('API Response:', res);
-
-                if (response.ok && res.success) {
-                  showPopup('Product added to cart!');
-                  setTimeout(() => {
-                    setPopupVisible(false);
-                    navigation.navigate('Cart');
-                  }, 1500);
-                } else {
-                  showPopup(res.message || '❌ Something went wrong');
-                }
-              } catch (error) {
-                console.log('Error:', error);
-                showPopup('❌ Failed to add product to cart');
-              }
-            }}
-          >
-            <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
-          </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.cartButton, { borderColor: theme.dark ? '#fff' : '#000' }]}
+                        onPress={handleAddToCart}
+                    >
+                        <Text style={[styles.cartTxt, { color: theme.dark ? '#fff' : '#000' }]}>Add to cart</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() =>
                             navigation.navigate('PaymentScreen', {
@@ -128,6 +160,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                                 price: product.price,        // 💰 product price
                                 date: new Date().toDateString(), // optional (for now)
                                 time: null,                  // optional
+                                quantity: count // ← Pass the quantity
                             })
                         }
                         style={[styles.buyButton, { backgroundColor: COLORS.primary }]}
@@ -138,10 +171,10 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
             </View>
 
             <Popup
-        visible={popupVisible}
-        message={popupMessage}
-        onClose={() => setPopupVisible(false)}
-      />
+                visible={popupVisible}
+                message={popupMessage}
+                onClose={() => setPopupVisible(false)}
+            />
         </SafeAreaView>
     )
 }
@@ -151,7 +184,6 @@ export default ProductDetails
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-
     },
     image: {
         width: wp('90%'),
