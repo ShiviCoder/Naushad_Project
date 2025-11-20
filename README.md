@@ -99,4 +99,5 @@ To learn more about React Native, take a look at the following resources:
  updates done by harshal sir
  all api done
  otp api integrate
- "20-11-25 Latest Code Push"
+ "20-11-25 Latest Code Push" -> back navigation fix
+ 
