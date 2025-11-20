@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, BackHandler } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -28,6 +28,20 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
     const [popupVisible, setPopupVisible] = useState(false);
     const [popupMessage, setPopupMessage] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+  const backAction = () => {
+    navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
+    return true; // 👈 global exit handler को block करेगा
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, []);
 
     // Fetch userId from AsyncStorage on component mount
     useEffect(() => {

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
+  BackHandler,
 } from 'react-native';
 import RazorpayCheckout from 'react-native-razorpay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,6 +31,20 @@ const PaymentScreen = () => {
 
   console.log('📥 PaymentScreen - Route Params:', params);
 
+
+  useEffect(() => {
+  const backAction = () => {
+    navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
+    return true; // 👈 global exit handler को block करेगा
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, []);
   // ✅ Process incoming data based on source screen
   useEffect(() => {
     const processIncomingData = async () => {

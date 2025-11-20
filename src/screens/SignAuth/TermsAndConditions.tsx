@@ -24,15 +24,12 @@ const TermsAndConditions = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-   const getToken = async () => {
+  const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
     console.log('API Token: ', token);
     console.log("token accept")
     return token;
   }
-
-  // const token =
-  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg';
   const loadLocalAcceptance = useCallback(async (remote?: TermsDoc) => {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY); // { termsId, updatedAt, accepted }
@@ -64,10 +61,8 @@ const TermsAndConditions = () => {
       const doc: TermsDoc | undefined = data?.data;
       setTerms(doc);
       await loadLocalAcceptance(doc);
-      console.log('Terms token : ',token)
-      // console.log('Terms Data:', data);
+      console.log('Terms token : ', token)
     } catch (err) {
-      // console.log('Error loading:', err);
       Alert.alert('Error', 'Unable to load Terms. Please try again.');
     } finally {
       setLoading(false);
@@ -77,7 +72,7 @@ const TermsAndConditions = () => {
     fetchTerms();
   }, [fetchTerms]);
   const persistLocalAcceptance = async (doc: TermsDoc, value: boolean) => {
-     const token = await getToken();
+    const token = await getToken();
     try {
       const payload = JSON.stringify({
         termsId: doc._id,
@@ -90,13 +85,10 @@ const TermsAndConditions = () => {
     }
   };
   const submitAcceptance = async () => {
-     const token = await getToken();
+    const token = await getToken();
     if (!terms) return;
     try {
       setSubmitting(true);
-      // Optional: PATCH on your API to record acceptance against this terms._id
-      // Ensure your backend stores acceptance per user (not mutating the master terms).
-      // Endpoint here is illustrative; adjust to your backend route.
       await fetch(`https://naushad.onrender.com/api/terms-and-conditions/${terms._id}/accept`, {
         method: 'PATCH',
         headers: {
@@ -115,6 +107,15 @@ const TermsAndConditions = () => {
   };
   const lastUpdated =
     terms?.updatedAt ? new Date(terms.updatedAt).toLocaleDateString() : undefined;
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Terms And Conditions" />

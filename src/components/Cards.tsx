@@ -48,7 +48,7 @@ const Card = ({ item }) => {
           {/* Card Content */}
           <View style={styles.cardContent}>
             <Text style={styles.rate}>
-              Rate: <Text style={styles.bold}>{item.price}</Text>
+              Rate: <Text style={styles.bold}>₹ {item.price}</Text>
             </Text>
             <Text style={{ fontSize: hp("1.3%"), fontWeight: "500" }}>
               Products:-{""}

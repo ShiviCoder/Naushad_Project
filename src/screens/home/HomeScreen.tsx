@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TextInput, TouchableOpacity, FlatList, ImageBackground, Dimensions, ActivityIndicator, RefreshControl, Animated, SafeAreaViewBase } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TextInput, TouchableOpacity, FlatList, ImageBackground, Dimensions, ActivityIndicator, RefreshControl, Animated, SafeAreaViewBase, Alert, BackHandler, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, } from 'react-native-responsive-screen';
 import { Shadow } from 'react-native-shadow-2';
 import Svg, { Polygon } from 'react-native-svg';
@@ -118,7 +118,6 @@ const VideoCard = ({ videoId }) => {
 };
 
 
-
 const HomeScreen = () => {
   const [gender, setGender] = useState("male");
   const navigation = useNavigation();
@@ -163,7 +162,25 @@ const HomeScreen = () => {
     console.log("token accept")
     return token;
   }
+   const isFocused = useIsFocused();
+   const [exitPopup, setExitPopup] = useState(false);
 
+
+  useEffect(() => {
+  if (!isFocused) return;
+
+  const backAction = () => {
+    setExitPopup(true);   // 👈 Custom Popup open
+    return true;
+  };
+
+  const subscription = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => subscription.remove();
+}, [isFocused]);
   const fetchAllData = async () => {
     try {
       setLoading(true);   // start loading
@@ -489,27 +506,39 @@ const HomeScreen = () => {
   };
 
   const [homeServices, setHomeService] = useState([]);
-  const fetchHomeServices = async () => {
+  const fetchHomeServices = async (selectedGender) => {
     try {
       const token = await getToken();
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
-      const response = await fetch('https://naushad.onrender.com/api/home-services/', {
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender for special offers:", g);
+
+      const response = await fetch(`https://naushad.onrender.com/api/home-services?gender=${gender}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      const json = await response.json();
-      console.log("Home service token : ", token)
-      console.log("Home services : ", json);
-      console.log(json.data[0].image)
-      setHomeService(json.data);
+     const json = await response.json();
+      console.log("📦 Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Special home Filtered Data:", data);
+      setHomeService(data);
     } catch (error) {
       console.log("Home services error : ", error)
     }
   }
-
 
   const [aboutData, setAboutData] = useState([]);
   const fetchAboutData = async () => {
@@ -627,16 +656,6 @@ const HomeScreen = () => {
             </View>
 
             <View style={styles.genderToggleContainer}>
-              {/* Label Row 
-            <RadioButton
-              type="gender"
-              selected={gender}           // Male / female / Male / Female etc.
-              onSelect={(value) => {
-                setGender(value);         // value as-is
-                fetchProductPackages(value); // API call with exact value
-              }}
-              labels={["Male", "Female"]}
-            /> */}
               <RadioButton
                 type="gender"
                 selected={gender}
@@ -654,6 +673,7 @@ const HomeScreen = () => {
                   fetchSpecialOffers(formatted);
                   fetchProducts(formatted);
                   fetchPackages(formatted);
+                  fetchHomeServices(formatted);
                 }}
                 labels={["Male", "Female"]}
                 values={["male", "female"]}
@@ -1102,10 +1122,40 @@ const HomeScreen = () => {
             />
           </ScrollView>
         </Animated.View>)
+        <Popup
+  visible={exitPopup}
+  message="Are you sure you want to exit?"
+  onClose={() => setExitPopup(false)}   // Cancel
+  onExit={() => BackHandler.exitApp()}  // Exit
+/>
       </SafeAreaView>
     )
   )
 };
+const Popup = ({ visible, message, onClose, onExit }) => {
+  return (
+    <Modal transparent animationType="fade" visible={visible}>
+      <View style={styles.overlay}>
+        <View style={styles.popcontainer}>
+          
+          <Text style={styles.message}>{message}</Text>
+
+          <View style={{ flexDirection: 'row', gap: 20 }}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#ccc' }]} onPress={onClose}>
+              <Text style={[styles.buttonText, { color: '#000' }]}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.primary }]} onPress={onExit}>
+              <Text style={styles.buttonText}>Exit</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 
 // Updated SectionTitle component with navigation support
 const SectionTitle = ({
@@ -1137,6 +1187,49 @@ const SectionTitle = ({
 
 export default HomeScreen;
 const styles = StyleSheet.create({
+   overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  popcontainer: {
+    width: '80%',
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    alignItems: 'center',
+  },
+
+  message: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    minWidth: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

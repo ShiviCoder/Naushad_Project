@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  BackHandler,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -29,6 +30,20 @@ const ProductPackages = ({ navigation }) => {
   const [popupMessage, setPopupMessage] = useState('');
   const [userId, setUserId] = useState(null);
 
+
+  useEffect(() => {
+  const backAction = () => {
+    navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
+    return true; // 👈 global exit handler को block करेगा
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, []);
   // Fetch userId from AsyncStorage on component mount
   useEffect(() => {
     const fetchUserId = async () => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Head from "../../components/Head";
@@ -15,10 +16,26 @@ import {
 } from "react-native-responsive-screen";
 import COLORS from "../../utils/Colors";
 
+
 export default function LikedProductsScreen({ route, navigation }) {
   const { likedProducts = [], products = [], theme } = route.params || {};
 
   const likedItems = products.filter((p) => likedProducts.includes(p._id));
+
+  useEffect(() => {
+  const backAction = () => {
+    navigation.goBack(); 
+    return true; 
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, []);
+
 
   return (
     <>
