@@ -1,15 +1,18 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from '../../utils/Colors';
 
 const AboutUs = () => {
   const { theme } = useTheme();
   const [aboutUs, setAboutUs] = useState();
+  const [loading, setLoading] = useState(false);
   const fetchAboutUs = async () => {
     try {
+      setLoading(true);
       const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg'
       const res = await fetch("https://naushad.onrender.com/api/about-us", {
         method: "GET",
@@ -26,11 +29,21 @@ const AboutUs = () => {
     catch (err) {
       console.log(err)
     }
+    finally{
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     fetchAboutUs();
   }, [])
+  if (loading) {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </SafeAreaView>
+  );
+}
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="About Us" />
