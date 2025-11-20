@@ -5,6 +5,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import COLORS from '../../utils/Colors'
 import { useTheme } from '../../context/ThemeContext'
 import { useNavigation, useRoute } from '@react-navigation/native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 // Dummy backend seats response
 // bookedSeats array contains already booked seat numbers from backend
@@ -19,8 +20,8 @@ const BookingSeats = () => {
   const { theme } = useTheme()
   const seats = Array.from({ length: 20 }, (_, i) => i + 1)
   const navigation = useNavigation()
-  const route = useRoute()
-  const { selectedDate, selectedTime } = route.params || {}
+ const route = useRoute();
+const { date, time, serviceName, price } = route.params || {};
 
   const [bookedSeats, setBookedSeats] = useState<number[]>([])
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null)
@@ -34,19 +35,19 @@ const BookingSeats = () => {
   }, [])
 
   const onNextPress = () => {
-    const formattedDate = selectedDate ? new Date(selectedDate).toISOString() : null
-    const formattedTime = selectedTime || '00:00'
+  const formattedDate = date ? new Date(date).toISOString() : null;
+  const formattedTime = time || '00:00';
 
-    console.log('📅', formattedDate, '🕒', formattedTime, 'Seat:', selectedSeat)
+  console.log('📅', formattedDate, '🕒', formattedTime, 'Seat:', selectedSeat);
 
-    
-      navigation.navigate('PaymentScreen', {
-        selectedDate: formattedDate,
-        selectedTime,
-        selectedSeat,
-      })
-    
-  }
+  navigation.navigate('BookAppoinment2', {
+    date: formattedDate,
+    time: formattedTime,
+    seat: selectedSeat,
+    serviceName,
+    price,
+  });
+};
 
   const renderItem = ({ item }: { item: number }) => {
     const isBooked = bookedSeats.includes(item)
@@ -75,7 +76,8 @@ const BookingSeats = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+   <SafeAreaView style={{flex : 1}}>
+     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Booking" showBack={true} />
 
       <View style={{ padding: wp('3%') }}>
@@ -107,6 +109,7 @@ const BookingSeats = () => {
         </View>
       </View>
     </View>
+   </SafeAreaView>
   )
 }
 

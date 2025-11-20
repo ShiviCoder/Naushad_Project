@@ -42,13 +42,13 @@ export default function BookAppointmentScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'BookAppointmentScreen'>>();
   const navigation = useNavigation<any>();
   const { image, showTab = false, serviceName, price } = route.params || {};
-  const showBack = !showTab; // if tab visible → back button hide, else show
+  const showBack = !showTab;
 
-  // Popup state - can be removed since no validation needed now
+  // Popup state
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const data = [
     'image',
@@ -59,29 +59,47 @@ export default function BookAppointmentScreen() {
     'nextButton'
   ];
 
-  // Handler for "Next" button press - no validation, directly navigate
+  // Handler for "Next" button press
   const onNextPress = () => {
     console.log("🧾 Service params:", route.params);
-    console.log("📅 Selected Date (string):", selectedDate?.toISOString());
-    console.log("🕒 Selected Time (state):", selectedTime);
+    console.log("📅 Selected Date:", selectedDate?.toDateString());
+    console.log("🕒 Selected Time:", selectedTime);
 
     if (!selectedDate) {
       console.log("❌ No date selected yet");
+      setPopupMessage("Please select a date");
+      setPopupVisible(true);
       return;
     }
+
+    if (!selectedTime) {
+      console.log("❌ No time selected yet");
+      setPopupMessage("Please select a time");
+      setPopupVisible(true);
+      return;
+    }
+
+    // Format date properly for storage
+    const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const dateString = selectedDate.toDateString(); // Human readable format
+
+    console.log("✅ Formatted Date:", formattedDate);
+    console.log("✅ Date String:", dateString);
+    console.log("✅ Selected Time:", selectedTime);
 
     navigation.navigate('BookingSeats', {
       serviceName,
       price,
-      date: selectedDate.toDateString(),
+      date: formattedDate, // Use ISO format for consistency
+      dateString: dateString, // Human readable format
       time: selectedTime,
     });
   };
+
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const renderItem = ({ item }: { item: string }) => {
     switch (item) {
       case 'image':
@@ -106,7 +124,6 @@ export default function BookAppointmentScreen() {
       case 'calendar':
         return (
           <View style={styles.calenderContainer}>
-            {/* Removed any onMonthChange prop */}
             <Calender
               onDateSelect={(date) => {
                 console.log("📅 Received from Calender:", date.toDateString());
@@ -124,7 +141,6 @@ export default function BookAppointmentScreen() {
       case 'timeSelect':
         return (
           <View style={styles.timeContainer}>
-            {/* Removed any onTimeChange prop */}
             <TimeSelect selectedDate={selectedDate} onTimeSelect={setSelectedTime} />
           </View>
         );
@@ -159,7 +175,6 @@ export default function BookAppointmentScreen() {
         }}
         showsVerticalScrollIndicator={false}
       />
-      {/* Popup component retained but not used */}
       <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
     </SafeAreaView>
   );

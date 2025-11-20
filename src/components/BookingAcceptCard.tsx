@@ -13,24 +13,65 @@ const BookingAcceptCards = ({ item }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
-  // ✅ Inverted logic for card background and text
-  const cardBackground = theme.background === '#121212' ? '#fff' : '#000'; // dark theme → white card, light theme → black card
-  const textColor = theme.background === '#121212' ? '#000' : '#fff';      // dark theme → black text, light theme → white text
-
-  const inactiveColor = textColor; // checkbox inactive same as text color
-
+  const cardBackground = theme.background === '#121212' ? '#fff' : '#000';
+  const textColor = theme.background === '#121212' ? '#000' : '#fff';
+  const inactiveColor = textColor;
   const acceptedTextColor = isChecked ? theme.primary : textColor;
+
+  // Format services array
+  const formatServices = (services) => {
+    if (!services || services.length === 0) return 'No services';
+    
+    try {
+      // Handle both stringified arrays and regular arrays
+      const serviceArray = typeof services[0] === 'string' && services[0].startsWith('[') 
+        ? JSON.parse(services[0])
+        : services;
+      
+      return Array.isArray(serviceArray) ? serviceArray.join(', ') : String(serviceArray);
+    } catch (error) {
+      return services.join(', ');
+    }
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  // Format time
+  const formatTime = (timeString) => {
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const formattedHour = hour % 12 || 12;
+      return `${formattedHour}:${minutes} ${ampm}`;
+    } catch (error) {
+      return timeString;
+    }
+  };
 
   return (
     <TouchableOpacity
       style={[styles.container, { backgroundColor: cardBackground }]}
-      onPress={() => navigation.navigate('BookingAccepted')}
+      onPress={() => navigation.navigate('BookingAccepted', { booking: item })}
     >
       {/* Service + Checkbox */}
       <View style={styles.acceptContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
-          <Image source={item.image[0]} style={styles.icon} />
-          <Text style={[styles.text, { color: textColor }]}>{item.service}</Text>
+          <Image source={require('../assets/hairCut.png')} style={styles.icon} />
+          <Text style={[styles.text, { color: textColor }]}>
+            {formatServices(item.services)}
+          </Text>
         </View>
 
         <View style={[styles.accept, { marginBottom: hp('-0.8%') }]}>
@@ -46,20 +87,26 @@ const BookingAcceptCards = ({ item }) => {
 
       {/* Date */}
       <View style={styles.content}>
-        <Image source={item.image[1]} style={styles.icon} />
-        <Text style={[styles.text, { color: textColor }]}>Date :- {item.date}</Text>
+        <Image source={require('../assets/calender.png')} style={styles.icon} />
+        <Text style={[styles.text, { color: textColor }]}>
+          Date: {formatDate(item.date)}
+        </Text>
       </View>
 
       {/* Time */}
       <View style={styles.content}>
-        <Image source={item.image[2]} style={styles.icon} />
-        <Text style={[styles.text, { color: textColor }]}>Time :- {item.time}</Text>
+        <Image source={require('../assets/stopwatch-removebg-preview.png')} style={styles.icon} />
+        <Text style={[styles.text, { color: textColor }]}>
+          Time: {formatTime(item.time)}
+        </Text>
       </View>
 
-      {/* Amount */}
+      {/* Appointment Code */}
       <View style={styles.content}>
-        <Image source={item.image[3]} style={styles.icon} />
-        <Text style={[styles.text, { color: textColor }]}>Amount :- ₹{item.price}</Text>
+        <Image source={require('../assets/moneyBag2.png')} style={styles.icon} />
+        <Text style={[styles.text, { color: textColor }]}>
+          Code: {item.appointmentCode}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -77,6 +124,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('4%'),
     justifyContent: 'center',
     gap: hp('1%'),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   acceptContainer: {
     flexDirection: 'row',
@@ -93,11 +145,13 @@ const styles = StyleSheet.create({
   text: {
     fontSize: wp('3.5%'),
     fontWeight: '500',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   accept: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: wp('5%'),
+    gap: wp('3%'),
   },
   content: {
     flexDirection: 'row',

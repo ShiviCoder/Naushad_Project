@@ -126,6 +126,12 @@ const BottomNavbar = ({ navigation }) => {
   useExitAppBackHandler(selectedTab);
 
   useEffect(() => {
+  const index = tabs.indexOf(selectedTab);
+  const initialX = getTabPosition(index);
+  circleTranslateX.setValue(initialX);
+}, []);
+
+  useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
     const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
 

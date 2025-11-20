@@ -8,42 +8,91 @@ import { useTheme } from '../context/ThemeContext';
 
 const BookingPendingCard = ({ item }) => {
   const navigation = useNavigation();
-  const { theme } = useTheme(); // ✅ get current theme
+  const { theme } = useTheme();
+
+  // Format services array
+  const formatServices = (services) => {
+    if (!services || services.length === 0) return 'No services';
+    
+    try {
+      const serviceArray = typeof services[0] === 'string' && services[0].startsWith('[') 
+        ? JSON.parse(services[0])
+        : services;
+      
+      return Array.isArray(serviceArray) ? serviceArray.join(', ') : String(serviceArray);
+    } catch (error) {
+      return services.join(', ');
+    }
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  // Format time
+  const formatTime = (timeString) => {
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const formattedHour = hour % 12 || 12;
+      return `${formattedHour}:${minutes} ${ampm}`;
+    } catch (error) {
+      return timeString;
+    }
+  };
 
   return (
     <TouchableOpacity
-      style={styles.container} // background unchanged
-      onPress={() => navigation.navigate('BookingPending')}
+      style={styles.container}
+      onPress={() => navigation.navigate('BookingPending', { booking: item })}
     >
       {/* Service + Pending Status */}
       <View style={styles.pendingContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
-          <Image style={styles.icon} source={item.image[0]} />
-          <Text style={[styles.text, { color: theme.textPrimary }]}>{item.service}</Text>
+          <Image style={styles.icon} source={require('../assets/facial.png')} />
+          <Text style={[styles.text, { color: theme.textPrimary }]}>
+            {formatServices(item.services)}
+          </Text>
         </View>
 
         <View style={[styles.content, { gap: wp('0%'), marginBottom: hp('-0.8%') }]}>
-          <Image style={styles.icon} source={item.image[4]} />
+          <Image style={styles.icon} source={require('../assets/pending.png')} />
           <Text style={[styles.text, { color: theme.textPrimary }]}>Pending</Text>
         </View>
       </View>
 
       {/* Date */}
       <View style={[styles.content, { marginVertical: hp('-0.2%') }]}>
-        <Image style={styles.icon} source={item.image[1]} />
-        <Text style={[styles.text, { color: theme.textPrimary }]}>Date :- {item.date}</Text>
+        <Image style={styles.icon} source={require('../assets/calender.png')} />
+        <Text style={[styles.text, { color: theme.textPrimary }]}>
+          Date: {formatDate(item.date)}
+        </Text>
       </View>
 
       {/* Time */}
       <View style={styles.content}>
-        <Image style={styles.icon} source={item.image[2]} />
-        <Text style={[styles.text, { color: theme.textPrimary }]}>Time :- {item.time}</Text>
+        <Image style={styles.icon} source={require('../assets/stopwatch-removebg-preview.png')} />
+        <Text style={[styles.text, { color: theme.textPrimary }]}>
+          Time: {formatTime(item.time)}
+        </Text>
       </View>
 
-      {/* Amount */}
+      {/* Appointment Code */}
       <View style={styles.content}>
-        <Image style={styles.icon} source={item.image[3]} />
-        <Text style={[styles.text, { color: theme.textPrimary }]}>Amount :- ₹{item.price}</Text>
+        <Image style={styles.icon} source={require('../assets/moneyBag2.png')} />
+        <Text style={[styles.text, { color: theme.textPrimary }]}>
+          Code: {item.appointmentCode}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -52,7 +101,7 @@ const BookingPendingCard = ({ item }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
-    backgroundColor: '#ACACAC8A', // ✅ unchanged
+    backgroundColor: '#ACACAC8A',
     width: '90%',
     minHeight: hp('20%'),
     marginVertical: hp('1.5%'),
@@ -62,6 +111,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('4%'),
     justifyContent: 'center',
     gap: hp('1%'),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   pendingContainer: {
     flexDirection: 'row',
@@ -82,8 +136,10 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: wp('3.5%'),
-    color: '#000', // fallback
+    color: '#000',
     fontWeight: '500',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
 });
 

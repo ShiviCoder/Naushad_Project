@@ -1,10 +1,11 @@
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { BackHandler, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Head from '../../components/Head'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import COLORS from '../../utils/Colors'
 import { useTheme } from '../../context/ThemeContext'
 import { useNavigation, useRoute } from '@react-navigation/native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 // Dummy backend seats response
 // bookedSeats array contains already booked seat numbers from backend
@@ -32,6 +33,20 @@ const BookingSeats = () => {
     }
     loadBookedSeats()
   }, [])
+
+   useEffect(() => {
+    const backAction = () => {
+      navigation.goBack(); 
+      return true; 
+    };
+  
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+  
+    return () => backHandler.remove();
+  }, []);
 
   const onNextPress = () => {
     const formattedDate = selectedDate ? new Date(selectedDate).toISOString() : null
@@ -75,7 +90,8 @@ const BookingSeats = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+   <SafeAreaView style={{flex :1}}>
+     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Booking" showBack={true} />
 
       <View style={{ padding: wp('3%') }}>
@@ -107,6 +123,7 @@ const BookingSeats = () => {
         </View>
       </View>
     </View>
+   </SafeAreaView>
   )
 }
 

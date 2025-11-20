@@ -34,19 +34,18 @@ const CartScreen = () => {
   };
 
   useEffect(() => {
-  const backAction = () => {
-    navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
-    return true; // 👈 global exit handler को block करेगा
-  };
+    const backAction = () => {
+      navigation.goBack();
+      return true;
+    };
 
-  const backHandler = BackHandler.addEventListener(
-    "hardwareBackPress",
-    backAction
-  );
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
-  return () => backHandler.remove();
-}, []);
-
+    return () => backHandler.remove();
+  }, []);
 
   // Fetch userId from AsyncStorage
   useEffect(() => {
@@ -147,9 +146,35 @@ const CartScreen = () => {
     }
   }, [userId]);
 
+  // ✅ Handle Checkout - Pass all cart items to PaymentScreen
+  const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      showPopup("Your cart is empty");
+      return;
+    }
+
+    // Prepare cart items for payment screen
+    const checkoutItems = cartItems.map(item => ({
+      type: 'cart',
+      serviceName: item.name,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity || 1,
+      image: item.image,
+      source: 'Cart'
+    }));
+
+    console.log('🛒 Checkout Items:', checkoutItems);
+
+    navigation.navigate("PaymentScreen", {
+      services: checkoutItems,
+      source: 'Cart'
+    });
+  };
+
   // ✅ Calculations
   const subtotal = cartItems.reduce((acc, item) => acc + Number(item.price || 0) * Number(item.quantity || 0), 0);
-  const discount = 0; // you can modify if your API includes discounts
+  const discount = 0;
   const gst = Math.round((subtotal - discount) * 0.1);
   const total = subtotal - discount + gst;
 
@@ -161,7 +186,7 @@ const CartScreen = () => {
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={{ marginTop: 10, color: theme.dark ? "#fff" : "#000" }}>
-            Loading cart items...
+            
           </Text>
         </View>
       ) : (
@@ -254,7 +279,7 @@ const CartScreen = () => {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("PaymentScreen")}
+                  onPress={handleCheckout}
                   style={[styles.checkoutBtn, { backgroundColor: COLORS.primary }]}
                 >
                   <Text style={[styles.checkoutText, { color: "#fff" }]}>Checkout</Text>
@@ -333,16 +358,6 @@ const styles = StyleSheet.create({
     fontSize: wp("3.5%"), 
     fontWeight: "bold", 
     color: "#fff" 
-  },
-  removeRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginTop: hp("0.5%") 
-  },
-  removeText: { 
-    color: "red", 
-    fontSize: wp("3%"), 
-    fontWeight: "500" 
   },
   summary: { 
     marginTop: hp("2%") 
