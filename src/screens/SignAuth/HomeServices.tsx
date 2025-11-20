@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ScrollView,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
@@ -32,34 +33,81 @@ export default function ServicesScreen() {
     console.log("token accept")
     return token;
   }
+ const [gender, setGender] = useState("male");
 
-  const fetchHomeServices = async () => {
+useEffect(() => {
+  const loadGender = async () => {
+    const savedGender = await AsyncStorage.getItem("selectedGender");
+
+    console.log("Loaded Gender:", savedGender);
+
+    // Fallback to male if null/undefined/"null"
+    if (!savedGender || savedGender === "null") {
+      setGender("male");
+    } else {
+      setGender(savedGender);
+    }
+    await AsyncStorage.removeItem("selectedGender");
+    console.log("Old gender removed from AsyncStorage");
+  };
+
+  loadGender();
+}, []);
+  const fetchHomeServices = async (selectedGender) => {
     try {
       setLoading(true);
       const token = await getToken();
-      const response = await fetch("https://naushad.onrender.com/api/home-services/", {
-        method: "GET",
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+      console.log("Selected Gender for special offers:", g);
+
+      const response = await fetch(`https://naushad.onrender.com/api/home-services?gender=${gender}`, {
+        method: 'GET',
         headers: {
-          Authorization:
-            `Bearer ${token}`,
-          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
-      const json = await response.json();
-      console.log("Home services:", json);
-      console.log('Home service token : ',token)
-      setServices(json.data);
+     const json = await response.json();
+      console.log("📦 Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Special Filtered Data:", data);
+      setServices(data);
     } catch (error) {
-      console.log("Home services error:", error);
-    } finally { 
+      console.log("Home services error : ", error)
+    } finally  {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchHomeServices();
-  }, []);
+    fetchHomeServices(gender);
+  }, [gender]);
 
+
+  useEffect(() => {
+  const backAction = () => {
+    navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
+    return true; // 👈 global exit handler को block करेगा
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, []);
   const onRefresh = async () => {
     setRefreshing(true);
 

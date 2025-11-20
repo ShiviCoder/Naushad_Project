@@ -265,7 +265,7 @@ const ServiceDetails = () => {
                   navigation.navigate('CloneBookAppointment', {
                     serviceName: item.serviceName || item.title || item.name,
                     title: item.title || item.serviceName || item.name,
-                    price: totalPrice,
+                    price: totalPrice, quantity: quantity // ← Pass the quantity
                   });
 
                   Alert.alert('Success', 'Services added to cart!');

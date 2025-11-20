@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  BackHandler,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -19,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Popup from '../../components/PopUp';
+
 const ProductPackages = ({ navigation }) => {
   const [quantity, setQuantity] = useState(1);
   const { theme } = useTheme();
@@ -26,11 +28,42 @@ const ProductPackages = ({ navigation }) => {
   const { item } = route.params || {};
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [userId, setUserId] = useState(null);
+
 
   useEffect(() => {
-    console.log("Route Params ---->", route.params);
-    console.log("Item Data ---->", item);
+  const backAction = () => {
+    navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
+    return true; // 👈 global exit handler को block करेगा
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, []);
+  // Fetch userId from AsyncStorage on component mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        console.log('🆔 ProductPackages - Fetched userId from AsyncStorage:', storedUserId);
+        setUserId(storedUserId);
+      } catch (error) {
+        console.error('❌ ProductPackages - Error fetching userId:', error);
+      }
+    };
+
+    fetchUserId();
   }, []);
+
+  useEffect(() => {
+    console.log("📦 ProductPackages - Route Params:", route.params);
+    console.log("📦 ProductPackages - Item Data:", item);
+  }, []);
+
   if (!item) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -58,54 +91,72 @@ const ProductPackages = ({ navigation }) => {
 
   const handleAddToCart = async () => {
     try {
-      const userId = await AsyncStorage.getItem("userId");
-      if (!userId) {
+      console.log('🛒 ProductPackages - Starting add to cart process...');
+      console.log('🆔 Current userId state:', userId);
+
+      // Get fresh userId from AsyncStorage to ensure we have the latest
+      const freshUserId = await AsyncStorage.getItem('userId');
+      console.log('🆔 Fresh userId from AsyncStorage:', freshUserId);
+
+      if (!freshUserId) {
         setPopupMessage("Please log in first.");
         setPopupVisible(true);
         return;
       }
 
       const product = {
-        id: 1,
-        name: item.title || "Product",
+        productId: item._id || item.id || 1,
+        name: item.name || item.title || "Product",
         price: item.price || 0,
-        oldPrice: 0,
-        discount: 0,
-        image: "https://via.placeholder.com/150",
+        image: item.image || "https://via.placeholder.com/150",
       };
+
+      console.log('📤 ProductPackages - Cart request data:');
+      console.log('- User ID:', freshUserId);
+      console.log('- Product ID:', product.productId);
+      console.log('- Product Name:', product.name);
+      console.log('- Price:', product.price);
+      console.log('- Quantity:', quantity);
+      console.log('- Image:', product.image);
+
+      // FIXED: Changed 'qty' to 'quantity' to match API requirements
+      const requestBody = {
+        userId: freshUserId,
+        productId: product.productId,
+        name: product.name,
+        price: product.price,
+        quantity: quantity, // CHANGED FROM 'qty' to 'quantity'
+        image: product.image,
+      };
+
+      console.log('📦 Request Body:', JSON.stringify(requestBody, null, 2));
 
       const response = await fetch("https://naushad.onrender.com/api/cart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          userId,
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          qty: quantity,
-          image: product.image,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const res = await response.json();
-      console.log("Add to Cart Response:", res);
+      console.log('📥 ProductPackages - Cart API Response:');
+      console.log('- Status:', response.status);
+      console.log('- Success:', res.success);
+      console.log('- Message:', res.message);
+      console.log('- Full Response:', JSON.stringify(res, null, 2));
 
       if (response.ok && res.success) {
-        setPopupMessage("Product added to cart!");
+        setPopupMessage("Product added to cart ✅");
         setPopupVisible(true);
-        setTimeout(() => {
-          setPopupVisible(false);
-          navigation.navigate("Cart");
-        }, 1500);
+        // Stay on the same screen - no navigation
       } else {
-        setPopupMessage(res.message || "Failed to add product to cart");
+        setPopupMessage(res.message || "❌ Failed to add product to cart");
         setPopupVisible(true);
       }
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      setPopupMessage("Something went wrong while adding to cart");
+      console.error('❌ ProductPackages - Cart Error:', error);
+      setPopupMessage("❌ Network error. Please try again.");
       setPopupVisible(true);
     }
   };
@@ -124,7 +175,6 @@ const ProductPackages = ({ navigation }) => {
             style={styles.productImage}
             resizeMode="cover"
           />
-
         </View>
 
         <View style={styles.productInfo}>
@@ -148,7 +198,6 @@ const ProductPackages = ({ navigation }) => {
             {item.description || 'No description available.'}
           </Text>
 
-
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Items list
           </Text>
@@ -168,14 +217,10 @@ const ProductPackages = ({ navigation }) => {
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Usage Instruction
           </Text>
-                <Text
-                  style={[styles.offerText, { color: theme.textPrimary }]}
-                >
-                  - {item.usage}
-                </Text>
+          <Text style={[styles.offerText, { color: theme.textPrimary }]}>
+            - {item.usage}
+          </Text>
         </View>
-
-
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
@@ -212,6 +257,7 @@ const ProductPackages = ({ navigation }) => {
             navigation.navigate('PaymentScreen', {
               serviceName: item.name || 'Product',
               price: item.price || 0,
+               quantity: quantity // ← Pass the quantity
             })
           }
           style={[styles.buyNowButton, { backgroundColor: COLORS.primary }]}
@@ -372,7 +418,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   quantityDisplay: {
-    // flex: 1,
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
@@ -386,9 +431,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: wp('4.44%'),
     paddingVertical: hp('1%'),
-    // gap: 12,
-    // borderTopWidth: wp('0.28%'),
-    // borderTopColor: '#f0f0f0',
   },
   addToCartButton: {
     flex: 1,
@@ -408,7 +450,6 @@ const styles = StyleSheet.create({
   },
   buyNowButton: {
     flex: 1,
-    // height: 56,
     width: wp('97.22%'),
     height: hp('5.125%'),
     backgroundColor: '#F6B745',

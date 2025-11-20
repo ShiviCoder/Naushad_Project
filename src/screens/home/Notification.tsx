@@ -8,6 +8,7 @@ import {
   StatusBar,
   Animated,
   RefreshControl,
+  BackHandler,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -25,6 +26,20 @@ const NotificationsScreen = ({ navigation }) => {
   const translateY = useRef(new Animated.Value(0)).current;
   const [refreshing, setRefreshing] = useState(false);
   const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack(); // 👈 सिर्फ पिछली screen पर ले जाएगा
+      return true; // 👈 global exit handler को block करेगा
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   // ✅ Delete all notifications
   const handleDeleteAll = () => {
@@ -63,7 +78,7 @@ const NotificationsScreen = ({ navigation }) => {
       const parsed = JSON.parse(stored);
       console.log('✅ User fetched:', parsed);
 
-      const userId = parsed?.user?._id;
+      const userId = parsed?._id;
       console.log('✅ User ID:', userId);
 
       // ✅ Use GET method and append userId to URL
@@ -118,7 +133,7 @@ const NotificationsScreen = ({ navigation }) => {
       <StatusBar
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
         backgroundColor={theme.background}
-      /> 
+      />
       <Animated.ScrollView
         style={{ transform: [{ translateY }] }}
         showsVerticalScrollIndicator={false}

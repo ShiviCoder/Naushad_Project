@@ -1,16 +1,17 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import COLORS from '../../utils/Colors';
 
 const PrivacyPolicy = () => {
   const { theme } = useTheme();
-  const [privacy,setPrivacy] = useState();
- 
-   const getToken = async () => {
+  const [privacy, setPrivacy] = useState();
+  const [loading, setLoading] = useState(false);
+  const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
     console.log('API Token: ', token);
     console.log("token accept")
@@ -18,9 +19,9 @@ const PrivacyPolicy = () => {
   }
 
 
- const fetchPrivacy = async () => {
+  const fetchPrivacy = async () => {
     try {
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTI4MTc0NiwiZXhwIjoxNzYxODg2NTQ2fQ.bnP8K0nSFLCWuA9pU0ZIA2zU3uwYuV7_R58ZLW2woBg'
+      setLoading(true);
       const token = await getToken();
       const res = await fetch("https://naushad.onrender.com/api/privacy-policy", {
         method: "GET",
@@ -36,56 +37,64 @@ const PrivacyPolicy = () => {
     }
     catch (err) {
       console.log(err)
+    } finally {
+      setLoading(false);
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchPrivacy();
-  },[])
-
+  }, [])
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Privacy Policy" />
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={[styles.heading, { color: theme.textSecondary }]}>
-         {privacy?.title}
+          {privacy?.title}
         </Text>
 
         <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Information Collection</Text>
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-          {privacy?.content}
-        </Text>
+          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Information Collection</Text>
+          <Text style={[styles.text, { color: theme.textSecondary }]}>
+            {privacy?.content}
+          </Text>
         </View>
-
+    
         <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Use of Information</Text>
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-         {privacy?.content}
-        </Text>
+          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Use of Information</Text>
+          <Text style={[styles.text, { color: theme.textSecondary }]}>
+            {privacy?.content}
+          </Text>
         </View>
-
-
+    
+    
         <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Security</Text>
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-          {privacy?.content}
-        </Text>
+          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Security</Text>
+          <Text style={[styles.text, { color: theme.textSecondary }]}>
+            {privacy?.content}
+          </Text>
         </View>
-
+    
         <View style={[styles.card, { backgroundColor: theme.dark ? '#333' : '#f5f5f5' }]}>
-        <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Changes to Policy</Text>
-        <Text style={[styles.text, { color: theme.textSecondary }]}>
-         {privacy?.content}
-        </Text>
+          <Text style={[styles.subHeading, { color: theme.textPrimary }]}>Changes to Policy</Text>
+          <Text style={[styles.text, { color: theme.textSecondary }]}>
+            {privacy?.content}
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
-};
-
+};  
+    
 export default PrivacyPolicy;
-
+    
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -104,7 +113,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: hp('1%'),
   },
-   card: {
+  card: {
     padding: wp('4%'),
     borderRadius: wp('3%'),
     marginBottom: hp('2%'),
@@ -115,4 +124,4 @@ const styles = StyleSheet.create({
     lineHeight: hp('2.5%'),
     textAlign: 'justify',
   },
-});
+}); 
