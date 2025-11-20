@@ -250,7 +250,6 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-  Alert,
 } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Head from '../../components/Head';
@@ -261,7 +260,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useRoute } from '@react-navigation/native';
 import Popup from '../../components/PopUp';
 
-
 const BookAppointmentScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const [selectedServices, setSelectedServices] = useState([]);
@@ -271,55 +269,19 @@ const BookAppointmentScreen = ({ navigation }) => {
   const { selectedDate, selectedTime } = route.params || {};
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
-  console.log(selectedDate, selectedTime);
 
   const services = [
     { id: 1, name: 'Shampoo', price: 499, includes: 'Wash, Cut, Blowdry', image: require('../../assets/SHH.png'), description: 'Professional shampoo service including wash, cut, and blowdry.' },
     { id: 2, name: 'Head Massage', price: 599, includes: 'Oil, Massage, Relaxation', image: require('../../assets/SHH.png'), description: 'Relaxing head massage with nourishing oils for stress relief.' },
     { id: 3, name: 'Hair Mask', price: 699, includes: 'Mask, Steam, Rinse', image: require('../../assets/SHH.png'), description: 'Deep conditioning mask for smooth and shiny hair.' },
-    {
-      id: 4,
-      name: 'Shampoo',
-      price: 499,
-      includes: 'wash, Cut, Blowdry',
-      image: require('../../assets/SHH.png'),
-    },
-    {
-      id: 5,
-      name: 'Head massage',
-      price: 499,
-      includes: 'wash, Cut, Blowdry',
-      image: require('../../assets/SHH.png'),
-    },
-    {
-      id: 6,
-      name: 'Hair mask',
-      price: 499,
-      includes: 'wash, Cut, Blowdry',
-      image: require('../../assets/SHH.png'),
-    },
-    {
-      id: 7,
-      name: 'Shampoo',
-      price: 499,
-      includes: 'wash, Cut, Blowdry',
-      image: require('../../assets/SHH.png'),
-    },
-    {
-      id: 8,
-      name: 'Head massage',
-      price: 499,
-      includes: 'wash, Cut, Blowdry',
-      image: require('../../assets/SHH.png'),
-    },
-    {
-      id: 9,
-      name: 'Hair mask',
-      price: 499,
-      includes: 'wash, Cut, Blowdry',
-      image: require('../../assets/SHH.png'),
-    },
+    { id: 4, name: 'Shampoo', price: 499, includes: 'wash, Cut, Blowdry', image: require('../../assets/SHH.png') },
+    { id: 5, name: 'Head massage', price: 499, includes: 'wash, Cut, Blowdry', image: require('../../assets/SHH.png') },
+    { id: 6, name: 'Hair mask', price: 499, includes: 'wash, Cut, Blowdry', image: require('../../assets/SHH.png') },
+    { id: 7, name: 'Shampoo', price: 499, includes: 'wash, Cut, Blowdry', image: require('../../assets/SHH.png') },
+    { id: 8, name: 'Head massage', price: 499, includes: 'wash, Cut, Blowdry', image: require('../../assets/SHH.png') },
+    { id: 9, name: 'Hair mask', price: 499, includes: 'wash, Cut, Blowdry', image: require('../../assets/SHH.png') },
   ];
+
   // Open modal when service is pressed
   const handleServicePress = (service) => {
     setSelectedService(service);
@@ -328,7 +290,6 @@ const BookAppointmentScreen = ({ navigation }) => {
 
   // Handle "Select" button inside modal
   const handleSelectService = () => {
-    console.log("helloooooooooooooooooooo")
     if (selectedService) {
       setSelectedServices((prevSelected) =>
         prevSelected.includes(selectedService.id)
@@ -339,69 +300,28 @@ const BookAppointmentScreen = ({ navigation }) => {
     setIsModalVisible(false);
   };
 
-  const sendData = async () => {
-    try {
-      const selectedServiceDetails = services
-        .filter((service) => selectedServices.includes(service.id))
-        .map((srv) => ({
-          serviceName: srv.name,
-          price: srv.price,
-        }));
-
-      if (selectedServiceDetails.length === 0) {
-        setPopupMessage('Please select at least one service.');
-        setPopupVisible(true);
-        return;
-      }
-
-      // ✅ Calculate total price
-      const totalPrice = selectedServiceDetails.reduce((sum, item) => sum + item.price, 0);
-
-      const formattedDate = new Date(selectedDate).toISOString().split('T')[0]; // YYYY-MM-DD
-      const formattedTime = selectedTime.replace('.', ':');
-
-      const payload = {
-        date: formattedDate,
-        time: formattedTime,
-        services: selectedServiceDetails.map((s) => s.serviceName),
-        totalPrice,
-      };
-
-      console.log('📦 API Payload:', payload);
-
-      const response = await fetch('https://naushad.onrender.com/api/appointments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      console.log('✅ API Response:', data);
-
-      if (response.ok) {
-        setPopupMessage('Appointment booked successfully!');
-        setPopupVisible(true);
-
-        // ✅ Send all service details + total to PaymentScreen
-        navigation.navigate('PaymentScreen', {
-          services: selectedServiceDetails,
-          totalPrice,
-          selectedDate,
-          selectedTime,
-        });
-      } else {
-        setPopupMessage('Failed to book appointment.');
-        setPopupVisible(true);
-      }
-
-    } catch (error) {
-      console.error('❌ API Error:', error.message);
-      setPopupMessage('Failed to book appointment. Try again.');
+  // Handle Proceed button press without API call
+  const handleProceed = () => {
+    if (selectedServices.length === 0) {
+      setPopupMessage('Please select at least one service.');
       setPopupVisible(true);
-
+      return;
     }
-  };
+    // Gather selected service details
+    const selectedServiceDetails = services
+      .filter((service) => selectedServices.includes(service.id))
+      .map((srv) => ({
+        serviceName: srv.name,
+        price: srv.price,
+      }));
 
+    navigation.navigate('PaymentScreen', {
+      services: selectedServiceDetails,
+      totalPrice: selectedServiceDetails.reduce((sum, item) => sum + item.price, 0),
+      selectedDate,
+      selectedTime,
+    });
+  };
 
   const renderService = (service) => {
     const isSelected = selectedServices.includes(service.id);
@@ -459,18 +379,20 @@ const BookAppointmentScreen = ({ navigation }) => {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={sendData}
+        onPress={handleProceed}
         style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}
       >
         <Text style={[styles.proceedButtonText, { color: theme.textOnAccent }]}>
           Proceed to Pay
         </Text>
       </TouchableOpacity>
+
       <Popup
         visible={popupVisible}
         message={popupMessage}
         onClose={() => setPopupVisible(false)}
       />
+
       {/* Popup Modal */}
       <Modal
         transparent
@@ -501,10 +423,7 @@ const BookAppointmentScreen = ({ navigation }) => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => {
-                      console.log('Button Pressed');
-                      handleSelectService();
-                    }}
+                    onPress={handleSelectService}
                     style={[
                       styles.modalButton,
                       {
@@ -580,11 +499,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkboxFill: {
-    width: '100%',
-    height: '100%',
-    borderRadius: wp('1%'),
-  },
   proceedButton: {
     marginHorizontal: wp('5.56%'),
     marginVertical: hp('2.5%'),
@@ -610,14 +524,14 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     height: hp('80%'),
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   modalImage: {
     width: wp('70%'),
     height: hp('40%'),
     borderRadius: 10,
     marginBottom: 10,
-    resizeMode: 'contain'
+    resizeMode: 'contain',
   },
   modalTitle: {
     fontSize: wp('6%'),

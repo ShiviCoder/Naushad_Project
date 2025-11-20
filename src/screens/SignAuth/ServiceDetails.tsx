@@ -262,7 +262,7 @@ const ServiceDetails = () => {
                   const totalPrice = mainPrice + extraTotal;
 
                   // ✅ Navigate to payment page
-                  navigation.navigate('CloneBookAppointment', {
+                  navigation.navigate('BookAppointmentScreen', {
                     serviceName: item.serviceName || item.title || item.name,
                     title: item.title || item.serviceName || item.name,
                     price: totalPrice, quantity: quantity // ← Pass the quantity

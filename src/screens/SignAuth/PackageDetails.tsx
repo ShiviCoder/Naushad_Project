@@ -84,9 +84,10 @@ const PackageDetails = () => {
       <TouchableOpacity
         style={[styles.bookAppoint, { backgroundColor: COLORS.primary }]}
         onPress={() => {
-          navigation.navigate('CloneBookAppointment',{
+          navigation.navigate('BookAppointmentScreen',{
             serviceName: item.title,
             price: item.price,
+            from : 'PackageDetails'
           });
         }}
       >

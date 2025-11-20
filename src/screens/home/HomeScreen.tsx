@@ -162,25 +162,25 @@ const HomeScreen = () => {
     console.log("token accept")
     return token;
   }
-   const isFocused = useIsFocused();
-   const [exitPopup, setExitPopup] = useState(false);
+  const isFocused = useIsFocused();
+  const [exitPopup, setExitPopup] = useState(false);
 
 
   useEffect(() => {
-  if (!isFocused) return;
+    if (!isFocused) return;
 
-  const backAction = () => {
-    setExitPopup(true);   // 👈 Custom Popup open
-    return true;
-  };
+    const backAction = () => {
+      setExitPopup(true);   // 👈 Custom Popup open
+      return true;
+    };
 
-  const subscription = BackHandler.addEventListener(
-    "hardwareBackPress",
-    backAction
-  );
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
-  return () => subscription.remove();
-}, [isFocused]);
+    return () => subscription.remove();
+  }, [isFocused]);
   const fetchAllData = async () => {
     try {
       setLoading(true);   // start loading
@@ -519,7 +519,7 @@ const HomeScreen = () => {
           'Content-Type': 'application/json',
         },
       });
-     const json = await response.json();
+      const json = await response.json();
       console.log("📦 Full Response:", json);
 
       if (!json?.success) return;
@@ -792,7 +792,9 @@ const HomeScreen = () => {
                 <Text style={styles.bannerText}>
                   and take your look to the next level
                 </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("CloneBookAppointment")}
+                <TouchableOpacity onPress={() => navigation.navigate('BookAppointmentScreen', { 
+                  
+})}
                   style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
                   <Text style={[styles.bookBtnText, { color: '#fff', fontWeight: 'bold' }]}>Book Appointment</Text>
                 </TouchableOpacity>
@@ -941,28 +943,74 @@ const HomeScreen = () => {
               title="Our Packages"
               onPress={() => handleSectionNavigation('packages')}
             />
-            <FlatList data={packages}
+            <FlatList
+              data={packages}
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item.id}
               contentContainerStyle={{ paddingHorizontal: wp('2%') }}
               renderItem={({ item }) => (
-                <View style={[styles.packageCard, { backgroundColor: COLORS.secondary }]}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Text style={styles.packageTitle} numberOfLines={2}>{item.title}</Text>
+                <View
+                  style={[
+                    styles.packageCard,
+                    {
+                      backgroundColor: COLORS.secondary,
+                      height: hp("22%"),   // FIXED HEIGHT so button stays at bottom
+                      paddingBottom: hp("1%"),
+                    },
+                  ]}
+                >
+                  {/* Title + Price */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Text
+                      style={styles.packageTitle}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {item.title}
+                    </Text>
+
                     <Text style={styles.packagePrice}>₹{item.price}</Text>
                   </View>
-                  <View style={{ marginTop: hp('2%') }}>
-                    <Text style={styles.packageLabel}>
+
+                  {/* Middle Content */}
+                  <View style={{ marginTop: hp("2%"), flex: 1 }}>
+                    <Text style={styles.packageLabel} numberOfLines={2} ellipsizeMode="tail">
                       <Text style={styles.packageLabelText}>Services:- </Text>
                       <Text style={styles.packageValue}>{item.services}</Text>
                     </Text>
-                    <Text style={[styles.packageLabel, { marginTop: 4 }]}>
+
+                    <Text
+                      style={[styles.packageLabel, { marginTop: 4 }]}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
                       <Text style={styles.packageLabelText}>About:- </Text>
                       <Text style={styles.packageValue}>{item.about}</Text>
                     </Text>
                   </View>
-                  <TouchableOpacity style={[styles.packageBtn, { backgroundColor: COLORS.primary }]} onPress={() => navigation.navigate('PackageDetails', { item })}>
+
+                  {/* Fixed Bottom Button */}
+                  <TouchableOpacity
+                    style={[
+                      styles.packageBtn,
+                      {
+                        backgroundColor: COLORS.primary,
+                        position: "absolute",
+                        bottom: hp("1%"),
+                        left: wp("3%"),
+                        right: wp("3%"),
+                        width: wp('25%')
+                      },
+                    ]}
+                    onPress={() => navigation.navigate("PackageDetails", { item })}
+                  >
                     <Text style={styles.packageBtnText}>Book now</Text>
                   </TouchableOpacity>
                 </View>
@@ -1018,26 +1066,40 @@ const HomeScreen = () => {
                       </Svg>
 
                       {/* === Header Hexagon === */}
-                      <View style={{ position: "absolute", top: 0, alignItems: "center", justifyContent: 'center' }}>
+                      <View
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: wp("22%"),
+                        }}
+                      >
                         <Svg height={hp("6%")} width={wp("22%")}>
                           <Polygon
                             points={`0,0 ${wp("22%")},0 ${wp("22%")},${hp("3%")} ${wp("11%")},${hp("6%")} 0,${hp("3%")}`}
                             fill={COLORS.primary}
                           />
                         </Svg>
+
                         <Text
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
                           style={{
                             position: "absolute",
                             top: hp("1%"),
+                            width: wp("20%"),
+                            textAlign: "center",
                             color: "white",
                             fontWeight: "600",
                             fontSize: hp("1%"),
-                            alignSelf: 'center'
+                            paddingHorizontal: 2,
                           }}
                         >
                           {item.name}
                         </Text>
                       </View>
+
 
                       {/* === Content === */}
                       <View style={{ marginTop: hp("8%"), width: "85%" }}>
@@ -1071,7 +1133,8 @@ const HomeScreen = () => {
                           paddingVertical: hp("0.8%"),
                           paddingHorizontal: wp("5%"),
                           borderRadius: wp("5%"),
-                          marginTop: hp("1.5%"),
+                          marginTop: "auto",     // ⭐ always pushes button to bottom
+                          marginBottom: hp("1%"), // optional small bottom spacing
                         }}
                       >
                         <Text style={{ color: "white", fontWeight: "600", fontSize: hp("1.3%") }}>
@@ -1123,11 +1186,11 @@ const HomeScreen = () => {
           </ScrollView>
         </Animated.View>)
         <Popup
-  visible={exitPopup}
-  message="Are you sure you want to exit?"
-  onClose={() => setExitPopup(false)}   // Cancel
-  onExit={() => BackHandler.exitApp()}  // Exit
-/>
+          visible={exitPopup}
+          message="Are you sure you want to exit?"
+          onClose={() => setExitPopup(false)}   // Cancel
+          onExit={() => BackHandler.exitApp()}  // Exit
+        />
       </SafeAreaView>
     )
   )
@@ -1137,7 +1200,7 @@ const Popup = ({ visible, message, onClose, onExit }) => {
     <Modal transparent animationType="fade" visible={visible}>
       <View style={styles.overlay}>
         <View style={styles.popcontainer}>
-          
+
           <Text style={styles.message}>{message}</Text>
 
           <View style={{ flexDirection: 'row', gap: 20 }}>
@@ -1187,7 +1250,7 @@ const SectionTitle = ({
 
 export default HomeScreen;
 const styles = StyleSheet.create({
-   overlay: {
+  overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
@@ -1682,7 +1745,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 12,
-    fontFamily: "Poppins-Medium"
+    fontFamily: "Poppins-Medium",
+    alignSelf: 'center'
   },
   bottomBarWrap: {
     position: 'absolute',
