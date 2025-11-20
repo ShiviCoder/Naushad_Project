@@ -16,16 +16,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Feather'; // Make sure this import is present
+
+// const ADMIN_EMAIL = 'shivani123@gmail.com';
+// const ADMIN_PASSWORD = 'shi123';
 
 const Signin = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // <--- FIX added here
   const [loading, setLoading] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [nextRoute, setNextRoute] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -34,6 +37,13 @@ const Signin = ({ navigation }) => {
       setPopupVisible(true);
       return;
     }
+
+    // if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    //   setPopupMessage('Access Denied. Only admin can login.');
+    //   setNextRoute(null);
+    //   setPopupVisible(true);
+    //   return;
+    // }
 
     setLoading(true);
     try {
@@ -45,11 +55,11 @@ const Signin = ({ navigation }) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
-        },
+        }
       );
       const data = await response.json();
       if (response.ok && data.token) {
-        console.log('Token :', data.token);
+        console.log('Token from response:', data.token);
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data));
         // Retrieve and log the stored token for debugging
@@ -91,7 +101,6 @@ const Signin = ({ navigation }) => {
         resizeMode="contain"
       />
 
-      {/* Email Field */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -105,12 +114,11 @@ const Signin = ({ navigation }) => {
         />
       </View>
 
-      {/* Password Field */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <View style={styles.passwordContainer}>
           <TextInput
-            style={[styles.input, { flex: 1, borderWidth: 0.5, borderLeftWidth : 0, borderRightWidth : 0 , marginBottom: 0 }]}
+            style={[styles.input, { flex: 1, borderWidth: 0.5, borderLeftWidth: 0, borderRightWidth: 0, marginBottom: 0 }]}
             placeholder="Enter password"
             placeholderTextColor="gray"
             secureTextEntry={!showPassword}
@@ -128,7 +136,6 @@ const Signin = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Forgot Password */}
       <TouchableOpacity
         style={styles.forgotPasswordContainer}
         onPress={() => navigation.navigate('ForgetPassword')}
@@ -136,7 +143,6 @@ const Signin = ({ navigation }) => {
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
 
-      {/* Signin Button */}
       <TouchableOpacity
         style={[styles.signinButton, { backgroundColor: COLORS.primary }]}
         onPress={handleSignIn}
@@ -149,7 +155,6 @@ const Signin = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
-      {/* Signup Link */}
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don’t have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -160,7 +165,7 @@ const Signin = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Popup */}
+      {/* Popup Component */}
       <Popup
         visible={popupVisible}
         message={popupMessage}

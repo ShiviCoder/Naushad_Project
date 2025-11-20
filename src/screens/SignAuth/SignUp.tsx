@@ -469,6 +469,7 @@ import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
+import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAppRegistrationCode } from '../../utils/appRegistrationCode/appRegistrationCode';
 
@@ -483,6 +484,8 @@ export default function SignupScreen({ navigation }) {
   const [referal, setReferal] = useState('');
   const [photo, setPhoto] = useState(null);
   const [appRegistrationCode, setAppRegistrationCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
@@ -529,16 +532,9 @@ export default function SignupScreen({ navigation }) {
   };
 
   const handleSignup = async () => {
-    if (
-      !fullName ||
-      !emailOrPhone ||
-      !password ||
-      !confirmPassword ||
-      !dob ||
-      !address ||
-      !gender
-    ) {
-      setPopupMessage('All fields are required.');
+    // Validate required fields
+    if (!fullName || !emailOrPhone || !password || !confirmPassword) {
+      setPopupMessage('Please fill all required fields.');
       setPopupVisible(true);
       return;
     }
@@ -656,6 +652,13 @@ export default function SignupScreen({ navigation }) {
     if (nextRoute) navigation.navigate(nextRoute.name);
   };
 
+  // Render required field label with asterisk
+  const RequiredLabel = ({ children }) => (
+    <Text style={styles.label}>
+      {children} <Text style={styles.requiredStar}>*</Text>
+    </Text>
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -665,44 +668,68 @@ export default function SignupScreen({ navigation }) {
           resizeMode="contain"
         />
 
-        <Text style={styles.label}>Full Name</Text>
+        <RequiredLabel>Full Name</RequiredLabel>
         <TextInput
-          style={[styles.input, showError.fullName && styles.inputError]}
+          style={styles.input}
           placeholder="Enter full name"
           placeholderTextColor="gray"
           value={fullName}
-          onChangeText={(val) => { setFullName(val); setShowError((s)=>({...s,fullName:false})) }}
+          onChangeText={setFullName}
         />
 
-        <Text style={styles.label}>Email</Text>
+        <RequiredLabel>Email</RequiredLabel>
         <TextInput
           style={styles.input}
           placeholder="Enter your Gmail"
           placeholderTextColor="gray"
           value={emailOrPhone}
-          onChangeText={(val) => { setEmailOrPhone(val); setShowError((s)=>({...s,emailOrPhone:false})) }}
+          onChangeText={setEmailOrPhone}
           keyboardType="email-address"
         />
 
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={[styles.input, showError.password && styles.inputError]}
-          placeholder="Enter password"
-          placeholderTextColor="gray"
-          secureTextEntry
-          value={password}
-          onChangeText={(val) => { setPassword(val); setShowError((s)=>({...s,password:false})) }}
-        />
+        <RequiredLabel>Password</RequiredLabel>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={[styles.input, styles.passwordInput]}
+            placeholder="Enter password"
+            placeholderTextColor="gray"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity 
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <FeatherIcon
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={22}
+              color={showPassword ? COLORS.primary : 'gray'}
+            />
+          </TouchableOpacity>
+        </View>
 
-        <Text style={styles.label}>Confirm Password</Text>
-        <TextInput
-          style={[styles.input, showError.confirmPassword && styles.inputError]}
-          placeholder="Confirm password"
-          placeholderTextColor="gray"
-          secureTextEntry
-          value={confirmPassword}
-          onChangeText={(val) => { setConfirmPassword(val); setShowError((s)=>({...s,confirmPassword:false})) }}
-        />
+        <RequiredLabel>Confirm Password</RequiredLabel>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={[styles.input, styles.passwordInput]}
+            placeholder="Confirm password"
+            placeholderTextColor="gray"
+            secureTextEntry={!showConfirmPassword}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TouchableOpacity 
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.eyeIcon}
+          >
+            <FeatherIcon
+              name={showConfirmPassword ? 'eye-off' : 'eye'}
+              size={22}
+              color={showConfirmPassword ? COLORS.primary : 'gray'}
+            />
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.label}>Date of Birth</Text>
         <TextInput
@@ -821,6 +848,10 @@ const styles = StyleSheet.create({
     marginTop: hp('0.5%'),
     color: '#000',
   },
+  requiredStar: {
+    color: COLORS.primary,
+    fontSize: wp('4%'),
+  },
   input: {
     height: hp('6%'),
     borderWidth: 0.5,
@@ -831,9 +862,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     color: 'black',
   },
-  inputError: {
-    borderColor: 'red',
-    borderWidth: 1.2,
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: COLORS.primary,
+    borderRadius: wp('2%'),
+    backgroundColor: '#fff',
+    marginBottom: hp('1%'),
+  },
+  passwordInput: {
+    flex: 1,
+    borderWidth: 0,
+    marginBottom: 0,
+  },
+  eyeIcon: {
+    paddingHorizontal: wp('3%'),
+    paddingVertical: hp('1%'),
   },
   button: {
     paddingVertical: hp('1.5%'),
@@ -890,6 +935,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginVertical: hp('2%'),
   },
   profileImage: {
     width: 60,
