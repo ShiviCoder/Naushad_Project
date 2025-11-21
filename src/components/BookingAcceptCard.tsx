@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 
 const BookingAcceptCards = ({ item }) => {
-  const [isChecked, setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(true);
   const navigation = useNavigation();
   const { theme } = useTheme();
 

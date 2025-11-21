@@ -12,33 +12,37 @@ import TimeSelect from '../../components/TImeSelect';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
-import BottomNavbar from '../../components/BottomNavbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Head from '../../components/Head';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
 
 type RootStackParamList = {
-  BookAppointmentScreen: { image?: any; showTab?: boolean; from?: any };
+  BookAppointmentScreen: { 
+    image?: any; 
+    showTab?: boolean; 
+    from?: any; 
+    serviceName?: string;
+    price?: string;
+  };
 };
 
 export default function BookAppointmentScreen() {
   const { theme } = useTheme();
-  const route =
-    useRoute<
-      RouteProp<
-        { BookAppointmentScreen: { showTab?: boolean; from?: any; image?: any } },
-        'BookAppointmentScreen'
-      >
-    >();
+  const route = useRoute<RouteProp<RootStackParamList, 'BookAppointmentScreen'>>();
+  const navigation = useNavigation<any>();
+  
+  const { image, serviceName, price, from, showTab } = route.params || {};
+  
+  // Show back button only when NOT from bottom bar
+  const showBack = from !== 'bottomBar';
+  
+  console.log('🔍 BookAppointmentScreen - From:', from, 'ShowTab:', showTab);
 
-  const { image, showTab = false } = route.params || {};
-  const navigation = useNavigation();
-  const showBack = !showTab; // if tab visible → back button hide, else show
-
-  // Popup state - can be removed since no validation needed now
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const data = [
     'image',
@@ -49,30 +53,55 @@ export default function BookAppointmentScreen() {
     'nextButton'
   ];
 
-  // Handler for "Next" button press - no validation, directly navigate
   const onNextPress = () => {
-    const formattedDate = selectedDate ? selectedDate.toISOString() : null; // ✅ make it serializable
+  console.log("🧾 Service params:", route.params);
+  console.log("📅 Selected Date:", selectedDate?.toDateString());
+  console.log("🕒 Selected Time:", selectedTime);
 
-    if (route.params?.from === 'bottomBar') {
-      navigation.navigate('BookingSeats1', {
-        selectedDate: formattedDate,
-        selectedTime,
-      });
-    } else {
-      navigation.navigate('PaymentScreen', {
-        selectedDate: formattedDate,
-        selectedTime,
-      });
-    }
+  if (!selectedDate) {
+    console.log("❌ No date selected yet");
+    setPopupMessage("Please select a date");
+    setPopupVisible(true);
+    return;
+  }
 
-    console.log('📅', formattedDate, '🕒', selectedTime);
+  if (!selectedTime) {
+    console.log("❌ No time selected yet");
+    setPopupMessage("Please select a time");
+    setPopupVisible(true);
+    return;
+  }
+
+  // FIX: Format date without timezone conversion
+  const formatDateWithoutTimezone = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
+
+  const formattedDate = formatDateWithoutTimezone(selectedDate);
+  const dateString = selectedDate.toDateString(); // Human readable format
+
+  console.log("✅ Formatted Date:", formattedDate);
+  console.log("✅ Date String:", dateString);
+  console.log("✅ Selected Time:", selectedTime);
+  console.log("📍 Navigation Source:", from);
+
+  // Always navigate to BookingSeats after BookAppointmentScreen
+  console.log('🚀 Navigating to BookingSeats');
+  navigation.navigate('BookingSeats', {
+    serviceName,
+    price,
+    date: formattedDate,
+    time: selectedTime,
+    from: from || 'regular' // Pass along the source
+  });
+};
+
   const handlePopupClose = () => {
     setPopupVisible(false);
   };
-
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedTime, setSelectedTime] = useState(null);
 
   const renderItem = ({ item }: { item: string }) => {
     switch (item) {
@@ -98,7 +127,6 @@ export default function BookAppointmentScreen() {
       case 'calendar':
         return (
           <View style={styles.calenderContainer}>
-            {/* Removed any onMonthChange prop */}
             <Calender
               onDateSelect={(date) => {
                 console.log("📅 Received from Calender:", date.toDateString());
@@ -116,7 +144,6 @@ export default function BookAppointmentScreen() {
       case 'timeSelect':
         return (
           <View style={styles.timeContainer}>
-            {/* Removed any onTimeChange prop */}
             <TimeSelect selectedDate={selectedDate} onTimeSelect={setSelectedTime} />
           </View>
         );
@@ -126,6 +153,7 @@ export default function BookAppointmentScreen() {
             <TouchableOpacity
               onPress={onNextPress}
               style={[styles.nxtButton, { backgroundColor: COLORS.primary }]}
+              disabled={!selectedDate || !selectedTime}
             >
               <Text style={[styles.nxtText, { color: '#fff' }]}>Next</Text>
             </TouchableOpacity>
@@ -140,20 +168,18 @@ export default function BookAppointmentScreen() {
     <SafeAreaView
       style={[styles.mainContainer, { backgroundColor: theme.background }]}
     >
-      <Head title="Bookings" showBack={false} />
+      <Head title="Bookings" showBack={showBack} />
       <FlatList
         data={data}
         renderItem={renderItem}
         keyExtractor={(item) => item}
         contentContainerStyle={{
-          paddingBottom: hp('15%'),
+          paddingBottom: from === 'bottomBar' ? hp('25%') : hp('15%'), // Extra space when bottom navbar is visible
           paddingHorizontal: wp('3%')
         }}
         showsVerticalScrollIndicator={false}
       />
-      {showTab && <BottomNavbar />}
 
-      {/* Popup component retained but not used */}
       <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
     </SafeAreaView>
   );
@@ -189,14 +215,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontWeight: '800'
   },
-  calenderContainer: { marginHorizontal: wp('2%'), marginBottom: hp('0.5%') },
-  timeContainer: { marginHorizontal: wp('1%'), marginBottom: hp('1%') },
+  calenderContainer: { 
+    marginHorizontal: wp('2%'), 
+    marginBottom: hp('0.5%') 
+  },
+  timeContainer: { 
+    marginHorizontal: wp('1%'), 
+    marginBottom: hp('1%') 
+  },
   nxt: {
     marginHorizontal: wp('2%'),
     marginTop: hp('2%'),
     width: '93%',
     alignSelf: 'center'
-
   },
   nxtButton: {
     paddingVertical: hp('1%'),

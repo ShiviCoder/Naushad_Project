@@ -11,7 +11,6 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import RazorpayCheckout from 'react-native-razorpay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -21,26 +20,6 @@ import Head from '../../components/Head';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Utility function to convert DD-MM-YYYY to YYYY-MM-DD
-function convertDDMMYYYYtoISO(dateStr) {
-  console.log('🔄 convertDDMMYYYYtoISO - Input:', dateStr);
-  if (!dateStr) {
-    console.log('❌ convertDDMMYYYYtoISO - No date string provided');
-    return "";
-  }
-  
-  // Check if already in YYYY-MM-DD format
-  if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
-    console.log('✅ convertDDMMYYYYtoISO - Already in YYYY-MM-DD format:', dateStr);
-    return dateStr;
-  }
-  
-  const [day, month, year] = dateStr.split("-");
-  const isoDate = `${year}-${month}-${day}`;
-  console.log('✅ convertDDMMYYYYtoISO - Converted to YYYY-MM-DD:', isoDate);
-  return isoDate;
-}
-
 // Utility function to ensure date is in YYYY-MM-DD format
 function ensureYYYYMMDD(dateStr) {
   console.log('🔄 ensureYYYYMMDD - Input:', dateStr);
@@ -49,37 +28,88 @@ function ensureYYYYMMDD(dateStr) {
     return '';
   }
 
-  // Extract only YYYY-MM-DD part if it includes time
-  let cleanDateStr = dateStr;
-  if (dateStr.includes('T')) {
-    cleanDateStr = dateStr.split('T')[0];
-    console.log('🔄 ensureYYYYMMDD - Extracted YYYY-MM-DD:', cleanDateStr);
-  }
-
   // If already in YYYY-MM-DD format, return as is
-  if (cleanDateStr.includes('-') && cleanDateStr.split('-')[0].length === 4) {
-    console.log('✅ ensureYYYYMMDD - Already in YYYY-MM-DD format:', cleanDateStr);
-    return cleanDateStr;
+  if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+    console.log('✅ ensureYYYYMMDD - Already in YYYY-MM-DD format:', dateStr);
+    return dateStr;
   }
 
+  // If it's a Date object, format it
+  if (dateStr instanceof Date) {
+    const year = dateStr.getFullYear();
+    const month = String(dateStr.getMonth() + 1).padStart(2, '0');
+    const day = String(dateStr.getDate()).padStart(2, '0');
+    const formatted = `${year}-${month}-${day}`;
+    console.log('✅ ensureYYYYMMDD - Formatted Date object to YYYY-MM-DD:', formatted);
+    return formatted;
+  }
+
+  // For any other format, try to parse it
   try {
-    const d = new Date(cleanDateStr);
-    if (isNaN(d)) {
-      console.log('❌ ensureYYYYMMDD - Invalid date:', cleanDateStr);
+    const date = new Date(dateStr);
+    if (isNaN(date)) {
+      console.log('❌ ensureYYYYMMDD - Invalid date string:', dateStr);
       return '';
     }
-
-    const year = d.getFullYear();
-    const month = ('0' + (d.getMonth() + 1)).slice(-2);
-    const day = ('0' + d.getDate()).slice(-2);
-    const formattedDate = `${year}-${month}-${day}`;
-    
-    console.log('✅ ensureYYYYMMDD - Formatted to YYYY-MM-DD:', formattedDate);
-    return formattedDate;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formatted = `${year}-${month}-${day}`;
+    console.log('✅ ensureYYYYMMDD - Parsed and formatted to YYYY-MM-DD:', formatted);
+    return formatted;
   } catch (error) {
     console.log('❌ ensureYYYYMMDD - Error:', error);
     return '';
   }
+}
+
+// Utility function to ensure time is in 24-hour format (HH:MM)
+function ensure24HourTime(timeStr) {
+  console.log('🔄 ensure24HourTime - Input:', timeStr);
+  if (!timeStr) {
+    console.log('❌ ensure24HourTime - No time string provided');
+    return '00:00';
+  }
+
+  // Replace dots with colons if needed
+  let cleanTime = timeStr.replace(/\./g, ':');
+  
+  // If already in proper 24-hour format (HH:MM), return as is
+  if (/^\d{1,2}:\d{2}$/.test(cleanTime)) {
+    const [hours, minutes] = cleanTime.split(':');
+    const formattedHours = hours.padStart(2, '0');
+    const formattedMinutes = minutes.padStart(2, '0');
+    const result = `${formattedHours}:${formattedMinutes}`;
+    console.log('✅ ensure24HourTime - Already in 24-hour format, normalized:', result);
+    return result;
+  }
+
+  // If it's in 12-hour format with AM/PM, convert to 24-hour
+  if (cleanTime.includes('AM') || cleanTime.includes('PM')) {
+    try {
+      const [time, modifier] = cleanTime.split(' ');
+      let [hours, minutes] = time.split(':');
+      
+      hours = parseInt(hours, 10);
+      
+      if (modifier === 'PM' && hours < 12) {
+        hours += 12;
+      }
+      if (modifier === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      const result = `${hours.toString().padStart(2, '0')}:${minutes || '00'}`;
+      console.log('✅ ensure24HourTime - Converted from 12-hour to 24-hour:', result);
+      return result;
+    } catch (error) {
+      console.log('❌ ensure24HourTime - Error converting 12-hour format:', error);
+      return '00:00';
+    }
+  }
+
+  console.log('❌ ensure24HourTime - Unrecognized time format:', timeStr);
+  return '00:00';
 }
 
 // Utility function to format time to 12-hour format for display
@@ -90,66 +120,26 @@ function formatTo12Hour(timeStr) {
     return '';
   }
 
-  // If already in 12-hour format with AM/PM, return as is
-  if (timeStr.includes('AM') || timeStr.includes('PM')) {
-    console.log('✅ formatTo12Hour - Already in 12-hour format:', timeStr);
-    return timeStr;
-  }
-
+  // First ensure it's in 24-hour format
+  const time24h = ensure24HourTime(timeStr);
+  
   try {
-    let [hour, minute] = timeStr.split(':').map(Number);
+    const [hours, minutes] = time24h.split(':');
+    const hourNum = parseInt(hours, 10);
     
-    // Handle case where minute might be undefined
-    if (isNaN(minute)) minute = 0;
-
-    let ampm = hour >= 12 ? 'PM' : 'AM';
-    hour = hour % 12;
-    if (hour === 0) hour = 12;
-
-    const formattedTime = `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
-    console.log('✅ formatTo12Hour - Formatted to 12-hour:', formattedTime);
-    return formattedTime;
+    let displayHour = hourNum % 12;
+    if (displayHour === 0) displayHour = 12;
+    
+    const ampm = hourNum >= 12 ? 'PM' : 'AM';
+    const result = `${displayHour}:${minutes} ${ampm}`;
+    
+    console.log('✅ formatTo12Hour - Formatted to 12-hour:', result);
+    return result;
   } catch (error) {
     console.log('❌ formatTo12Hour - Error:', error);
-    return timeStr;
+    return time24h;
   }
 }
-
-// Utility function to convert 12-hour time to 24-hour format for backend
-const convertTo24HourFormat = (time12h) => {
-  console.log('🔄 convertTo24HourFormat - Input:', time12h);
-  if (!time12h) {
-    console.log('❌ convertTo24HourFormat - No time string provided');
-    return '';
-  }
-  
-  // If already in 24-hour format, return as is
-  if (time12h.includes(':') && !time12h.includes('AM') && !time12h.includes('PM')) {
-    console.log('✅ convertTo24HourFormat - Already in 24-hour format:', time12h);
-    return time12h;
-  }
-
-  try {
-    const [time, modifier] = time12h.split(' ');
-    let [hours, minutes] = time.split(':');
-    
-    hours = parseInt(hours, 10);
-    
-    if (modifier === 'PM' && hours < 12) {
-      hours += 12;
-    }
-    if (modifier === 'AM' && hours === 12) {
-      hours = 0;
-    }
-    
-    const formatted24h = `${hours.toString().padStart(2, '0')}:${minutes || '00'}`;
-    console.log('✅ convertTo24HourFormat - Converted to 24-hour:', formatted24h);
-    return formatted24h;
-  } catch (error) {
-    console.log('❌ convertTo24HourFormat - Error:', error);
-    return time12h;
-  }
-};
 
 const PaymentScreen = () => {
   const [method, setMethod] = useState('card');
@@ -162,8 +152,6 @@ const PaymentScreen = () => {
   const route = useRoute();
   const params = route.params || {};
 
-  const [orderId, setOrderId] = useState(null);
-  const [loadingOrderId, setLoadingOrderId] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
 
   // New state for success popup
@@ -172,22 +160,27 @@ const PaymentScreen = () => {
 
   // State for incoming date and time (date will be stored in YYYY-MM-DD format)
   const [incomingDate, setIncomingDate] = useState(
-    params?.date ? convertDDMMYYYYtoISO(params.date) : 
+    params?.date ? ensureYYYYMMDD(params.date) : 
     params?.selectedDate ? ensureYYYYMMDD(params.selectedDate) : 
+    null
+  );
+  const [incomingTime, setIncomingTime] = useState(
+    params?.time ? ensure24HourTime(params.time) : 
+    params?.selectedTime ? ensure24HourTime(params.selectedTime) : 
     null
   );
   const [incomingTime, setIncomingTime] = useState(params?.time || params?.selectedTime || null);
 
   console.log('📥 PaymentScreen - Route Params:', params);
   console.log('📥 PaymentScreen - Initial incomingDate (YYYY-MM-DD):', incomingDate);
-  console.log('📥 PaymentScreen - Initial incomingTime:', incomingTime);
+  console.log('📥 PaymentScreen - Initial incomingTime (24-hour):', incomingTime);
 
   // Process incoming date and time from params
   useEffect(() => {
     console.log('🔄 useEffect - Processing incoming date and time from params');
     
     if (params?.date) {
-      const isoDate = convertDDMMYYYYtoISO(params.date);
+      const isoDate = ensureYYYYMMDD(params.date);
       console.log('✅ useEffect - Setting incomingDate (YYYY-MM-DD):', isoDate);
       setIncomingDate(isoDate);
     } else if (params?.selectedDate) {
@@ -199,11 +192,13 @@ const PaymentScreen = () => {
     }
     
     if (params?.time) {
-      console.log('✅ useEffect - Setting incomingTime:', params.time);
-      setIncomingTime(params.time);
+      const time24h = ensure24HourTime(params.time);
+      console.log('✅ useEffect - Setting incomingTime (24-hour):', time24h);
+      setIncomingTime(time24h);
     } else if (params?.selectedTime) {
-      console.log('✅ useEffect - Setting incomingTime from selectedTime:', params.selectedTime);
-      setIncomingTime(params.selectedTime);
+      const time24h = ensure24HourTime(params.selectedTime);
+      console.log('✅ useEffect - Setting incomingTime from selectedTime (24-hour):', time24h);
+      setIncomingTime(time24h);
     } else {
       console.log('❌ useEffect - No time found in params');
     }
@@ -214,7 +209,7 @@ const PaymentScreen = () => {
     const processIncomingData = async () => {
       console.log('🔄 processIncomingData - Starting data processing');
       console.log('📊 processIncomingData - Current incomingDate (YYYY-MM-DD):', incomingDate);
-      console.log('📊 processIncomingData - Current incomingTime:', incomingTime);
+      console.log('📊 processIncomingData - Current incomingTime (24-hour):', incomingTime);
       
       let processedServices = [];
 
@@ -232,6 +227,7 @@ const PaymentScreen = () => {
           image: service.image,
           date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
           time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
+          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
           source: service.source || 'Cart'
         }));
       }
@@ -245,6 +241,7 @@ const PaymentScreen = () => {
           quantity: params.quantity || 1,
           date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
           time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
+          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
           source: 'ProductDetails'
         }];
       }
@@ -258,6 +255,7 @@ const PaymentScreen = () => {
           quantity: params.quantity || 1,
           date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
           time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
+          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
           source: 'ProductPackages'
         }];
       }
@@ -271,11 +269,12 @@ const PaymentScreen = () => {
           quantity: params.quantity || 1,
           date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
           time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
+          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
           source: 'ServiceDetails'
         }];
       }
 
-      console.log('📋 processIncomingData - Processed Services with YYYY-MM-DD dates:', processedServices);
+      console.log('📋 processIncomingData - Processed Services:', processedServices);
 
       // Storage update
       if (processedServices.length > 0) {
@@ -288,7 +287,7 @@ const PaymentScreen = () => {
         const stored = await AsyncStorage.getItem('currentPaymentServices');
         if (stored) {
           const storedData = JSON.parse(stored);
-          console.log('📂 processIncomingData - Loaded stored services with dates:', storedData);
+          console.log('📂 processIncomingData - Loaded stored services:', storedData);
           setServiceList(storedData);
         } else {
           console.log('❌ processIncomingData - No services found in storage');
@@ -345,11 +344,10 @@ const PaymentScreen = () => {
       console.log('🔄 showSuccessPopup - Auto navigating to success screen');
       setSuccessPopupVisible(false);
       navigation.replace('PaymentSuccessScreen', {
-        paymentId: 'temp_payment_id', // This should come from actual payment response
         bookedServices: serviceList,
         totalAmount: totalPrice,
         appointmentDate: incomingDate, // Already in YYYY-MM-DD format
-        appointmentTime: convertTo24HourFormat(incomingTime), // Convert to 24-hour for backend
+        appointmentTime: incomingTime, // Already in 24-hour format
       });
     }, 2000);
   };
@@ -360,68 +358,23 @@ const PaymentScreen = () => {
     setServiceList([]);
   };
 
-  // Fetch Razorpay order ID from backend API when screen loads or totalPrice changes
-  useEffect(() => {
-    const generateOrderId = async () => {
-      if (totalPrice <= 0) {
-        console.log("💸 No amount due, skipping order id generation.");
-        return;
-      }
-      console.log('🔄 generateOrderId - Generating order ID for amount:', totalPrice);
-      setLoadingOrderId(true);
-      try {
-        const response = await fetch('https://naushad.onrender.com/api/razorpay/generate-order-id', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: totalPrice, currency: 'INR' }),
-        });
-        const json = await response.json();
-        console.log('📝 Generated Razorpay Order ID response:', json);
-        if (json && json.orderId) {
-          console.log('✅ Order ID generated:', json.orderId);
-          setOrderId(json.orderId);
-        } else if (json.data && json.data.id) {
-          console.log('✅ Order ID generated from data.id:', json.data.id);
-          setOrderId(json.data.id);
-        } else {
-          console.warn('⚠️ Could not get order ID from server response');
-        }
-      } catch (error) {
-        console.error('❌ Error generating order ID:', error);
-        showPopup('Error', 'Failed to generate payment order. Please try again.');
-      } finally {
-        setLoadingOrderId(false);
-      }
-    };
-
-    generateOrderId();
-  }, [totalPrice]);
-
-  // Verify payment API call to backend
-  const verifyPayment = async (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
-    console.log('🔍 verifyPayment - Verifying payment');
-    try {
-      const response = await fetch('https://naushad.onrender.com/api/razorpay/verify-order-id', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          razorpay_order_id,
-          razorpay_payment_id,
-          razorpay_signature,
-        }),
-      });
-      const json = await response.json();
-      console.log('🔍 Payment verification response:', json);
-      return json.success === true;
-    } catch (error) {
-      console.error('❌ Payment verification error:', error);
-      return false;
-    }
-  };
-
-  // Book appointment API call after successful payment
+  // Book appointment API call
   const bookAppointment = async (date, time, services) => {
     try {
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
+      const userId = await AsyncStorage.getItem('userId');
+      
+      console.log('🔑 Token from storage:', token);
+      console.log('👤 User ID from storage:', userId);
+      console.log('📊 User Data from storage:', userData);
+
+      if (!token) {
+        console.log('❌ No token found');
+        return { success: false, error: 'Authentication required. Please login again.' };
+      }
+
       console.log('📅 Booking appointment with:');
       console.log('   Date (YYYY-MM-DD):', date);
       console.log('   Time (24-hour):', time);
@@ -429,28 +382,47 @@ const PaymentScreen = () => {
       
       const requestBody = {
         date: date, // Already in YYYY-MM-DD format
-        time: time, // Now in 24-hour format
+        time: time, // Already in 24-hour format
         services: services,
         totalAmount: totalPrice
       };
 
-      console.log('📤 Sending to backend (YYYY-MM-DD date format):', requestBody);
+      console.log('📤 Sending to backend:', requestBody);
+      console.log('🔐 Using token:', token);
       
       const response = await fetch('https://naushad.onrender.com/api/appointments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(requestBody),
       });
       
-      const json = await response.json();
-      console.log('📅 Appointment booking response:', json);
+      const responseText = await response.text();
+      console.log('📥 Raw API Response:', responseText);
       
-      if (json.success) {
+      let json;
+      try {
+        json = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ JSON Parse Error:', parseError);
+        return { success: false, error: 'Invalid response from server' };
+      }
+      
+      console.log('📅 Appointment booking response:', json);
+      console.log('📊 Response status:', response.status);
+      
+      if (response.ok && json.success) {
         console.log('✅ Appointment booked successfully!');
+        console.log('📋 Appointment data:', json.data);
         return { success: true, data: json };
       } else {
-        console.log('❌ Appointment booking failed:', json.message);
-        return { success: false, error: json.message };
+        console.log('❌ Appointment booking failed:', json.message || 'Unknown error');
+        return { 
+          success: false, 
+          error: json.message || `Server error: ${response.status}` 
+        };
       }
     } catch (error) {
       console.error('❌ Appointment booking error:', error);
@@ -458,109 +430,69 @@ const PaymentScreen = () => {
     }
   };
 
-  // Handle payment processing
-  const handlePayment = async () => {
-    console.log('🔄 handlePayment - Starting payment process');
+  // Handle booking process
+  const handleBooking = async () => {
+    console.log('🔄 handleBooking - Starting booking process');
     
     if (serviceList.length === 0) {
-      console.log('❌ handlePayment - No services found');
-      showPopup('No Items', 'No items found for payment.');
-      return;
-    }
-    if (!orderId) {
-      console.log('❌ handlePayment - No order ID');
-      showPopup('Payment Setup', 'Payment order is not ready yet. Please wait.');
+      console.log('❌ handleBooking - No services found');
+      showPopup('No Items', 'No items found for booking.');
       return;
     }
     if (method === 'wallet') {
-      console.log('ℹ️ handlePayment - Wallet method selected (not available)');
+      console.log('ℹ️ handleBooking - Wallet method selected (not available)');
       showPopup('Coming Soon', 'Wallet / Salon Credits payment option will be available soon.');
       return;
     }
 
-    // Get date and time from state (date is already in YYYY-MM-DD format)
-    const bookingDate = incomingDate;
-    let bookingTime = incomingTime;
+    // Get date and time from state (already in correct formats)
+    const bookingDate = incomingDate; // Already in YYYY-MM-DD format
+    const bookingTime = incomingTime; // Already in 24-hour format
 
     console.log('📅 Final Booking Details:');
     console.log('   Date (YYYY-MM-DD):', bookingDate);
-    console.log('   Time:', bookingTime);
+    console.log('   Time (24-hour):', bookingTime);
     console.log('   Services:', serviceList);
 
     if (!bookingDate || !bookingTime) {
-      console.log('❌ handlePayment - Missing date or time');
+      console.log('❌ handleBooking - Missing date or time');
       showPopup('Missing Information', 'Please ensure date and time are selected for booking.');
       return;
     }
 
-    // Convert time to 24-hour format for backend
-    const bookingTime24h = convertTo24HourFormat(bookingTime);
-    console.log('🕒 Time conversion:', { 
-      original: bookingTime, 
-      converted_24h: bookingTime24h 
-    });
-
-    // Compose Razorpay payment options with order_id from backend
-    const options = {
-      description: 'Payment - Naushad Hair Salon',
-      image: 'https://i.imgur.com/3g7nmJC.png',
-      currency: 'INR',
-      key: 'rzp_test_RB4DVzPPSyg8yG',
-      amount: totalPrice * 100,
-      name: 'Naushad Hair Salon',
-      order_id: orderId,
-      prefill: {
-        email: 'customer@example.com',
-        contact: '9876543210',
-        name: 'Test User',
-      },
-      theme: { color: COLORS.primary },
-    };
-
-    let paymentData;
+    // Verify the formats
+    console.log('✅ Verified Formats:');
+    console.log('   Date format correct:', /^\d{4}-\d{2}-\d{2}$/.test(bookingDate));
+    console.log('   Time format correct:', /^\d{2}:\d{2}$/.test(bookingTime));
 
     try {
-      console.log('💳 handlePayment - Opening Razorpay checkout');
+      console.log('📝 handleBooking - Starting appointment booking');
       setProcessingPayment(true);
-      paymentData = await RazorpayCheckout.open(options);
-      console.log('💳 Payment Success Data:', paymentData);
 
-      // Verify payment with backend api
-      const verified = await verifyPayment(paymentData.razorpay_order_id, paymentData.razorpay_payment_id, paymentData.razorpay_signature);
-      if (!verified) {
-        console.log('❌ handlePayment - Payment verification failed');
-        showPopup('Verification Failed', 'Payment verification failed. Please contact support.');
-        setProcessingPayment(false);
-        return;
-      }
-
-      console.log('✅ handlePayment - Payment verified successfully');
-
-      // Clear stored payment services data
-      await clearPaymentData();
-
-      // Book appointment after successful payment
+      // Book appointment directly
       const servicesArray = serviceList.map(service => service.serviceName);
 
       console.log('📅 Final Appointment Booking Data:');
       console.log('   Date for backend (YYYY-MM-DD):', bookingDate);
-      console.log('   Time for backend (24-hour):', bookingTime24h);
+      console.log('   Time for backend (24-hour):', bookingTime);
       console.log('   Services:', servicesArray);
 
-      const bookingResult = await bookAppointment(bookingDate, bookingTime24h, servicesArray);
+      const bookingResult = await bookAppointment(bookingDate, bookingTime, servicesArray);
 
       if (bookingResult.success) {
-        console.log('✅ handlePayment - Appointment booked successfully');
+        console.log('✅ handleBooking - Appointment booked successfully');
+        // Clear stored payment services data
+        await clearPaymentData();
         // Show success popup with image
         showSuccessPopup('Appointment booked successfully!');
       } else {
-        console.log('❌ handlePayment - Appointment booking failed');
-        setProcessingPayment(false);
+        console.log('❌ handleBooking - Appointment booking failed');
         showPopup('Booking Failed', `Appointment booking failed: ${bookingResult.error}`);
       }
     } catch (error) {
-      console.log('❌ Payment Error or Cancelled:', error);
-      showPopup('Payment Failed', 'Payment was not completed. Please try again.');
+      console.log('❌ Booking Error:', error);
+      showPopup('Booking Failed', 'Booking was not completed. Please try again.');
+    } finally {
       setProcessingPayment(false);
     }
   };
@@ -578,41 +510,40 @@ const PaymentScreen = () => {
   };
 
   // Format date for display (convert YYYY-MM-DD to readable format)
-  // Format date for display (convert YYYY-MM-DD to readable format)
-const formatDateForDisplay = (dateString) => {
-  console.log('🔄 formatDateForDisplay - Input:', dateString);
-  if (!dateString) {
-    console.log('❌ formatDateForDisplay - No date string');
-    return 'Not selected';
-  }
-  
-  // Extract only YYYY-MM-DD part if it includes time
-  let cleanDateString = dateString;
-  if (dateString.includes('T')) {
-    cleanDateString = dateString.split('T')[0];
-    console.log('🔄 formatDateForDisplay - Extracted YYYY-MM-DD:', cleanDateString);
-  }
-  
-  try {
-    const date = new Date(cleanDateString);
-    if (isNaN(date)) {
-      console.log('❌ formatDateForDisplay - Invalid date:', cleanDateString);
+  const formatDateForDisplay = (dateString) => {
+    console.log('🔄 formatDateForDisplay - Input:', dateString);
+    if (!dateString) {
+      console.log('❌ formatDateForDisplay - No date string');
+      return 'Not selected';
+    }
+    
+    // Extract only YYYY-MM-DD part if it includes time
+    let cleanDateString = dateString;
+    if (dateString.includes('T')) {
+      cleanDateString = dateString.split('T')[0];
+      console.log('🔄 formatDateForDisplay - Extracted YYYY-MM-DD:', cleanDateString);
+    }
+    
+    try {
+      const date = new Date(cleanDateString);
+      if (isNaN(date)) {
+        console.log('❌ formatDateForDisplay - Invalid date:', cleanDateString);
+        return cleanDateString;
+      }
+
+      const formatted = date.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      console.log('✅ formatDateForDisplay - Formatted for display:', formatted);
+      return formatted;
+    } catch (error) {
+      console.log('❌ formatDateForDisplay - Error:', error);
       return cleanDateString;
     }
-
-    const formatted = date.toLocaleDateString('en-IN', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-    console.log('✅ formatDateForDisplay - Formatted for display:', formatted);
-    return formatted;
-  } catch (error) {
-    console.log('❌ formatDateForDisplay - Error:', error);
-    return cleanDateString;
-  }
-};
+  };
 
   // Success Popup Component
   const SuccessPopup = () => (
@@ -648,29 +579,158 @@ const formatDateForDisplay = (dateString) => {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-      <Head title="Payment" />
+      <Head title="Booking" />
 
       <ScrollView
         contentContainerStyle={[styles.contentContainer, { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Show loading spinner if order id is loading */}
-        {loadingOrderId && (
-          <View style={{ paddingVertical: hp('5%') }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{ textAlign: 'center', marginTop: 10, color: theme.textSecondary }}>
-              Preparing payment...
+        {/* Services list */}
+        {serviceList.length > 0 ? (
+          <View style={styles.serviceCard}>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginBottom: hp('2%') }]}>
+              Order Summary ({getTotalQuantity()} {getTotalQuantity() === 1 ? 'item' : 'items'})
+            </Text>
+            
+            {serviceList.map((srv, i) => (
+              <View key={i} style={styles.serviceBlock}>
+                <View style={styles.serviceHeader}>
+                  <Text style={[styles.serviceTitle, { color: theme.textPrimary }]}>
+                    {srv.serviceName || srv.name || 'Unnamed'}
+                  </Text>
+                  <Text style={[styles.serviceTag, { 
+                    backgroundColor: srv.type === 'product' ? '#E3F2FD' : 
+                                   srv.type === 'package' ? '#E8F5E8' : 
+                                   srv.type === 'cart' ? '#E8EAF6' : '#FFF3E0',
+                    color: srv.type === 'product' ? '#1976D2' : 
+                          srv.type === 'package' ? '#2E7D32' : 
+                          srv.type === 'cart' ? '#5C6BC0' : '#F57C00'
+                  }]}>
+                    {getServiceTypeLabel(srv.type)}
+                  </Text>
+                </View>
+
+                <View style={styles.quantityRow}>
+                  <Text style={[styles.quantityLabel, { color: theme.textSecondary }]}>
+                    Quantity:
+                  </Text>
+                  <View style={styles.quantityBadge}>
+                    <Text style={[styles.quantityValue, { color: '#fff' }]}>
+                      {srv.quantity || 1}
+                    </Text>
+                  </View>
+                  {srv.quantity > 1 && (
+                    <Text style={[styles.quantityNote, { color: theme.textSecondary }]}>
+                      ({srv.quantity} units)
+                    </Text>
+                  )}
+                </View>
+
+                {/* Date and Time Display */}
+                <View style={styles.datetimeRow}>
+                  <View style={styles.datetimeItem}>
+                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                      📅 Date:
+                    </Text>
+                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                      {formatDateForDisplay(srv.date)}
+                    </Text>
+                  </View>
+                  <View style={styles.datetimeItem}>
+                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                      🕒 Time:
+                    </Text>
+                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                      {srv.time || 'Not selected'}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Display raw formats for debugging */}
+                <View style={styles.debugRow}>
+                  <Text style={[styles.debugText, { color: theme.textSecondary }]}>
+                    📋 Backend Date: {srv.date || 'Not set'} | Backend Time: {srv.backendTime || 'Not set'}
+                  </Text>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <Text style={[styles.detailText, { color: theme.textSecondary }]}>
+                    📱 From: {srv.source || 'Unknown'}
+                  </Text>
+                </View>
+
+                <View style={styles.footerRow}>
+                  <View style={styles.priceDetails}>
+                    <Text style={[styles.addOnText, { color: theme.textPrimary }]}>
+                      {srv.quantity > 1 ? `₹${srv.price} × ${srv.quantity}` : 'Price'}
+                    </Text>
+                    {srv.quantity > 1 && (
+                      <Text style={[styles.unitPrice, { color: theme.textSecondary }]}>
+                        Unit price: ₹{srv.price}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.priceContainer}>
+                    <Text style={[styles.price, { color: COLORS.primary }]}>
+                      ₹{getItemSubtotal(srv)}
+                    </Text>
+                    {srv.quantity > 1 && (
+                      <Text style={[styles.originalPrice, { color: theme.textSecondary }]}>
+                        (₹{srv.price} each)
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                {i < serviceList.length - 1 && (
+                  <View style={styles.divider} />
+                )}
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+              No items found for booking
+            </Text>
+            <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
+              Please go back and select a product or service
             </Text>
           </View>
         )}
 
-        {/* Services list */}
-        {!loadingOrderId && (
+        {serviceList.length > 0 && (
           <>
-            {serviceList.length > 0 ? (
-              <View style={styles.serviceCard}>
-                <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginBottom: hp('2%') }]}>
-                  Order Summary ({getTotalQuantity()} {getTotalQuantity() === 1 ? 'item' : 'items'})
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginTop: hp('2%') }]}>
+              Select Payment Method
+            </Text>
+
+            <RadioItem
+              label="Credit / Debit Card"
+              selected={method === 'card'}
+              onPress={() => setMethod('card')}
+              primary={COLORS.primary}
+              theme={theme}
+            />
+            <RadioItem
+              label="UPI / Google Pay / Paytm"
+              selected={method === 'upi'}
+              onPress={() => setMethod('upi')}
+              primary={COLORS.primary}
+              theme={theme}
+            />
+            <RadioItem
+              label="Wallet / Salon Credits"
+              selected={method === 'wallet'}
+              onPress={() => setMethod('wallet')}
+              primary={COLORS.primary}
+              theme={theme}
+            />
+
+            <View style={styles.totalBreakdown}>
+              <View style={styles.breakdownRow}>
+                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
+                  Subtotal ({getTotalQuantity()} items):
                 </Text>
                 
                 {serviceList.map((srv, i) => (
@@ -839,19 +899,19 @@ const formatDateForDisplay = (dateString) => {
         )}
       </ScrollView>
 
-      {/* Footer Pay Button */}
+      {/* Footer Book Button */}
       {serviceList.length > 0 && (
         <View style={[styles.footer, { backgroundColor: theme.background }]}>
           <TouchableOpacity
             activeOpacity={0.9}
             style={[styles.payBtn, { backgroundColor: COLORS.primary }]}
-            onPress={handlePayment}
-            disabled={processingPayment || loadingOrderId}
+            onPress={handleBooking}
+            disabled={processingPayment}
           >
             {processingPayment ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.payText}>Pay ₹{totalPrice.toLocaleString('en-IN')}</Text>
+              <Text style={styles.payText}>Book Appointment - ₹{totalPrice.toLocaleString('en-IN')}</Text>
             )}
           </TouchableOpacity>
         </View>

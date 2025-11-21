@@ -12,6 +12,7 @@ const BookingPendingCard = ({ item }) => {
 
   // Format services array
   const formatServices = (services) => {
+<<<<<<< HEAD
     if (!services || services.length === 0) return 'No services';
     
     try {
@@ -22,6 +23,38 @@ const BookingPendingCard = ({ item }) => {
       return Array.isArray(serviceArray) ? serviceArray.join(', ') : String(serviceArray);
     } catch (error) {
       return services.join(', ');
+=======
+    console.log('🔄 formatServices - Input:', services);
+    
+    if (!services || services.length === 0) return 'No services';
+    
+    try {
+      // If services is a string that looks like JSON, parse it
+      if (typeof services === 'string' && services.startsWith('[')) {
+        const parsedServices = JSON.parse(services);
+        console.log('✅ formatServices - Parsed JSON string:', parsedServices);
+        return Array.isArray(parsedServices) ? parsedServices.join(', ') : String(parsedServices);
+      }
+      
+      // If services is already an array
+      if (Array.isArray(services)) {
+        console.log('✅ formatServices - Already an array:', services);
+        return services.join(', ');
+      }
+      
+      // If it's a single service object with serviceName
+      if (typeof services === 'object' && services.serviceName) {
+        console.log('✅ formatServices - Single service object:', services.serviceName);
+        return services.serviceName;
+      }
+      
+      // Default case - handle single string
+      console.log('✅ formatServices - Default case:', String(services));
+      return String(services);
+    } catch (error) {
+      console.log('❌ formatServices - Error:', error);
+      return String(services);
+>>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
     }
   };
 
@@ -50,6 +83,33 @@ const BookingPendingCard = ({ item }) => {
       return timeString;
     }
   };
+<<<<<<< HEAD
+=======
+
+  // Get services from the item prop - UPDATED
+  const getServices = () => {
+    console.log('📋 BookingPendingCard - Item:', item);
+    
+    // Try different possible properties where services might be stored
+    if (item.service) { // ADDED THIS - check for singular 'service'
+      return formatServices(item.service);
+    } else if (item.services) {
+      return formatServices(item.services);
+    } else if (item.serviceName) {
+      return formatServices([item.serviceName]);
+    } else if (item.serviceList) {
+      return formatServices(item.serviceList);
+    } else if (item.bookedServices) {
+      // If bookedServices is an array of objects with serviceName
+      if (Array.isArray(item.bookedServices) && item.bookedServices[0]?.serviceName) {
+        return formatServices(item.bookedServices.map(service => service.serviceName));
+      }
+      return formatServices(item.bookedServices);
+    }
+    
+    return 'No services';
+  };
+>>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
 
   return (
     <TouchableOpacity
@@ -61,7 +121,11 @@ const BookingPendingCard = ({ item }) => {
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
           <Image style={styles.icon} source={require('../assets/facial.png')} />
           <Text style={[styles.text, { color: theme.textPrimary }]}>
+<<<<<<< HEAD
             {formatServices(item.services)}
+=======
+            {getServices()}
+>>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
           </Text>
         </View>
 
@@ -91,7 +155,11 @@ const BookingPendingCard = ({ item }) => {
       <View style={styles.content}>
         <Image style={styles.icon} source={require('../assets/moneyBag2.png')} />
         <Text style={[styles.text, { color: theme.textPrimary }]}>
+<<<<<<< HEAD
           Code: {item.appointmentCode}
+=======
+          Code: {item.appointmentCode || 'N/A'}
+>>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
         </Text>
       </View>
     </TouchableOpacity>

@@ -792,7 +792,9 @@ const HomeScreen = () => {
                 <Text style={styles.bannerText}>
                   and take your look to the next level
                 </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("CloneBookAppointment")}
+                <TouchableOpacity onPress={() => navigation.navigate('BookAppointmentScreen', { 
+                  
+})}
                   style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
                   <Text style={[styles.bookBtnText, { color: '#fff', fontWeight: 'bold' }]}>Book Appointment</Text>
                 </TouchableOpacity>

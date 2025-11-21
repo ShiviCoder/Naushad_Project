@@ -1,4 +1,4 @@
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { BackHandler, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Head from '../../components/Head'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'
@@ -8,9 +8,7 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 // Dummy backend seats response
-// bookedSeats array contains already booked seat numbers from backend
 const fetchBookedSeats = async (): Promise<number[]> => {
-  // simulate API call
   return new Promise((resolve) => {
     setTimeout(() => resolve([9, 18, 7, 12]), 500)
   })
@@ -20,8 +18,16 @@ const BookingSeats = () => {
   const { theme } = useTheme()
   const seats = Array.from({ length: 20 }, (_, i) => i + 1)
   const navigation = useNavigation()
- const route = useRoute();
-const { date, time, serviceName, price } = route.params || {};
+  const route = useRoute()
+  
+  // Get all parameters including the source information
+  const { 
+    date: selectedDate, 
+    time: selectedTime, 
+    serviceName, 
+    price,
+    from,
+  } = route.params || {}
 
   const [bookedSeats, setBookedSeats] = useState<number[]>([])
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null)
@@ -34,20 +40,62 @@ const { date, time, serviceName, price } = route.params || {};
     loadBookedSeats()
   }, [])
 
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack(); 
+      return true; 
+    };
+  
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    return () => backHandler.remove();
+  }, []);
+
+  // Add debug logging to check the source
+  useEffect(() => {
+    console.log('📋 BookingSeats Route Params:', route.params)
+    console.log('📍 Source (from):', from)
+    console.log('📅 Selected Date (raw):', selectedDate)
+    console.log('📅 Selected Date (as Date):', selectedDate ? new Date(selectedDate) : 'No date')
+    console.log('📅 Selected Date (local):', selectedDate ? new Date(selectedDate).toLocaleDateString() : 'No date')
+    console.log('🕒 Selected Time:', selectedTime)
+  }, [route.params])
+
   const onNextPress = () => {
-  const formattedDate = date ? new Date(date).toISOString() : null;
-  const formattedTime = time || '00:00';
+    // FIX: Use the date as-is without timezone conversion
+    const formattedDate = selectedDate || null
+    const formattedTime = selectedTime || '00:00'
 
-  console.log('📅', formattedDate, '🕒', formattedTime, 'Seat:', selectedSeat);
+    console.log('📍 Navigation Source:', from)
+    console.log('📅 Formatted Date:', formattedDate)
+    console.log('🕒 Formatted Time:', formattedTime)
+    console.log('💺 Selected Seat:', selectedSeat)
 
-  navigation.navigate('BookAppoinment2', {
-    date: formattedDate,
-    time: formattedTime,
-    seat: selectedSeat,
-    serviceName,
-    price,
-  });
-};
+    // Conditional navigation based on source
+    if (from === 'PackageDetails' || from === 'Our-Packages') {
+      // Navigate to Payment Screen when coming from Packages
+      console.log('🚀 Navigating to Payment Screen')
+      navigation.navigate('PaymentScreen', {
+        selectedDate: formattedDate, // Use the date as-is
+        selectedTime: formattedTime,
+        selectedSeat,
+        serviceName,
+        price,
+      })
+    } else {
+      // Default navigation to BookAppointment2
+      console.log('🚀 Navigating to BookAppointment2 Screen')
+      navigation.navigate('BookAppoinment2', {
+        selectedDate: formattedDate, // Use the date as-is
+        selectedTime: formattedTime,
+        selectedSeat,
+        serviceName,
+        price,
+      })
+    }
+  }
 
   const renderItem = ({ item }: { item: number }) => {
     const isBooked = bookedSeats.includes(item)
@@ -76,7 +124,7 @@ const { date, time, serviceName, price } = route.params || {};
   }
 
   return (
-   <SafeAreaView style={{flex : 1}}>
+   <SafeAreaView style={{flex :1}}>
      <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Head title="Booking" showBack={true} />
 
@@ -97,14 +145,18 @@ const { date, time, serviceName, price } = route.params || {};
           }}
           showsVerticalScrollIndicator={false}
         />
-        
+
         <View style={styles.nxt}>
           <TouchableOpacity
             onPress={onNextPress}
-            style={[styles.nxtButton, { backgroundColor: COLORS.primary }]}
-            disabled={selectedSeat === null} // disable Next if no seat selected
+            style={[styles.nxtButton, { 
+              backgroundColor: selectedSeat ? COLORS.primary : '#ccc' 
+            }]}
+            disabled={selectedSeat === null}
           >
-            <Text style={[styles.nxtText, { color: '#fff' }]}>Next</Text>
+            <Text style={[styles.nxtText, { color: '#fff' }]}>
+              {(from === 'PackageDetails' || from === 'Our-Packages') ? 'Proceed to Payment' : 'Next'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -118,10 +170,31 @@ export default BookingSeats
 const styles = StyleSheet.create({
   container: { flex: 1 },
   text: {
-    marginBottom: hp('4%'),
+    marginBottom: hp('1%'),
     fontSize: wp('5%'),
     fontFamily: 'Poppins-Medium',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    textAlign: 'center'
+  },
+  dateTimeContainer: {
+    alignItems: 'center',
+    marginBottom: hp('2%'),
+    padding: wp('2%'),
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: wp('2%'),
+    marginHorizontal: wp('5%'),
+  },
+  dateTimeText: {
+    fontSize: wp('4%'),
+    fontFamily: 'Poppins-Medium',
+    textAlign: 'center'
+  },
+  debugText: {
+    fontSize: wp('3.5%'),
+    fontFamily: 'Poppins-Regular',
+    alignSelf: 'center',
+    marginBottom: hp('1%'),
+    fontStyle: 'italic'
   },
   nxt: {
     marginHorizontal: wp('2%'),
