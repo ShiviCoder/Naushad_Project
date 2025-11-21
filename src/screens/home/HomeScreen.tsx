@@ -633,7 +633,7 @@ const HomeScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate("LikedProductScreen", { likedProducts, products, theme })}>
-                  <View
+                  {/* <View
                     style={{
                       width: wp('7%'),
                       height: wp('7%'),
@@ -650,7 +650,7 @@ const HomeScreen = () => {
                       source={require('../../assets/heart.png')}
                       style={{ width: wp('3.5%'), height: wp('3.5%') }}
                     />
-                  </View>
+                  </View> */}
                 </TouchableOpacity>
               </View>
             </View>

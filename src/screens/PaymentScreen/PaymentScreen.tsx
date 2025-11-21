@@ -68,7 +68,7 @@ function ensure24HourTime(timeStr) {
   console.log('🔄 ensure24HourTime - Input:', timeStr);
   if (!timeStr) {
     console.log('❌ ensure24HourTime - No time string provided');
-    return '00:00';
+    return '';
   }
 
   // Replace dots with colons if needed
@@ -104,12 +104,12 @@ function ensure24HourTime(timeStr) {
       return result;
     } catch (error) {
       console.log('❌ ensure24HourTime - Error converting 12-hour format:', error);
-      return '00:00';
+      return '';
     }
   }
 
   console.log('❌ ensure24HourTime - Unrecognized time format:', timeStr);
-  return '00:00';
+  return '';
 }
 
 // Utility function to format time to 12-hour format for display
@@ -169,11 +169,18 @@ const PaymentScreen = () => {
     params?.selectedTime ? ensure24HourTime(params.selectedTime) : 
     null
   );
-  const [incomingTime, setIncomingTime] = useState(params?.time || params?.selectedTime || null);
 
   console.log('📥 PaymentScreen - Route Params:', params);
   console.log('📥 PaymentScreen - Initial incomingDate (YYYY-MM-DD):', incomingDate);
   console.log('📥 PaymentScreen - Initial incomingTime (24-hour):', incomingTime);
+
+  // Check if date and time are available
+  const hasDateTime = useMemo(() => {
+    const hasDate = !!incomingDate && incomingDate.trim() !== '';
+    const hasTime = !!incomingTime && incomingTime.trim() !== '';
+    console.log('📅 hasDateTime check - Date:', hasDate, 'Time:', hasTime);
+    return hasDate && hasTime;
+  }, [incomingDate, incomingTime]);
 
   // Process incoming date and time from params
   useEffect(() => {
@@ -210,6 +217,7 @@ const PaymentScreen = () => {
       console.log('🔄 processIncomingData - Starting data processing');
       console.log('📊 processIncomingData - Current incomingDate (YYYY-MM-DD):', incomingDate);
       console.log('📊 processIncomingData - Current incomingTime (24-hour):', incomingTime);
+      console.log('📊 processIncomingData - Has DateTime:', hasDateTime);
       
       let processedServices = [];
 
@@ -225,9 +233,9 @@ const PaymentScreen = () => {
           price: service.price,
           quantity: service.quantity || 1,
           image: service.image,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: service.source || 'Cart'
         }));
       }
@@ -239,9 +247,9 @@ const PaymentScreen = () => {
           name: params.serviceName,
           price: params.price,
           quantity: params.quantity || 1,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: 'ProductDetails'
         }];
       }
@@ -253,9 +261,9 @@ const PaymentScreen = () => {
           name: params.item.name || params.item.title,
           price: params.item.price,
           quantity: params.quantity || 1,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: 'ProductPackages'
         }];
       }
@@ -267,9 +275,9 @@ const PaymentScreen = () => {
           name: params.serviceName,
           price: params.price,
           quantity: params.quantity || 1,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: 'ServiceDetails'
         }];
       }
@@ -296,7 +304,7 @@ const PaymentScreen = () => {
     };
 
     processIncomingData();
-  }, [params, incomingDate, incomingTime]);
+  }, [params, incomingDate, incomingTime, hasDateTime]);
 
   // Calculate total price based on services and quantities
   const totalPrice = useMemo(() => {
@@ -439,6 +447,7 @@ const PaymentScreen = () => {
       showPopup('No Items', 'No items found for booking.');
       return;
     }
+
     if (method === 'wallet') {
       console.log('ℹ️ handleBooking - Wallet method selected (not available)');
       showPopup('Coming Soon', 'Wallet / Salon Credits payment option will be available soon.');
@@ -454,6 +463,7 @@ const PaymentScreen = () => {
     console.log('   Time (24-hour):', bookingTime);
     console.log('   Services:', serviceList);
 
+    // Check if date and time are required but missing
     if (!bookingDate || !bookingTime) {
       console.log('❌ handleBooking - Missing date or time');
       showPopup('Missing Information', 'Please ensure date and time are selected for booking.');
@@ -579,7 +589,7 @@ const PaymentScreen = () => {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-      <Head title="Booking" />
+      <Head title="Payment" />
 
       <ScrollView
         contentContainerStyle={[styles.contentContainer, { backgroundColor: theme.background }]}
@@ -626,32 +636,33 @@ const PaymentScreen = () => {
                   )}
                 </View>
 
-                {/* Date and Time Display */}
-                <View style={styles.datetimeRow}>
-                  <View style={styles.datetimeItem}>
-                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                      📅 Date:
-                    </Text>
-                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                      {formatDateForDisplay(srv.date)}
-                    </Text>
-                  </View>
-                  <View style={styles.datetimeItem}>
-                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                      🕒 Time:
-                    </Text>
-                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                      {srv.time || 'Not selected'}
-                    </Text>
-                  </View>
-                </View>
+                  <>
+                    <View style={styles.datetimeRow}>
+                      <View style={styles.datetimeItem}>
+                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                          📅 Date:
+                        </Text>
+                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                          {formatDateForDisplay(srv.date)}
+                        </Text>
+                      </View>
+                      <View style={styles.datetimeItem}>
+                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                          🕒 Time:
+                        </Text>
+                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                          {srv.time || 'Not selected'}
+                        </Text>
+                      </View>
+                    </View>
 
-                {/* Display raw formats for debugging */}
-                <View style={styles.debugRow}>
-                  <Text style={[styles.debugText, { color: theme.textSecondary }]}>
-                    📋 Backend Date: {srv.date || 'Not set'} | Backend Time: {srv.backendTime || 'Not set'}
-                  </Text>
-                </View>
+                    {/* Display raw formats for debugging - Only show if date/time available */}
+                    <View style={styles.debugRow}>
+                      <Text style={[styles.debugText, { color: theme.textSecondary }]}>
+                        📋 Backend Date: {srv.date || 'Not set'} | Backend Time: {srv.backendTime || 'Not set'}
+                      </Text>
+                    </View>
+                  </>
 
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailText, { color: theme.textSecondary }]}>
@@ -732,169 +743,26 @@ const PaymentScreen = () => {
                 <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
                   Subtotal ({getTotalQuantity()} items):
                 </Text>
-                
-                {serviceList.map((srv, i) => (
-                  <View key={i} style={styles.serviceBlock}>
-                    <View style={styles.serviceHeader}>
-                      <Text style={[styles.serviceTitle, { color: theme.textPrimary }]}>
-                        {srv.serviceName || srv.name || 'Unnamed'}
-                      </Text>
-                      <Text style={[styles.serviceTag, { 
-                        backgroundColor: srv.type === 'product' ? '#E3F2FD' : 
-                                       srv.type === 'package' ? '#E8F5E8' : 
-                                       srv.type === 'cart' ? '#E8EAF6' : '#FFF3E0',
-                        color: srv.type === 'product' ? '#1976D2' : 
-                              srv.type === 'package' ? '#2E7D32' : 
-                              srv.type === 'cart' ? '#5C6BC0' : '#F57C00'
-                      }]}>
-                        {getServiceTypeLabel(srv.type)}
-                      </Text>
-                    </View>
-
-                    <View style={styles.quantityRow}>
-                      <Text style={[styles.quantityLabel, { color: theme.textSecondary }]}>
-                        Quantity:
-                      </Text>
-                      <View style={styles.quantityBadge}>
-                        <Text style={[styles.quantityValue, { color: '#fff' }]}>
-                          {srv.quantity || 1}
-                        </Text>
-                      </View>
-                      {srv.quantity > 1 && (
-                        <Text style={[styles.quantityNote, { color: theme.textSecondary }]}>
-                          ({srv.quantity} units)
-                        </Text>
-                      )}
-                    </View>
-
-                    {/* Date and Time Display */}
-                    <View style={styles.datetimeRow}>
-                      <View style={styles.datetimeItem}>
-                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                          📅 Date:
-                        </Text>
-                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                          {formatDateForDisplay(srv.date)}
-                        </Text>
-                      </View>
-                      <View style={styles.datetimeItem}>
-                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                          🕒 Time:
-                        </Text>
-                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                          {srv.time || 'Not selected'}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Display raw YYYY-MM-DD date for debugging */}
-                    <View style={styles.debugRow}>
-                      <Text style={[styles.debugText, { color: theme.textSecondary }]}>
-                        📋 Backend Date (YYYY-MM-DD): {srv.date || 'Not set'}
-                      </Text>
-                    </View>
-
-                    <View style={styles.detailRow}>
-                      <Text style={[styles.detailText, { color: theme.textSecondary }]}>
-                        📱 From: {srv.source || 'Unknown'}
-                      </Text>
-                    </View>
-
-                    <View style={styles.footerRow}>
-                      <View style={styles.priceDetails}>
-                        <Text style={[styles.addOnText, { color: theme.textPrimary }]}>
-                          {srv.quantity > 1 ? `₹${srv.price} × ${srv.quantity}` : 'Price'}
-                        </Text>
-                        {srv.quantity > 1 && (
-                          <Text style={[styles.unitPrice, { color: theme.textSecondary }]}>
-                            Unit price: ₹{srv.price}
-                          </Text>
-                        )}
-                      </View>
-                      <View style={styles.priceContainer}>
-                        <Text style={[styles.price, { color: COLORS.primary }]}>
-                          ₹{getItemSubtotal(srv)}
-                        </Text>
-                        {srv.quantity > 1 && (
-                          <Text style={[styles.originalPrice, { color: theme.textSecondary }]}>
-                            (₹{srv.price} each)
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-
-                    {i < serviceList.length - 1 && (
-                      <View style={styles.divider} />
-                    )}
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <View style={styles.emptyState}>
-                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                  No items found for payment
-                </Text>
-                <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
-                  Please go back and select a product or service
+                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
+                  ₹{serviceList.reduce((acc, curr) => acc + getItemSubtotal(curr), 0).toLocaleString('en-IN')}
                 </Text>
               </View>
-            )}
-
-            {serviceList.length > 0 && (
-              <>
-                <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginTop: hp('2%') }]}>
-                  Select Payment Method
+              <View style={styles.breakdownRow}>
+                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
+                  GST (10%):
                 </Text>
+                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
+                  ₹{Math.round(totalPrice * 0.1).toLocaleString('en-IN')}
+                </Text>
+              </View>
+            </View>
 
-                <RadioItem
-                  label="Credit / Debit Card"
-                  selected={method === 'card'}
-                  onPress={() => setMethod('card')}
-                  primary={COLORS.primary}
-                  theme={theme}
-                />
-                <RadioItem
-                  label="UPI / Google Pay / Paytm"
-                  selected={method === 'upi'}
-                  onPress={() => setMethod('upi')}
-                  primary={COLORS.primary}
-                  theme={theme}
-                />
-                <RadioItem
-                  label="Wallet / Salon Credits"
-                  selected={method === 'wallet'}
-                  onPress={() => setMethod('wallet')}
-                  primary={COLORS.primary}
-                  theme={theme}
-                />
-
-                <View style={styles.totalBreakdown}>
-                  <View style={styles.breakdownRow}>
-                    <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
-                      Subtotal ({getTotalQuantity()} items):
-                    </Text>
-                    <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                      ₹{serviceList.reduce((acc, curr) => acc + getItemSubtotal(curr), 0).toLocaleString('en-IN')}
-                    </Text>
-                  </View>
-                  <View style={styles.breakdownRow}>
-                    <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
-                      GST (10%):
-                    </Text>
-                    <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                      ₹{Math.round(totalPrice * 0.1).toLocaleString('en-IN')}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.totalRow}>
-                  <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>Total Payable:</Text>
-                  <Text style={[styles.totalValue, { color: theme.textPrimary }]}>
-                    ₹ {totalPrice.toLocaleString('en-IN')}
-                  </Text>
-                </View>
-              </>
-            )}
+            <View style={styles.totalRow}>
+              <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>Total Payable:</Text>
+              <Text style={[styles.totalValue, { color: theme.textPrimary }]}>
+                ₹ {totalPrice.toLocaleString('en-IN')}
+              </Text>
+            </View>
           </>
         )}
       </ScrollView>
@@ -911,7 +779,9 @@ const PaymentScreen = () => {
             {processingPayment ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.payText}>Book Appointment - ₹{totalPrice.toLocaleString('en-IN')}</Text>
+              <Text style={styles.payText}>
+                {hasDateTime ? 'Confirm Order' : 'Confirm Order'} - ₹{totalPrice.toLocaleString('en-IN')}
+              </Text>
             )}
           </TouchableOpacity>
         </View>

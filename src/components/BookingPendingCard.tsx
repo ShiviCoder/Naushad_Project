@@ -12,18 +12,6 @@ const BookingPendingCard = ({ item }) => {
 
   // Format services array
   const formatServices = (services) => {
-<<<<<<< HEAD
-    if (!services || services.length === 0) return 'No services';
-    
-    try {
-      const serviceArray = typeof services[0] === 'string' && services[0].startsWith('[') 
-        ? JSON.parse(services[0])
-        : services;
-      
-      return Array.isArray(serviceArray) ? serviceArray.join(', ') : String(serviceArray);
-    } catch (error) {
-      return services.join(', ');
-=======
     console.log('🔄 formatServices - Input:', services);
     
     if (!services || services.length === 0) return 'No services';
@@ -54,7 +42,6 @@ const BookingPendingCard = ({ item }) => {
     } catch (error) {
       console.log('❌ formatServices - Error:', error);
       return String(services);
->>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
     }
   };
 
@@ -83,8 +70,6 @@ const BookingPendingCard = ({ item }) => {
       return timeString;
     }
   };
-<<<<<<< HEAD
-=======
 
   // Get services from the item prop - UPDATED
   const getServices = () => {
@@ -109,23 +94,32 @@ const BookingPendingCard = ({ item }) => {
     
     return 'No services';
   };
->>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
+
+  // Handle navigation to booking details
+  const handlePress = () => {
+    console.log('📍 Navigation - Passing booking data:', item);
+    navigation.navigate('BookingPending', { 
+      booking: item,
+      serviceName: getServices(),
+      date: item.date,
+      time: item.time,
+      price: item.totalAmount || item.price,
+      appointmentCode: item.appointmentCode,
+      status: item.status || 'pending'
+    });
+  };
 
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => navigation.navigate('BookingPending', { booking: item })}
+      onPress={handlePress}
     >
       {/* Service + Pending Status */}
       <View style={styles.pendingContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
           <Image style={styles.icon} source={require('../assets/facial.png')} />
           <Text style={[styles.text, { color: theme.textPrimary }]}>
-<<<<<<< HEAD
-            {formatServices(item.services)}
-=======
             {getServices()}
->>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
           </Text>
         </View>
 
@@ -155,11 +149,7 @@ const BookingPendingCard = ({ item }) => {
       <View style={styles.content}>
         <Image style={styles.icon} source={require('../assets/moneyBag2.png')} />
         <Text style={[styles.text, { color: theme.textPrimary }]}>
-<<<<<<< HEAD
-          Code: {item.appointmentCode}
-=======
           Code: {item.appointmentCode || 'N/A'}
->>>>>>> 21b67dfc6b2f29c91621635c81364493080aefdb
         </Text>
       </View>
     </TouchableOpacity>
@@ -179,11 +169,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('4%'),
     justifyContent: 'center',
     gap: hp('1%'),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   pendingContainer: {
     flexDirection: 'row',
