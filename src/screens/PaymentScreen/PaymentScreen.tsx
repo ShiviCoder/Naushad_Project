@@ -367,76 +367,93 @@ const PaymentScreen = () => {
   };
 
   // Book appointment API call
-  const bookAppointment = async (date, time, services) => {
-    try {
-      // Get token from AsyncStorage
-      const token = await AsyncStorage.getItem('userToken');
-      const userData = await AsyncStorage.getItem('userData');
-      const userId = await AsyncStorage.getItem('userId');
-      
-      console.log('🔑 Token from storage:', token);
-      console.log('👤 User ID from storage:', userId);
-      console.log('📊 User Data from storage:', userData);
+ // Book appointment API call - UPDATED VERSION
+const bookAppointment = async (date, time, services) => {
+  try {
+    // Get token from AsyncStorage
+    const token = await AsyncStorage.getItem('userToken');
+    const userData = await AsyncStorage.getItem('userData');
+    const userId = await AsyncStorage.getItem('userId');
+    
+    console.log('🔑 Token from storage:', token);
+    console.log('👤 User ID from storage:', userId);
 
-      if (!token) {
-        console.log('❌ No token found');
-        return { success: false, error: 'Authentication required. Please login again.' };
-      }
-
-      console.log('📅 Booking appointment with:');
-      console.log('   Date (YYYY-MM-DD):', date);
-      console.log('   Time (24-hour):', time);
-      console.log('   Services:', services);
-      
-      const requestBody = {
-        date: date, // Already in YYYY-MM-DD format
-        time: time, // Already in 24-hour format
-        services: services,
-        totalAmount: totalPrice
-      };
-
-      console.log('📤 Sending to backend:', requestBody);
-      console.log('🔐 Using token:', token);
-      
-      const response = await fetch('https://naushad.onrender.com/api/appointments', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestBody),
-      });
-      
-      const responseText = await response.text();
-      console.log('📥 Raw API Response:', responseText);
-      
-      let json;
-      try {
-        json = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('❌ JSON Parse Error:', parseError);
-        return { success: false, error: 'Invalid response from server' };
-      }
-      
-      console.log('📅 Appointment booking response:', json);
-      console.log('📊 Response status:', response.status);
-      
-      if (response.ok && json.success) {
-        console.log('✅ Appointment booked successfully!');
-        console.log('📋 Appointment data:', json.data);
-        return { success: true, data: json };
-      } else {
-        console.log('❌ Appointment booking failed:', json.message || 'Unknown error');
-        return { 
-          success: false, 
-          error: json.message || `Server error: ${response.status}` 
-        };
-      }
-    } catch (error) {
-      console.error('❌ Appointment booking error:', error);
-      return { success: false, error: error.message };
+    if (!token) {
+      console.log('❌ No token found');
+      return { success: false, error: 'Authentication required. Please login again.' };
     }
-  };
+
+    console.log('📅 Booking appointment with:');
+    console.log('   Date (YYYY-MM-DD):', date);
+    console.log('   Time (24-hour):', time);
+    console.log('   Services:', services);
+    
+    // Enhanced request body with proper structure
+    const requestBody = {
+      date: date,
+      time: time,
+      services: services,
+      totalAmount: totalPrice,
+      // Add these common required fields
+      serviceType: 'appointment',
+      status: 'pending',
+      paymentStatus: 'pending'
+    };
+
+    console.log('📤 Sending to backend:', JSON.stringify(requestBody, null, 2));
+    console.log('🔐 Using token:', token ? 'Present' : 'Missing');
+    
+    const response = await fetch('https://naushad.onrender.com/api/appointments', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const responseText = await response.text();
+    console.log('📥 Raw API Response:', responseText);
+    console.log('📊 Response Status:', response.status);
+    console.log('📊 Response OK:', response.ok);
+    
+    let json;
+    try {
+      json = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('❌ JSON Parse Error:', parseError);
+      console.error('❌ Response that failed to parse:', responseText);
+      return { 
+        success: false, 
+        error: `Server returned invalid JSON: ${response.status}`,
+        status: response.status
+      };
+    }
+    
+    console.log('📅 Appointment booking response:', json);
+    
+    if (response.ok && json.success) {
+      console.log('✅ Appointment booked successfully!');
+      console.log('📋 Appointment data:', json.data);
+      return { success: true, data: json };
+    } else {
+      console.log('❌ Appointment booking failed:', json.message || 'Unknown error');
+      console.log('❌ Full error response:', json);
+      return { 
+        success: false, 
+        error: json.message || `Server error: ${response.status}`,
+        status: response.status,
+        details: json
+      };
+    }
+  } catch (error) {
+    console.error('❌ Appointment booking network error:', error);
+    return { 
+      success: false, 
+      error: `Network error: ${error.message}` 
+    };
+  }
+};
 
   // Handle booking process
   const handleBooking = async () => {

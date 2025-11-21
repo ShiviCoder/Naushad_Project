@@ -23,9 +23,6 @@ import COLORS from "../../utils/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator } from "react-native";
 
-
-
-
 const MyProfile = () => {
   const [filePath, setFilePath] = useState({});
   const [modal, setModal] = useState(false);
@@ -112,14 +109,9 @@ const MyProfile = () => {
       </View>
     );
   }
+
   const renderInfoRow = (icon, label, fieldKey, disabled = false) => (
-    <TouchableOpacity
-      style={styles.infoRow}
-      activeOpacity={disabled ? 1 : 0.8}
-      onPress={() => {
-        if (!disabled) openEditModal(label, fieldKey);
-      }}
-    >
+    <View style={styles.infoRow}>
       <Icon
         name={icon}
         size={22}
@@ -130,7 +122,18 @@ const MyProfile = () => {
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{user?.[fieldKey] || "Not available"}</Text>
       </View>
-    </TouchableOpacity>
+      
+      {/* Edit Icon - Only show if not disabled */}
+      {!disabled && (
+        <TouchableOpacity
+          style={styles.editIconContainer}
+          onPress={() => openEditModal(label, fieldKey)}
+          activeOpacity={0.7}
+        >
+          <Icon name="create-outline" size={20} color={COLORS.primary} />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 
   return (
@@ -230,6 +233,7 @@ const MyProfile = () => {
               placeholder={`Enter ${editLabel}`}
               placeholderTextColor="#aaa"
               style={styles.popupInput}
+              autoFocus={true}
             />
 
             <View style={styles.popupButtons}>
@@ -240,7 +244,11 @@ const MyProfile = () => {
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSaveField}>
+              <TouchableOpacity 
+                style={[styles.saveBtn, !tempValue.trim() && styles.saveBtnDisabled]} 
+                onPress={handleSaveField}
+                disabled={!tempValue.trim()}
+              >
                 <Text style={styles.saveTextBtn}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -337,8 +345,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: hp("2%"),
+    paddingVertical: hp("0.5%"),
   },
-  infoTextContainer: { marginLeft: wp("3%"), flex: 1 },
+  infoTextContainer: { 
+    marginLeft: wp("3%"), 
+    flex: 1,
+  },
   label: {
     fontSize: wp("3.5%"),
     fontWeight: "600",
@@ -348,6 +360,10 @@ const styles = StyleSheet.create({
     fontSize: wp("4%"),
     color: "#333",
     marginTop: 2,
+  },
+  editIconContainer: {
+    padding: wp("2%"),
+    marginLeft: wp("1%"),
   },
 
   // Image Modal
@@ -392,6 +408,7 @@ const styles = StyleSheet.create({
     padding: wp("3%"),
     fontSize: wp("3.8%"),
     color: "#000",
+    backgroundColor: "#f9f9f9",
   },
   popupButtons: {
     flexDirection: "row",
@@ -399,19 +416,33 @@ const styles = StyleSheet.create({
     marginTop: hp("3%"),
   },
   cancelBtn: {
-    backgroundColor: "#ccc",
-    paddingVertical: hp("1%"),
-    paddingHorizontal: wp("6%"),
+    backgroundColor: "#f0f0f0",
+    paddingVertical: hp("1.5%"),
+    paddingHorizontal: wp("8%"),
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
   saveBtn: {
     backgroundColor: COLORS.primary,
-    paddingVertical: hp("1%"),
-    paddingHorizontal: wp("6%"),
+    paddingVertical: hp("1.5%"),
+    paddingHorizontal: wp("8%"),
     borderRadius: 8,
   },
-  cancelText: { color: "#000", fontWeight: "600" },
-  saveTextBtn: { color: "#fff", fontWeight: "600" },
+  saveBtnDisabled: {
+    backgroundColor: "#ccc",
+    opacity: 0.6,
+  },
+  cancelText: { 
+    color: "#666", 
+    fontWeight: "600",
+    fontSize: wp("3.8%"),
+  },
+  saveTextBtn: { 
+    color: "#fff", 
+    fontWeight: "600",
+    fontSize: wp("3.8%"),
+  },
 });
 
 export default MyProfile;

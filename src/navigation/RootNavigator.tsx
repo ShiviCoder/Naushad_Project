@@ -51,6 +51,7 @@ import BookingSeats from '../screens/SignAuth/BookingSeats';
 // Import the tab version
 import BookAppointmentTabScreen from '../components/BookAppointmentTabScreen';
 import BottomNavbarWrapper from '../components/BottomNavbarWrapper';
+import CartPaymentScreen from '../screens/PaymentScreen/CartPaymentScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -112,6 +113,7 @@ export type RootStackParamList = {
   PaymentScreen: undefined;
   PaymentSuccessScreen: undefined;
   VideosScreen: undefined;
+  CartPaymentScreen : undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -179,7 +181,8 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="LikedProductScreen" component={LikedProductScreen} />
         <Stack.Screen name="SettingScreen" component={SettingScreen} />
         <Stack.Screen name="BookingSeats" component={BookingSeats} />
-        
+<Stack.Screen name='CartPaymentScreen' component={CartPaymentScreen}/>
+
         {/* Standalone BookAppointmentScreen without bottom tabs */}
         <Stack.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
       </Stack.Navigator>

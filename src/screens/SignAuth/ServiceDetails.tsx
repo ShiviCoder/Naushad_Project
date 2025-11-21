@@ -71,7 +71,6 @@ const ServiceDetails = () => {
   // Parse highlights if they are stored as stringified array
   const parseHighlights = (highlights: any) => {
     if (!highlights || !Array.isArray(highlights)) return [];
-    
     if (highlights.length > 0 && typeof highlights[0] === 'string' && highlights[0].startsWith('[')) {
       try {
         return JSON.parse(highlights[0]);
@@ -125,18 +124,15 @@ const ServiceDetails = () => {
 
       const totalPrice = mainPrice + extraTotal;
 
-      // Navigate to payment page
       navigation.navigate('BookAppointmentScreen', {
         serviceName: item.serviceName,
         title: item.title,
         price: totalPrice,
-        quantity: quantity
+        quantity: quantity,
+        from: 'PackageDetails'
       });
-
-      Alert.alert('Success', 'Services added to cart!');
     } catch (error) {
       console.error('Error adding to cart:', error);
-      Alert.alert('Error', 'Failed to add services to cart');
     }
   };
 
@@ -145,22 +141,22 @@ const ServiceDetails = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Head title="Our Services" />
-      
+
       {loading ? (
         <View style={[styles.fullScreenLoading, { backgroundColor: theme.background }]}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-         
+
         </View>
       ) : (
         <ScrollView
           style={[
             styles.container,
             { backgroundColor: theme.background },
-          ]}   
+          ]}
         >
           <View style={{ gap: hp('2%') }}>
             {/* Main Image */}
-            <Image                            
+            <Image
               style={styles.image}
               source={{ uri: item.imageUrl }}
             />
@@ -197,7 +193,7 @@ const ServiceDetails = () => {
             )}
 
             {/* Quantity Selector */}
-            <View style={styles.quantityContainer}>
+            {/* <View style={styles.quantityContainer}>
               <Text style={[styles.quantityLabel, { color: theme.textPrimary }]}>
                 Quantity:
               </Text>
@@ -218,7 +214,7 @@ const ServiceDetails = () => {
                   <Text style={styles.quantityButtonText}>+</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </View> */}
 
             {/* Extra Services Section */}
             <View style={styles.extra}>
@@ -230,7 +226,6 @@ const ServiceDetails = () => {
                   <Text style={[styles.extraHead, { color: theme.textPrimary, fontSize: wp('4%') }]}>See all</Text>
                 </TouchableOpacity>
               </View>
-              
               <FlatList
                 data={extraServices}
                 horizontal
@@ -242,9 +237,9 @@ const ServiceDetails = () => {
                     style={styles.serviceCard}
                     activeOpacity={0.8}
                   >
-                    <Image 
-                      source={{ uri: service.imageUrl }} 
-                      style={styles.serviceImage} 
+                    <Image
+                      source={{ uri: service.imageUrl }}
+                      style={styles.serviceImage}
                     />
                     <View style={styles.nameItem}>
                       <Text style={styles.serviceName}>{service.serviceName}</Text>
@@ -256,8 +251,8 @@ const ServiceDetails = () => {
                       style={[
                         styles.bookBtn,
                         {
-                          backgroundColor: selectedServices.includes(service._id) 
-                            ? COLORS.secondary 
+                          backgroundColor: selectedServices.includes(service._id)
+                            ? COLORS.secondary
                             : COLORS.primary,
                         },
                       ]}

@@ -40,31 +40,48 @@ const BookingSeats = () => {
   const { theme } = useTheme()
   const navigation = useNavigation()
   const route = useRoute()
-  
-  // Get all parameters including the source information
-  const { 
-    selectedDate, 
-    selectedTime, 
-    serviceName, 
-    price,
-    from,
-  } = route.params || {}
-
+ const { date: selectedDate, time: selectedTime, serviceName, price, from } = route.params || {}
   const [chairs, setChairs] = useState<Chair[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null)
 
-  // Add debug logging to check the source and parameters
   useEffect(() => {
-    console.log('📋 BookingSeats Route Params:', route.params)
-    console.log('📍 Source (from):', from)
-    console.log('📅 Selected Date (raw):', selectedDate)
-    console.log('📅 Selected Date (as Date):', selectedDate ? new Date(selectedDate) : 'No date')
-    console.log('📅 Selected Date (local):', selectedDate ? new Date(selectedDate).toLocaleDateString() : 'No date')
-    console.log('🕒 Selected Time:', selectedTime)
-    console.log('💼 Service Name:', serviceName)
-    console.log('💰 Price:', price)
-  }, [route.params])
+    const fetchChairs = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(
+          'https://naushad.onrender.com/api/appointments/get-chairs'
+        )
+        const data: ChairsResponse = await response.json()
+
+        if (data.success) {
+          setChairs(data.data)
+        } else {
+          console.error('Failed to fetch chairs:', data.message)
+        }
+      } catch (error) {
+        console.error('Error fetching chairs:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchChairs()
+  }, [])
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack()
+      return true
+    }
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    )
+
+    return () => backHandler.remove()
+  }, [navigation])
 
   useEffect(() => {
     const fetchChairs = async () => {
@@ -105,39 +122,16 @@ const BookingSeats = () => {
   }, [navigation])
 
   const onNextPress = () => {
-    // FIX: Use the date as-is without timezone conversion
-    const formattedDate = selectedDate || null
+    const formattedDate = selectedDate
+      ? new Date(selectedDate).toISOString()
+      : null
     const formattedTime = selectedTime || '00:00'
 
-    console.log('📍 Navigation Source:', from)
-    console.log('📅 Formatted Date:', formattedDate)
-    console.log('🕒 Formatted Time:', formattedTime)
-    console.log('💺 Selected Seat:', selectedSeat)
-    console.log('💼 Service Name:', serviceName)
-    console.log('💰 Price:', price)
-
-    // Conditional navigation based on source
-    if (from === 'PackageDetails' || from === 'Our-Packages') {
-      // Navigate to Payment Screen when coming from Packages
-      console.log('🚀 Navigating to Payment Screen')
-      navigation.navigate('PaymentScreen', {
-        selectedDate: formattedDate, // Use the date as-is
-        selectedTime: formattedTime,
-        selectedSeat,
-        serviceName,
-        price,
-      })
-    } else {
-      // Default navigation to BookAppointment2
-      console.log('🚀 Navigating to BookAppointment2 Screen')
-      navigation.navigate('BookAppoinment2', {
-        selectedDate: formattedDate, // Use the date as-is
-        selectedTime: formattedTime,
-        selectedSeat,
-        serviceName,
-        price,
-      })
-    }
+    navigation.navigate('BookAppoinment2', {
+      selectedDate: formattedDate,
+      selectedTime,
+      selectedSeat
+    })
   }
 
   // ************************************
@@ -200,9 +194,7 @@ const BookingSeats = () => {
             color={COLORS.primary} 
             style={styles.activityIndicator}
           />
-          <Text style={[styles.loadingText, { color: theme.textPrimary }]}>
-            Loading seats...
-          </Text>
+          
         </View>
       </SafeAreaView>
     )
@@ -216,35 +208,6 @@ const BookingSeats = () => {
         <View style={{ padding: wp('3%') }}>
           <Text style={[styles.text, { color: theme.textPrimary }]}>
             Please confirm your seat
-          </Text>
-
-          {/* Date and Time Display */}
-          <View style={[styles.dateTimeContainer, { backgroundColor: theme.cardBackground }]}>
-            <Text style={[styles.dateTimeText, { color: theme.textPrimary }]}>
-              {selectedDate ? new Date(selectedDate).toLocaleDateString() : 'No date selected'}
-            </Text>
-            <Text style={[styles.dateTimeText, { color: theme.textPrimary }]}>
-              {selectedTime || 'No time selected'}
-            </Text>
-            {(serviceName || price) && (
-              <View style={styles.serviceInfo}>
-                {serviceName && (
-                  <Text style={[styles.serviceText, { color: theme.textPrimary }]}>
-                    Service: {serviceName}
-                  </Text>
-                )}
-                {price && (
-                  <Text style={[styles.serviceText, { color: theme.textPrimary }]}>
-                    Price: ${price}
-                  </Text>
-                )}
-              </View>
-            )}
-          </View>
-
-          {/* Debug information */}
-          <Text style={[styles.debugText, { color: theme.textSecondary }]}>
-            Source: {from || 'Not specified'}
           </Text>
 
           <View style={styles.legendContainer}>
@@ -296,9 +259,7 @@ const BookingSeats = () => {
               ]}
               disabled={selectedSeat === null}
             >
-              <Text style={[styles.nxtText, { color: '#fff' }]}>
-                {(from === 'PackageDetails' || from === 'Our-Packages') ? 'Proceed to Payment' : 'Next'}
-              </Text>
+              <Text style={[styles.nxtText, { color: '#fff' }]}>Next</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -329,36 +290,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: wp('4.5%'),
     fontFamily: 'Poppins-Medium'
-  },
-  dateTimeContainer: {
-    alignItems: 'center',
-    marginBottom: hp('2%'),
-    padding: wp('3%'),
-    borderRadius: wp('2%'),
-    marginHorizontal: wp('2%'),
-  },
-  dateTimeText: {
-    fontSize: wp('4%'),
-    fontFamily: 'Poppins-Medium',
-    textAlign: 'center',
-    marginBottom: hp('0.5%')
-  },
-  serviceInfo: {
-    marginTop: hp('1%'),
-    alignItems: 'center'
-  },
-  serviceText: {
-    fontSize: wp('3.5%'),
-    fontFamily: 'Poppins-Regular',
-    marginBottom: hp('0.3%')
-  },
-  debugText: {
-    fontSize: wp('3%'),
-    fontFamily: 'Poppins-Regular',
-    alignSelf: 'center',
-    marginBottom: hp('1%'),
-    fontStyle: 'italic',
-    textAlign: 'center'
   },
   legendContainer: {
     flexDirection: 'row',

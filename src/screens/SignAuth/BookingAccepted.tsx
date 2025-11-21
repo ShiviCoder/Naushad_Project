@@ -238,7 +238,9 @@ export default function BookingAccepted() {
         <Head title="Booking Details" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-         
+          <Text style={[styles.loadingText, { color: theme.textPrimary }]}>
+            Loading booking details...
+          </Text>
         </View>
       </SafeAreaView>
     );

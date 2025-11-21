@@ -169,7 +169,7 @@ const ProductDetails = ({ navigation }: ProductDetailsProps) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() =>
-                            navigation.navigate('PaymentScreen', {
+                            navigation.navigate('CartPaymentScreen', {
                                 serviceName: product.name,   // 🧾 product name as service name
                                 price: product.price,        // 💰 product price
                                 date: new Date().toDateString(), // optional (for now)
