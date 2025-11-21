@@ -11,6 +11,7 @@ import {
   Image,
   Modal,
 } from 'react-native';
+import RazorpayCheckout from 'react-native-razorpay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -161,6 +162,8 @@ const PaymentScreen = () => {
   const route = useRoute();
   const params = route.params || {};
 
+  const [orderId, setOrderId] = useState(null);
+  const [loadingOrderId, setLoadingOrderId] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
 
   // New state for success popup
@@ -342,6 +345,7 @@ const PaymentScreen = () => {
       console.log('🔄 showSuccessPopup - Auto navigating to success screen');
       setSuccessPopupVisible(false);
       navigation.replace('PaymentSuccessScreen', {
+        paymentId: 'temp_payment_id', // This should come from actual payment response
         bookedServices: serviceList,
         totalAmount: totalPrice,
         appointmentDate: incomingDate, // Already in YYYY-MM-DD format
@@ -356,23 +360,68 @@ const PaymentScreen = () => {
     setServiceList([]);
   };
 
-  // Book appointment API call
+  // Fetch Razorpay order ID from backend API when screen loads or totalPrice changes
+  useEffect(() => {
+    const generateOrderId = async () => {
+      if (totalPrice <= 0) {
+        console.log("💸 No amount due, skipping order id generation.");
+        return;
+      }
+      console.log('🔄 generateOrderId - Generating order ID for amount:', totalPrice);
+      setLoadingOrderId(true);
+      try {
+        const response = await fetch('https://naushad.onrender.com/api/razorpay/generate-order-id', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: totalPrice, currency: 'INR' }),
+        });
+        const json = await response.json();
+        console.log('📝 Generated Razorpay Order ID response:', json);
+        if (json && json.orderId) {
+          console.log('✅ Order ID generated:', json.orderId);
+          setOrderId(json.orderId);
+        } else if (json.data && json.data.id) {
+          console.log('✅ Order ID generated from data.id:', json.data.id);
+          setOrderId(json.data.id);
+        } else {
+          console.warn('⚠️ Could not get order ID from server response');
+        }
+      } catch (error) {
+        console.error('❌ Error generating order ID:', error);
+        showPopup('Error', 'Failed to generate payment order. Please try again.');
+      } finally {
+        setLoadingOrderId(false);
+      }
+    };
+
+    generateOrderId();
+  }, [totalPrice]);
+
+  // Verify payment API call to backend
+  const verifyPayment = async (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
+    console.log('🔍 verifyPayment - Verifying payment');
+    try {
+      const response = await fetch('https://naushad.onrender.com/api/razorpay/verify-order-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id,
+          razorpay_payment_id,
+          razorpay_signature,
+        }),
+      });
+      const json = await response.json();
+      console.log('🔍 Payment verification response:', json);
+      return json.success === true;
+    } catch (error) {
+      console.error('❌ Payment verification error:', error);
+      return false;
+    }
+  };
+
+  // Book appointment API call after successful payment
   const bookAppointment = async (date, time, services) => {
     try {
-      // Get token from AsyncStorage
-      const token = await AsyncStorage.getItem('userToken');
-      const userData = await AsyncStorage.getItem('userData');
-      const userId = await AsyncStorage.getItem('userId');
-      
-      console.log('🔑 Token from storage:', token);
-      console.log('👤 User ID from storage:', userId);
-      console.log('📊 User Data from storage:', userData);
-
-      if (!token) {
-        console.log('❌ No token found');
-        return { success: false, error: 'Authentication required. Please login again.' };
-      }
-
       console.log('📅 Booking appointment with:');
       console.log('   Date (YYYY-MM-DD):', date);
       console.log('   Time (24-hour):', time);
@@ -386,41 +435,22 @@ const PaymentScreen = () => {
       };
 
       console.log('📤 Sending to backend (YYYY-MM-DD date format):', requestBody);
-      console.log('🔐 Using token:', token);
       
       const response = await fetch('https://naushad.onrender.com/api/appointments', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
       
-      const responseText = await response.text();
-      console.log('📥 Raw API Response:', responseText);
-      
-      let json;
-      try {
-        json = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('❌ JSON Parse Error:', parseError);
-        return { success: false, error: 'Invalid response from server' };
-      }
-      
+      const json = await response.json();
       console.log('📅 Appointment booking response:', json);
-      console.log('📊 Response status:', response.status);
       
-      if (response.ok && json.success) {
+      if (json.success) {
         console.log('✅ Appointment booked successfully!');
-        console.log('📋 Appointment data:', json.data);
         return { success: true, data: json };
       } else {
-        console.log('❌ Appointment booking failed:', json.message || 'Unknown error');
-        return { 
-          success: false, 
-          error: json.message || `Server error: ${response.status}` 
-        };
+        console.log('❌ Appointment booking failed:', json.message);
+        return { success: false, error: json.message };
       }
     } catch (error) {
       console.error('❌ Appointment booking error:', error);
@@ -428,18 +458,22 @@ const PaymentScreen = () => {
     }
   };
 
-  // Handle booking process
-  const handleBooking = async () => {
-    console.log('🔄 handleBooking - Starting booking process');
+  // Handle payment processing
+  const handlePayment = async () => {
+    console.log('🔄 handlePayment - Starting payment process');
     
     if (serviceList.length === 0) {
-      console.log('❌ handleBooking - No services found');
-      showPopup('No Items', 'No items found for booking.');
+      console.log('❌ handlePayment - No services found');
+      showPopup('No Items', 'No items found for payment.');
       return;
     }
-
+    if (!orderId) {
+      console.log('❌ handlePayment - No order ID');
+      showPopup('Payment Setup', 'Payment order is not ready yet. Please wait.');
+      return;
+    }
     if (method === 'wallet') {
-      console.log('ℹ️ handleBooking - Wallet method selected (not available)');
+      console.log('ℹ️ handlePayment - Wallet method selected (not available)');
       showPopup('Coming Soon', 'Wallet / Salon Credits payment option will be available soon.');
       return;
     }
@@ -454,7 +488,7 @@ const PaymentScreen = () => {
     console.log('   Services:', serviceList);
 
     if (!bookingDate || !bookingTime) {
-      console.log('❌ handleBooking - Missing date or time');
+      console.log('❌ handlePayment - Missing date or time');
       showPopup('Missing Information', 'Please ensure date and time are selected for booking.');
       return;
     }
@@ -466,11 +500,46 @@ const PaymentScreen = () => {
       converted_24h: bookingTime24h 
     });
 
-    try {
-      console.log('📝 handleBooking - Starting appointment booking');
-      setProcessingPayment(true);
+    // Compose Razorpay payment options with order_id from backend
+    const options = {
+      description: 'Payment - Naushad Hair Salon',
+      image: 'https://i.imgur.com/3g7nmJC.png',
+      currency: 'INR',
+      key: 'rzp_test_RB4DVzPPSyg8yG',
+      amount: totalPrice * 100,
+      name: 'Naushad Hair Salon',
+      order_id: orderId,
+      prefill: {
+        email: 'customer@example.com',
+        contact: '9876543210',
+        name: 'Test User',
+      },
+      theme: { color: COLORS.primary },
+    };
 
-      // Book appointment directly
+    let paymentData;
+
+    try {
+      console.log('💳 handlePayment - Opening Razorpay checkout');
+      setProcessingPayment(true);
+      paymentData = await RazorpayCheckout.open(options);
+      console.log('💳 Payment Success Data:', paymentData);
+
+      // Verify payment with backend api
+      const verified = await verifyPayment(paymentData.razorpay_order_id, paymentData.razorpay_payment_id, paymentData.razorpay_signature);
+      if (!verified) {
+        console.log('❌ handlePayment - Payment verification failed');
+        showPopup('Verification Failed', 'Payment verification failed. Please contact support.');
+        setProcessingPayment(false);
+        return;
+      }
+
+      console.log('✅ handlePayment - Payment verified successfully');
+
+      // Clear stored payment services data
+      await clearPaymentData();
+
+      // Book appointment after successful payment
       const servicesArray = serviceList.map(service => service.serviceName);
 
       console.log('📅 Final Appointment Booking Data:');
@@ -481,19 +550,17 @@ const PaymentScreen = () => {
       const bookingResult = await bookAppointment(bookingDate, bookingTime24h, servicesArray);
 
       if (bookingResult.success) {
-        console.log('✅ handleBooking - Appointment booked successfully');
-        // Clear stored payment services data
-        await clearPaymentData();
+        console.log('✅ handlePayment - Appointment booked successfully');
         // Show success popup with image
         showSuccessPopup('Appointment booked successfully!');
       } else {
-        console.log('❌ handleBooking - Appointment booking failed');
+        console.log('❌ handlePayment - Appointment booking failed');
+        setProcessingPayment(false);
         showPopup('Booking Failed', `Appointment booking failed: ${bookingResult.error}`);
       }
     } catch (error) {
-      console.log('❌ Booking Error:', error);
-      showPopup('Booking Failed', 'Booking was not completed. Please try again.');
-    } finally {
+      console.log('❌ Payment Error or Cancelled:', error);
+      showPopup('Payment Failed', 'Payment was not completed. Please try again.');
       setProcessingPayment(false);
     }
   };
@@ -511,40 +578,41 @@ const PaymentScreen = () => {
   };
 
   // Format date for display (convert YYYY-MM-DD to readable format)
-  const formatDateForDisplay = (dateString) => {
-    console.log('🔄 formatDateForDisplay - Input:', dateString);
-    if (!dateString) {
-      console.log('❌ formatDateForDisplay - No date string');
-      return 'Not selected';
-    }
-    
-    // Extract only YYYY-MM-DD part if it includes time
-    let cleanDateString = dateString;
-    if (dateString.includes('T')) {
-      cleanDateString = dateString.split('T')[0];
-      console.log('🔄 formatDateForDisplay - Extracted YYYY-MM-DD:', cleanDateString);
-    }
-    
-    try {
-      const date = new Date(cleanDateString);
-      if (isNaN(date)) {
-        console.log('❌ formatDateForDisplay - Invalid date:', cleanDateString);
-        return cleanDateString;
-      }
-
-      const formatted = date.toLocaleDateString('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-      console.log('✅ formatDateForDisplay - Formatted for display:', formatted);
-      return formatted;
-    } catch (error) {
-      console.log('❌ formatDateForDisplay - Error:', error);
+  // Format date for display (convert YYYY-MM-DD to readable format)
+const formatDateForDisplay = (dateString) => {
+  console.log('🔄 formatDateForDisplay - Input:', dateString);
+  if (!dateString) {
+    console.log('❌ formatDateForDisplay - No date string');
+    return 'Not selected';
+  }
+  
+  // Extract only YYYY-MM-DD part if it includes time
+  let cleanDateString = dateString;
+  if (dateString.includes('T')) {
+    cleanDateString = dateString.split('T')[0];
+    console.log('🔄 formatDateForDisplay - Extracted YYYY-MM-DD:', cleanDateString);
+  }
+  
+  try {
+    const date = new Date(cleanDateString);
+    if (isNaN(date)) {
+      console.log('❌ formatDateForDisplay - Invalid date:', cleanDateString);
       return cleanDateString;
     }
-  };
+
+    const formatted = date.toLocaleDateString('en-IN', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+    console.log('✅ formatDateForDisplay - Formatted for display:', formatted);
+    return formatted;
+  } catch (error) {
+    console.log('❌ formatDateForDisplay - Error:', error);
+    return cleanDateString;
+  }
+};
 
   // Success Popup Component
   const SuccessPopup = () => (
@@ -580,196 +648,210 @@ const PaymentScreen = () => {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-      <Head title="Booking" />
+      <Head title="Payment" />
 
       <ScrollView
         contentContainerStyle={[styles.contentContainer, { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Services list */}
-        {serviceList.length > 0 ? (
-          <View style={styles.serviceCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginBottom: hp('2%') }]}>
-              Order Summary ({getTotalQuantity()} {getTotalQuantity() === 1 ? 'item' : 'items'})
-            </Text>
-            
-            {serviceList.map((srv, i) => (
-              <View key={i} style={styles.serviceBlock}>
-                <View style={styles.serviceHeader}>
-                  <Text style={[styles.serviceTitle, { color: theme.textPrimary }]}>
-                    {srv.serviceName || srv.name || 'Unnamed'}
-                  </Text>
-                  <Text style={[styles.serviceTag, { 
-                    backgroundColor: srv.type === 'product' ? '#E3F2FD' : 
-                                   srv.type === 'package' ? '#E8F5E8' : 
-                                   srv.type === 'cart' ? '#E8EAF6' : '#FFF3E0',
-                    color: srv.type === 'product' ? '#1976D2' : 
-                          srv.type === 'package' ? '#2E7D32' : 
-                          srv.type === 'cart' ? '#5C6BC0' : '#F57C00'
-                  }]}>
-                    {getServiceTypeLabel(srv.type)}
-                  </Text>
-                </View>
-
-                <View style={styles.quantityRow}>
-                  <Text style={[styles.quantityLabel, { color: theme.textSecondary }]}>
-                    Quantity:
-                  </Text>
-                  <View style={styles.quantityBadge}>
-                    <Text style={[styles.quantityValue, { color: '#fff' }]}>
-                      {srv.quantity || 1}
-                    </Text>
-                  </View>
-                  {srv.quantity > 1 && (
-                    <Text style={[styles.quantityNote, { color: theme.textSecondary }]}>
-                      ({srv.quantity} units)
-                    </Text>
-                  )}
-                </View>
-
-                {/* Date and Time Display */}
-                <View style={styles.datetimeRow}>
-                  <View style={styles.datetimeItem}>
-                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                      📅 Date:
-                    </Text>
-                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                      {formatDateForDisplay(srv.date)}
-                    </Text>
-                  </View>
-                  <View style={styles.datetimeItem}>
-                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                      🕒 Time:
-                    </Text>
-                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                      {srv.time || 'Not selected'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Display raw YYYY-MM-DD date for debugging */}
-                <View style={styles.debugRow}>
-                  <Text style={[styles.debugText, { color: theme.textSecondary }]}>
-                    📋 Backend Date (YYYY-MM-DD): {srv.date || 'Not set'}
-                  </Text>
-                </View>
-
-                <View style={styles.detailRow}>
-                  <Text style={[styles.detailText, { color: theme.textSecondary }]}>
-                    📱 From: {srv.source || 'Unknown'}
-                  </Text>
-                </View>
-
-                <View style={styles.footerRow}>
-                  <View style={styles.priceDetails}>
-                    <Text style={[styles.addOnText, { color: theme.textPrimary }]}>
-                      {srv.quantity > 1 ? `₹${srv.price} × ${srv.quantity}` : 'Price'}
-                    </Text>
-                    {srv.quantity > 1 && (
-                      <Text style={[styles.unitPrice, { color: theme.textSecondary }]}>
-                        Unit price: ₹{srv.price}
-                      </Text>
-                    )}
-                  </View>
-                  <View style={styles.priceContainer}>
-                    <Text style={[styles.price, { color: COLORS.primary }]}>
-                      ₹{getItemSubtotal(srv)}
-                    </Text>
-                    {srv.quantity > 1 && (
-                      <Text style={[styles.originalPrice, { color: theme.textSecondary }]}>
-                        (₹{srv.price} each)
-                      </Text>
-                    )}
-                  </View>
-                </View>
-
-                {i < serviceList.length - 1 && (
-                  <View style={styles.divider} />
-                )}
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-              No items found for booking
-            </Text>
-            <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
-              Please go back and select a product or service
+        {/* Show loading spinner if order id is loading */}
+        {loadingOrderId && (
+          <View style={{ paddingVertical: hp('5%') }}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ textAlign: 'center', marginTop: 10, color: theme.textSecondary }}>
+              Preparing payment...
             </Text>
           </View>
         )}
 
-        {serviceList.length > 0 && (
+        {/* Services list */}
+        {!loadingOrderId && (
           <>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginTop: hp('2%') }]}>
-              Select Payment Method
-            </Text>
-
-            <RadioItem
-              label="Credit / Debit Card"
-              selected={method === 'card'}
-              onPress={() => setMethod('card')}
-              primary={COLORS.primary}
-              theme={theme}
-            />
-            <RadioItem
-              label="UPI / Google Pay / Paytm"
-              selected={method === 'upi'}
-              onPress={() => setMethod('upi')}
-              primary={COLORS.primary}
-              theme={theme}
-            />
-            <RadioItem
-              label="Wallet / Salon Credits"
-              selected={method === 'wallet'}
-              onPress={() => setMethod('wallet')}
-              primary={COLORS.primary}
-              theme={theme}
-            />
-
-            <View style={styles.totalBreakdown}>
-              <View style={styles.breakdownRow}>
-                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
-                  Subtotal ({getTotalQuantity()} items):
+            {serviceList.length > 0 ? (
+              <View style={styles.serviceCard}>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginBottom: hp('2%') }]}>
+                  Order Summary ({getTotalQuantity()} {getTotalQuantity() === 1 ? 'item' : 'items'})
                 </Text>
-                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                  ₹{serviceList.reduce((acc, curr) => acc + getItemSubtotal(curr), 0).toLocaleString('en-IN')}
+                
+                {serviceList.map((srv, i) => (
+                  <View key={i} style={styles.serviceBlock}>
+                    <View style={styles.serviceHeader}>
+                      <Text style={[styles.serviceTitle, { color: theme.textPrimary }]}>
+                        {srv.serviceName || srv.name || 'Unnamed'}
+                      </Text>
+                      <Text style={[styles.serviceTag, { 
+                        backgroundColor: srv.type === 'product' ? '#E3F2FD' : 
+                                       srv.type === 'package' ? '#E8F5E8' : 
+                                       srv.type === 'cart' ? '#E8EAF6' : '#FFF3E0',
+                        color: srv.type === 'product' ? '#1976D2' : 
+                              srv.type === 'package' ? '#2E7D32' : 
+                              srv.type === 'cart' ? '#5C6BC0' : '#F57C00'
+                      }]}>
+                        {getServiceTypeLabel(srv.type)}
+                      </Text>
+                    </View>
+
+                    <View style={styles.quantityRow}>
+                      <Text style={[styles.quantityLabel, { color: theme.textSecondary }]}>
+                        Quantity:
+                      </Text>
+                      <View style={styles.quantityBadge}>
+                        <Text style={[styles.quantityValue, { color: '#fff' }]}>
+                          {srv.quantity || 1}
+                        </Text>
+                      </View>
+                      {srv.quantity > 1 && (
+                        <Text style={[styles.quantityNote, { color: theme.textSecondary }]}>
+                          ({srv.quantity} units)
+                        </Text>
+                      )}
+                    </View>
+
+                    {/* Date and Time Display */}
+                    <View style={styles.datetimeRow}>
+                      <View style={styles.datetimeItem}>
+                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                          📅 Date:
+                        </Text>
+                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                          {formatDateForDisplay(srv.date)}
+                        </Text>
+                      </View>
+                      <View style={styles.datetimeItem}>
+                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                          🕒 Time:
+                        </Text>
+                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                          {srv.time || 'Not selected'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Display raw YYYY-MM-DD date for debugging */}
+                    <View style={styles.debugRow}>
+                      <Text style={[styles.debugText, { color: theme.textSecondary }]}>
+                        📋 Backend Date (YYYY-MM-DD): {srv.date || 'Not set'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.detailRow}>
+                      <Text style={[styles.detailText, { color: theme.textSecondary }]}>
+                        📱 From: {srv.source || 'Unknown'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.footerRow}>
+                      <View style={styles.priceDetails}>
+                        <Text style={[styles.addOnText, { color: theme.textPrimary }]}>
+                          {srv.quantity > 1 ? `₹${srv.price} × ${srv.quantity}` : 'Price'}
+                        </Text>
+                        {srv.quantity > 1 && (
+                          <Text style={[styles.unitPrice, { color: theme.textSecondary }]}>
+                            Unit price: ₹{srv.price}
+                          </Text>
+                        )}
+                      </View>
+                      <View style={styles.priceContainer}>
+                        <Text style={[styles.price, { color: COLORS.primary }]}>
+                          ₹{getItemSubtotal(srv)}
+                        </Text>
+                        {srv.quantity > 1 && (
+                          <Text style={[styles.originalPrice, { color: theme.textSecondary }]}>
+                            (₹{srv.price} each)
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+
+                    {i < serviceList.length - 1 && (
+                      <View style={styles.divider} />
+                    )}
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                  No items found for payment
+                </Text>
+                <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
+                  Please go back and select a product or service
                 </Text>
               </View>
-              <View style={styles.breakdownRow}>
-                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
-                  GST (10%):
-                </Text>
-                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                  ₹{Math.round(totalPrice * 0.1).toLocaleString('en-IN')}
-                </Text>
-              </View>
-            </View>
+            )}
 
-            <View style={styles.totalRow}>
-              <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>Total Payable:</Text>
-              <Text style={[styles.totalValue, { color: theme.textPrimary }]}>
-                ₹ {totalPrice.toLocaleString('en-IN')}
-              </Text>
-            </View>
+            {serviceList.length > 0 && (
+              <>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginTop: hp('2%') }]}>
+                  Select Payment Method
+                </Text>
+
+                <RadioItem
+                  label="Credit / Debit Card"
+                  selected={method === 'card'}
+                  onPress={() => setMethod('card')}
+                  primary={COLORS.primary}
+                  theme={theme}
+                />
+                <RadioItem
+                  label="UPI / Google Pay / Paytm"
+                  selected={method === 'upi'}
+                  onPress={() => setMethod('upi')}
+                  primary={COLORS.primary}
+                  theme={theme}
+                />
+                <RadioItem
+                  label="Wallet / Salon Credits"
+                  selected={method === 'wallet'}
+                  onPress={() => setMethod('wallet')}
+                  primary={COLORS.primary}
+                  theme={theme}
+                />
+
+                <View style={styles.totalBreakdown}>
+                  <View style={styles.breakdownRow}>
+                    <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
+                      Subtotal ({getTotalQuantity()} items):
+                    </Text>
+                    <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
+                      ₹{serviceList.reduce((acc, curr) => acc + getItemSubtotal(curr), 0).toLocaleString('en-IN')}
+                    </Text>
+                  </View>
+                  <View style={styles.breakdownRow}>
+                    <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
+                      GST (10%):
+                    </Text>
+                    <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
+                      ₹{Math.round(totalPrice * 0.1).toLocaleString('en-IN')}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.totalRow}>
+                  <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>Total Payable:</Text>
+                  <Text style={[styles.totalValue, { color: theme.textPrimary }]}>
+                    ₹ {totalPrice.toLocaleString('en-IN')}
+                  </Text>
+                </View>
+              </>
+            )}
           </>
         )}
       </ScrollView>
 
-      {/* Footer Book Button */}
+      {/* Footer Pay Button */}
       {serviceList.length > 0 && (
         <View style={[styles.footer, { backgroundColor: theme.background }]}>
           <TouchableOpacity
             activeOpacity={0.9}
             style={[styles.payBtn, { backgroundColor: COLORS.primary }]}
-            onPress={handleBooking}
-            disabled={processingPayment}
+            onPress={handlePayment}
+            disabled={processingPayment || loadingOrderId}
           >
             {processingPayment ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.payText}>Book Appointment - ₹{totalPrice.toLocaleString('en-IN')}</Text>
+              <Text style={styles.payText}>Pay ₹{totalPrice.toLocaleString('en-IN')}</Text>
             )}
           </TouchableOpacity>
         </View>
