@@ -166,7 +166,7 @@ const CartScreen = () => {
 
     console.log('🛒 Checkout Items:', checkoutItems);
 
-    navigation.navigate("PaymentScreen", {
+    navigation.navigate("CartPaymentScreen", {
       services: checkoutItems,
       source: 'Cart'
     });

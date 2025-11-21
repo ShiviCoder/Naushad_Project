@@ -68,7 +68,7 @@ function ensure24HourTime(timeStr) {
   console.log('🔄 ensure24HourTime - Input:', timeStr);
   if (!timeStr) {
     console.log('❌ ensure24HourTime - No time string provided');
-    return '00:00';
+    return '';
   }
 
   // Replace dots with colons if needed
@@ -104,12 +104,12 @@ function ensure24HourTime(timeStr) {
       return result;
     } catch (error) {
       console.log('❌ ensure24HourTime - Error converting 12-hour format:', error);
-      return '00:00';
+      return '';
     }
   }
 
   console.log('❌ ensure24HourTime - Unrecognized time format:', timeStr);
-  return '00:00';
+  return '';
 }
 
 // Utility function to format time to 12-hour format for display
@@ -174,6 +174,14 @@ const PaymentScreen = () => {
   console.log('📥 PaymentScreen - Initial incomingDate (YYYY-MM-DD):', incomingDate);
   console.log('📥 PaymentScreen - Initial incomingTime (24-hour):', incomingTime);
 
+  // Check if date and time are available
+  const hasDateTime = useMemo(() => {
+    const hasDate = !!incomingDate && incomingDate.trim() !== '';
+    const hasTime = !!incomingTime && incomingTime.trim() !== '';
+    console.log('📅 hasDateTime check - Date:', hasDate, 'Time:', hasTime);
+    return hasDate && hasTime;
+  }, [incomingDate, incomingTime]);
+
   // Process incoming date and time from params
   useEffect(() => {
     console.log('🔄 useEffect - Processing incoming date and time from params');
@@ -209,6 +217,7 @@ const PaymentScreen = () => {
       console.log('🔄 processIncomingData - Starting data processing');
       console.log('📊 processIncomingData - Current incomingDate (YYYY-MM-DD):', incomingDate);
       console.log('📊 processIncomingData - Current incomingTime (24-hour):', incomingTime);
+      console.log('📊 processIncomingData - Has DateTime:', hasDateTime);
       
       let processedServices = [];
 
@@ -224,9 +233,9 @@ const PaymentScreen = () => {
           price: service.price,
           quantity: service.quantity || 1,
           image: service.image,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: service.source || 'Cart'
         }));
       }
@@ -238,9 +247,9 @@ const PaymentScreen = () => {
           name: params.serviceName,
           price: params.price,
           quantity: params.quantity || 1,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: 'ProductDetails'
         }];
       }
@@ -252,9 +261,9 @@ const PaymentScreen = () => {
           name: params.item.name || params.item.title,
           price: params.item.price,
           quantity: params.quantity || 1,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: 'ProductPackages'
         }];
       }
@@ -266,9 +275,9 @@ const PaymentScreen = () => {
           name: params.serviceName,
           price: params.price,
           quantity: params.quantity || 1,
-          date: ensureYYYYMMDD(incomingDate), // Ensure YYYY-MM-DD format
-          time: formatTo12Hour(incomingTime), // Convert to 12-hour for display
-          backendTime: ensure24HourTime(incomingTime), // Keep 24-hour for backend
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
           source: 'ServiceDetails'
         }];
       }
@@ -295,7 +304,7 @@ const PaymentScreen = () => {
     };
 
     processIncomingData();
-  }, [params, incomingDate, incomingTime]);
+  }, [params, incomingDate, incomingTime, hasDateTime]);
 
   // Calculate total price based on services and quantities
   const totalPrice = useMemo(() => {
@@ -358,76 +367,93 @@ const PaymentScreen = () => {
   };
 
   // Book appointment API call
-  const bookAppointment = async (date, time, services) => {
-    try {
-      // Get token from AsyncStorage
-      const token = await AsyncStorage.getItem('userToken');
-      const userData = await AsyncStorage.getItem('userData');
-      const userId = await AsyncStorage.getItem('userId');
-      
-      console.log('🔑 Token from storage:', token);
-      console.log('👤 User ID from storage:', userId);
-      console.log('📊 User Data from storage:', userData);
+ // Book appointment API call - UPDATED VERSION
+const bookAppointment = async (date, time, services) => {
+  try {
+    // Get token from AsyncStorage
+    const token = await AsyncStorage.getItem('userToken');
+    const userData = await AsyncStorage.getItem('userData');
+    const userId = await AsyncStorage.getItem('userId');
+    
+    console.log('🔑 Token from storage:', token);
+    console.log('👤 User ID from storage:', userId);
 
-      if (!token) {
-        console.log('❌ No token found');
-        return { success: false, error: 'Authentication required. Please login again.' };
-      }
-
-      console.log('📅 Booking appointment with:');
-      console.log('   Date (YYYY-MM-DD):', date);
-      console.log('   Time (24-hour):', time);
-      console.log('   Services:', services);
-      
-      const requestBody = {
-        date: date, // Already in YYYY-MM-DD format
-        time: time, // Already in 24-hour format
-        services: services,
-        totalAmount: totalPrice
-      };
-
-      console.log('📤 Sending to backend:', requestBody);
-      console.log('🔐 Using token:', token);
-      
-      const response = await fetch('https://naushad.onrender.com/api/appointments', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestBody),
-      });
-      
-      const responseText = await response.text();
-      console.log('📥 Raw API Response:', responseText);
-      
-      let json;
-      try {
-        json = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('❌ JSON Parse Error:', parseError);
-        return { success: false, error: 'Invalid response from server' };
-      }
-      
-      console.log('📅 Appointment booking response:', json);
-      console.log('📊 Response status:', response.status);
-      
-      if (response.ok && json.success) {
-        console.log('✅ Appointment booked successfully!');
-        console.log('📋 Appointment data:', json.data);
-        return { success: true, data: json };
-      } else {
-        console.log('❌ Appointment booking failed:', json.message || 'Unknown error');
-        return { 
-          success: false, 
-          error: json.message || `Server error: ${response.status}` 
-        };
-      }
-    } catch (error) {
-      console.error('❌ Appointment booking error:', error);
-      return { success: false, error: error.message };
+    if (!token) {
+      console.log('❌ No token found');
+      return { success: false, error: 'Authentication required. Please login again.' };
     }
-  };
+
+    console.log('📅 Booking appointment with:');
+    console.log('   Date (YYYY-MM-DD):', date);
+    console.log('   Time (24-hour):', time);
+    console.log('   Services:', services);
+    
+    // Enhanced request body with proper structure
+    const requestBody = {
+      date: date,
+      time: time,
+      services: services,
+      totalAmount: totalPrice,
+      // Add these common required fields
+      serviceType: 'appointment',
+      status: 'pending',
+      paymentStatus: 'pending'
+    };
+
+    console.log('📤 Sending to backend:', JSON.stringify(requestBody, null, 2));
+    console.log('🔐 Using token:', token ? 'Present' : 'Missing');
+    
+    const response = await fetch('https://naushad.onrender.com/api/appointments', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const responseText = await response.text();
+    console.log('📥 Raw API Response:', responseText);
+    console.log('📊 Response Status:', response.status);
+    console.log('📊 Response OK:', response.ok);
+    
+    let json;
+    try {
+      json = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('❌ JSON Parse Error:', parseError);
+      console.error('❌ Response that failed to parse:', responseText);
+      return { 
+        success: false, 
+        error: `Server returned invalid JSON: ${response.status}`,
+        status: response.status
+      };
+    }
+    
+    console.log('📅 Appointment booking response:', json);
+    
+    if (response.ok && json.success) {
+      console.log('✅ Appointment booked successfully!');
+      console.log('📋 Appointment data:', json.data);
+      return { success: true, data: json };
+    } else {
+      console.log('❌ Appointment booking failed:', json.message || 'Unknown error');
+      console.log('❌ Full error response:', json);
+      return { 
+        success: false, 
+        error: json.message || `Server error: ${response.status}`,
+        status: response.status,
+        details: json
+      };
+    }
+  } catch (error) {
+    console.error('❌ Appointment booking network error:', error);
+    return { 
+      success: false, 
+      error: `Network error: ${error.message}` 
+    };
+  }
+};
 
   // Handle booking process
   const handleBooking = async () => {
@@ -454,6 +480,7 @@ const PaymentScreen = () => {
     console.log('   Time (24-hour):', bookingTime);
     console.log('   Services:', serviceList);
 
+    // Check if date and time are required but missing
     if (!bookingDate || !bookingTime) {
       console.log('❌ handleBooking - Missing date or time');
       showPopup('Missing Information', 'Please ensure date and time are selected for booking.');
@@ -579,7 +606,7 @@ const PaymentScreen = () => {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-      <Head title="Booking" />
+      <Head title="Payment" />
 
       <ScrollView
         contentContainerStyle={[styles.contentContainer, { backgroundColor: theme.background }]}
@@ -626,32 +653,33 @@ const PaymentScreen = () => {
                   )}
                 </View>
 
-                {/* Date and Time Display */}
-                <View style={styles.datetimeRow}>
-                  <View style={styles.datetimeItem}>
-                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                      📅 Date:
-                    </Text>
-                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                      {formatDateForDisplay(srv.date)}
-                    </Text>
-                  </View>
-                  <View style={styles.datetimeItem}>
-                    <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
-                      🕒 Time:
-                    </Text>
-                    <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
-                      {srv.time || 'Not selected'}
-                    </Text>
-                  </View>
-                </View>
+                  <>
+                    <View style={styles.datetimeRow}>
+                      <View style={styles.datetimeItem}>
+                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                          📅 Date:
+                        </Text>
+                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                          {formatDateForDisplay(srv.date)}
+                        </Text>
+                      </View>
+                      <View style={styles.datetimeItem}>
+                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                          🕒 Time:
+                        </Text>
+                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                          {srv.time || 'Not selected'}
+                        </Text>
+                      </View>
+                    </View>
 
-                {/* Display raw formats for debugging */}
-                <View style={styles.debugRow}>
-                  <Text style={[styles.debugText, { color: theme.textSecondary }]}>
-                    📋 Backend Date: {srv.date || 'Not set'} | Backend Time: {srv.backendTime || 'Not set'}
-                  </Text>
-                </View>
+                    {/* Display raw formats for debugging - Only show if date/time available */}
+                    <View style={styles.debugRow}>
+                      <Text style={[styles.debugText, { color: theme.textSecondary }]}>
+                        📋 Backend Date: {srv.date || 'Not set'} | Backend Time: {srv.backendTime || 'Not set'}
+                      </Text>
+                    </View>
+                  </>
 
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailText, { color: theme.textSecondary }]}>
@@ -768,7 +796,9 @@ const PaymentScreen = () => {
             {processingPayment ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.payText}>Book Appointment - ₹{totalPrice.toLocaleString('en-IN')}</Text>
+              <Text style={styles.payText}>
+                {hasDateTime ? 'Confirm Order' : 'Confirm Order'} - ₹{totalPrice.toLocaleString('en-IN')}
+              </Text>
             )}
           </TouchableOpacity>
         </View>

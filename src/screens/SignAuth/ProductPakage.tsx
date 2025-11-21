@@ -254,7 +254,7 @@ const ProductPackages = ({ navigation }) => {
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate('PaymentScreen', {
+            navigation.navigate('CartPaymentScreen', {
               serviceName: item.name || 'Product',
               price: item.price || 0,
                quantity: quantity // ← Pass the quantity

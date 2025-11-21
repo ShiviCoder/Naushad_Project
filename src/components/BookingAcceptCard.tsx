@@ -12,7 +12,6 @@ const BookingAcceptCards = ({ item }) => {
   const [isChecked, setIsChecked] = useState(true);
   const navigation = useNavigation();
   const { theme } = useTheme();
-
   const cardBackground = theme.background === '#121212' ? '#fff' : '#000';
   const textColor = theme.background === '#121212' ? '#000' : '#fff';
   const inactiveColor = textColor;
@@ -20,18 +19,63 @@ const BookingAcceptCards = ({ item }) => {
 
   // Format services array
   const formatServices = (services) => {
+    console.log('🔄 formatServices - Input:', services);
+    
     if (!services || services.length === 0) return 'No services';
     
     try {
       // Handle both stringified arrays and regular arrays
-      const serviceArray = typeof services[0] === 'string' && services[0].startsWith('[') 
-        ? JSON.parse(services[0])
-        : services;
+      let serviceArray = services;
       
-      return Array.isArray(serviceArray) ? serviceArray.join(', ') : String(serviceArray);
+      // If it's a string that looks like JSON, parse it
+      if (typeof services === 'string' && services.startsWith('[')) {
+        serviceArray = JSON.parse(services);
+        console.log('✅ formatServices - Parsed JSON string:', serviceArray);
+      }
+      
+      // If it's already an array
+      if (Array.isArray(serviceArray)) {
+        console.log('✅ formatServices - Already an array:', serviceArray);
+        return serviceArray.join(', ');
+      }
+      
+      // If it's a single service object with serviceName
+      if (typeof serviceArray === 'object' && serviceArray.serviceName) {
+        console.log('✅ formatServices - Single service object:', serviceArray.serviceName);
+        return serviceArray.serviceName;
+      }
+      
+      // Default case - handle single string
+      console.log('✅ formatServices - Default case:', String(serviceArray));
+      return String(serviceArray);
     } catch (error) {
-      return services.join(', ');
+      console.log('❌ formatServices - Error:', error);
+      return String(services);
     }
+  };
+
+  // Get services for navigation
+  const getServices = () => {
+    console.log('📋 BookingAcceptCards - Item:', item);
+    
+    // Try different possible properties where services might be stored
+    if (item.service) {
+      return formatServices(item.service);
+    } else if (item.services) {
+      return formatServices(item.services);
+    } else if (item.serviceName) {
+      return formatServices([item.serviceName]);
+    } else if (item.serviceList) {
+      return formatServices(item.serviceList);
+    } else if (item.bookedServices) {
+      // If bookedServices is an array of objects with serviceName
+      if (Array.isArray(item.bookedServices) && item.bookedServices[0]?.serviceName) {
+        return formatServices(item.bookedServices.map(service => service.serviceName));
+      }
+      return formatServices(item.bookedServices);
+    }
+    
+    return 'No services';
   };
 
   // Format date
@@ -60,17 +104,42 @@ const BookingAcceptCards = ({ item }) => {
     }
   };
 
+  // Get price from item
+  const getPrice = () => {
+    return item.totalAmount || 
+           item.price || 
+           item.amount || 
+           item.totalPrice || 
+           item.servicePrice || 
+           '500';
+  };
+
+  // Handle navigation to booking accepted screen
+  const handlePress = () => {
+    console.log('📍 Navigation - Passing booking data to BookingAccepted:', item);
+    
+    navigation.navigate('BookingAccepted', { 
+      booking: item,
+      serviceName: getServices(),
+      date: item.date,
+      time: item.time,
+      price: getPrice(),
+      appointmentCode: item.appointmentCode,
+      status: item.status || 'accepted'
+    });
+  };
+
   return (
     <TouchableOpacity
       style={[styles.container, { backgroundColor: cardBackground }]}
-      onPress={() => navigation.navigate('BookingAccepted', { booking: item })}
+      onPress={handlePress}
     >
       {/* Service + Checkbox */}
       <View style={styles.acceptContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
           <Image source={require('../assets/hairCut.png')} style={styles.icon} />
           <Text style={[styles.text, { color: textColor }]}>
-            {formatServices(item.services)}
+            {getServices()}
           </Text>
         </View>
 
@@ -105,7 +174,7 @@ const BookingAcceptCards = ({ item }) => {
       <View style={styles.content}>
         <Image source={require('../assets/moneyBag2.png')} style={styles.icon} />
         <Text style={[styles.text, { color: textColor }]}>
-          Code: {item.appointmentCode}
+          Code: {item.appointmentCode || 'N/A'}
         </Text>
       </View>
     </TouchableOpacity>

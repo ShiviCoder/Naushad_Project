@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, FlatList, Alert } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, FlatList, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import Head from '../../components/Head';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -9,61 +9,12 @@ import COLORS from '../../utils/Colors';
 import { useCart } from '../../context/CartContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type extra = {
-  product: string;
-  price: number;
-};
-
-type Service = {
-  name: string;
-  price: number;
-  desc: string;
-  image: any;
-  highlights: string[];
-  extras: extra[];
-};
-
 type RootStackParamList = {
   Home: undefined;
   ServicesScreen: undefined;
-  ServiceDetails: { item: Service };
+  ServiceDetails: { item: any };
+  BookAppointmentScreen: { serviceName: string; title: string; price: number; quantity: number };
 };
-
-const services = [
-  {
-    id: '1',
-    name: 'Facial',
-    price: '600.00',
-    desc: 'Glow facial therapy',
-    image: [require('../../assets/images/facial.jpg'),
-    require('../../assets/images/man-service3.jpg'),
-    ],
-    highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  },
-  {
-    id: '2',
-    name: 'Hair Coloring',
-    price: '400.00',
-    desc: 'Long-lasting shades',
-    image: [require('../../assets/images/haircolor1.png'),
-    require('../../assets/images/man-service5.jpg')
-    ],
-    highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  },
-  {
-    id: '3',
-    name: 'Hair Cut',
-    price: '350.00',
-    desc: 'Stylish cut with blow dry',
-    image: [require('../../assets/images/haircut1.png'),
-    require('../../assets/images/man-service4.jpg')
-    ],
-    highlights: ['Wash & trim included', 'Modern Styling', '1 hr Duration'],
-    extras: [{ product: 'beard cut', price: 500 }, { product: 'beard cut', price: 900 }],
-  }
-];
 
 const ServiceDetails = () => {
   const { theme } = useTheme();
@@ -72,225 +23,279 @@ const ServiceDetails = () => {
   const { item } = route.params;
   const { addToCart } = useCart();
 
-  // multiple selection ke liye array state
+  // State for extra services from API
+  const [extraServices, setExtraServices] = useState<any[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  // toggle logic
-  const toggleService = (id: string) => {
-    if (selectedServices.includes(id)) {
-      setSelectedServices(selectedServices.filter((item) => item !== id));
-    } else {
-      setSelectedServices([...selectedServices, id]);
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    return token;
+  };
+
+  // Fetch extra services from API
+  const fetchExtraServices = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      const res = await fetch('https://naushad.onrender.com/api/ourservice', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      // Filter out the current service to show only other services as extras
+      const otherServices = data.data.filter((service: any) => service._id !== item._id);
+      setExtraServices(otherServices.slice(0, 5)); // Limit to 5 extra services
+    } catch (err) {
+      console.log('Fetch extra services error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggleSelectService = (service: Service) => {
-    if (selectedServices.includes(service.id)) {
-      // remove from selection
-      setSelectedServices(prev => prev.filter(id => id !== service.id));
+  useEffect(() => {
+    fetchExtraServices();
+  }, [item]);
+
+  // Toggle service selection
+  const toggleSelectService = (service: any) => {
+    if (selectedServices.includes(service._id)) {
+      setSelectedServices(prev => prev.filter(id => id !== service._id));
     } else {
-      // add to selection
-      setSelectedServices(prev => [...prev, service.id]);
+      setSelectedServices(prev => [...prev, service._id]);
     }
   };
+
+  // Parse highlights if they are stored as stringified array
+  const parseHighlights = (highlights: any) => {
+    if (!highlights || !Array.isArray(highlights)) return [];
+
+    if (highlights.length > 0 && typeof highlights[0] === 'string' && highlights[0].startsWith('[')) {
+      try {
+        return JSON.parse(highlights[0]);
+      } catch (error) {
+        console.log('Error parsing highlights:', error);
+        return highlights;
+      }
+    }
+    return highlights;
+  };
+
+  const handleBookAppointment = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        Alert.alert('Error', 'Please log in first.');
+        return;
+      }
+
+      const mainPrice = item.price * quantity;
+      let extraTotal = 0;
+
+      // Add selected extra services to cart and calculate total
+      for (const serviceId of selectedServices) {
+        const service = extraServices.find(s => s._id === serviceId);
+        if (service) {
+          extraTotal += service.price;
+
+          // Add to cart via API
+          const response = await fetch('https://naushad.onrender.com/api/cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId,
+              productId: service._id,
+              name: service.serviceName,
+              price: service.price,
+              qty: 1,
+              image: service.imageUrl || '',
+            }),
+          });
+
+          const res = await response.json();
+          if (!response.ok || !res.success) {
+            console.log('Add to cart failed:', res);
+          }
+        }
+      }
+
+      const totalPrice = mainPrice + extraTotal;
+
+      navigation.navigate('BookAppointmentScreen', {
+        serviceName: item.serviceName,
+        title: item.title,
+        price: totalPrice,
+        quantity: quantity,
+        from: 'PackageDetails'
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  const highlights = parseHighlights(item.highlights);
 
   return (
-    <SafeAreaView>
-      <ScrollView
-        style={[
-          styles.container,
-          { backgroundColor: theme.background, height: '100%' },
-        ]}
+    <SafeAreaView style={{ flex: 1 }}>
+      <Head title="Our Services" />
 
-      >
-        <Head title="Our Services" />
+      {loading ? (
+        <View style={[styles.fullScreenLoading, { backgroundColor: theme.background }]}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
 
-        <View style={{ gap: hp('2%') }}>
-          {/* Main Image */}
-          <Image
-            style={styles.image}
-            source={
-              Array.isArray(item.image)
-                ? item.image[0] // if image is an array (from local services array)
-                : typeof item.image === 'number'
-                  ? item.image // local require()
-                  : item.image
-                    ? { uri: item.image } // remote URL from API
-                    : item.imageUrl
-                      ? { uri: item.imageUrl } // alternate field
-                      : require('../../assets/images/refer.png') // fallback
-            }
-          />
-
-          {/* Name and Price */}
-          <View style={styles.nameCont}>
-            <Text style={[styles.name, { color: theme.textPrimary }]}>
-              {item.serviceName || item.name}
-            </Text>
-            <Text style={[styles.price, { color: theme.textPrimary }]}>
-              ₹{item.price}
-            </Text>
-          </View>
-
-          {/* Description */}
-          <Text style={[styles.desc, { color: theme.subtext }]}>
-            "{item.title || item.description}"
-          </Text>
-
-          {/* Highlights */}
-          {item.highlights && <View style={styles.highlightCont}>
-            <Text style={[styles.hightlightHead, { color: theme.textPrimary }]}>
-              Highlights
-            </Text>
-
-            {Array.isArray(item.highlights) && item.highlights.map((point, index) => (
-              <View key={index} style={styles.highInCon}>
-                <View style={[styles.circle, { backgroundColor: COLORS.primary }]} />
-                <Text style={styles.highlightTxt}>{point}</Text>
-              </View>
-            ))}
-          </View>
-          }
-          {/* Extra Services Section */}
-          <View style={styles.extra}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={[styles.extraHead, { color: theme.textPrimary }]}>
-                Extra
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Services')}>
-                <Text style={[styles.extraHead, { color: theme.textPrimary, fontSize: wp('4%') }]}>See all</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={services}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={item => item.id}
-              contentContainerStyle={{ paddingHorizontal: wp('1%') }}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    addToCart({
-                      id: item.id.toString(),
-                      name: item.name,
-                      price: parseFloat(item.price),
-                      qty: 1, // default quantity
-                    });
-                    navigation.navigate('ServiceDetails', {
-                      item: {
-                        ...item,
-                        image: item.image
-                      }
-                    })
-                  }
-                  }
-                  style={styles.serviceCard}
-                  activeOpacity={0.8}
-                >
-                  <Image source={
-                    item.image[1]
-                  } style={styles.serviceImage} />
-                  <View style={styles.nameItem}>
-                    <Text style={styles.serviceName}>{item.name}</Text>
-                    <Text style={styles.servicePrice}>₹{item.price}</Text>
-                  </View>
-                  <Text style={styles.serviceDesc}>{item.desc}</Text>
-                  <View style={{ flex: 1 }} />
-                  <TouchableOpacity
-                    style={[
-                      styles.bookBtn,
-                      {
-                        backgroundColor:
-                          // selected color
-                          COLORS.primary, // default
-                      },
-                    ]}
-                    onPress={() => toggleSelectService(item)}
-                  >
-                    <Text style={styles.bookBtnText}>
-                      {selectedServices.includes(item.id) ? 'Selected' : 'Select'}
-                    </Text>
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              )}
+        </View>
+      ) : (
+        <ScrollView
+          style={[
+            styles.container,
+            { backgroundColor: theme.background },
+          ]}
+        >
+          <View style={{ gap: hp('2%') }}>
+            {/* Main Image */}
+            <Image
+              style={styles.image}
+              source={{ uri: item.imageUrl }}
             />
 
-            {/* Book Appointment Button */}
-            <TouchableOpacity
-              style={[styles.BookAppointBtn, { backgroundColor: COLORS.primary }]}
-              onPress={async () => {
-                const userId = await AsyncStorage.getItem('userId');
-                try {
-                  const userId = await AsyncStorage.getItem('userId');
-                  if (!userId) {
-                    Alert.alert('Error', 'Please log in first.');
-                    return;
-                  }
-
-                  const mainPrice = parseFloat(item.price);
-                  let extraTotal = 0;
-
-                  // Loop through selected services
-                  for (const serviceId of selectedServices) {
-                    const service = services.find(s => s.id === serviceId);
-                    if (service) {
-                      extraTotal += parseFloat(service.price);
-
-                      // ✅ Call backend API to add each service to the cart
-                      const response = await fetch('https://naushad.onrender.com/api/cart', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                          userId,
-                          productId: service.id,
-                          name: service.name,
-                          price: parseFloat(service.price),
-                          qty: 1,
-                          image: service.image || '', // optional
-                        }),
-                      });
-
-                      const res = await response.json();
-                      if (!response.ok || !res.success) {
-                        console.log('Add to cart failed:', res);
-                      }
-                    }
-                  }
-
-                  const totalPrice = mainPrice + extraTotal;
-
-                  // ✅ Navigate to payment page
-                  navigation.navigate('BookAppointmentScreen', {
-                    serviceName: item.serviceName || item.title || item.name,
-                    title: item.title || item.serviceName || item.name,
-                    price: totalPrice, quantity: quantity // ← Pass the quantity
-                  });
-
-                  Alert.alert('Success', 'Services added to cart!');
-                } catch (error) {
-                  console.error('Error adding to cart:', error);
-                  Alert.alert('Error', 'Failed to add services to cart');
-                }
-              }}
-            >
-              <Text style={[styles.BookAppointBtnTxt, { color: '#fff' }]}>
-                Book Appointment
+            {/* Name and Price */}
+            <View style={styles.nameCont}>
+              <Text style={[styles.name, { color: theme.textPrimary }]}>
+                {item.serviceName}
               </Text>
-            </TouchableOpacity>
+              <Text style={[styles.price, { color: theme.textPrimary }]}>
+                ₹{item.price}
+              </Text>
+            </View>
 
+            {/* Description */}
+            <Text style={[styles.desc, { color: theme.subtext }]}>
+              "{item.title}"
+            </Text>
+
+            {/* Highlights */}
+            {highlights && highlights.length > 0 && (
+              <View style={styles.highlightCont}>
+                <Text style={[styles.hightlightHead, { color: theme.textPrimary }]}>
+                  Highlights
+                </Text>
+
+                {highlights.map((point: string, index: number) => (
+                  <View key={index} style={styles.highInCon}>
+                    <View style={[styles.circle, { backgroundColor: COLORS.primary }]} />
+                    <Text style={styles.highlightTxt}>{point}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Quantity Selector */}
+            {/* <View style={styles.quantityContainer}>
+              <Text style={[styles.quantityLabel, { color: theme.textPrimary }]}>
+                Quantity:
+              </Text>
+              <View style={styles.quantityControls}>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => setQuantity(prev => Math.max(1, prev - 1))}
+                >
+                  <Text style={styles.quantityButtonText}>-</Text>
+                </TouchableOpacity>
+                <Text style={[styles.quantityText, { color: theme.textPrimary }]}>
+                  {quantity}
+                </Text>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => setQuantity(prev => prev + 1)}
+                >
+                  <Text style={styles.quantityButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View> */}
+
+            {/* Extra Services Section */}
+            <View style={styles.extra}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={[styles.extraHead, { color: theme.textPrimary }]}>
+                  Extra Services
+                </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('ServicesScreen')}>
+                  <Text style={[styles.extraHead, { color: theme.textPrimary, fontSize: wp('4%') }]}>See all</Text>
+                </TouchableOpacity>
+              </View>
+
+              <FlatList
+                data={extraServices}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={item => item._id}
+                contentContainerStyle={{ paddingHorizontal: wp('1%') }}
+                renderItem={({ item: service }) => (
+                  <TouchableOpacity
+                    style={styles.serviceCard}
+                    activeOpacity={0.8}
+                  >
+                    <Image
+                      source={{ uri: service.imageUrl }}
+                      style={styles.serviceImage}
+                    />
+                    <View style={styles.nameItem}>
+                      <Text style={styles.serviceName}>{service.serviceName}</Text>
+                      <Text style={styles.servicePrice}>₹{service.price}</Text>
+                    </View>
+                    <Text style={styles.serviceDesc}>{service.title}</Text>
+                    <View style={{ flex: 1 }} />
+                    <TouchableOpacity
+                      style={[
+                        styles.bookBtn,
+                        {
+                          backgroundColor: selectedServices.includes(service._id)
+                            ? COLORS.secondary
+                            : COLORS.primary,
+                        },
+                      ]}
+                      onPress={() => toggleSelectService(service)}
+                    >
+                      <Text style={styles.bookBtnText}>
+                        {selectedServices.includes(service._id) ? 'Selected' : 'Select'}
+                      </Text>
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                )}
+              />
+
+              {/* Book Appointment Button */}
+              <TouchableOpacity
+                style={[styles.BookAppointBtn, { backgroundColor: COLORS.primary }]}
+                onPress={handleBookAppointment}
+              >
+                <Text style={[styles.BookAppointBtnTxt, { color: '#fff' }]}>
+                  Book Appointment - ₹{item.price * quantity}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
+
 export default ServiceDetails;
 
 const styles = StyleSheet.create({
   container: {
     gap: hp('4%'),
+    flex: 1,
+  },
+  fullScreenLoading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
     width: '90%',
@@ -375,12 +380,41 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Poppins-Medium',
   },
-  serviceItem: {
+  quantityContainer: {
+    width: '90%',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: hp('2%'),
+  },
+  quantityLabel: {
+    fontSize: hp('2%'),
+    fontWeight: '600',
+    fontFamily: 'Poppins-Medium',
+  },
+  quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: hp('1.2%'),
-    borderRadius: wp('2%'),
-    marginBottom: hp('1.5%'),
+    gap: wp('4%'),
+  },
+  quantityButton: {
+    width: wp('8%'),
+    height: wp('8%'),
+    borderRadius: wp('4%'),
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityButtonText: {
+    color: '#fff',
+    fontSize: wp('4%'),
+    fontWeight: 'bold',
+  },
+  quantityText: {
+    fontSize: hp('2%'),
+    fontWeight: '600',
+    fontFamily: 'Poppins-Medium',
   },
   serviceCard: {
     width: wp('38%'),
@@ -411,19 +445,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
+    width: '100%',
   },
   serviceName: {
     fontSize: wp('3.5%'),
     fontWeight: 'bold',
     color: '#060505ff',
-    flex: 1
-    , fontFamily: "Poppins-Medium"
+    flex: 1,
+    fontFamily: "Poppins-Medium"
   },
   servicePrice: {
     fontSize: wp('3%'),
     fontWeight: '500',
-    color: '#0a0909ff'
-    , fontFamily: "Poppins-Medium"
+    color: '#0a0909ff',
+    fontFamily: "Poppins-Medium"
   },
   serviceDesc: {
     color: '#1111118A',
@@ -447,5 +482,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: wp('3%'),
     fontFamily: "Poppins-Medium"
+  },
+  loadingText: {
+    fontSize: wp('4%'),
+    marginTop: hp('2%'),
+    fontFamily: 'Poppins-Medium',
   },
 });

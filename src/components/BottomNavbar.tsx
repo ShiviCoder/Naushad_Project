@@ -121,21 +121,32 @@ const BottomNavbar = ({ navigation, state }) => {
   const circleScale = useRef(new Animated.Value(1)).current;
   const [selectedTab, setSelectedTab] = useState(state?.index !== undefined ? state.routeNames[state.index] : 'HomeScreen');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useExitAppBackHandler(selectedTab);
 
+  // 🔥 FIX: Initialize circle position on component mount
+  useEffect(() => {
+    const initialTab = state?.index !== undefined ? state.routeNames[state.index] : 'HomeScreen';
+    const index = tabs.indexOf(initialTab);
+    if (index !== -1) {
+      const initialX = getTabPosition(index);
+      circleTranslateX.setValue(initialX);
+      setIsInitialized(true);
+    }
+  }, []); // Empty dependency array - run only once on mount
+
   // Sync with navigation state
   useEffect(() => {
-    if (state?.index !== undefined) {
+    if (state?.index !== undefined && isInitialized) {
       const currentTab = state.routeNames[state.index];
       setSelectedTab(currentTab);
       const index = tabs.indexOf(currentTab);
       if (index !== -1) {
-        const initialX = getTabPosition(index);
-        circleTranslateX.setValue(initialX);
+        animateToTab(currentTab);
       }
     }
-  }, [state]);
+  }, [state, isInitialized]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -154,7 +165,8 @@ const BottomNavbar = ({ navigation, state }) => {
   const getTabPosition = index => {
     const tabWidth = screenWidth / tabs.length;
     const circleWidth = 64;
-    return index * tabWidth + tabWidth / 2 - circleWidth / 2;
+    // 🔥 FIX: Calculate center position correctly
+    return index * tabWidth + (tabWidth - circleWidth) / 2;
   };
 
   const animateToTab = tabName => {

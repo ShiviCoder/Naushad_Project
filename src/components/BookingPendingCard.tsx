@@ -95,10 +95,24 @@ const BookingPendingCard = ({ item }) => {
     return 'No services';
   };
 
+  // Handle navigation to booking details
+  const handlePress = () => {
+    console.log('📍 Navigation - Passing booking data:', item);
+    navigation.navigate('BookingPending', { 
+      booking: item,
+      serviceName: getServices(),
+      date: item.date,
+      time: item.time,
+      price: item.totalAmount || item.price,
+      appointmentCode: item.appointmentCode,
+      status: item.status || 'pending'
+    });
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => navigation.navigate('BookingPending', { booking: item })}
+      onPress={handlePress}
     >
       {/* Service + Pending Status */}
       <View style={styles.pendingContainer}>
