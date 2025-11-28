@@ -287,6 +287,7 @@ export default function ServicesScreen() {
             <ActivityIndicator size="large" color={COLORS.primary} />
           </View>
         )}
+<<<<<<< HEAD
 
         {/* 🔹 Services Loading Indicator */}
         {categoryLoading && (
@@ -294,6 +295,8 @@ export default function ServicesScreen() {
             <ActivityIndicator size="large" color={COLORS.primary} />
           </View>
         )}
+=======
+>>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
 
         {/* 🔹 Services */}
         {!categoryLoading && filteredServices.length > 0 ? (

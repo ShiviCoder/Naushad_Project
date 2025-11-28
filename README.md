@@ -95,9 +95,9 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
- helooooo
- updates done by harshal sir
- all api done
- otp api integrate
- "20-11-25 Latest Code Push" -> back navigation fix
- 
+  helooooo
+  updates done by harshal sir
+  all api done
+  otp api integrate
+  "20-11-25 Latest Code Push" -> back navigation fix
+  LATEST

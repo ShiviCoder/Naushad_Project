@@ -12,7 +12,10 @@ import {
   Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
@@ -38,8 +41,11 @@ function ensureYYYYMMDD(dateStr) {
   // If it's an ISO string with time (like "2025-11-26T00:00:00.000Z"), extract only the date part
   if (dateStr.includes('T')) {
     const datePart = dateStr.split('T')[0];
-    console.log('✅ ensureYYYYMMDD - Extracted date from ISO string:', datePart);
-    
+    console.log(
+      '✅ ensureYYYYMMDD - Extracted date from ISO string:',
+      datePart,
+    );
+
     // Validate the extracted date
     if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
       return datePart;
@@ -52,7 +58,10 @@ function ensureYYYYMMDD(dateStr) {
     const month = String(dateStr.getMonth() + 1).padStart(2, '0');
     const day = String(dateStr.getDate()).padStart(2, '0');
     const formatted = `${year}-${month}-${day}`;
-    console.log('✅ ensureYYYYMMDD - Formatted Date object to YYYY-MM-DD:', formatted);
+    console.log(
+      '✅ ensureYYYYMMDD - Formatted Date object to YYYY-MM-DD:',
+      formatted,
+    );
     return formatted;
   }
 
@@ -67,7 +76,10 @@ function ensureYYYYMMDD(dateStr) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const formatted = `${year}-${month}-${day}`;
-    console.log('✅ ensureYYYYMMDD - Parsed and formatted to YYYY-MM-DD:', formatted);
+    console.log(
+      '✅ ensureYYYYMMDD - Parsed and formatted to YYYY-MM-DD:',
+      formatted,
+    );
     return formatted;
   } catch (error) {
     console.log('❌ ensureYYYYMMDD - Error:', error);
@@ -85,14 +97,16 @@ function ensure24HourTime(timeStr) {
 
   // Replace dots with colons if needed
   let cleanTime = timeStr.replace(/\./g, ':');
-  
   // If already in proper 24-hour format (HH:MM), return as is
   if (/^\d{1,2}:\d{2}$/.test(cleanTime)) {
     const [hours, minutes] = cleanTime.split(':');
     const formattedHours = hours.padStart(2, '0');
     const formattedMinutes = minutes.padStart(2, '0');
     const result = `${formattedHours}:${formattedMinutes}`;
-    console.log('✅ ensure24HourTime - Already in 24-hour format, normalized:', result);
+    console.log(
+      '✅ ensure24HourTime - Already in 24-hour format, normalized:',
+      result,
+    );
     return result;
   }
 
@@ -101,21 +115,27 @@ function ensure24HourTime(timeStr) {
     try {
       const [time, modifier] = cleanTime.split(' ');
       let [hours, minutes] = time.split(':');
-      
+
       hours = parseInt(hours, 10);
-      
+
       if (modifier === 'PM' && hours < 12) {
         hours += 12;
       }
       if (modifier === 'AM' && hours === 12) {
         hours = 0;
       }
-      
+
       const result = `${hours.toString().padStart(2, '0')}:${minutes || '00'}`;
-      console.log('✅ ensure24HourTime - Converted from 12-hour to 24-hour:', result);
+      console.log(
+        '✅ ensure24HourTime - Converted from 12-hour to 24-hour:',
+        result,
+      );
       return result;
     } catch (error) {
-      console.log('❌ ensure24HourTime - Error converting 12-hour format:', error);
+      console.log(
+        '❌ ensure24HourTime - Error converting 12-hour format:',
+        error,
+      );
       return '';
     }
   }
@@ -134,17 +154,17 @@ function formatTo12Hour(timeStr) {
 
   // First ensure it's in 24-hour format
   const time24h = ensure24HourTime(timeStr);
-  
+
   try {
     const [hours, minutes] = time24h.split(':');
     const hourNum = parseInt(hours, 10);
-    
+
     let displayHour = hourNum % 12;
     if (displayHour === 0) displayHour = 12;
-    
+
     const ampm = hourNum >= 12 ? 'PM' : 'AM';
     const result = `${displayHour}:${minutes} ${ampm}`;
-    
+
     console.log('✅ formatTo12Hour - Formatted to 12-hour:', result);
     return result;
   } catch (error) {
@@ -170,21 +190,38 @@ const PaymentScreen = () => {
   const [successPopupVisible, setSuccessPopupVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // State for incoming date and time (date will be stored in YYYY-MM-DD format)
+  // State for incoming date, time, and chair number
   const [incomingDate, setIncomingDate] = useState(
-    params?.date ? ensureYYYYMMDD(params.date) : 
-    params?.selectedDate ? ensureYYYYMMDD(params.selectedDate) : 
-    null
+    params?.date
+      ? ensureYYYYMMDD(params.date)
+      : params?.selectedDate
+      ? ensureYYYYMMDD(params.selectedDate)
+      : null,
   );
   const [incomingTime, setIncomingTime] = useState(
-    params?.time ? ensure24HourTime(params.time) : 
-    params?.selectedTime ? ensure24HourTime(params.selectedTime) : 
-    null
+    params?.time
+      ? ensure24HourTime(params.time)
+      : params?.selectedTime
+      ? ensure24HourTime(params.selectedTime)
+      : null,
+  );
+  const [incomingChairNumber, setIncomingChairNumber] = useState(
+    params?.selectedSeat || params?.chairNumber || null,
   );
 
   console.log('📥 PaymentScreen - Route Params:', params);
-  console.log('📥 PaymentScreen - Initial incomingDate (YYYY-MM-DD):', incomingDate);
-  console.log('📥 PaymentScreen - Initial incomingTime (24-hour):', incomingTime);
+  console.log(
+    '📥 PaymentScreen - Initial incomingDate (YYYY-MM-DD):',
+    incomingDate,
+  );
+  console.log(
+    '📥 PaymentScreen - Initial incomingTime (24-hour):',
+    incomingTime,
+  );
+  console.log(
+    '📥 PaymentScreen - Initial incomingChairNumber:',
+    incomingChairNumber,
+  );
 
   // Check if date and time are available
   const hasDateTime = useMemo(() => {
@@ -194,43 +231,70 @@ const PaymentScreen = () => {
     return hasDate && hasTime;
   }, [incomingDate, incomingTime]);
 
-  // Process incoming date and time from params
+  // Process incoming date, time, and chair number from params
   useEffect(() => {
-    console.log('🔄 useEffect - Processing incoming date and time from params');
-    
+    console.log(
+      '🔄 useEffect - Processing incoming date, time, and chair number from params',
+    );
+
     if (params?.date) {
       const isoDate = ensureYYYYMMDD(params.date);
       console.log('✅ useEffect - Setting incomingDate (YYYY-MM-DD):', isoDate);
       setIncomingDate(isoDate);
     } else if (params?.selectedDate) {
       const isoDate = ensureYYYYMMDD(params.selectedDate);
-      console.log('✅ useEffect - Setting incomingDate from selectedDate (YYYY-MM-DD):', isoDate);
+      console.log(
+        '✅ useEffect - Setting incomingDate from selectedDate (YYYY-MM-DD):',
+        isoDate,
+      );
       setIncomingDate(isoDate);
     } else {
       console.log('❌ useEffect - No date found in params');
     }
-    
+
     if (params?.time) {
       const time24h = ensure24HourTime(params.time);
       console.log('✅ useEffect - Setting incomingTime (24-hour):', time24h);
       setIncomingTime(time24h);
     } else if (params?.selectedTime) {
       const time24h = ensure24HourTime(params.selectedTime);
-      console.log('✅ useEffect - Setting incomingTime from selectedTime (24-hour):', time24h);
+      console.log(
+        '✅ useEffect - Setting incomingTime from selectedTime (24-hour):',
+        time24h,
+      );
       setIncomingTime(time24h);
     } else {
       console.log('❌ useEffect - No time found in params');
     }
+
+    // Set chair number
+    if (params?.selectedSeat || params?.chairNumber) {
+      const chairNum = params.selectedSeat || params.chairNumber;
+      console.log('✅ useEffect - Setting incomingChairNumber:', chairNum);
+      setIncomingChairNumber(chairNum);
+    } else {
+      console.log('❌ useEffect - No chair number found in params');
+    }
   }, [params]);
 
-  // Process incoming services from different params with proper date and time handling
+  // Process incoming services from different params with proper date, time, and chair number handling
   useEffect(() => {
     const processIncomingData = async () => {
       console.log('🔄 processIncomingData - Starting data processing');
-      console.log('📊 processIncomingData - Current incomingDate (YYYY-MM-DD):', incomingDate);
-      console.log('📊 processIncomingData - Current incomingTime (24-hour):', incomingTime);
+      console.log(
+        '📊 processIncomingData - Current incomingDate (YYYY-MM-DD):',
+        incomingDate,
+      );
+      console.log(
+        '📊 processIncomingData - Current incomingTime (24-hour):',
+        incomingTime,
+      );
+      console.log(
+        '📊 processIncomingData - Current incomingChairNumber:',
+        incomingChairNumber,
+      );
       console.log('📊 processIncomingData - Has DateTime:', hasDateTime);
-      
+
       let processedServices = [];
 
       console.log('🔄 processIncomingData - Processing params:', params);
@@ -245,69 +309,87 @@ const PaymentScreen = () => {
           price: service.price,
           quantity: service.quantity || 1,
           image: service.image,
-          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
-          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
-          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
-          source: service.source || 'Cart'
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null,
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null,
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null,
+          chairNumber: incomingChairNumber,
+          source: service.source || 'Cart',
         }));
-      }
-      else if (params.serviceName && params.price) {
+      } else if (params.serviceName && params.price) {
         console.log('✅ processIncomingData - Processing single service');
-        processedServices = [{
-          type: 'product',
-          serviceName: params.serviceName,
-          name: params.serviceName,
-          price: params.price,
-          quantity: params.quantity || 1,
-          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
-          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
-          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
-          source: 'ProductDetails'
-        }];
-      }
-      else if (params.item && (params.item.name || params.item.title)) {
+        processedServices = [
+          {
+            type: 'product',
+            serviceName: params.serviceName,
+            name: params.serviceName,
+            price: params.price,
+            quantity: params.quantity || 1,
+            date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null,
+            time: hasDateTime ? formatTo12Hour(incomingTime) : null,
+            backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null,
+            chairNumber: incomingChairNumber,
+            source: 'ProductDetails',
+          },
+        ];
+      } else if (params.item && (params.item.name || params.item.title)) {
         console.log('✅ processIncomingData - Processing package item');
-        processedServices = [{
-          type: 'package',
-          serviceName: params.item.name || params.item.title,
-          name: params.item.name || params.item.title,
-          price: params.item.price,
-          quantity: params.quantity || 1,
-          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
-          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
-          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
-          source: 'ProductPackages'
-        }];
-      }
-      else if (params.serviceName && params.price) {
+        processedServices = [
+          {
+            type: 'package',
+            serviceName: params.item.name || params.item.title,
+            name: params.item.name || params.item.title,
+            price: params.item.price,
+            quantity: params.quantity || 1,
+            date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null,
+            time: hasDateTime ? formatTo12Hour(incomingTime) : null,
+            backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null,
+            chairNumber: incomingChairNumber,
+            source: 'ProductPackages',
+          },
+        ];
+      } else if (params.serviceName && params.price) {
         console.log('✅ processIncomingData - Processing service details');
-        processedServices = [{
-          type: 'service',
-          serviceName: params.serviceName,
-          name: params.serviceName,
-          price: params.price,
-          quantity: params.quantity || 1,
-          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null, // Only set if available
-          time: hasDateTime ? formatTo12Hour(incomingTime) : null, // Only set if available
-          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null, // Only set if available
-          source: 'ServiceDetails'
-        }];
+        processedServices = [
+          {
+            type: 'service',
+            serviceName: params.serviceName,
+            name: params.serviceName,
+            price: params.price,
+            quantity: params.quantity || 1,
+            date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null,
+            time: hasDateTime ? formatTo12Hour(incomingTime) : null,
+            backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null,
+            chairNumber: incomingChairNumber,
+            source: 'ServiceDetails',
+          },
+        ];
       }
 
-      console.log('📋 processIncomingData - Processed Services:', processedServices);
+      console.log(
+        '📋 processIncomingData - Processed Services:',
+        processedServices,
+      );
 
       // Storage update
       if (processedServices.length > 0) {
         console.log('💾 processIncomingData - Saving to AsyncStorage');
-        await AsyncStorage.setItem('currentPaymentServices', JSON.stringify(processedServices));
+        await AsyncStorage.setItem(
+          'currentPaymentServices',
+          JSON.stringify(processedServices),
+        );
         setServiceList(processedServices);
       } else {
-        console.log('📂 processIncomingData - No processed services, loading from storage');
+        console.log(
+          '📂 processIncomingData - No processed services, loading from storage',
+        );
         // fallback load from storage
         const stored = await AsyncStorage.getItem('currentPaymentServices');
         if (stored) {
           const storedData = JSON.parse(stored);
-          console.log('📂 processIncomingData - Loaded stored services:', storedData);
+          console.log(
+            '📂 processIncomingData - Loaded stored services:',
+            storedData,
+          );
           setServiceList(storedData);
         } else {
           console.log('❌ processIncomingData - No services found in storage');
@@ -316,31 +398,36 @@ const PaymentScreen = () => {
     };
 
     processIncomingData();
-  }, [params, incomingDate, incomingTime, hasDateTime]);
+  }, [params, incomingDate, incomingTime, incomingChairNumber, hasDateTime]);
 
   // Calculate total price based on services and quantities
   const totalPrice = useMemo(() => {
     const total = serviceList.reduce((acc, curr) => {
       const itemPrice = Number(curr.price || 0);
       const itemQuantity = Number(curr.quantity || 1);
-      return acc + (itemPrice * itemQuantity);
+      return acc + itemPrice * itemQuantity;
     }, 0);
     console.log('💰 Total Price Calculation:', total);
     return total;
   }, [serviceList]);
 
   // Function to get subtotal per item
-  const getItemSubtotal = (item) => {
+  const getItemSubtotal = item => {
     const price = Number(item.price || 0);
     const quantity = Number(item.quantity || 1);
     const subtotal = price * quantity;
-    console.log(`📦 getItemSubtotal - ${item.serviceName}: ${price} × ${quantity} = ${subtotal}`);
+    console.log(
+      `📦 getItemSubtotal - ${item.serviceName}: ${price} × ${quantity} = ${subtotal}`,
+    );
     return subtotal;
   };
 
   // Total quantity for all items
   const getTotalQuantity = () => {
-    const totalQty = serviceList.reduce((acc, curr) => acc + Number(curr.quantity || 1), 0);
+    const totalQty = serviceList.reduce(
+      (acc, curr) => acc + Number(curr.quantity || 1),
+      0,
+    );
     console.log('📊 getTotalQuantity:', totalQty);
     return totalQty;
   };
@@ -354,11 +441,11 @@ const PaymentScreen = () => {
   };
 
   // Success popup helper
-  const showSuccessPopup = (message) => {
+  const showSuccessPopup = message => {
     console.log('🎉 showSuccessPopup:', message);
     setSuccessMessage(message);
     setSuccessPopupVisible(true);
-    
+
     // Auto navigate after 2 seconds
     setTimeout(() => {
       console.log('🔄 showSuccessPopup - Auto navigating to success screen');
@@ -366,8 +453,9 @@ const PaymentScreen = () => {
       navigation.replace('PaymentSuccessScreen', {
         bookedServices: serviceList,
         totalAmount: totalPrice,
-        appointmentDate: incomingDate, // Already in YYYY-MM-DD format
-        appointmentTime: incomingTime, // Already in 24-hour format
+        appointmentDate: incomingDate,
+        appointmentTime: incomingTime,
+        chairNumber: incomingChairNumber,
       });
     }, 2000);
   };
@@ -378,21 +466,105 @@ const PaymentScreen = () => {
     setServiceList([]);
   };
 
-  // Book appointment API call
- // Book appointment API call - UPDATED VERSION
-const bookAppointment = async (date, time, services) => {
-  try {
-    // Get token from AsyncStorage
-    const token = await AsyncStorage.getItem('userToken');
-    const userData = await AsyncStorage.getItem('userData');
-    const userId = await AsyncStorage.getItem('userId');
-    
-    console.log('🔑 Token from storage:', token);
-    console.log('👤 User ID from storage:', userId);
+  // Book appointment API call - UPDATED: Changed chairNumber to chairNo
+  const bookAppointment = async (date, time, services) => {
+    try {
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
+      const userId = await AsyncStorage.getItem('userId');
 
-    if (!token) {
-      console.log('❌ No token found');
-      return { success: false, error: 'Authentication required. Please login again.' };
+      console.log('🔑 Token from storage:', token);
+      console.log('👤 User ID from storage:', userId);
+
+      if (!token) {
+        console.log('❌ No token found');
+        return {
+          success: false,
+          error: 'Authentication required. Please login again.',
+        };
+      }
+
+      console.log('📅 Booking appointment with:');
+      console.log('   Date (YYYY-MM-DD):', date);
+      console.log('   Time (24-hour):', time);
+      console.log('   Services:', services);
+      console.log('   Chair Number:', incomingChairNumber);
+
+      // Enhanced request body with proper structure - CHANGED: chairNumber to chairNo
+      const requestBody = {
+        date: date,
+        time: time,
+        services: services,
+        totalAmount: totalPrice,
+        chairNo: incomingChairNumber, // CHANGED: chairNumber to chairNo
+        // Add these common required fields
+        serviceType: 'appointment',
+        status: 'pending',
+        paymentStatus: 'pending',
+      };
+
+      console.log(
+        '📤 Sending to backend:',
+        JSON.stringify(requestBody, null, 2),
+      );
+      console.log('🔐 Using token:', token ? 'Present' : 'Missing');
+
+      const response = await fetch(
+        'https://naushad.onrender.com/api/appointments',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestBody),
+        },
+      );
+
+      const responseText = await response.text();
+      console.log('📥 Raw API Response:', responseText);
+      console.log('📊 Response Status:', response.status);
+      console.log('📊 Response OK:', response.ok);
+
+      let json;
+      try {
+        json = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ JSON Parse Error:', parseError);
+        console.error('❌ Response that failed to parse:', responseText);
+        return {
+          success: false,
+          error: `Server returned invalid JSON: ${response.status}`,
+          status: response.status,
+        };
+      }
+
+      console.log('📅 Appointment booking response:', json);
+
+      if (response.ok && json.success) {
+        console.log('✅ Appointment booked successfully!');
+        console.log('📋 Appointment data:', json.data);
+        return { success: true, data: json };
+      } else {
+        console.log(
+          '❌ Appointment booking failed:',
+          json.message || 'Unknown error',
+        );
+        console.log('❌ Full error response:', json);
+        return {
+          success: false,
+          error: json.message || `Server error: ${response.status}`,
+          status: response.status,
+          details: json,
+        };
+      }
+    } catch (error) {
+      console.error('❌ Appointment booking network error:', error);
+      return {
+        success: false,
+        error: `Network error: ${error.message}`,
+      };
     }
 
     console.log('📅 Booking appointment with:');
@@ -470,7 +642,7 @@ const bookAppointment = async (date, time, services) => {
   // Handle booking process
   const handleBooking = async () => {
     console.log('🔄 handleBooking - Starting booking process');
-    
+
     if (serviceList.length === 0) {
       console.log('❌ handleBooking - No services found');
       showPopup('No Items', 'No items found for booking.');
@@ -479,7 +651,10 @@ const bookAppointment = async (date, time, services) => {
 
     if (method === 'wallet') {
       console.log('ℹ️ handleBooking - Wallet method selected (not available)');
-      showPopup('Coming Soon', 'Wallet / Salon Credits payment option will be available soon.');
+      showPopup(
+        'Coming Soon',
+        'Wallet / Salon Credits payment option will be available soon.',
+      );
       return;
     }
 
@@ -490,18 +665,25 @@ const bookAppointment = async (date, time, services) => {
     console.log('📅 Final Booking Details:');
     console.log('   Date (YYYY-MM-DD):', bookingDate);
     console.log('   Time (24-hour):', bookingTime);
+    console.log('   Chair Number:', incomingChairNumber);
     console.log('   Services:', serviceList);
 
     // Check if date and time are required but missing
     if (!bookingDate || !bookingTime) {
       console.log('❌ handleBooking - Missing date or time');
-      showPopup('Missing Information', 'Please ensure date and time are selected for booking.');
+      showPopup(
+        'Missing Information',
+        'Please ensure date and time are selected for booking.',
+      );
       return;
     }
 
     // Verify the formats
     console.log('✅ Verified Formats:');
-    console.log('   Date format correct:', /^\d{4}-\d{2}-\d{2}$/.test(bookingDate));
+    console.log(
+      '   Date format correct:',
+      /^\d{4}-\d{2}-\d{2}$/.test(bookingDate),
+    );
     console.log('   Time format correct:', /^\d{2}:\d{2}$/.test(bookingTime));
 
     try {
@@ -514,9 +696,14 @@ const bookAppointment = async (date, time, services) => {
       console.log('📅 Final Appointment Booking Data:');
       console.log('   Date for backend (YYYY-MM-DD):', bookingDate);
       console.log('   Time for backend (24-hour):', bookingTime);
+      console.log('   Chair Number:', incomingChairNumber);
       console.log('   Services:', servicesArray);
 
-      const bookingResult = await bookAppointment(bookingDate, bookingTime, servicesArray);
+      const bookingResult = await bookAppointment(
+        bookingDate,
+        bookingTime,
+        servicesArray,
+      );
 
       if (bookingResult.success) {
         console.log('✅ handleBooking - Appointment booked successfully');
@@ -526,22 +713,28 @@ const bookAppointment = async (date, time, services) => {
         showSuccessPopup('Appointment booked successfully!');
       } else {
         console.log('❌ handleBooking - Appointment booking failed');
-        showPopup('Booking Failed', `Appointment booking failed: ${bookingResult.error}`);
+        showPopup(
+          'Booking Failed',
+          `Appointment booking failed: ${bookingResult.error}`,
+        );
       }
     } catch (error) {
       console.log('❌ Booking Error:', error);
-      showPopup('Booking Failed', 'Booking was not completed. Please try again.');
+      showPopup(
+        'Booking Failed',
+        'Booking was not completed. Please try again.',
+      );
     } finally {
       setProcessingPayment(false);
     }
   };
 
-  const getServiceTypeLabel = (type) => {
+  const getServiceTypeLabel = type => {
     const labelMap = {
-      'product': 'Product',
-      'package': 'Package',
-      'service': 'Service',
-      'cart': 'Cart Item'
+      product: 'Product',
+      package: 'Package',
+      service: 'Service',
+      cart: 'Cart Item',
     };
     const label = labelMap[type] || 'Item';
     console.log(`🏷️ getServiceTypeLabel - ${type} -> ${label}`);
@@ -549,20 +742,23 @@ const bookAppointment = async (date, time, services) => {
   };
 
   // Format date for display (convert YYYY-MM-DD to readable format)
-  const formatDateForDisplay = (dateString) => {
+  const formatDateForDisplay = dateString => {
     console.log('🔄 formatDateForDisplay - Input:', dateString);
     if (!dateString) {
       console.log('❌ formatDateForDisplay - No date string');
       return 'Not selected';
     }
-    
+
     // Extract only YYYY-MM-DD part if it includes time
     let cleanDateString = dateString;
     if (dateString.includes('T')) {
       cleanDateString = dateString.split('T')[0];
-      console.log('🔄 formatDateForDisplay - Extracted YYYY-MM-DD:', cleanDateString);
+      console.log(
+        '🔄 formatDateForDisplay - Extracted YYYY-MM-DD:',
+        cleanDateString,
+      );
     }
-    
+
     try {
       const date = new Date(cleanDateString);
       if (isNaN(date)) {
@@ -574,9 +770,12 @@ const bookAppointment = async (date, time, services) => {
         weekday: 'short',
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       });
-      console.log('✅ formatDateForDisplay - Formatted for display:', formatted);
+      console.log(
+        '✅ formatDateForDisplay - Formatted for display:',
+        formatted,
+      );
       return formatted;
     } catch (error) {
       console.log('❌ formatDateForDisplay - Error:', error);
@@ -594,15 +793,21 @@ const bookAppointment = async (date, time, services) => {
     >
       <View style={styles.successPopupOverlay}>
         <View style={styles.successPopupContainer}>
-          <Image 
-            source={require('../../assets/images/success.png')} 
+          <Image
+            source={require('../../assets/images/success.png')}
             style={styles.successImage}
             resizeMode="contain"
           />
           <Text style={styles.successPopupTitle}>Success!</Text>
           <Text style={styles.successPopupMessage}>{successMessage}</Text>
-          <ActivityIndicator size="small" color={COLORS.primary} style={styles.successLoader} />
-          <Text style={styles.successRedirectText}>Redirecting to confirmation...</Text>
+          <ActivityIndicator
+            size="small"
+            color={COLORS.primary}
+            style={styles.successLoader}
+          />
+          <Text style={styles.successRedirectText}>
+            Redirecting to confirmation...
+          </Text>
         </View>
       </View>
     </Modal>
@@ -611,9 +816,9 @@ const bookAppointment = async (date, time, services) => {
   // Log navigation state for debugging
   useEffect(() => {
     const state = navigation.getState();
-    console.log("📌 Full Navigation State:", state);
-    console.log("📌 All Routes:", state.routes);
-    console.log("📌 Current Route:", state.routes[state.index]);
+    console.log('📌 Full Navigation State:', state);
+    console.log('📌 All Routes:', state.routes);
+    console.log('📌 Current Route:', state.routes[state.index]);
   }, []);
 
   return (
@@ -621,36 +826,67 @@ const bookAppointment = async (date, time, services) => {
       <Head title="Payment" />
 
       <ScrollView
-        contentContainerStyle={[styles.contentContainer, { backgroundColor: theme.background }]}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { backgroundColor: theme.background },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Services list */}
         {serviceList.length > 0 ? (
           <View style={styles.serviceCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginBottom: hp('2%') }]}>
-              Order Summary ({getTotalQuantity()} {getTotalQuantity() === 1 ? 'item' : 'items'})
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.textPrimary, marginBottom: hp('2%') },
+              ]}
+            >
+              Order Summary ({getTotalQuantity()}{' '}
+              {getTotalQuantity() === 1 ? 'item' : 'items'})
             </Text>
-            
+
             {serviceList.map((srv, i) => (
               <View key={i} style={styles.serviceBlock}>
                 <View style={styles.serviceHeader}>
-                  <Text style={[styles.serviceTitle, { color: theme.textPrimary }]}>
+                  <Text
+                    style={[styles.serviceTitle, { color: theme.textPrimary }]}
+                  >
                     {srv.serviceName || srv.name || 'Unnamed'}
                   </Text>
-                  <Text style={[styles.serviceTag, { 
-                    backgroundColor: srv.type === 'product' ? '#E3F2FD' : 
-                                   srv.type === 'package' ? '#E8F5E8' : 
-                                   srv.type === 'cart' ? '#E8EAF6' : '#FFF3E0',
-                    color: srv.type === 'product' ? '#1976D2' : 
-                          srv.type === 'package' ? '#2E7D32' : 
-                          srv.type === 'cart' ? '#5C6BC0' : '#F57C00'
-                  }]}>
+                  <Text
+                    style={[
+                      styles.serviceTag,
+                      {
+                        backgroundColor:
+                          srv.type === 'product'
+                            ? '#E3F2FD'
+                            : srv.type === 'package'
+                            ? '#E8F5E8'
+                            : srv.type === 'cart'
+                            ? '#E8EAF6'
+                            : '#FFF3E0',
+                        color:
+                          srv.type === 'product'
+                            ? '#1976D2'
+                            : srv.type === 'package'
+                            ? '#2E7D32'
+                            : srv.type === 'cart'
+                            ? '#5C6BC0'
+                            : '#F57C00',
+                      },
+                    ]}
+                  >
                     {getServiceTypeLabel(srv.type)}
                   </Text>
                 </View>
 
                 <View style={styles.quantityRow}>
-                  <Text style={[styles.quantityLabel, { color: theme.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.quantityLabel,
+                      { color: theme.textSecondary },
+                    ]}
+                  >
                     Quantity:
                   </Text>
                   <View style={styles.quantityBadge}>
@@ -659,53 +895,119 @@ const bookAppointment = async (date, time, services) => {
                     </Text>
                   </View>
                   {srv.quantity > 1 && (
-                    <Text style={[styles.quantityNote, { color: theme.textSecondary }]}>
+                    <Text
+                      style={[
+                        styles.quantityNote,
+                        { color: theme.textSecondary },
+                      ]}
+                    >
                       ({srv.quantity} units)
                     </Text>
                   )}
                 </View>
 
+                {hasDateTime && (
                   <>
                     <View style={styles.datetimeRow}>
                       <View style={styles.datetimeItem}>
-                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                        <Text
+                          style={[
+                            styles.datetimeLabel,
+                            { color: theme.textSecondary },
+                          ]}
+                        >
                           📅 Date:
                         </Text>
-                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                        <Text
+                          style={[
+                            styles.datetimeValue,
+                            { color: theme.textPrimary },
+                          ]}
+                        >
                           {formatDateForDisplay(srv.date)}
                         </Text>
                       </View>
                       <View style={styles.datetimeItem}>
-                        <Text style={[styles.datetimeLabel, { color: theme.textSecondary }]}>
+                        <Text
+                          style={[
+                            styles.datetimeLabel,
+                            { color: theme.textSecondary },
+                          ]}
+                        >
                           🕒 Time:
                         </Text>
-                        <Text style={[styles.datetimeValue, { color: theme.textPrimary }]}>
+                        <Text
+                          style={[
+                            styles.datetimeValue,
+                            { color: theme.textPrimary },
+                          ]}
+                        >
                           {srv.time || 'Not selected'}
                         </Text>
                       </View>
                     </View>
 
+                    {/* Chair Number Row */}
+                    {incomingChairNumber && (
+                      <View style={styles.chairRow}>
+                        <Text
+                          style={[
+                            styles.chairLabel,
+                            { color: theme.textSecondary },
+                          ]}
+                        >
+                          💺 Chair Number:
+                        </Text>
+                        <Text
+                          style={[
+                            styles.chairValue,
+                            { color: theme.textPrimary },
+                          ]}
+                        >
+                          {incomingChairNumber}
+                        </Text>
+                      </View>
+                    )}
+
                     {/* Display raw formats for debugging - Only show if date/time available */}
                     <View style={styles.debugRow}>
-                      <Text style={[styles.debugText, { color: theme.textSecondary }]}>
-                        📋 Backend Date: {srv.date || 'Not set'} | Backend Time: {srv.backendTime || 'Not set'}
+                      <Text
+                        style={[
+                          styles.debugText,
+                          { color: theme.textSecondary },
+                        ]}
+                      >
+                        📋 Backend Date: {srv.date || 'Not set'} | Backend Time:{' '}
+                        {srv.backendTime || 'Not set'}
                       </Text>
                     </View>
                   </>
+                )}
 
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailText, { color: theme.textSecondary }]}>
+                  <Text
+                    style={[styles.detailText, { color: theme.textSecondary }]}
+                  >
                     📱 From: {srv.source || 'Unknown'}
                   </Text>
                 </View>
 
                 <View style={styles.footerRow}>
                   <View style={styles.priceDetails}>
-                    <Text style={[styles.addOnText, { color: theme.textPrimary }]}>
-                      {srv.quantity > 1 ? `₹${srv.price} × ${srv.quantity}` : 'Price'}
+                    <Text
+                      style={[styles.addOnText, { color: theme.textPrimary }]}
+                    >
+                      {srv.quantity > 1
+                        ? `₹${srv.price} × ${srv.quantity}`
+                        : 'Price'}
                     </Text>
                     {srv.quantity > 1 && (
-                      <Text style={[styles.unitPrice, { color: theme.textSecondary }]}>
+                      <Text
+                        style={[
+                          styles.unitPrice,
+                          { color: theme.textSecondary },
+                        ]}
+                      >
                         Unit price: ₹{srv.price}
                       </Text>
                     )}
@@ -715,16 +1017,19 @@ const bookAppointment = async (date, time, services) => {
                       ₹{getItemSubtotal(srv)}
                     </Text>
                     {srv.quantity > 1 && (
-                      <Text style={[styles.originalPrice, { color: theme.textSecondary }]}>
+                      <Text
+                        style={[
+                          styles.originalPrice,
+                          { color: theme.textSecondary },
+                        ]}
+                      >
                         (₹{srv.price} each)
                       </Text>
                     )}
                   </View>
                 </View>
 
-                {i < serviceList.length - 1 && (
-                  <View style={styles.divider} />
-                )}
+                {i < serviceList.length - 1 && <View style={styles.divider} />}
               </View>
             ))}
           </View>
@@ -741,7 +1046,12 @@ const bookAppointment = async (date, time, services) => {
 
         {serviceList.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginTop: hp('2%') }]}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.textPrimary, marginTop: hp('2%') },
+              ]}
+            >
               Select Payment Method
             </Text>
 
@@ -769,25 +1079,44 @@ const bookAppointment = async (date, time, services) => {
 
             <View style={styles.totalBreakdown}>
               <View style={styles.breakdownRow}>
-                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.breakdownLabel,
+                    { color: theme.textSecondary },
+                  ]}
+                >
                   Subtotal ({getTotalQuantity()} items):
                 </Text>
-                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                  ₹{serviceList.reduce((acc, curr) => acc + getItemSubtotal(curr), 0).toLocaleString('en-IN')}
+                <Text
+                  style={[styles.breakdownValue, { color: theme.textPrimary }]}
+                >
+                  ₹
+                  {serviceList
+                    .reduce((acc, curr) => acc + getItemSubtotal(curr), 0)
+                    .toLocaleString('en-IN')}
                 </Text>
               </View>
               <View style={styles.breakdownRow}>
-                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.breakdownLabel,
+                    { color: theme.textSecondary },
+                  ]}
+                >
                   GST (10%):
                 </Text>
-                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
+                <Text
+                  style={[styles.breakdownValue, { color: theme.textPrimary }]}
+                >
                   ₹{Math.round(totalPrice * 0.1).toLocaleString('en-IN')}
                 </Text>
               </View>
             </View>
 
             <View style={styles.totalRow}>
-              <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>Total Payable:</Text>
+              <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>
+                Total Payable:
+              </Text>
               <Text style={[styles.totalValue, { color: theme.textPrimary }]}>
                 ₹ {totalPrice.toLocaleString('en-IN')}
               </Text>
@@ -809,7 +1138,8 @@ const bookAppointment = async (date, time, services) => {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.payText}>
-                {hasDateTime ? 'Confirm Order' : 'Confirm Order'} - ₹{totalPrice.toLocaleString('en-IN')}
+                {hasDateTime ? 'Confirm Order' : 'Confirm Order'} - ₹
+                {totalPrice.toLocaleString('en-IN')}
               </Text>
             )}
           </TouchableOpacity>
@@ -828,28 +1158,41 @@ const bookAppointment = async (date, time, services) => {
       />
     </SafeAreaView>
   );
-}
+};
 
 function RadioItem({ label, selected, onPress, primary, theme }) {
-  console.log(`🔘 RadioItem - ${label}: ${selected ? 'selected' : 'not selected'}`);
+  console.log(
+    `🔘 RadioItem - ${label}: ${selected ? 'selected' : 'not selected'}`,
+  );
   return (
-    <TouchableOpacity style={styles.radioRow} activeOpacity={0.8} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.radioRow}
+      activeOpacity={0.8}
+      onPress={onPress}
+    >
       <View
         style={[
           styles.radioOuter,
           selected && { borderColor: primary, backgroundColor: '#FFF5E0' },
         ]}
       >
-        {selected && <View style={[styles.radioDot, { backgroundColor: primary }]} />}
+        {selected && (
+          <View style={[styles.radioDot, { backgroundColor: primary }]} />
+        )}
       </View>
-      <Text style={[styles.radioText, { color: theme.textPrimary }]}>{label}</Text>
+      <Text style={[styles.radioText, { color: theme.textPrimary }]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, paddingTop: Platform.OS === 'ios' ? hp('1.1%') : 0 },
-  contentContainer: { paddingHorizontal: wp('5%'), paddingVertical: hp('1.5%') },
+  contentContainer: {
+    paddingHorizontal: wp('5%'),
+    paddingVertical: hp('1.5%'),
+  },
 
   serviceCard: {
     borderRadius: wp('3.5%'),
@@ -873,14 +1216,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: hp('0.5%'),
   },
-  serviceTitle: { 
-    fontSize: wp('4.2%'), 
+  serviceTitle: {
+    fontSize: wp('4.2%'),
     fontWeight: '700',
     flex: 1,
     marginRight: wp('2%'),
   },
-  serviceTag: { 
-    fontSize: wp('3.2%'), 
+  serviceTag: {
+    fontSize: wp('3.2%'),
     fontWeight: '600',
     paddingHorizontal: wp('2%'),
     paddingVertical: hp('0.3%'),
@@ -931,6 +1274,23 @@ const styles = StyleSheet.create({
     fontSize: wp('3.4%'),
     fontWeight: '600',
   },
+  // New styles for chair number row
+  chairRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp('0.5%'),
+    marginBottom: hp('0.3%'),
+  },
+  chairLabel: {
+    fontSize: wp('3.4%'),
+    marginRight: wp('1%'),
+    fontWeight: '500',
+  },
+  chairValue: {
+    fontSize: wp('3.4%'),
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
   debugRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -941,11 +1301,15 @@ const styles = StyleSheet.create({
     fontSize: wp('2.8%'),
     fontStyle: 'italic',
   },
-  detailRow: { flexDirection: 'row', alignItems: 'center', marginTop: hp('0.3%') },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp('0.3%'),
+  },
   detailText: { fontSize: wp('3.6%') },
-  footerRow: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: hp('1%'),
     alignItems: 'flex-start',
   },
@@ -966,21 +1330,21 @@ const styles = StyleSheet.create({
     fontSize: wp('3%'),
     marginTop: hp('0.2%'),
   },
-  divider: { 
-    height: 1, 
-    backgroundColor: '#EEE', 
+  divider: {
+    height: 1,
+    backgroundColor: '#EEE',
     marginTop: hp('1.2%'),
     marginBottom: hp('1.2%'),
   },
-  sectionTitle: { 
-    fontSize: wp('4.5%'), 
-    fontWeight: '700', 
+  sectionTitle: {
+    fontSize: wp('4.5%'),
+    fontWeight: '700',
     marginTop: hp('2.5%'),
     marginBottom: hp('1.5%'),
   },
-  radioRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
+  radioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: hp('1.5%'),
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
@@ -1015,9 +1379,9 @@ const styles = StyleSheet.create({
     fontSize: wp('3.8%'),
     fontWeight: '500',
   },
-  totalRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: hp('1%'),
     paddingTop: hp('1%'),
     borderTopWidth: 1,
@@ -1025,17 +1389,17 @@ const styles = StyleSheet.create({
   },
   totalLabel: { fontSize: wp('5%'), fontWeight: '900' },
   totalValue: { marginLeft: 'auto', fontSize: wp('5%'), fontWeight: '900' },
-  footer: { 
-    paddingHorizontal: wp('5%'), 
+  footer: {
+    paddingHorizontal: wp('5%'),
     paddingVertical: hp('2%'),
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
   },
-  payBtn: { 
-    height: hp('6.5%'), 
-    borderRadius: wp('3.8%'), 
-    alignItems: 'center', 
-    justifyContent: 'center' 
+  payBtn: {
+    height: hp('6.5%'),
+    borderRadius: wp('3.8%'),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   payText: { fontSize: wp('4.3%'), fontWeight: '800', color: '#FFFFFF' },
   emptyState: {
