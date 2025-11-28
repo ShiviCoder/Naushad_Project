@@ -166,7 +166,7 @@ const CartScreen = () => {
 
     console.log('🛒 Checkout Items:', checkoutItems);
 
-    navigation.navigate("PaymentScreen", {
+    navigation.navigate("CartPaymentScreen", {
       services: checkoutItems,
       source: 'Cart'
     });
@@ -179,7 +179,7 @@ const CartScreen = () => {
   const total = subtotal - discount + gst;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.dark ? "#121212" : "#fff" }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.dark ? "#121212" : "#f8f9fa" }]}>
       <Head title="Cart" />
 
       {loading ? (
@@ -195,15 +195,15 @@ const CartScreen = () => {
           contentContainerStyle={{ paddingBottom: 180, paddingHorizontal: 20 }}
         >
           {cartItems.length === 0 ? (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: 50 }}>
-              <Text style={{ fontSize: 18, color: theme.dark ? "#888" : "#aaa" }}>
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIcon, { backgroundColor: theme.dark ? "#333" : "#e9ecef" }]}>
+                <Icon name="cart-outline" size={60} color={theme.dark ? "#666" : "#adb5bd"} />
+              </View>
+              <Text style={[styles.emptyTitle, { color: theme.dark ? "#fff" : "#000" }]}>
                 Your cart is empty
               </Text>
-              <Text style={{ fontSize: 14, color: theme.dark ? "#666" : "#999", marginTop: 10 }}>
-                Add some products to your cart!
-              </Text>
-              <Text style={{ fontSize: 12, color: theme.dark ? "#555" : "#888", marginTop: 5 }}>
-                User ID: {userId}
+              <Text style={[styles.emptySubtitle, { color: theme.dark ? "#888" : "#6c757d" }]}>
+                Add some amazing products to your cart!
               </Text>
             </View>
           ) : (
@@ -212,36 +212,54 @@ const CartScreen = () => {
                 key={item._id}
                 style={[
                   styles.card,
-                  { backgroundColor: theme.dark ? "#333" : "#f8f8f8", borderColor: COLORS.shadow },
+                  { 
+                    backgroundColor: theme.dark ? "#1e1e1e" : "#fff",
+                    shadowColor: theme.dark ? "#000" : COLORS.primary,
+                  },
                 ]}
               >
+                {/* Premium Badge */}
+                <View style={styles.premiumBadge}>
+                  <Text style={styles.premiumText}>Premium</Text>
+                </View>
+
                 <Image
                   source={{ uri: item.image || "https://via.placeholder.com/150" }}
                   style={styles.image}
                 />
+                
                 <View style={styles.itemDetails}>
                   <View style={styles.headerRow}>
                     <Text style={[styles.itemName, { color: theme.dark ? "#fff" : "#000" }]}>
                       {item.name}
                     </Text>
-                    {/* Remove button - top right corner */}
                     <TouchableOpacity 
-                      style={styles.removeButton}
+                      style={[styles.removeButton, { backgroundColor: theme.dark ? "#333" : "#f8f9fa" }]}
                       onPress={() => handleRemove(item._id)}
                     >
-                      <Icon name="close" size={20} color="red" />
+                      <Icon name="trash-outline" size={18} color="#dc3545" />
                     </TouchableOpacity>
                   </View>
                   
-                  <View style={styles.priceRow}>
-                    <Text style={[styles.price, { color: theme.dark ? "#fff" : "#000" }]}>
-                      ₹{item.price}
-                    </Text>
-                  </View>
+                  <Text style={[styles.itemDescription, { color: theme.dark ? "#bbb" : "#6c757d" }]}>
+                    Premium service with expert care
+                  </Text>
 
-                  {/* Quantity */}
-                  <View style={[styles.qtyRow, { backgroundColor: theme.dark ? "#555" : "#000" }]}>
-                    <Text style={styles.qtyValue}>Qty: {item.quantity}</Text>
+                  <View style={styles.bottomRow}>
+                    <View style={styles.priceContainer}>
+                      <Text style={[styles.price, { color: theme.dark ? "#fff" : "#000" }]}>
+                        ₹{item.price}
+                      </Text>
+                      <Text style={[styles.originalPrice, { color: theme.dark ? "#666" : "#adb5bd" }]}>
+                        ₹{Math.round(item.price * 1.2)}
+                      </Text>
+                    </View>
+
+                    <View style={[styles.quantityContainer, { backgroundColor: theme.dark ? "#333" : "#e9ecef" }]}>
+                      <Text style={[styles.quantityText, { color: theme.dark ? "#fff" : "#000" }]}>
+                        Qty: {item.quantity}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -250,39 +268,68 @@ const CartScreen = () => {
 
           {cartItems.length > 0 && (
             <>
-              <View style={styles.summary}>
+              <View style={[styles.summaryCard, { backgroundColor: theme.dark ? "#1e1e1e" : "#fff" }]}>
+                <Text style={[styles.summaryTitle, { color: theme.dark ? "#fff" : "#000" }]}>
+                  Order Summary
+                </Text>
+                
                 <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                  <Text style={[styles.summaryLabel, { color: theme.dark ? "#bbb" : "#6c757d" }]}>
                     Subtotal
                   </Text>
-                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                  <Text style={[styles.summaryValue, { color: theme.dark ? "#fff" : "#000" }]}>
                     ₹{subtotal}
                   </Text>
                 </View>
+                
                 <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                  <Text style={[styles.summaryLabel, { color: theme.dark ? "#bbb" : "#6c757d" }]}>
+                    Discount
+                  </Text>
+                  <Text style={[styles.summaryValue, { color: "#28a745" }]}>
+                    -₹{discount}
+                  </Text>
+                </View>
+                
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: theme.dark ? "#bbb" : "#6c757d" }]}>
                     GST (10%)
                   </Text>
-                  <Text style={[styles.summaryText, { color: theme.dark ? "#fff" : "#000" }]}>
+                  <Text style={[styles.summaryValue, { color: theme.dark ? "#fff" : "#000" }]}>
                     ₹{gst}
+                  </Text>
+                </View>
+                
+                <View style={styles.divider} />
+                
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.totalLabel, { color: theme.dark ? "#fff" : "#000" }]}>
+                    Total Amount
+                  </Text>
+                  <Text style={[styles.totalValue, { color: COLORS.primary }]}>
+                    ₹{total}
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.stickyFooter, { backgroundColor: theme.dark ? "#222" : "#fff" }]}>
-                <View style={styles.totalRow}>
-                  <Text style={[styles.totalText, { color: theme.dark ? "#fff" : "#000" }]}>
-                    Total
+              <View style={[styles.stickyFooter, { backgroundColor: theme.dark ? "#1a1a1a" : "#fff" }]}>
+                <View style={styles.totalContainer}>
+                  <Text style={[styles.footerLabel, { color: theme.dark ? "#bbb" : "#6c757d" }]}>
+                    Total Payable
                   </Text>
-                  <Text style={[styles.totalText, { color: theme.dark ? "#fff" : "#000" }]}>
+                  <Text style={[styles.footerTotal, { color: theme.dark ? "#fff" : "#000" }]}>
                     ₹{total}
                   </Text>
                 </View>
                 <TouchableOpacity
                   onPress={handleCheckout}
-                  style={[styles.checkoutBtn, { backgroundColor: COLORS.primary }]}
+                  style={[styles.checkoutBtn, { 
+                    backgroundColor: COLORS.primary,
+                    shadowColor: COLORS.primary,
+                  }]}
                 >
-                  <Text style={[styles.checkoutText, { color: "#fff" }]}>Checkout</Text>
+                  <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+                  <Icon name="arrow-forward" size={20} color="#fff" style={styles.checkoutIcon} />
                 </TouchableOpacity>
               </View>
             </>
@@ -301,103 +348,243 @@ const CartScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { 
+    flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: hp('10%'),
+  },
+  emptyIcon: {
+    width: wp('25%'),
+    height: wp('25%'),
+    borderRadius: wp('12.5%'),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: hp('2%'),
+  },
+  emptyTitle: {
+    fontSize: wp('5%'),
+    fontWeight: '700',
+    marginBottom: hp('1%'),
+  },
+  emptySubtitle: {
+    fontSize: wp('4%'),
+    textAlign: 'center',
+    paddingHorizontal: wp('10%'),
+  },
   card: {
     flexDirection: "row",
-    padding: wp("3%"),
-    borderRadius: wp("7%"),
-    borderWidth: 1,
-    marginBottom: hp("1.5%"),
-    elevation: 1,
+    padding: wp("4%"),
+    borderRadius: wp("5%"),
+    marginBottom: hp("2%"),
+    elevation: 8,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
     position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  premiumBadge: {
+    position: 'absolute',
+    top: wp('3%'),
+    left: wp('3%'),
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: wp('3%'),
+    paddingVertical: wp('1%'),
+    borderRadius: wp('2%'),
+    zIndex: 2,
+  },
+  premiumText: {
+    color: '#fff',
+    fontSize: wp('2.8%'),
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   image: {
-    width: wp("32%"),
-    height: hp("15%"),
-    borderRadius: wp("3%"),
-    marginRight: wp("3%"),
+    width: wp("28%"),
+    height: wp("28%"),
+    borderRadius: wp("4%"),
+    marginRight: wp("4%"),
   },
   itemDetails: { 
     flex: 1, 
-    justifyContent: "center" 
+    justifyContent: "space-between",
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: hp("0.5%"),
+    marginBottom: hp("1%"),
   },
   itemName: { 
-    fontSize: wp("4%"), 
+    fontSize: wp("4.2%"), 
     fontWeight: "700",
     flex: 1,
     marginRight: wp("2%"),
+    lineHeight: wp('4.8%'),
+  },
+  itemDescription: {
+    fontSize: wp('3.5%'),
+    marginBottom: hp('1%'),
+    lineHeight: wp('4.2%'),
   },
   removeButton: {
-    padding: wp("1%"),
-    borderRadius: wp("2%"),
-    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    padding: wp("2%"),
+    borderRadius: wp("3%"),
+    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  priceRow: { 
-    flexDirection: "row", 
-    alignItems: "flex-start", 
-    marginTop: hp("0.5%") 
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp('2%'),
   },
   price: { 
-    fontWeight: "bold", 
-    fontSize: wp("3.5%") 
-  },
-  qtyRow: {
-    marginTop: hp("1%"),
-    borderRadius: wp("3%"),
-    paddingHorizontal: wp("3%"),
-    paddingVertical: hp("0.5%"),
-    alignSelf: 'flex-start',
-  },
-  qtyValue: { 
-    fontSize: wp("3.5%"), 
-    fontWeight: "bold", 
-    color: "#fff" 
-  },
-  summary: { 
-    marginTop: hp("2%") 
-  },
-  summaryRow: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginVertical: hp("1%") 
-  },
-  summaryText: { 
+    fontWeight: "800", 
     fontSize: wp("4.5%"),
-    fontWeight: "500"
+    letterSpacing: 0.5,
+  },
+  originalPrice: {
+    fontSize: wp('3.5%'),
+    fontWeight: '500',
+    textDecorationLine: 'line-through',
+  },
+  quantityContainer: {
+    paddingHorizontal: wp('3%'),
+    paddingVertical: wp('1.5%'),
+    borderRadius: wp('3%'),
+    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  quantityText: { 
+    fontSize: wp("3.5%"), 
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
+  summaryCard: {
+    borderRadius: wp('5%'),
+    padding: wp('5%'),
+    marginTop: hp('1%'),
+    marginBottom: hp('2%'),
+    elevation: 8,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  summaryTitle: {
+    fontSize: wp('4.5%'),
+    fontWeight: '700',
+    marginBottom: hp('2%'),
+    letterSpacing: 0.5,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: hp('0.8%'),
+  },
+  summaryLabel: {
+    fontSize: wp('4%'),
+    fontWeight: '500',
+  },
+  summaryValue: {
+    fontSize: wp('4%'),
+    fontWeight: '600',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    marginVertical: hp('1.5%'),
+  },
+  totalLabel: {
+    fontSize: wp('4.2%'),
+    fontWeight: '700',
+  },
+  totalValue: {
+    fontSize: wp('4.5%'),
+    fontWeight: '800',
   },
   stickyFooter: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    padding: wp("4%"),
+    padding: wp("5%"),
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: 'rgba(0,0,0,0.1)',
+    elevation: 16,
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
   },
-  totalRow: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginBottom: hp("1%") 
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: hp('1.5%'),
   },
-  totalText: { 
-    fontSize: wp("4.5%"), 
-    fontWeight: "bold" 
+  footerLabel: {
+    fontSize: wp('4%'),
+    fontWeight: '500',
   },
-  checkoutBtn: { 
-    borderRadius: wp("3%"), 
-    paddingVertical: hp("1.5%"), 
-    alignItems: "center" 
+  footerTotal: {
+    fontSize: wp('4.5%'),
+    fontWeight: '800',
+  },
+  checkoutBtn: {
+    borderRadius: wp("4%"),
+    paddingVertical: hp("2%"),
+    alignItems: "center",
+    justifyContent: 'center',
+    flexDirection: 'row',
+    elevation: 8,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   checkoutText: { 
-    fontSize: wp("4%"), 
-    fontWeight: "bold", 
-    letterSpacing: 1 
+    fontSize: wp("4.2%"), 
+    fontWeight: "700", 
+    letterSpacing: 1,
+    color: '#fff',
+    marginRight: wp('2%'),
+  },
+  checkoutIcon: {
+    marginLeft: wp('1%'),
   },
 });
 

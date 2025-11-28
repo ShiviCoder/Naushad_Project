@@ -258,26 +258,45 @@ const HomeScreen = () => {
   };
 
   const [services, setServices] = useState([]);
-  const fetchServices = async () => {
+  const fetchServices = async (selectedGender) => {
     try {
       const token = await getToken();
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
+      console.log("🔍 Token:", token ? "Exists" : "Missing");
+
+      const g = (selectedGender || gender || "male").toLowerCase().trim();
+
       const response = await fetch('https://naushad.onrender.com/api/ourservice', {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-      })
+      });
 
-      const data = await response.json();
+      const json = await response.json();
+      console.log("📦Services Full Response:", json);
+
+      if (!json?.success) return;
+
+      let data = json.data || [];
+
+      // 🔥 FINAL FILTER (exact same as product-packages)
+      data = data.filter((item) =>
+        String(item.gender || "")
+          .trim()
+          .toLowerCase() === g
+      );
+
+      console.log("Filtered Products:", data);
+
       setServices(data);
-      console.log("Services data", data);
-      console.log("Services token", token);
     } catch (error) {
-      console.log("Error loading:", error);
+      console.log("❌ Error in auth test:", error);
     }
-  }
+  };
+  useEffect(() => {
+    fetchServices(gender);
+  }, [gender]);
 
 
 
@@ -358,7 +377,6 @@ const HomeScreen = () => {
   const fetchCertificates = async () => {
     try {
       const token = await getToken();
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/certificates', {
         method: 'GET',
         headers: {
@@ -561,13 +579,6 @@ const HomeScreen = () => {
     }
   }
 
-  const onGenderSelect = async (value) => {
-    const g = value.toLowerCase();
-    await AsyncStorage.setItem("selectedGender", g);
-    setGender(g);       // UI update (home screen)
-  };
-
-
   return (
     loading ? (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -604,8 +615,12 @@ const HomeScreen = () => {
                       : 'User Name'}
                     {/* Hi Anchal ! */}
                   </Text>
-                  <Text style={[styles.locationText, { color: theme.textPrimary }]}>
-                    Indore
+                  <Text
+                    style={[styles.locationText, { color: theme.textPrimary }]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {user.address && user.address.length > 5 ? `${user.address.substring(0, 7)}...` : user.address}
                   </Text>
                 </View>
               </View>
@@ -674,6 +689,7 @@ const HomeScreen = () => {
                   fetchProducts(formatted);
                   fetchPackages(formatted);
                   fetchHomeServices(formatted);
+                  fetchServices(formatted);
                 }}
                 labels={["Male", "Female"]}
                 values={["male", "female"]}
@@ -734,7 +750,7 @@ const HomeScreen = () => {
               onPress={() => handleSectionNavigation('services')}
             />
             <FlatList
-              data={services.data}
+              data={services} // ✅ FIXED: Use services directly, not services.data
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={item => item._id}
@@ -746,7 +762,7 @@ const HomeScreen = () => {
                     style={styles.serviceImage}
                   />
                   <View style={styles.nameItem}>
-                    <Text style={styles.serviceName}>{item.serviceName}</Text>
+                    <Text style={styles.serviceName}>{item.serviceName}</Text> {/* ✅ FIXED: serviceName not name */}
                     <Text style={styles.servicePrice}>₹{item.price}</Text>
                   </View>
                   <Text style={styles.serviceDesc}>{item.title}</Text>
@@ -757,23 +773,27 @@ const HomeScreen = () => {
                     onPress={() => {
                       addToCart({
                         id: item._id.toString(),
-                        name: item.name,
+                        name: item.serviceName, // ✅ FIXED: serviceName not name
                         price: item.price,
-                        qty: 1, // default quantity
+                        qty: 1,
                       });
                       navigation.navigate('ServiceDetails', {
                         item: {
                           ...item,
-                          image: item.image, // ✅ Corrected line
+                          image: item.imageUrl, // ✅ FIXED: imageUrl not image
                         },
                       })
-                    }
-                    }
+                    }}
                   >
                     <Text style={styles.bookBtnText}>Book now</Text>
                   </TouchableOpacity>
                 </View>
               )}
+              ListEmptyComponent={
+                <Text style={{ textAlign: 'center', padding: 20, color: '#666' }}>
+                  No services found for {gender}
+                </Text>
+              }
             />
 
             {/* Appointment Banner */}
@@ -792,7 +812,9 @@ const HomeScreen = () => {
                 <Text style={styles.bannerText}>
                   and take your look to the next level
                 </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("CloneBookAppointment")}
+                <TouchableOpacity onPress={() => navigation.navigate('BookAppointmentScreen', {
+
+                })}
                   style={[styles.bookNowBtn, { backgroundColor: COLORS.primary }]}>
                   <Text style={[styles.bookBtnText, { color: '#fff', fontWeight: 'bold' }]}>Book Appointment</Text>
                 </TouchableOpacity>

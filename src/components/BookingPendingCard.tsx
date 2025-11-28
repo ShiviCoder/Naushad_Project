@@ -12,16 +12,36 @@ const BookingPendingCard = ({ item }) => {
 
   // Format services array
   const formatServices = (services) => {
+    console.log('🔄 formatServices - Input:', services);
+    
     if (!services || services.length === 0) return 'No services';
     
     try {
-      const serviceArray = typeof services[0] === 'string' && services[0].startsWith('[') 
-        ? JSON.parse(services[0])
-        : services;
+      // If services is a string that looks like JSON, parse it
+      if (typeof services === 'string' && services.startsWith('[')) {
+        const parsedServices = JSON.parse(services);
+        console.log('✅ formatServices - Parsed JSON string:', parsedServices);
+        return Array.isArray(parsedServices) ? parsedServices.join(', ') : String(parsedServices);
+      }
       
-      return Array.isArray(serviceArray) ? serviceArray.join(', ') : String(serviceArray);
+      // If services is already an array
+      if (Array.isArray(services)) {
+        console.log('✅ formatServices - Already an array:', services);
+        return services.join(', ');
+      }
+      
+      // If it's a single service object with serviceName
+      if (typeof services === 'object' && services.serviceName) {
+        console.log('✅ formatServices - Single service object:', services.serviceName);
+        return services.serviceName;
+      }
+      
+      // Default case - handle single string
+      console.log('✅ formatServices - Default case:', String(services));
+      return String(services);
     } catch (error) {
-      return services.join(', ');
+      console.log('❌ formatServices - Error:', error);
+      return String(services);
     }
   };
 
@@ -51,17 +71,55 @@ const BookingPendingCard = ({ item }) => {
     }
   };
 
+  // Get services from the item prop - UPDATED
+  const getServices = () => {
+    console.log('📋 BookingPendingCard - Item:', item);
+    
+    // Try different possible properties where services might be stored
+    if (item.service) { // ADDED THIS - check for singular 'service'
+      return formatServices(item.service);
+    } else if (item.services) {
+      return formatServices(item.services);
+    } else if (item.serviceName) {
+      return formatServices([item.serviceName]);
+    } else if (item.serviceList) {
+      return formatServices(item.serviceList);
+    } else if (item.bookedServices) {
+      // If bookedServices is an array of objects with serviceName
+      if (Array.isArray(item.bookedServices) && item.bookedServices[0]?.serviceName) {
+        return formatServices(item.bookedServices.map(service => service.serviceName));
+      }
+      return formatServices(item.bookedServices);
+    }
+    
+    return 'No services';
+  };
+
+  // Handle navigation to booking details
+  const handlePress = () => {
+    console.log('📍 Navigation - Passing booking data:', item);
+    navigation.navigate('BookingPending', { 
+      booking: item,
+      serviceName: getServices(),
+      date: item.date,
+      time: item.time,
+      price: item.totalAmount || item.price,
+      appointmentCode: item.appointmentCode,
+      status: item.status || 'pending'
+    });
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => navigation.navigate('BookingPending', { booking: item })}
+      onPress={handlePress}
     >
       {/* Service + Pending Status */}
       <View style={styles.pendingContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
           <Image style={styles.icon} source={require('../assets/facial.png')} />
           <Text style={[styles.text, { color: theme.textPrimary }]}>
-            {formatServices(item.services)}
+            {getServices()}
           </Text>
         </View>
 
@@ -91,7 +149,7 @@ const BookingPendingCard = ({ item }) => {
       <View style={styles.content}>
         <Image style={styles.icon} source={require('../assets/moneyBag2.png')} />
         <Text style={[styles.text, { color: theme.textPrimary }]}>
-          Code: {item.appointmentCode}
+          Code: {item.appointmentCode || 'N/A'}
         </Text>
       </View>
     </TouchableOpacity>
@@ -111,11 +169,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('4%'),
     justifyContent: 'center',
     gap: hp('1%'),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   pendingContainer: {
     flexDirection: 'row',

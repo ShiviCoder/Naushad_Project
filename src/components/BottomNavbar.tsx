@@ -23,6 +23,7 @@ import {
 
 const { width: screenWidth } = Dimensions.get('window');
 
+// In your BottomNavbar component
 const TAB_META = {
   HomeScreen: {
     icon: (isActive: boolean) => (
@@ -40,13 +41,11 @@ const TAB_META = {
     ),
     label: 'Bookings',
   },
-  BookAppointmentScreen: {
+  BookAppointmentTab: { // CHANGED: Use the new tab name
     icon: (isActive: boolean) =>
       isActive ? (
-        // When active → icon only (inside floating circle)
         <Icon name="add" size={wp('8%')} color="#fff" />
       ) : (
-        // When inactive → circle with primary bg and white icon
         <View
           style={{
             width: wp('12%'),
@@ -69,7 +68,7 @@ const TAB_META = {
         style={{
           width: wp('8%'),
           height: wp('8%'),
-          tintColor: '#fff' ,
+          tintColor: '#fff',
           resizeMode: 'contain',
         }}
       />
@@ -114,22 +113,40 @@ const useExitAppBackHandler = (selectedTab) => {
   }, [exitApp, selectedTab]);
 };
 
-const BottomNavbar = ({ navigation }) => {
+const BottomNavbar = ({ navigation, state }) => {
   const insets = useSafeAreaInsets();
   const animatedScales = useRef({}).current;
   const tabs = Object.keys(TAB_META);
   const circleTranslateX = useRef(new Animated.Value(0)).current;
   const circleScale = useRef(new Animated.Value(1)).current;
-  const [selectedTab, setSelectedTab] = useState('HomeScreen');
+  const [selectedTab, setSelectedTab] = useState(state?.index !== undefined ? state.routeNames[state.index] : 'HomeScreen');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useExitAppBackHandler(selectedTab);
 
+  // 🔥 FIX: Initialize circle position on component mount
   useEffect(() => {
-  const index = tabs.indexOf(selectedTab);
-  const initialX = getTabPosition(index);
-  circleTranslateX.setValue(initialX);
-}, []);
+    const initialTab = state?.index !== undefined ? state.routeNames[state.index] : 'HomeScreen';
+    const index = tabs.indexOf(initialTab);
+    if (index !== -1) {
+      const initialX = getTabPosition(index);
+      circleTranslateX.setValue(initialX);
+      setIsInitialized(true);
+    }
+  }, []); // Empty dependency array - run only once on mount
+
+  // Sync with navigation state
+  useEffect(() => {
+    if (state?.index !== undefined && isInitialized) {
+      const currentTab = state.routeNames[state.index];
+      setSelectedTab(currentTab);
+      const index = tabs.indexOf(currentTab);
+      if (index !== -1) {
+        animateToTab(currentTab);
+      }
+    }
+  }, [state, isInitialized]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -148,7 +165,8 @@ const BottomNavbar = ({ navigation }) => {
   const getTabPosition = index => {
     const tabWidth = screenWidth / tabs.length;
     const circleWidth = 64;
-    return index * tabWidth + tabWidth / 2 - circleWidth / 2;
+    // 🔥 FIX: Calculate center position correctly
+    return index * tabWidth + (tabWidth - circleWidth) / 2;
   };
 
   const animateToTab = tabName => {
@@ -179,11 +197,19 @@ const BottomNavbar = ({ navigation }) => {
 
   const handleTabPress = (tabName) => {
     if (selectedTab === tabName) return;
+    
     setSelectedTab(tabName);
     animateToTab(tabName);
-    requestAnimationFrame(() => {
+    
+    // Navigate with from: 'bottomBar' to indicate it's from bottom tabs
+    if (tabName === 'BookAppointmentScreen') {
+      navigation.navigate(tabName, { 
+        from: 'bottomBar',
+        showTab: true // This tells BookAppointmentScreen to show bottom navbar
+      });
+    } else {
       navigation.navigate(tabName, { from: 'bottomBar' });
-    });
+    }
   };
 
   if (keyboardVisible) return null;
