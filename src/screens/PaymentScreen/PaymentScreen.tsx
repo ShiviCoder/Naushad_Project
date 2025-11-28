@@ -21,6 +21,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Utility function to ensure date is in YYYY-MM-DD format
+// FIXED ensureYYYYMMDD function
 function ensureYYYYMMDD(dateStr) {
   console.log('🔄 ensureYYYYMMDD - Input:', dateStr);
   if (!dateStr) {
@@ -28,10 +29,21 @@ function ensureYYYYMMDD(dateStr) {
     return '';
   }
 
-  // If already in YYYY-MM-DD format, return as is
-  if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+  // If it's already just the date part in YYYY-MM-DD format, return as is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     console.log('✅ ensureYYYYMMDD - Already in YYYY-MM-DD format:', dateStr);
     return dateStr;
+  }
+
+  // If it's an ISO string with time (like "2025-11-26T00:00:00.000Z"), extract only the date part
+  if (dateStr.includes('T')) {
+    const datePart = dateStr.split('T')[0];
+    console.log('✅ ensureYYYYMMDD - Extracted date from ISO string:', datePart);
+    
+    // Validate the extracted date
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      return datePart;
+    }
   }
 
   // If it's a Date object, format it
