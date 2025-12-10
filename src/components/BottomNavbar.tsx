@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
+// BottomNavbar.js
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
@@ -16,247 +16,289 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { MySvgIcon } from '../components/Svg';
 import COLORS from '../utils/Colors';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// In your BottomNavbar component
+/* --------------------------------------------- */
+/* TAB META */
+/* --------------------------------------------- */
 const TAB_META = {
   HomeScreen: {
-    icon: (isActive: boolean) => (
-      <Icon name="home" size={wp('8%')} color={'#fff'} />
+    icon: isActive => (
+      <Icon
+        name="home-outline"
+        size={24}
+        color={isActive ? '#FFFFFF' : COLORS.primary}
+      />
     ),
     label: 'Home',
   },
   BookingScreen: {
-    icon: (isActive: boolean) => (
+    icon: isActive => (
       <MySvgIcon
-        width={wp('8%')}
-        height={hp('3.3%')}
-        fill={'#fff'}
+        width={24}
+        height={24}
+        fill={isActive ? '#FFFFFF' : COLORS.primary}
       />
     ),
     label: 'Bookings',
   },
-  BookAppointmentTab: { // CHANGED: Use the new tab name
-    icon: (isActive: boolean) =>
-      isActive ? (
-        <Icon name="add" size={wp('8%')} color="#fff" />
-      ) : (
-        <View
-          style={{
-            width: wp('12%'),
-            height: wp('12%'),
-            borderRadius: wp('6%'),
-            backgroundColor: COLORS.primary,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Icon name="add" size={wp('8%')} color="#fff" />
-        </View>
-      ),
-    label: 'Book',
-  },
-  BlankScreen: {
-    icon: (isActive: boolean) => (
+  BookAppointmentTab: {
+    icon: isActive => (
       <Image
-        source={require('../assets/referral.png')}
+        source={require('../assets/plus.png')}
         style={{
-          width: wp('8%'),
-          height: wp('8%'),
-          tintColor: '#fff',
-          resizeMode: 'contain',
+          width: 24,
+          height: 24,
+          tintColor: isActive ? '#FFFFFF' : COLORS.primary,
         }}
       />
     ),
-    label: 'Refer',
+    label: 'Book',
+  },
+  BlankScreen: {
+    icon: isActive => (
+      <Image
+        source={require('../assets/order.png')}
+        style={{
+          width: 24,
+          height: 24,
+          tintColor: isActive ? '#FFFFFF' : COLORS.primary,
+        }}
+      />
+    ),
+    label: 'Order History',
   },
   AccountScreen: {
-    icon: (isActive: boolean) => (
+    icon: isActive => (
       <Icon
         name="person-outline"
-        size={wp('8%')}
-        color={'#fff'}
+        size={24}
+        color={isActive ? '#FFFFFF' : COLORS.primary}
       />
     ),
     label: 'Account',
   },
 };
 
-const useExitAppBackHandler = (selectedTab) => {
+/* --------------------------------------------- */
+/* EXIT HANDLER */
+/* --------------------------------------------- */
+const useExitAppBackHandler = (selectedTab, isNavigatorFocused) => {
   const [exitApp, setExitApp] = useState(false);
   const exitTimerRef = useRef(null);
 
   useEffect(() => {
     const backAction = () => {
-      if (selectedTab !== 'HomeScreen') return false;
+      if (!isNavigatorFocused || selectedTab !== 'HomeScreen') return false;
+
       if (!exitApp) {
         setExitApp(true);
         ToastAndroid.show('Press again to exit', ToastAndroid.SHORT);
-        exitTimerRef.current = setTimeout(() => setExitApp(false), 2000);
-        return true;
-      } else {
-        BackHandler.exitApp();
+
+        exitTimerRef.current = setTimeout(() => {
+          setExitApp(false);
+        }, 2000);
+
         return true;
       }
+
+      BackHandler.exitApp();
+      return true;
     };
 
-    const handler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    const handler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
     return () => {
       handler.remove();
-      clearTimeout(exitTimerRef.current);
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
     };
-  }, [exitApp, selectedTab]);
+  }, [exitApp, selectedTab, isNavigatorFocused]);
 };
 
+/* --------------------------------------------- */
+/* MAIN NAVBAR */
+/* --------------------------------------------- */
 const BottomNavbar = ({ navigation, state }) => {
   const insets = useSafeAreaInsets();
-  const animatedScales = useRef({}).current;
   const tabs = Object.keys(TAB_META);
-  const circleTranslateX = useRef(new Animated.Value(0)).current;
-  const circleScale = useRef(new Animated.Value(1)).current;
-  const [selectedTab, setSelectedTab] = useState(state?.index !== undefined ? state.routeNames[state.index] : 'HomeScreen');
+  const tabCount = tabs.length;
+  const tabWidth = screenWidth / tabCount;
+
+  const animatedLabel = useRef({});
+  const circleX = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const [selectedTab, setSelectedTab] = useState('HomeScreen');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  useExitAppBackHandler(selectedTab);
+  useExitAppBackHandler(selectedTab, true);
 
-  // 🔥 FIX: Initialize circle position on component mount
+  /* INIT LABEL ANIM */
+  const initAnimations = useCallback(() => {
+    tabs.forEach(t => {
+      animatedLabel.current[t] = new Animated.Value(0);
+    });
+  }, []);
+
   useEffect(() => {
-    const initialTab = state?.index !== undefined ? state.routeNames[state.index] : 'HomeScreen';
-    const index = tabs.indexOf(initialTab);
-    if (index !== -1) {
-      const initialX = getTabPosition(index);
-      circleTranslateX.setValue(initialX);
-      setIsInitialized(true);
+    initAnimations();
+    const initial = state.routeNames[state.index];
+
+    setSelectedTab(initial);
+    animatedLabel.current[initial]?.setValue(1);
+
+    circleX.setValue(getPos(tabs.indexOf(initial)));
+    setInitialized(true);
+  }, []);
+
+  /* SYNC NAVIGATION */
+  useEffect(() => {
+    if (!initialized) return;
+    const current = state.routeNames[state.index];
+    if (current !== selectedTab) {
+      setSelectedTab(current);
+      animateTo(current);
     }
-  }, []); // Empty dependency array - run only once on mount
+  }, [state.index]);
 
-  // Sync with navigation state
+  /* KEYBOARD LISTENER */
   useEffect(() => {
-    if (state?.index !== undefined && isInitialized) {
-      const currentTab = state.routeNames[state.index];
-      setSelectedTab(currentTab);
-      const index = tabs.indexOf(currentTab);
-      if (index !== -1) {
-        animateToTab(currentTab);
-      }
-    }
-  }, [state, isInitialized]);
-
-  useEffect(() => {
-    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
-
+    const show = Keyboard.addListener('keyboardDidShow', () =>
+      setKeyboardVisible(true),
+    );
+    const hide = Keyboard.addListener('keyboardDidHide', () =>
+      setKeyboardVisible(false),
+    );
     return () => {
-      showSub.remove();
-      hideSub.remove();
+      show.remove();
+      hide.remove();
     };
   }, []);
 
-  tabs.forEach(tab => {
-    if (!animatedScales[tab]) animatedScales[tab] = new Animated.Value(1);
-  });
+  /* --------------------------------------------- */
+  /* POSITION CALC — FIXED (circle perfectly centered) */
+  /* --------------------------------------------- */
+  const getPos = index => index * tabWidth + tabWidth / 2 - 32; // 32 = half of circle width
 
-  const getTabPosition = index => {
-    const tabWidth = screenWidth / tabs.length;
-    const circleWidth = 64;
-    // 🔥 FIX: Calculate center position correctly
-    return index * tabWidth + (tabWidth - circleWidth) / 2;
-  };
+  /* --------------------------------------------- */
+  /* ANIMATIONS */
+  /* --------------------------------------------- */
+  const animateTo = tab => {
+    if (isAnimating) return;
 
-  const animateToTab = tabName => {
-    const index = tabs.indexOf(tabName);
-    const target = getTabPosition(index);
+    setIsAnimating(true);
+
+    const index = tabs.indexOf(tab);
+    const targetX = getPos(index);
+
+    const labelAnim = tabs.map(t =>
+      Animated.timing(animatedLabel.current[t], {
+        toValue: t === tab ? 1 : 0,
+        duration: 200,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: false,
+      }),
+    );
 
     Animated.parallel([
-      Animated.timing(circleTranslateX, {
-        toValue: target,
-        duration: 150,
+      Animated.parallel(labelAnim),
+      Animated.timing(circleX, {
+        toValue: targetX,
+        duration: 260,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.sequence([
-        Animated.timing(circleScale, {
-          toValue: 1.05,
-          duration: 80,
+        Animated.timing(scale, {
+          toValue: 1.15,
+          duration: 140,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
-        Animated.timing(circleScale, {
+        Animated.timing(scale, {
           toValue: 1,
-          duration: 80,
+          duration: 140,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
       ]),
-    ]).start();
+    ]).start(() => setIsAnimating(false));
   };
 
-  const handleTabPress = (tabName) => {
-    if (selectedTab === tabName) return;
-    
-    setSelectedTab(tabName);
-    animateToTab(tabName);
-    
-    // Navigate with from: 'bottomBar' to indicate it's from bottom tabs
-    if (tabName === 'BookAppointmentScreen') {
-      navigation.navigate(tabName, { 
-        from: 'bottomBar',
-        showTab: true // This tells BookAppointmentScreen to show bottom navbar
-      });
-    } else {
-      navigation.navigate(tabName, { from: 'bottomBar' });
-    }
+  const onPressTab = tab => {
+    if (isAnimating || tab === selectedTab) return;
+    setSelectedTab(tab);
+    animateTo(tab);
+    navigation.navigate(tab);
   };
 
   if (keyboardVisible) return null;
 
+  /* --------------------------------------------- */
+  /* RENDER */
+  /* --------------------------------------------- */
   return (
-    <View style={[styles.bottomNavContainer, { paddingBottom: insets.bottom }]}>
-      <View style={styles.tabBar}>
-        {/* 🔹 Floating Active Circle */}
+    <View style={styles.container}>
+      <View style={[styles.innerContainer, { paddingBottom: insets.bottom }]}>
+        {/* ACTIVE FLOATING CIRCLE */}
         <Animated.View
           style={[
             styles.activeCircle,
             {
-              backgroundColor: COLORS.primary,
-              transform: [
-                { translateX: circleTranslateX },
-                { scale: circleScale },
-              ],
+              transform: [{ translateX: circleX }, { scale }],
             },
           ]}
         >
-          {TAB_META[selectedTab]?.icon(true)}
+          {TAB_META[selectedTab].icon(true)}
         </Animated.View>
 
-        {/* 🔹 Tabs */}
-        <View style={styles.tabsContainer}>
+        {/* TABS */}
+        <View style={styles.tabsRow}>
           {tabs.map(tab => {
-            const meta = TAB_META[tab];
             const isActive = selectedTab === tab;
 
             return (
               <TouchableOpacity
                 key={tab}
-                onPress={() => handleTabPress(tab)}
-                style={[styles.tabItem, { width: screenWidth / tabs.length }]}
-                activeOpacity={0.8}
+                style={[styles.tabButton, { width: tabWidth }]}
+                onPress={() => onPressTab(tab)}
+                activeOpacity={0.85}
               >
-                {/* Always render icon to preserve space */}
-                <View style={{ opacity: isActive ? 0 : 1 }}>
-                  {meta.icon(false)}
-                </View>
-
-                {/* Label only when active */}
-                {isActive && (
-                  <View style={{ position: 'absolute', top: selectedTab === 'BookAppointmentScreen' ? wp('7.5%') : wp('4%'), }}>
-                    <Text style={styles.labelActive}>{meta.label}</Text>
+                {/* Inactive Icon */}
+                {!isActive && (
+                  <View style={styles.iconWrap}>
+                    {TAB_META[tab].icon(false)}
                   </View>
                 )}
+
+                {/* Active Label */}
+                <Animated.Text
+                  style={[
+                    styles.tabLabel,
+                    {
+                      opacity: animatedLabel.current[tab] || 0,
+                      transform: [
+                        {
+                          translateY: animatedLabel.current[tab]
+                            ? animatedLabel.current[tab].interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [8, 0],
+                              })
+                            : 0,
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  {TAB_META[tab].label}
+                </Animated.Text>
               </TouchableOpacity>
             );
           })}
@@ -266,56 +308,49 @@ const BottomNavbar = ({ navigation, state }) => {
   );
 };
 
+/* --------------------------------------------- */
+/* STYLES */
+/* --------------------------------------------- */
 const styles = StyleSheet.create({
-  bottomNavContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  tabBar: {
-    height: hp('9%'),
-    backgroundColor: '#1A1A1A',
-    borderTopColor: 'rgba(255,255,255,0.1)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 10,
+  container: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  innerContainer: {
+    backgroundColor: '#FEFBFB',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.08)',
+    height: 82,
   },
   activeCircle: {
     position: 'absolute',
-    top: -28,
-    left: 0,
+    top: -30,
     width: 64,
     height: 64,
     borderRadius: 32,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
     elevation: 8,
     borderWidth: 3,
-    borderColor: '#1A1A1A',
+    borderColor: '#FFFBEF',
     zIndex: 10,
   },
-  tabsContainer: {
+  tabsRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    paddingBottom: hp('3%'),
-    paddingTop: hp('2%'),
+    paddingTop: 18,
   },
-  tabItem: {
+  tabButton: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  labelActive: {
-    color: '#fff',
+  iconWrap: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 26,
+    marginBottom: 4,
+  },
+  tabLabel: {
     fontSize: wp('3.2%'),
     fontWeight: '600',
+    color: COLORS.primary,
     textAlign: 'center',
   },
 });

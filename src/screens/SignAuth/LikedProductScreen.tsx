@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   BackHandler,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Head from "../../components/Head";
 import {
   widthPercentageToDP as wp,
@@ -16,6 +18,11 @@ import {
 } from "react-native-responsive-screen";
 import COLORS from "../../utils/Colors";
 
+const { width } = Dimensions.get('window');
+const guidelineBaseWidth = 375;
+const scale = size => (width / guidelineBaseWidth) * size;
+const moderateScale = (size, factor = 0.5) =>
+  size + (scale(size) - size) * factor;
 
 export default function LikedProductsScreen({ route, navigation }) {
   const { likedProducts = [], products = [], theme } = route.params || {};
@@ -23,147 +30,156 @@ export default function LikedProductsScreen({ route, navigation }) {
   const likedItems = products.filter((p) => likedProducts.includes(p._id));
 
   useEffect(() => {
-  const backAction = () => {
-    navigation.goBack(); 
-    return true; 
-  };
+    const backAction = () => {
+      navigation.goBack(); 
+      return true; 
+    };
 
-  const backHandler = BackHandler.addEventListener(
-    "hardwareBackPress",
-    backAction
-  );
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
-  return () => backHandler.remove();
-}, []);
-
+    return () => backHandler.remove();
+  }, [navigation]);
 
   return (
-    <>
-     <Head title="Liked Products" onBackPress={() => navigation.goBack()} />
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme?.dark ? "#000" : "#fff",
-        paddingHorizontal: wp("1%"),
-      }}
-    >
-     
-
-      {likedItems.length > 0 ? (
-        <FlatList
-          data={likedItems}
-          numColumns={2}
-          contentContainerStyle={{ paddingVertical: hp("2%") }}
-          keyExtractor={(item) => item._id.toString()}
-          renderItem={({ item }) => {
-            const selectedImage = { uri: item.image }; // fallback
-            return (
-              <TouchableOpacity
-                style={styles.productCard}
-                onPress={() =>
-                  navigation.navigate("ProductDetails", { product: item })
-                }
-              >
-                <Image
-                  resizeMode="cover"
-                  source={selectedImage}
-                  style={styles.ImageStyle}
-                />
-                <Text
-                  numberOfLines={1}
-                  style={[styles.productName, { color: "#000" }]}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme?.dark ? "#000" : "#fff" }]}>
+      <Head title="Liked Products" onBackPress={() => navigation.goBack()} />
+      
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme?.dark ? "#000" : "#fff" }
+        ]}
+      >
+        {likedItems.length > 0 ? (
+          <FlatList
+            data={likedItems}
+            numColumns={2}
+            contentContainerStyle={{ paddingVertical: hp("2%") }}
+            keyExtractor={(item) => item._id.toString()}
+            renderItem={({ item }) => {
+              const selectedImage = { uri: item.image }; // fallback
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.productCard,
+                    { backgroundColor: COLORS.shadow }
+                  ]}
+                  onPress={() =>
+                    navigation.navigate("ProductDetails", { product: item })
+                  }
                 >
-                  {item.name}
-                </Text>
-
-                <View style={styles.OuterPriceContainer}>
-                  <View style={styles.InnerPriceContainer}>
-                    <Text style={[styles.priceStyle, { color: "#000" }]}>
-                      ₹{item.price}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.DiscountStyle,
-                        { color: theme?.dark ? "#42BA86" : "#42BA86" },
-                      ]}
-                    >
-                      ({item.offer})
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.descContain}>
                   <Image
-                    resizeMode="contain"
-                    source={{
-                      uri: "http://naushad.onrender.com/uploads/icons/1761913753959-Leaf1.png",
-                    }}
-                    style={styles.featureIconStyle}
+                    resizeMode="cover"
+                    source={selectedImage}
+                    style={styles.ImageStyle}
                   />
                   <Text
-                    style={[styles.DescStyle, { color: "#000" }]}
                     numberOfLines={1}
-                    ellipsizeMode="tail"
+                    style={[styles.productName, { color: "#000" }]}
                   >
-                    {item.description}
+                    {item.name}
                   </Text>
-                </View>
 
-                <View style={styles.OutRatContain}>
-                  <View
-                    style={[
-                      styles.InnerRatContain,
-                      {
-                        backgroundColor: theme?.dark ? "#0f8a43" : "#09932B",
-                      },
-                    ]}
-                  >
+                  <View style={styles.OuterPriceContainer}>
+                    <View style={styles.InnerPriceContainer}>
+                      <Text style={[styles.priceStyle, { color: "#000" }]}>
+                        ₹{item.price}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.DiscountStyle,
+                          { color: theme?.dark ? "#42BA86" : "#42BA86" },
+                        ]}
+                      >
+                        ({item.offer})
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.descContain}>
+                    <Image
+                      resizeMode="contain"
+                      source={{
+                        uri: "http://naushad.onrender.com/uploads/icons/1761913753959-Leaf1.png",
+                      }}
+                      style={styles.featureIconStyle}
+                    />
                     <Text
+                      style={[styles.DescStyle, { color: "#000" }]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.description}
+                    </Text>
+                  </View>
+
+                  <View style={styles.OutRatContain}>
+                    <View
                       style={[
-                        styles.ratingTextStyle,
+                        styles.InnerRatContain,
                         {
-                          color: theme?.dark ? "#861919ff" : "#e6e2e2ff",
+                          backgroundColor: theme?.dark ? "#0f8a43" : "#09932B",
                         },
                       ]}
                     >
-                      {item.rating}
+                      <Text
+                        style={[
+                          styles.ratingTextStyle,
+                          {
+                            color: theme?.dark ? "#861919ff" : "#e6e2e2ff",
+                          },
+                        ]}
+                      >
+                        {item.rating}
+                      </Text>
+                      <Image
+                        resizeMode="contain"
+                        style={styles.starStyle}
+                        source={require("../../assets/OurProduct/star1.png")}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.reviewStyle,
+                        { color: theme?.dark ? "#ccc" : "#ACACAC" },
+                      ]}
+                    >
+                      ({item.reviews?.[0] || 0})
                     </Text>
-                    <Image
-                      resizeMode="contain"
-                      style={styles.starStyle}
-                      source={require("../../assets/OurProduct/star1.png")}
-                    />
                   </View>
-                  <Text
-                    style={[
-                      styles.reviewStyle,
-                      { color: theme?.dark ? "#ccc" : "#ACACAC" },
-                    ]}
-                  >
-                    ({item.reviews?.[0] || 0})
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      ) : (
-        <Text
-          style={{
-            textAlign: "center",
-            marginTop: hp("20%"),
-            fontSize: wp("5%"),
-            color: theme?.textPrimary,
-          }}
-        >
-          No liked products yet ❤️
-        </Text>
-      )}
-    </View></>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        ) : (
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: hp("20%"),
+              fontSize: wp("5%"),
+              color: theme?.textPrimary,
+            }}
+          >
+            No liked products yet ❤️
+          </Text>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { 
+    flex: 1 
+  },
+  container: { 
+    flex: 1, 
+    paddingTop: moderateScale(20),
+    paddingHorizontal: wp("1%"),
+  },
   productCard: {
     width: wp("44%"),
     borderRadius: wp("7%"),
@@ -172,7 +188,6 @@ const styles = StyleSheet.create({
     marginHorizontal: wp("2%"),
     paddingVertical: hp("1.5%"),
     paddingHorizontal: wp("2%"),
-    backgroundColor: COLORS.shadow,
   },
   ImageStyle: {
     width: wp("40%"),

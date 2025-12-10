@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   StatusBar,
   ScrollView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Head from '../../components/Head';
@@ -33,15 +34,46 @@ const copyToClipboard = text => {
 };
 
 const ReferFriendScreen = () => {
-  const [referralCode] = useState('NAUS6U3MXT');
+  const [referralCode, setReferralCode] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('https://naushad.onrender.com/api/auth/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.user && data.user.referralCode) {
+        setReferralCode(data.user.referralCode);
+      } else {
+        setReferralCode('NAU21NHJ7K'); // fallback
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setReferralCode('NAU21NHJ7K'); // fallback
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const copyCodeToClipboard = () => {
     try {
       const success = copyToClipboard(referralCode);
       if (success) {
         setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2000); // reset after 2s
       } else {
         Alert.alert(
           'Copy Referral Code',
@@ -62,12 +94,27 @@ const ReferFriendScreen = () => {
       const shareMessage = `Join me on our salon app! Discover premium beauty and grooming services tailored just for you. Use my referral code: ${referralCode}`;
       await Share.share({
         message: shareMessage,
-        title: 'Invite Friends',
+        title: 'Invite Friends to Salon App',
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to share content');
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <StatusBar
+          barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.background}
+        />
+        <Head title="Refer a Friend" showBack={true} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -121,7 +168,7 @@ const ReferFriendScreen = () => {
               ]}
               onPress={copyCodeToClipboard}
             >
-              <Text style={[styles.copyButtonText,{color:COLORS.primary}]}>
+              <Text style={styles.copyButtonText}>
                 {copiedCode ? 'Copied!' : 'Copy Code'}
               </Text>
             </TouchableOpacity>
@@ -163,7 +210,7 @@ const ReferFriendScreen = () => {
                   Friends Join
                 </Text>
                 <Text style={[styles.stepText, { color: theme.textSecondary }]}>
-                  When your friend signs up using your referral code, they’ll
+                  When your friend signs up using your referral code, they'll
                   join our salon app community instantly.
                 </Text>
               </View>
@@ -197,6 +244,11 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: wp('5%'),
     paddingTop: hp('0%'),
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   mainTitle: {
     fontSize: wp('6%'),
@@ -232,13 +284,14 @@ const styles = StyleSheet.create({
     marginBottom: hp('2%'),
   },
   copyButton: {
-    paddingHorizontal: wp('8%'),
-    paddingVertical: hp('1.8%'),
+    paddingHorizontal: wp('30%'),
+    paddingVertical: hp('1.5%'),
     borderRadius: wp('2%'),
   },
   copyButtonText: {
     fontSize: wp('4%'),
     fontWeight: '600',
+    color: COLORS.primary,
   },
   signupButton: {
     paddingVertical: hp('1.3%'),

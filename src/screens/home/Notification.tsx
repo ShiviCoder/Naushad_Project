@@ -54,7 +54,7 @@ const NotificationItem = ({ item, index, theme, onPress, onDelete }) => {
 
   const handleDeletePress = async () => {
     if (isDeleting) return;
-    
+
     setIsDeleting(true);
     console.log(`🗑️ Deleting notification with ID: ${item._id}`);
     await onDelete(item._id);
@@ -66,7 +66,7 @@ const NotificationItem = ({ item, index, theme, onPress, onDelete }) => {
       <Animated.View
         style={[
           styles.notificationItem,
-          { 
+          {
             backgroundColor: theme.card,
             transform: [{ translateX }],
             opacity,
@@ -89,8 +89,11 @@ const NotificationItem = ({ item, index, theme, onPress, onDelete }) => {
               {formatTime(item.createdAt)}
             </Text>
           </View>
-          
-          <Text style={[styles.message, { color: theme.textSecondary }]} numberOfLines={2}>
+
+          <Text
+            style={[styles.message, { color: theme.textSecondary }]}
+            numberOfLines={2}
+          >
             {item.message}
           </Text>
 
@@ -104,22 +107,24 @@ const NotificationItem = ({ item, index, theme, onPress, onDelete }) => {
         </View>
 
         {/* Delete Icon */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
-            styles.deleteIconButton, 
-            { 
-              backgroundColor: isDeleting 
-                ? theme.dark ? '#444' : '#e2e8f0' 
+            styles.deleteIconButton,
+            {
+              backgroundColor: isDeleting
+                ? theme.dark
+                  ? '#444'
+                  : '#e2e8f0'
                 : 'rgba(239, 68, 68, 0.1)',
-            }
+            },
           ]}
           onPress={handleDeletePress}
           disabled={isDeleting}
         >
-          <Icon 
-            name={isDeleting ? "hourglass-empty" : "delete"} 
-            size={wp('4.5%')} 
-            color={isDeleting ? theme.textSecondary : '#ef4444'} 
+          <Icon
+            name={isDeleting ? 'hourglass-empty' : 'delete'}
+            size={wp('4.5%')}
+            color={isDeleting ? theme.textSecondary : '#ef4444'}
           />
         </TouchableOpacity>
       </Animated.View>
@@ -128,7 +133,13 @@ const NotificationItem = ({ item, index, theme, onPress, onDelete }) => {
 };
 
 // ✅ Notification Detail Modal Component
-const NotificationDetailModal = ({ visible, notification, onClose, theme, onDelete }) => {
+const NotificationDetailModal = ({
+  visible,
+  notification,
+  onClose,
+  theme,
+  onDelete,
+}) => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(hp('100%')));
 
@@ -167,7 +178,9 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
   const iconData = getNotificationIcon(notification.type);
 
   const handleDeleteFromModal = async () => {
-    console.log(`🗑️ Deleting notification from modal with ID: ${notification._id}`);
+    console.log(
+      `🗑️ Deleting notification from modal with ID: ${notification._id}`,
+    );
     await onDelete(notification._id);
     onClose();
   };
@@ -180,27 +193,39 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
       onRequestClose={onClose}
     >
       <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
-        <Animated.View 
+        <Animated.View
           style={[
-            styles.modalContainer, 
-            { 
+            styles.modalContainer,
+            {
               backgroundColor: theme.modalBackground || '#ffffff',
-              transform: [{ translateY: slideAnim }]
-            }
+              transform: [{ translateY: slideAnim }],
+            },
           ]}
         >
           {/* Modal Header */}
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleRow}>
-              <View style={[styles.modalIconContainer, { backgroundColor: iconData.bg }]}>
-                <Icon name={iconData.icon} size={wp('6%')} color={iconData.color} />
+              <View
+                style={[
+                  styles.modalIconContainer,
+                  { backgroundColor: iconData.bg },
+                ]}
+              >
+                <Icon
+                  name={iconData.icon}
+                  size={wp('6%')}
+                  color={iconData.color}
+                />
               </View>
               <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>
                 Notification Details
               </Text>
             </View>
-            <TouchableOpacity 
-              style={[styles.closeButton, { backgroundColor: theme.dark ? '#333' : '#f1f5f9' }]}
+            <TouchableOpacity
+              style={[
+                styles.closeButton,
+                { backgroundColor: theme.dark ? '#333' : '#f1f5f9' },
+              ]}
               onPress={onClose}
             >
               <Icon name="close" size={wp('5%')} color={theme.textSecondary} />
@@ -208,13 +233,17 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
           </View>
 
           {/* Modal Content */}
-          <ScrollView 
+          <ScrollView
             style={styles.modalContent}
             showsVerticalScrollIndicator={false}
           >
             {/* Notification Title */}
             <View style={styles.detailSection}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Title</Text>
+              <Text
+                style={[styles.detailLabel, { color: theme.textSecondary }]}
+              >
+                Title
+              </Text>
               <Text style={[styles.detailValue, { color: theme.textPrimary }]}>
                 {notification.title || 'Notification'}
               </Text>
@@ -222,17 +251,29 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
 
             {/* Notification Message */}
             <View style={styles.detailSection}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Message</Text>
-              <Text style={[styles.detailMessage, { color: theme.textPrimary }]}>
+              <Text
+                style={[styles.detailLabel, { color: theme.textSecondary }]}
+              >
+                Message
+              </Text>
+              <Text
+                style={[styles.detailMessage, { color: theme.textPrimary }]}
+              >
                 {notification.message}
               </Text>
             </View>
 
             {/* Notification Type */}
             <View style={styles.detailSection}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Type</Text>
+              <Text
+                style={[styles.detailLabel, { color: theme.textSecondary }]}
+              >
+                Type
+              </Text>
               <View style={styles.typeBadge}>
-                <View style={[styles.typeDot, { backgroundColor: iconData.color }]} />
+                <View
+                  style={[styles.typeDot, { backgroundColor: iconData.color }]}
+                />
                 <Text style={[styles.typeText, { color: theme.textPrimary }]}>
                   {notification.type || 'info'}
                 </Text>
@@ -241,7 +282,11 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
 
             {/* Timestamp */}
             <View style={styles.detailSection}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Time</Text>
+              <Text
+                style={[styles.detailLabel, { color: theme.textSecondary }]}
+              >
+                Time
+              </Text>
               <Text style={[styles.detailValue, { color: theme.textPrimary }]}>
                 {formatDetailedTime(notification.createdAt)}
               </Text>
@@ -249,7 +294,11 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
 
             {/* Notification ID */}
             <View style={styles.detailSection}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Notification ID</Text>
+              <Text
+                style={[styles.detailLabel, { color: theme.textSecondary }]}
+              >
+                Notification ID
+              </Text>
               <Text style={[styles.detailId, { color: theme.textSecondary }]}>
                 {notification._id}
               </Text>
@@ -258,12 +307,28 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
             {/* Additional Information */}
             {(notification.additionalData || notification.data) && (
               <View style={styles.detailSection}>
-                <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
+                <Text
+                  style={[styles.detailLabel, { color: theme.textSecondary }]}
+                >
                   Additional Info
                 </Text>
-                <View style={[styles.additionalInfoBox, { backgroundColor: theme.dark ? '#333' : '#f8fafc' }]}>
-                  <Text style={[styles.additionalInfoText, { color: theme.textSecondary }]}>
-                    {JSON.stringify(notification.additionalData || notification.data, null, 2)}
+                <View
+                  style={[
+                    styles.additionalInfoBox,
+                    { backgroundColor: theme.dark ? '#333' : '#f8fafc' },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.additionalInfoText,
+                      { color: theme.textSecondary },
+                    ]}
+                  >
+                    {JSON.stringify(
+                      notification.additionalData || notification.data,
+                      null,
+                      2,
+                    )}
                   </Text>
                 </View>
               </View>
@@ -271,15 +336,30 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
           </ScrollView>
 
           {/* Modal Footer */}
-          <View style={[styles.modalFooter, { borderTopColor: theme.dark ? '#333' : '#e2e8f0' }]}>
-            <TouchableOpacity 
-              style={[styles.deleteButton, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}
+          <View
+            style={[
+              styles.modalFooter,
+              { borderTopColor: theme.dark ? '#333' : '#e2e8f0' },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.deleteButton,
+                { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
+              ]}
               onPress={handleDeleteFromModal}
             >
-              <Icon name="delete" size={wp('4%')} color="#ef4444" style={styles.deleteButtonIcon} />
-              <Text style={[styles.deleteButtonText, { color: '#ef4444' }]}>Delete</Text>
+              <Icon
+                name="delete"
+                size={wp('4%')}
+                color="#ef4444"
+                style={styles.deleteButtonIcon}
+              />
+              <Text style={[styles.deleteButtonText, { color: '#ef4444' }]}>
+                Delete
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: COLORS.primary }]}
               onPress={onClose}
             >
@@ -293,25 +373,37 @@ const NotificationDetailModal = ({ visible, notification, onClose, theme, onDele
 };
 
 // ✅ Helper functions outside the component
-const getNotificationIcon = (type) => {
+const getNotificationIcon = type => {
   switch (type) {
     case 'success':
-      return { icon: 'check-circle', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
+      return {
+        icon: 'check-circle',
+        color: '#10b981',
+        bg: 'rgba(16, 185, 129, 0.1)',
+      };
     case 'warning':
-      return { icon: 'warning', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' };
+      return {
+        icon: 'warning',
+        color: '#f59e0b',
+        bg: 'rgba(245, 158, 11, 0.1)',
+      };
     case 'error':
       return { icon: 'error', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' };
     case 'info':
       return { icon: 'info', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' };
     default:
-      return { icon: 'notifications', color: COLORS.primary, bg: 'rgba(139, 92, 246, 0.1)' };
+      return {
+        icon: 'notifications',
+        color: COLORS.primary,
+        bg: 'rgba(139, 92, 246, 0.1)',
+      };
   }
 };
 
 // ✅ Format time function
-const formatTime = (dateString) => {
+const formatTime = dateString => {
   if (!dateString) return 'Recently';
-  
+
   const date = new Date(dateString);
   const now = new Date();
   const diff = now - date;
@@ -327,9 +419,9 @@ const formatTime = (dateString) => {
 };
 
 // ✅ Format detailed time function
-const formatDetailedTime = (dateString) => {
+const formatDetailedTime = dateString => {
   if (!dateString) return 'Recently';
-  
+
   const date = new Date(dateString);
   const now = new Date();
   const diff = now - date;
@@ -342,7 +434,7 @@ const formatDetailedTime = (dateString) => {
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 
   if (minutes < 1) return `Just now • ${formattedDate}`;
@@ -373,15 +465,15 @@ const NotificationsScreen = ({ navigation }) => {
     };
 
     const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
+      'hardwareBackPress',
+      backAction,
     );
 
     return () => backHandler.remove();
   }, [modalVisible]);
 
   // ✅ Handle notification press
-  const handleNotificationPress = (notification) => {
+  const handleNotificationPress = notification => {
     setSelectedNotification(notification);
     setModalVisible(true);
   };
@@ -396,11 +488,11 @@ const NotificationsScreen = ({ navigation }) => {
   const getUserId = async () => {
     try {
       console.log('🔍 Starting to fetch user ID from AsyncStorage...');
-      
+
       // Try multiple methods to get userId
       const storedUserId = await AsyncStorage.getItem('userId');
       const userDataString = await AsyncStorage.getItem('userData');
-      
+
       console.log('📦 Direct userId from AsyncStorage:', storedUserId);
       console.log('📦 userData from AsyncStorage:', userDataString);
 
@@ -411,7 +503,7 @@ const NotificationsScreen = ({ navigation }) => {
         try {
           const userData = JSON.parse(userDataString);
           console.log('📊 Parsed userData:', userData);
-          
+
           // Check different possible locations for userId
           if (userData.user && userData.user._id) {
             finalUserId = userData.user._id;
@@ -442,13 +534,13 @@ const NotificationsScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ Fetch user notifications
+  // ✅ Fetch user notifications and sort by latest first
   const getUserNotifications = async () => {
     try {
       console.log('🔄 Starting to fetch notifications...');
-      
+
       const user_Id = await getUserId();
-      
+
       if (!user_Id) {
         console.log('❌ Cannot fetch notifications: No userId available');
         setNotifications([]);
@@ -476,11 +568,19 @@ const NotificationsScreen = ({ navigation }) => {
 
       const data = await response.json();
       console.log('📩 Full API Response:', JSON.stringify(data, null, 2));
-      
+
       if (data.success) {
         console.log('✅ Notifications fetched successfully');
         console.log('📋 Number of notifications:', data.data?.length || 0);
-        setNotifications(data.data || []);
+
+        // ✅ Sort notifications by createdAt DESCENDING (latest first)
+        const sortedNotifications = (data.data || []).sort((a, b) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateB - dateA; // Latest first
+        });
+
+        setNotifications(sortedNotifications);
       } else {
         console.log('❌ API returned success: false');
         setNotifications([]);
@@ -489,17 +589,19 @@ const NotificationsScreen = ({ navigation }) => {
       console.log('❌ Error fetching notifications:', error);
       console.log('🔍 Error details:', {
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       setNotifications([]);
     }
   };
 
   // ✅ Delete individual notification
-  const deleteNotification = async (notificationId) => {
+  const deleteNotification = async notificationId => {
     try {
-      console.log(`🗑️ Starting to delete notification with ID: ${notificationId}`);
-      
+      console.log(
+        `🗑️ Starting to delete notification with ID: ${notificationId}`,
+      );
+
       if (!notificationId) {
         console.log('❌ Cannot delete: No notification ID provided');
         return false;
@@ -524,15 +626,23 @@ const NotificationsScreen = ({ navigation }) => {
 
       const data = await response.json();
       console.log('📩 Delete API Response:', JSON.stringify(data, null, 2));
-      
+
       if (data.success) {
         console.log('✅ Notification deleted successfully');
-        
-        // Remove the deleted notification from the local state
-        setNotifications(prevNotifications => 
-          prevNotifications.filter(notification => notification._id !== notificationId)
-        );
-        
+
+        // Remove the deleted notification from the local state and maintain sorting
+        setNotifications(prevNotifications => {
+          const updated = prevNotifications.filter(
+            notification => notification._id !== notificationId,
+          );
+          // Re-sort to ensure latest first order is maintained
+          return updated.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB - dateA;
+          });
+        });
+
         console.log('🔄 Notifications list updated after deletion');
         return true;
       } else {
@@ -543,7 +653,7 @@ const NotificationsScreen = ({ navigation }) => {
       console.log('❌ Error deleting notification:', error);
       console.log('🔍 Error details:', {
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       return false;
     }
@@ -552,7 +662,7 @@ const NotificationsScreen = ({ navigation }) => {
   // ✅ Delete all notifications with animation
   const handleDeleteAll = () => {
     if (notifications.length === 0) return;
-    
+
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.95,
@@ -599,22 +709,24 @@ const NotificationsScreen = ({ navigation }) => {
 
   // ✅ Render each notification using the separate component
   const renderNotificationItem = ({ item, index }) => (
-    <NotificationItem 
-      item={item} 
-      index={index} 
-      theme={theme} 
+    <NotificationItem
+      item={item}
+      index={index}
+      theme={theme}
       onPress={handleNotificationPress}
       onDelete={deleteNotification}
     />
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       <StatusBar
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
         backgroundColor={theme.background}
       />
-      
+
       <Animated.ScrollView
         style={{ transform: [{ translateY }] }}
         showsVerticalScrollIndicator={false}
@@ -662,11 +774,17 @@ const NotificationsScreen = ({ navigation }) => {
         {notifications.length > 0 && (
           <View style={[styles.statsBar, { backgroundColor: theme.card }]}>
             <Text style={[styles.statsText, { color: theme.textSecondary }]}>
-              {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}
+              {notifications.length}{' '}
+              {notifications.length === 1 ? 'notification' : 'notifications'}
             </Text>
-            <View style={[styles.statsDivider, { backgroundColor: theme.textSecondary }]} />
+            <View
+              style={[
+                styles.statsDivider,
+                { backgroundColor: theme.textSecondary },
+              ]}
+            />
             <Text style={[styles.statsText, { color: COLORS.primary }]}>
-              All caught up! 🎉
+              Latest first ↑
             </Text>
           </View>
         )}
@@ -674,28 +792,36 @@ const NotificationsScreen = ({ navigation }) => {
         {/* Notification List */}
         <FlatList
           data={notifications}
-          keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
+          keyExtractor={item =>
+            item._id?.toString() || Math.random().toString()
+          }
           renderItem={renderNotificationItem}
           style={[styles.list, { backgroundColor: theme.background }]}
           scrollEnabled={false}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Animated.View 
+              <Animated.View
                 style={[
                   styles.emptyIcon,
-                  { 
+                  {
                     backgroundColor: theme.dark ? '#333' : '#f1f5f9',
-                    transform: [{ scale: scaleAnim }]
-                  }
+                    transform: [{ scale: scaleAnim }],
+                  },
                 ]}
               >
-                <Icon name="notifications-off" size={wp('15%')} color={theme.textSecondary} />
+                <Icon
+                  name="notifications-off"
+                  size={wp('15%')}
+                  color={theme.textSecondary}
+                />
               </Animated.View>
               <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
                 No notifications yet
               </Text>
-              <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
+              <Text
+                style={[styles.emptySubtitle, { color: theme.textSecondary }]}
+              >
                 We'll notify you when something new arrives
               </Text>
               {/* <TouchableOpacity 
@@ -862,7 +988,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: wp('6%'),
     paddingVertical: hp('1.5%'),
-    borderRadius: wp('4%')
+    borderRadius: wp('4%'),
   },
   refreshButtonText: {
     color: '#fff',

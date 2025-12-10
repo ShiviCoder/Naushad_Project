@@ -52,6 +52,14 @@ import BookingSeats from '../screens/SignAuth/BookingSeats';
 import BookAppointmentTabScreen from '../components/BookAppointmentTabScreen';
 import BottomNavbarWrapper from '../components/BottomNavbarWrapper';
 import CartPaymentScreen from '../screens/PaymentScreen/CartPaymentScreen';
+import PendingBookingsScreen from '../screens/home/PendingBookingsScreen';
+import OrderHistory from '../screens/SignAuth/OrderHistory';
+import WalletAddMoneyScreen from '../screens/SignAuth/Wallet/WalletAddMoneyScreen';
+import WalletPaymentSuccessScreen from '../screens/SignAuth/Wallet/WalletPaymentSuccessScreen';
+import CartPaymentSuccess from '../screens/PaymentScreen/CartPaymentSuccess';
+import MyCartPayment from '../screens/PaymentScreen/MyCartPayment';
+import FundAddScreen from '../screens/PaymentScreen/FundAddScreen';
+import BookAppoinementFundAdd from '../screens/PaymentScreen/BookAppoinementFundAdd';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -113,7 +121,7 @@ export type RootStackParamList = {
   PaymentScreen: undefined;
   PaymentSuccessScreen: undefined;
   VideosScreen: undefined;
-  CartPaymentScreen : undefined;
+  CartPaymentScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -129,7 +137,10 @@ function MainTabs() {
       <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="BookingScreen" component={BookingScreen} />
       <Tab.Screen name="BlankScreen" component={BlankScreen} />
-      <Tab.Screen name="BookAppointmentTab" component={BookAppointmentTabScreen} />
+      <Tab.Screen
+        name="BookAppointmentTab"
+        component={BookAppointmentTabScreen}
+      />
       <Tab.Screen name="AccountScreen" component={AccountScreen} />
     </Tab.Navigator>
   );
@@ -145,7 +156,10 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="Signin" component={Signin} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="MainTabs" component={MainTabs} />
-        <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
+        <Stack.Screen
+          name="VerificationScreen"
+          component={VerificationScreen}
+        />
         <Stack.Screen name="CodeVerification" component={CodeVerification} />
         <Stack.Screen name="Services" component={Services} />
         <Stack.Screen name="OurProducts" component={OurProducts} />
@@ -155,7 +169,10 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="PackageDetails" component={PackageDetails} />
         <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
         <Stack.Screen name="PackagesScreen" component={PackagesScreen} />
-        <Stack.Screen name="ProductPackageScreen" component={ProductPackageScreen} />
+        <Stack.Screen
+          name="ProductPackageScreen"
+          component={ProductPackageScreen}
+        />
         <Stack.Screen name="MyProfile" component={MyProfile} />
         <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="Cart" component={Cart} />
@@ -169,22 +186,57 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen name="ReferFriend" component={ReferFriend} />
         <Stack.Screen name="AboutUs" component={AboutUs} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-        <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
+        <Stack.Screen
+          name="TermsAndConditions"
+          component={TermsAndConditions}
+        />
         <Stack.Screen name="AppVersion" component={AppVersion} />
         <Stack.Screen name="Certificates" component={Certificates} />
         <Stack.Screen name="HomeServices" component={HomeServices} />
         <Stack.Screen name="ForgetPassword" component={ForgotPassword} />
         <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
-        <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />
+        <Stack.Screen
+          name="PaymentSuccessScreen"
+          component={PaymentSuccessScreen}
+        />
         <Stack.Screen name="VideosScreen" component={VideosScreen} />
         <Stack.Screen name="WalletScreen" component={WalletScreen} />
-        <Stack.Screen name="LikedProductScreen" component={LikedProductScreen} />
+        <Stack.Screen
+          name="LikedProductScreen"
+          component={LikedProductScreen}
+        />
         <Stack.Screen name="SettingScreen" component={SettingScreen} />
         <Stack.Screen name="BookingSeats" component={BookingSeats} />
-<Stack.Screen name='CartPaymentScreen' component={CartPaymentScreen}/>
+        <Stack.Screen name="CartPaymentScreen" component={CartPaymentScreen} />
 
         {/* Standalone BookAppointmentScreen without bottom tabs */}
-        <Stack.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
+        <Stack.Screen
+          name="BookAppointmentScreen"
+          component={BookAppointmentScreen}
+        />
+        <Stack.Screen
+          name="PendingBookingsScreen"
+          component={PendingBookingsScreen}
+        />
+        <Stack.Screen name="OrderHistory" component={OrderHistory} />
+        <Stack.Screen
+          name="WalletAddMoneyScreen"
+          component={WalletAddMoneyScreen}
+        />
+        <Stack.Screen
+          name="WalletPaymentSuccessScreen"
+          component={WalletPaymentSuccessScreen}
+        />
+        <Stack.Screen
+          name="CartPaymentSuccess"
+          component={CartPaymentSuccess}
+        />
+        <Stack.Screen name="MyCartPayment" component={MyCartPayment} />
+        <Stack.Screen name="FundAddScreen" component={FundAddScreen} />
+        <Stack.Screen
+          name="BookAppoinementFundAdd"
+          component={BookAppoinementFundAdd}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

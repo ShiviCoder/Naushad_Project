@@ -89,7 +89,7 @@ const BookingSeats = () => {
     serviceName,
     price,
     from,
-  } = route.params || {};
+  } = (route.params || {}) as any;
 
   const [chairs, setChairs] = useState<Chair[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -155,16 +155,15 @@ const BookingSeats = () => {
       return;
     }
 
-    // Pass chair number with consistent key name
-    navigation.navigate('BookAppoinment2', {
+    navigation.navigate('BookAppoinment2' as never, {
       selectedDate,
       selectedTime,
       selectedSeat,
-      chairNumber: selectedSeat, // Add this line for consistency
+      chairNumber: selectedSeat,
       serviceName,
       price,
       from,
-    });
+    } as never);
   };
 
   const handleSeatPress = (seatNumber: number, isAvailable: boolean) => {
@@ -223,7 +222,7 @@ const BookingSeats = () => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator
             size="large"
-            color={COLORS.primary}
+            color={theme.primary}
             style={styles.activityIndicator}
           />
         </View>
@@ -237,12 +236,6 @@ const BookingSeats = () => {
         <Head title="Booking" showBack={true} />
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText]}>{error}</Text>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={[styles.retryButton, { backgroundColor: COLORS.primary }]}
-          >
-            <Text style={styles.retryButtonText}>Go Back</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -256,25 +249,6 @@ const BookingSeats = () => {
           <Text style={[styles.text, { color: theme.textPrimary }]}>
             Please confirm your seat
           </Text>
-
-          {/* <View style={styles.infoContainer}>
-            <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-              📅 Date: {selectedDate}
-            </Text>
-            <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-              🕒 Time: {selectedTime}
-            </Text>
-            {selectedSeat && (
-              <Text
-                style={[
-                  styles.infoText,
-                  { color: COLORS.primary, fontWeight: 'bold' },
-                ]}
-              >
-                💺 Selected Chair: {selectedSeat}
-              </Text>
-            )}
-          </View> */}
 
           <View style={styles.legendContainer}>
             <View style={styles.legendItem}>
@@ -372,10 +346,6 @@ const styles = StyleSheet.create({
   activityIndicator: {
     marginBottom: hp('2%'),
   },
-  loadingText: {
-    fontSize: wp('4.5%'),
-    fontFamily: 'Poppins-Medium',
-  },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -388,16 +358,6 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginBottom: hp('3%'),
-  },
-  retryButton: {
-    paddingVertical: hp('1.5%'),
-    paddingHorizontal: wp('8%'),
-    borderRadius: wp('2%'),
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: wp('4%'),
-    fontFamily: 'Poppins-Medium',
   },
   legendContainer: {
     flexDirection: 'row',

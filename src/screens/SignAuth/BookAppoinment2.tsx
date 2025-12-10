@@ -66,7 +66,6 @@ const BookAppointmentScreen = ({ navigation }) => {
         console.log('Services data:', result.data);
         setServices(result.data);
 
-        // Log each service's imageUrl
         result.data.forEach((service, index) => {
           console.log(`Service ${index + 1} - ${service.serviceName}:`, {
             imageUrl: service.imageUrl,
@@ -111,14 +110,12 @@ const BookAppointmentScreen = ({ navigation }) => {
   // Handle Proceed button press
   const handleProceed = () => {
     console.log('Selected services IDs:', selectedServices);
-
     if (selectedServices.length === 0) {
       setPopupMessage('Please select at least one service.');
       setPopupVisible(true);
       return;
     }
 
-    // Gather selected service details
     const selectedServiceDetails = services
       .filter(service => selectedServices.includes(service._id))
       .map(srv => ({
@@ -142,8 +139,8 @@ const BookAppointmentScreen = ({ navigation }) => {
       totalPrice: totalPrice,
       selectedDate,
       selectedTime,
-      selectedSeat: actualChairNumber, // Pass chair number
-      chairNumber: actualChairNumber, // Pass for consistency
+      selectedSeat: actualChairNumber,
+      chairNumber: actualChairNumber,
     });
   };
 
@@ -162,7 +159,6 @@ const BookAppointmentScreen = ({ navigation }) => {
         onPress={() => handleServicePress(service)}
         activeOpacity={0.8}
       >
-        {/* Service Image from API */}
         <Image
           source={{ uri: service.imageUrl }}
           style={styles.serviceImage}
@@ -230,7 +226,7 @@ const BookAppointmentScreen = ({ navigation }) => {
       >
         <Head title="Book Appointment" />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.primary} />
         </View>
       </SafeAreaView>
     );
@@ -243,61 +239,6 @@ const BookAppointmentScreen = ({ navigation }) => {
       <Head title="Book Appointment" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Appointment Details Section - ADDED THIS SECTION */}
-        {/* <View style={styles.appointmentDetailsContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Appointment Details
-          </Text>
-
-          <View style={styles.detailsGrid}>
-            <View style={styles.detailItem}>
-              <Text
-                style={[styles.detailLabel, { color: theme.textSecondary }]}
-              >
-                Date
-              </Text>
-              <Text style={[styles.detailValue, { color: theme.textPrimary }]}>
-                {selectedDate || 'Not selected'}
-              </Text>
-            </View>
-
-            <View style={styles.detailItem}>
-              <Text
-                style={[styles.detailLabel, { color: theme.textSecondary }]}
-              >
-                Time
-              </Text>
-              <Text style={[styles.detailValue, { color: theme.textPrimary }]}>
-                {selectedTime || 'Not selected'}
-              </Text>
-            </View>
-
-            <View style={styles.detailItem}>
-              <Text
-                style={[styles.detailLabel, { color: theme.textSecondary }]}
-              >
-                Chair Number
-              </Text>
-              <Text
-                style={[
-                  styles.detailValue,
-                  {
-                    color: actualChairNumber
-                      ? COLORS.primary
-                      : theme.textPrimary,
-                    fontWeight: actualChairNumber ? 'bold' : 'normal',
-                  },
-                ]}
-              >
-                {actualChairNumber
-                  ? `Chair ${actualChairNumber}`
-                  : 'Not selected'}
-              </Text>
-            </View>
-          </View>
-        </View> */}
-
-        {/* Services Section */}
         <View style={styles.servicesContainer}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Select Services
@@ -312,12 +253,6 @@ const BookAppointmentScreen = ({ navigation }) => {
               >
                 No services available
               </Text>
-              <TouchableOpacity
-                onPress={fetchServices}
-                style={styles.retryButton}
-              >
-                <Text style={styles.retryButtonText}>Retry</Text>
-              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -329,7 +264,7 @@ const BookAppointmentScreen = ({ navigation }) => {
           style={[styles.proceedButton, { backgroundColor: COLORS.primary }]}
         >
           <Text
-            style={[styles.proceedButtonText, { color: theme.textOnAccent }]}
+            style={[styles.proceedButtonText, { color: '#fff' }]}
           >
             Proceed to Pay
           </Text>
@@ -453,7 +388,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1, paddingHorizontal: wp('5%') },
 
-  // New styles for appointment details section
   appointmentDetailsContainer: {
     backgroundColor: 'rgba(0,0,0,0.05)',
     padding: wp('4%'),
@@ -493,11 +427,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    fontSize: wp('4%'),
-    fontFamily: 'Poppins-Medium',
-    marginTop: hp('2%'),
-  },
   noServicesContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -508,17 +437,6 @@ const styles = StyleSheet.create({
     fontSize: wp('4%'),
     fontFamily: 'Poppins-Medium',
     marginBottom: hp('2%'),
-  },
-  retryButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: wp('6%'),
-    paddingVertical: hp('1.5%'),
-    borderRadius: wp('2%'),
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: wp('3.5%'),
-    fontFamily: 'Poppins-Medium',
   },
 
   serviceItem: {
@@ -584,11 +502,10 @@ const styles = StyleSheet.create({
   },
   proceedButtonText: {
     fontSize: hp('1.875%'),
-    fontWeight: '600',
+    fontWeight: '900',
     fontFamily: 'Poppins-Medium',
   },
 
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(20, 14, 14, 0.4)',

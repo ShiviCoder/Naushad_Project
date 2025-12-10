@@ -160,12 +160,7 @@ const TermsAndConditions = () => {
             onPress={() => setAccepted(prev => !prev)}
             activeOpacity={0.8}
           >
-            <View style={[styles.checkbox, { borderColor: theme.textPrimary }]}>
-              {accepted && <Icon name="checkmark" size={wp('4%')} color={COLORS.primary} />}
-            </View>
-            <Text style={[styles.checkboxText, { color: theme.textPrimary }]}>
-              I have read and accept the Terms and Conditions
-            </Text>
+           
           </TouchableOpacity>
           {/* Continue / Accept Button */}
           <TouchableOpacity
