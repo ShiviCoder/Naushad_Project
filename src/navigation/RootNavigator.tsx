@@ -52,6 +52,11 @@ import BookingSeats from '../screens/SignAuth/BookingSeats';
 import BookAppointmentTabScreen from '../components/BookAppointmentTabScreen';
 import BottomNavbarWrapper from '../components/BottomNavbarWrapper';
 import CartPaymentScreen from '../screens/PaymentScreen/CartPaymentScreen';
+import PendingBookingsScreen from '../screens/home/PendingBookingsScreen';
+import OrderHistory from '../screens/SignAuth/OrderHistory';
+import WalletAddMoneyScreen from '../screens/SignAuth/Wallet/WalletAddMoneyScreen';
+import WalletPaymentSuccessScreen from '../screens/SignAuth/Wallet/WalletPaymentSuccessScreen';
+import CartPaymentSuccess from '../screens/PaymentScreen/CartPaymentSuccess';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -185,6 +190,12 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
 
         {/* Standalone BookAppointmentScreen without bottom tabs */}
         <Stack.Screen name="BookAppointmentScreen" component={BookAppointmentScreen} />
+        <Stack.Screen name="PendingBookingsScreen" component={PendingBookingsScreen} />
+        <Stack.Screen name="OrderHistory" component={OrderHistory} />
+        <Stack.Screen name="WalletAddMoneyScreen" component={WalletAddMoneyScreen} />
+        <Stack.Screen name="WalletPaymentSuccessScreen" component={WalletPaymentSuccessScreen} />
+        <Stack.Screen name="CartPaymentSuccess" component={CartPaymentSuccess} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

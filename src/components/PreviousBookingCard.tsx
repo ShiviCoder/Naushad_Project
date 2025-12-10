@@ -10,7 +10,7 @@ import { useTheme } from "../context/ThemeContext";
 import COLORS from "../utils/Colors";
 
 const PreviousBookingCard = ({ item }) => {
-  const [isChecked, setIsChecked] = useState(true); // Default to checked for completed bookings
+  const [isChecked, setIsChecked] = useState(true);
   const navigation = useNavigation();
   const { theme } = useTheme();
 
@@ -58,7 +58,10 @@ const PreviousBookingCard = ({ item }) => {
   return (
     <TouchableOpacity
       style={[styles.container, { backgroundColor: COLORS.secondary }]}
-      onPress={() => navigation.navigate('PreviousBooking', { booking: item })}
+      onPress={() => navigation.navigate('PreviousBooking', { 
+        booking: item,
+        chairNo: item.chairNo || 'Not assigned' // Added chairNo
+      })}
     >
       {/* Service + Status */}
       <View style={styles.pendingContainer}>
@@ -104,6 +107,16 @@ const PreviousBookingCard = ({ item }) => {
           Code: {item.appointmentCode}
         </Text>
       </View>
+
+      {/* Chair Number - NEW SECTION */}
+      {item.chairNo && (
+        <View style={styles.content}>
+          <Image source={require('../assets/chair-icon.png')} style={styles.icon} /> {/* Add your chair icon */}
+          <Text style={[styles.text, { color: theme.textPrimary }]}>
+            Chair: {item.chairNo}
+          </Text>
+        </View>
+      )}
 
       {/* Rebook Button */}
       <TouchableOpacity onPress={() => navigation.navigate('BookAppointmentScreen', { booking: item })}>

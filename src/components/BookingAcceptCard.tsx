@@ -24,28 +24,23 @@ const BookingAcceptCards = ({ item }) => {
     if (!services || services.length === 0) return 'No services';
     
     try {
-      // Handle both stringified arrays and regular arrays
       let serviceArray = services;
       
-      // If it's a string that looks like JSON, parse it
       if (typeof services === 'string' && services.startsWith('[')) {
         serviceArray = JSON.parse(services);
         console.log('✅ formatServices - Parsed JSON string:', serviceArray);
       }
       
-      // If it's already an array
       if (Array.isArray(serviceArray)) {
         console.log('✅ formatServices - Already an array:', serviceArray);
         return serviceArray.join(', ');
       }
       
-      // If it's a single service object with serviceName
       if (typeof serviceArray === 'object' && serviceArray.serviceName) {
         console.log('✅ formatServices - Single service object:', serviceArray.serviceName);
         return serviceArray.serviceName;
       }
       
-      // Default case - handle single string
       console.log('✅ formatServices - Default case:', String(serviceArray));
       return String(serviceArray);
     } catch (error) {
@@ -58,7 +53,6 @@ const BookingAcceptCards = ({ item }) => {
   const getServices = () => {
     console.log('📋 BookingAcceptCards - Item:', item);
     
-    // Try different possible properties where services might be stored
     if (item.service) {
       return formatServices(item.service);
     } else if (item.services) {
@@ -68,7 +62,6 @@ const BookingAcceptCards = ({ item }) => {
     } else if (item.serviceList) {
       return formatServices(item.serviceList);
     } else if (item.bookedServices) {
-      // If bookedServices is an array of objects with serviceName
       if (Array.isArray(item.bookedServices) && item.bookedServices[0]?.serviceName) {
         return formatServices(item.bookedServices.map(service => service.serviceName));
       }
@@ -125,7 +118,8 @@ const BookingAcceptCards = ({ item }) => {
       time: item.time,
       price: getPrice(),
       appointmentCode: item.appointmentCode,
-      status: item.status || 'accepted'
+      status: item.status || 'accepted',
+      chairNo: item.chairNo || 'Not assigned' // Added chairNo
     });
   };
 
@@ -177,6 +171,16 @@ const BookingAcceptCards = ({ item }) => {
           Code: {item.appointmentCode || 'N/A'}
         </Text>
       </View>
+
+      {/* Chair Number - NEW SECTION */}
+      {item.chairNo && (
+        <View style={styles.content}>
+          <Image source={require('../assets/chair-icon.png')} style={styles.icon} /> {/* Add your chair icon */}
+          <Text style={[styles.text, { color: textColor }]}>
+            Chair: {item.chairNo}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

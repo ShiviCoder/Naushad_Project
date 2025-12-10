@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TextInput, TouchableOpacity, FlatList, ImageBackground, Dimensions, ActivityIndicator, RefreshControl, Animated, SafeAreaViewBase, Alert, BackHandler, Modal } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TextInput, TouchableOpacity, FlatList, ImageBackground, Dimensions, ActivityIndicator, RefreshControl, Animated, Alert, BackHandler, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp, } from 'react-native-responsive-screen';
@@ -17,7 +17,7 @@ import COLORS from '../../utils/Colors'
 import RadioButton from '../../components/RadioButton';
 import { useCart } from '../../context/CartContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import PendingBookingMessage from '../home/PendingBookingMessage'; // Import the new component
 
 const { width } = Dimensions.get("window");
 const extractVideoId = (url) => {
@@ -117,7 +117,6 @@ const VideoCard = ({ videoId }) => {
   }
 };
 
-
 const HomeScreen = () => {
   const [gender, setGender] = useState("male");
   const navigation = useNavigation();
@@ -134,6 +133,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
   const [user, setUser] = useState<any>(null);
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -162,9 +162,9 @@ const HomeScreen = () => {
     console.log("token accept")
     return token;
   }
+  
   const isFocused = useIsFocused();
   const [exitPopup, setExitPopup] = useState(false);
-
 
   useEffect(() => {
     if (!isFocused) return;
@@ -181,6 +181,7 @@ const HomeScreen = () => {
 
     return () => subscription.remove();
   }, [isFocused]);
+
   const fetchAllData = async () => {
     try {
       setLoading(true);   // start loading
@@ -203,9 +204,11 @@ const HomeScreen = () => {
       setLoading(false);  // stop loading
     }
   };
+
   useEffect(() => {
     fetchAllData();
   }, []);
+
   const onRefresh = async () => {
     setRefreshing(true);
     Animated.timing(translateY, {
@@ -298,8 +301,6 @@ const HomeScreen = () => {
     fetchServices(gender);
   }, [gender]);
 
-
-
   // Products (added rating + tag)
   const [products, setProducts] = useState([]);
   const fetchProducts = async (selectedGender) => {
@@ -344,13 +345,11 @@ const HomeScreen = () => {
     fetchProducts(gender);
   }, [gender]);
 
-
   // Videos row (thumbnails with play)
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const fetchVideos = async () => {
     try {
-      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE";
       const token = await getToken();
 
       const res = await fetch("https://naushad.onrender.com/api/youtube", {
@@ -363,14 +362,11 @@ const HomeScreen = () => {
 
       const data = await res.json();
       setVideos(data);
-      //console.log("Youtube Token : ", token);
       console.log("Youtube Data:", data);
     } catch (err) {
       console.log("Error loading:", err);
     }
   };
-
-
 
   // Certificates (two items like the mock)
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -438,7 +434,6 @@ const HomeScreen = () => {
   useEffect(() => {
     fetchPackages(gender);
   }, [gender]);
-
 
   // Product packages (small horizontal cards)
   const [productPackages, setProductPackages] = useState([]);
@@ -562,7 +557,6 @@ const HomeScreen = () => {
   const fetchAboutData = async () => {
     try {
       const token = await getToken();
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGY1YTA4YjQ5MDE1NDQ2NDdmZDY1ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2MTg5NDQwNCwiZXhwIjoxNzYyNDk5MjA0fQ.A6s4471HX6IE7E5B7beYSYkytO1B8M_CPpn-GZwWFsE';
       const response = await fetch('https://naushad.onrender.com/api/about-salon', {
         method: 'GET',
         headers: {
@@ -586,7 +580,7 @@ const HomeScreen = () => {
       </View>
     ) : (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        (<Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
+        <Animated.View style={{ flex: 1, transform: [{ translateY }] }}>
           <ScrollView
             showsVerticalScrollIndicator={false}
             refreshControl={
@@ -613,14 +607,13 @@ const HomeScreen = () => {
                     {user
                       ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
                       : 'User Name'}
-                    {/* Hi Anchal ! */}
                   </Text>
                   <Text
                     style={[styles.locationText, { color: theme.textPrimary }]}
                     numberOfLines={1}
                     ellipsizeMode="tail"
                   >
-                    {user.address && user.address.length > 5 ? `${user.address.substring(0, 7)}...` : user.address}
+                    {user?.address && user.address.length > 5 ? `${user.address.substring(0, 7)}...` : user?.address || 'Location'}
                   </Text>
                 </View>
               </View>
@@ -628,7 +621,7 @@ const HomeScreen = () => {
               {/* Center Logo */}
               <Image
                 source={require('../../assets/images/logo.png')}
-                style={[styles.logo, { tintColor: theme.textPrimary }]}
+                style={[styles.logo, ]} //{ tintColor: theme.textPrimary }
               />
 
               {/* Right Icons */}
@@ -648,7 +641,7 @@ const HomeScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate("LikedProductScreen", { likedProducts, products, theme })}>
-                  {/* <View
+                  <View
                     style={{
                       width: wp('7%'),
                       height: wp('7%'),
@@ -665,7 +658,7 @@ const HomeScreen = () => {
                       source={require('../../assets/heart.png')}
                       style={{ width: wp('3.5%'), height: wp('3.5%') }}
                     />
-                  </View> */}
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -708,6 +701,10 @@ const HomeScreen = () => {
                 />
               </View>
             </View>
+
+            {/* Pending Booking Message */}
+            <PendingBookingMessage />
+
             {/* Special Offers header with navigation */}
             <SectionTitle title="Special Offers" showSeeAll={false} color={theme.textPrimary} />
 
@@ -840,12 +837,9 @@ const HomeScreen = () => {
                 >
                   <View style={styles.productCard}>
                     <Image
-
-                      // gender === 'Male' ? item.image[0] : item.image[1]
                       source={{ uri: item.image }}
                       style={styles.productImage} />
                     <Text style={styles.productName} numberOfLines={2}>
-                      {/* {gender === 'Male' ? item.name[0] : item.name[1]} */}
                       {item.name}
                     </Text>
                     <Text style={styles.productPrice}>
@@ -1204,7 +1198,7 @@ const HomeScreen = () => {
               )}
             />
           </ScrollView>
-        </Animated.View>)
+        </Animated.View>
         <Popup
           visible={exitPopup}
           message="Are you sure you want to exit?"
@@ -1215,6 +1209,7 @@ const HomeScreen = () => {
     )
   )
 };
+
 const Popup = ({ visible, message, onClose, onExit }) => {
   return (
     <Modal transparent animationType="fade" visible={visible}>
@@ -1238,7 +1233,6 @@ const Popup = ({ visible, message, onClose, onExit }) => {
     </Modal>
   );
 };
-
 
 // Updated SectionTitle component with navigation support
 const SectionTitle = ({
@@ -1269,6 +1263,7 @@ const SectionTitle = ({
 };
 
 export default HomeScreen;
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,

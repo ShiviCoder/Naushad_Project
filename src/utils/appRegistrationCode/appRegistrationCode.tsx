@@ -3,7 +3,7 @@
  * This file contains the app registration code that is sent with every user registration
  */
 
-export const APP_REGISTRATION_CODE = 'NAUMOINSOD';
+export const APP_REGISTRATION_CODE = 'NAU7D5-XDZ';
 
 /**
  * Get the app registration code

@@ -71,10 +71,6 @@ const ServiceDetails = () => {
   // Parse highlights if they are stored as stringified array
   const parseHighlights = (highlights: any) => {
     if (!highlights || !Array.isArray(highlights)) return [];
-<<<<<<< HEAD
-=======
-
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
     if (highlights.length > 0 && typeof highlights[0] === 'string' && highlights[0].startsWith('[')) {
       try {
         return JSON.parse(highlights[0]);
@@ -230,10 +226,6 @@ const ServiceDetails = () => {
                   <Text style={[styles.extraHead, { color: theme.textPrimary, fontSize: wp('4%') }]}>See all</Text>
                 </TouchableOpacity>
               </View>
-<<<<<<< HEAD
-=======
-
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
               <FlatList
                 data={extraServices}
                 horizontal

@@ -46,7 +46,7 @@ export default function SplashScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: COLORS.primary }]}
+      style={[styles.container, { backgroundColor: '#fff' }]}
     >
       <Image
         source={require('../assets/images/logo.png')}
@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
   logo: {
     width: wp('60%'),
     height: hp('20%'),
-    tintColor : '#fff'
+    // tintColor : '#fff'
   },
 });

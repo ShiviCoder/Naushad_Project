@@ -442,7 +442,7 @@ const NotificationsScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ Fetch user notifications
+  // ✅ Fetch user notifications and sort by latest first
   const getUserNotifications = async () => {
     try {
       console.log('🔄 Starting to fetch notifications...');
@@ -480,7 +480,15 @@ const NotificationsScreen = ({ navigation }) => {
       if (data.success) {
         console.log('✅ Notifications fetched successfully');
         console.log('📋 Number of notifications:', data.data?.length || 0);
-        setNotifications(data.data || []);
+        
+        // ✅ Sort notifications by createdAt DESCENDING (latest first)
+        const sortedNotifications = (data.data || []).sort((a, b) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateB - dateA; // Latest first
+        });
+        
+        setNotifications(sortedNotifications);
       } else {
         console.log('❌ API returned success: false');
         setNotifications([]);
@@ -528,10 +536,16 @@ const NotificationsScreen = ({ navigation }) => {
       if (data.success) {
         console.log('✅ Notification deleted successfully');
         
-        // Remove the deleted notification from the local state
-        setNotifications(prevNotifications => 
-          prevNotifications.filter(notification => notification._id !== notificationId)
-        );
+        // Remove the deleted notification from the local state and maintain sorting
+        setNotifications(prevNotifications => {
+          const updated = prevNotifications.filter(notification => notification._id !== notificationId);
+          // Re-sort to ensure latest first order is maintained
+          return updated.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB - dateA;
+          });
+        });
         
         console.log('🔄 Notifications list updated after deletion');
         return true;
@@ -666,7 +680,7 @@ const NotificationsScreen = ({ navigation }) => {
             </Text>
             <View style={[styles.statsDivider, { backgroundColor: theme.textSecondary }]} />
             <Text style={[styles.statsText, { color: COLORS.primary }]}>
-              All caught up! 🎉
+              Latest first ↑
             </Text>
           </View>
         )}

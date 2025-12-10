@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CartPaymentScreen = () => {
-  const [method, setMethod] = useState('card');
+  const [method, setMethod] = useState('wallet');
   const [serviceList, setServiceList] = useState([]);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
@@ -32,256 +32,353 @@ const CartPaymentScreen = () => {
   const params = route.params || {};
 
   const [processingPayment, setProcessingPayment] = useState(false);
-
-  // New state for success popup
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [loadingWallet, setLoadingWallet] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [successPopupVisible, setSuccessPopupVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  console.log('📥 PaymentScreen - Route Params:', params);
+  // 🔥 LOG ALL INCOMING PARAMS
+  console.log('📥 CART PAYMENT SCREEN - Route Params:', params);
 
-  // Process incoming services from different params
-  useEffect(() => {
-    const processIncomingData = async () => {
-      console.log('🔄 processIncomingData - Starting data processing');
-
-      let processedServices = [];
-
-      console.log('🔄 processIncomingData - Processing params:', params);
-
-      // Handle different parameter structures
-      if (params.services && Array.isArray(params.services)) {
-        console.log('✅ processIncomingData - Processing services array');
-        processedServices = params.services.map(service => ({
-          type: service.type || 'cart',
-          serviceName: service.serviceName || service.name,
-          name: service.serviceName || service.name,
-          price: service.price,
-          quantity: service.quantity || 1,
-          image: service.image,
-          source: service.source || 'Cart'
-        }));
-      }
-      else if (params.serviceName && params.price) {
-        console.log('✅ processIncomingData - Processing single service');
-        processedServices = [{
-          type: 'product',
-          serviceName: params.serviceName,
-          name: params.serviceName,
-          price: params.price,
-          quantity: params.quantity || 1,
-          source: 'ProductDetails'
-        }];
-      }
-      else if (params.item && (params.item.name || params.item.title)) {
-        console.log('✅ processIncomingData - Processing package item');
-        processedServices = [{
-          type: 'package',
-          serviceName: params.item.name || params.item.title,
-          name: params.item.name || params.item.title,
-          price: params.item.price,
-          quantity: params.quantity || 1,
-          source: 'ProductPackages'
-        }];
-      }
-      else if (params.serviceName && params.price) {
-        console.log('✅ processIncomingData - Processing service details');
-        processedServices = [{
-          type: 'service',
-          serviceName: params.serviceName,
-          name: params.serviceName,
-          price: params.price,
-          quantity: params.quantity || 1,
-          source: 'ServiceDetails'
-        }];
-      }
-
-      console.log('📋 processIncomingData - Processed Services:', processedServices);
-
-      // Storage update
-      if (processedServices.length > 0) {
-        console.log('💾 processIncomingData - Saving to AsyncStorage');
-        await AsyncStorage.setItem('currentPaymentServices', JSON.stringify(processedServices));
-        setServiceList(processedServices);
-      } else {
-        console.log('📂 processIncomingData - No processed services, loading from storage');
-        // fallback load from storage
-        const stored = await AsyncStorage.getItem('currentPaymentServices');
-        if (stored) {
-          const storedData = JSON.parse(stored);
-          console.log('📂 processIncomingData - Loaded stored services:', storedData);
-          setServiceList(storedData);
-        } else {
-          console.log('❌ processIncomingData - No services found in storage');
-        }
-      }
-    };
-
-    processIncomingData();
-  }, [params]);
-
-  // Calculate total price based on services and quantities
+  // Memoized totalPrice
   const totalPrice = useMemo(() => {
     const total = serviceList.reduce((acc, curr) => {
       const itemPrice = Number(curr.price || 0);
       const itemQuantity = Number(curr.quantity || 1);
       return acc + (itemPrice * itemQuantity);
     }, 0);
-    console.log('💰 Total Price Calculation:', total);
+    console.log('💰 Total Payable Amount:', total);
     return total;
   }, [serviceList]);
 
-  // Function to get subtotal per item
-  const getItemSubtotal = (item) => {
+  // Memoized hasSufficientBalance
+  const hasSufficientBalance = useMemo(() => {
+    return walletBalance >= totalPrice;
+  }, [walletBalance, totalPrice]);
+
+  // Memoized getItemSubtotal
+  const getItemSubtotal = useCallback((item) => {
     const price = Number(item.price || 0);
     const quantity = Number(item.quantity || 1);
     const subtotal = price * quantity;
-    console.log(`📦 getItemSubtotal - ${item.serviceName}: ${price} × ${quantity} = ${subtotal}`);
     return subtotal;
-  };
+  }, []);
 
-  // Total quantity for all items
-  const getTotalQuantity = () => {
+  // Memoized getTotalQuantity
+  const getTotalQuantity = useCallback(() => {
     const totalQty = serviceList.reduce((acc, curr) => acc + Number(curr.quantity || 1), 0);
-    console.log('📊 getTotalQuantity:', totalQty);
     return totalQty;
-  };
+  }, [serviceList]);
 
-  // Popup control helper
-  const showPopup = (title, message) => {
-    console.log('📢 showPopup:', title, message);
+  // Memoized getServiceTypeLabel
+  const getServiceTypeLabel = useCallback((type) => {
+    const labelMap = {
+      'product': 'Product',
+      'package': 'Package',
+      'service': 'Service',
+      'cart': 'Cart Item'
+    };
+    return labelMap[type] || 'Item';
+  }, []);
+
+  // 🔥 FETCH PRODUCT DATA FROM ASYNC STORAGE
+  const loadProductFromStorage = useCallback(async () => {
+    try {
+      console.log('💾 Loading product from AsyncStorage...');
+      
+      const savedProduct = await AsyncStorage.getItem('buyNowProduct');
+      
+      if (savedProduct) {
+        console.log('✅ Found saved product in AsyncStorage');
+        const productData = JSON.parse(savedProduct);
+        console.log('📦 Loaded Product Data:', productData);
+        
+        return [productData];
+      } else {
+        console.log('❌ No saved product found in AsyncStorage');
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ Error loading product from AsyncStorage:', error);
+      return [];
+    }
+  }, []);
+
+  // Fetch wallet balance
+  const fetchWalletBalance = useCallback(async () => {
+    try {
+      console.log('💰 Fetching wallet balance...');
+      
+      const response = await fetch('https://naushad.onrender.com/api/wallet', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      console.log('💰 Wallet API Response:', data);
+      
+      if (data.success) {
+        setWalletBalance(data.data.totalWalletAmount || 0);
+        console.log('💰 Wallet Balance:', data.data.totalWalletAmount);
+      } else {
+        console.log('❌ Failed to fetch wallet balance');
+      }
+    } catch (error) {
+      console.error('❌ Wallet fetch error:', error);
+    } finally {
+      setLoadingWallet(false);
+    }
+  }, []);
+
+  // 🔥 Process incoming data
+  const processIncomingData = useCallback(async () => {
+    console.log('🔄 Processing incoming data');
+
+    let processedServices = [];
+
+    // 🔥 Load from AsyncStorage if flag is set
+    if (params.loadFromStorage === true || params.source === 'ProductDetails') {
+      console.log('🔄 Loading from AsyncStorage');
+      const storageProducts = await loadProductFromStorage();
+      
+      if (storageProducts.length > 0) {
+        console.log('✅ Using product from AsyncStorage');
+        processedServices = storageProducts;
+      } else if (params.serviceName && params.price) {
+        console.log('🔄 Storage empty, using params');
+        processedServices = [{
+          type: 'product',
+          serviceName: params.serviceName,
+          name: params.serviceName,
+          price: params.price,
+          quantity: params.quantity || 1,
+          source: 'DirectParams',
+          productId: params.productId || null,
+          description: params.description || '',
+        }];
+      }
+    }
+    // Handle services array
+    else if (params.services && Array.isArray(params.services)) {
+      console.log('✅ Processing services array');
+      processedServices = params.services.map(service => ({
+        type: service.type || 'cart',
+        serviceName: service.serviceName || service.name,
+        name: service.serviceName || service.name,
+        price: service.price,
+        quantity: service.quantity || 1,
+        image: service.image,
+        source: service.source || 'Cart',
+        productId: service.productId || service.id || null,
+        productPackageId: service.productPackageId || null,
+        description: service.description || '',
+      }));
+    }
+    // Handle single service parameters
+    else if (params.serviceName && params.price) {
+      console.log('✅ Processing single service parameters');
+      processedServices = [{
+        type: 'product',
+        serviceName: params.serviceName,
+        name: params.serviceName,
+        price: params.price,
+        quantity: params.quantity || 1,
+        source: 'DirectParams',
+        productId: params.productId || null,
+        description: params.description || '',
+      }];
+    }
+
+    console.log('📋 Processed Services:', processedServices);
+
+    // Save to AsyncStorage for persistence
+    if (processedServices.length > 0) {
+      await AsyncStorage.setItem('currentPaymentServices', JSON.stringify(processedServices));
+      setServiceList(processedServices);
+    } else {
+      // Try to load from storage if no new data
+      const stored = await AsyncStorage.getItem('currentPaymentServices');
+      if (stored) {
+        const storedData = JSON.parse(stored);
+        console.log('📂 Loaded stored services:', storedData);
+        setServiceList(storedData);
+      } else {
+        console.log('❌ No services found');
+      }
+    }
+  }, [params, loadProductFromStorage]);
+
+  // Load all data
+  const loadAllData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      await processIncomingData();
+      await fetchWalletBalance();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [processIncomingData, fetchWalletBalance]);
+
+  // Load data on mount
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
+
+  // 🔥 SHOW POPUP FUNCTION
+  const showPopup = useCallback((title, message) => {
     setPopupTitle(title);
     setPopupMessage(message);
     setPopupVisible(true);
-  };
+  }, []);
 
-  // Success popup helper
-  const showSuccessPopup = (message) => {
-    console.log('🎉 showSuccessPopup:', message);
+  // 🔥 SHOW SUCCESS POPUP AND NAVIGATE
+  const showSuccessPopup = useCallback((message) => {
     setSuccessMessage(message);
     setSuccessPopupVisible(true);
 
-    // Auto navigate after 2 seconds
     setTimeout(() => {
-      console.log('🔄 showSuccessPopup - Auto navigating to success screen');
       setSuccessPopupVisible(false);
-      navigation.replace('PaymentSuccessScreen', {
+      // 🔥 Navigate to CartPaymentSuccess screen
+      navigation.replace('CartPaymentSuccess', {
         bookedServices: serviceList,
         totalAmount: totalPrice,
         paymentMethod: method,
       });
     }, 2000);
-  };
+  }, [serviceList, totalPrice, method, navigation]);
 
-  const clearPaymentData = async () => {
-    console.log('🗑️ clearPaymentData - Clearing payment data from storage');
+  // 🔥 CLEAR PAYMENT DATA
+  const clearPaymentData = useCallback(async () => {
+    console.log('🗑️ Clearing payment data');
     await AsyncStorage.removeItem('currentPaymentServices');
+    await AsyncStorage.removeItem('buyNowProduct');
     setServiceList([]);
-  };
+  }, []);
 
-  // Process order API call
-  const processOrder = async (services) => {
+  // 🔥 PROCESS ORDER FUNCTION - FIXED: Send only one: productId OR productPackageId
+  const processOrder = useCallback(async () => {
     try {
-      // Get token from AsyncStorage
       const token = await AsyncStorage.getItem('userToken');
       const userId = await AsyncStorage.getItem('userId');
 
-      console.log('🔑 Token from storage:', token ? 'Present' : 'Missing');
-      console.log('👤 User ID from storage:', userId);
+      console.log('🔑 Token:', token ? 'Present' : 'Missing');
+      console.log('👤 User ID:', userId);
 
       if (!token) {
         console.log('❌ No token found');
         return { success: false, error: 'Authentication required. Please login again.' };
       }
 
-      console.log('🛒 Processing order for services:', services);
+      if (!hasSufficientBalance) {
+        console.log('❌ Insufficient wallet balance');
+        return { success: false, error: 'Insufficient wallet balance. Please add money to your wallet.' };
+      }
 
-      const requestBody = {
-        services: services,
-        totalAmount: totalPrice,
-        paymentMethod: method,
-        userId: userId,
-        type: 'product_purchase'
+      console.log('🛒 Processing order for services:', serviceList);
+
+      // Get the first service (assuming single product order)
+      const service = serviceList[0];
+      
+      // 🔥 DECIDE WHICH ID TO SEND: productId OR productPackageId
+      // If productPackageId exists, send only productPackageId
+      // If no productPackageId, send productId
+      const hasProductPackageId = service?.productPackageId && service.productPackageId !== null;
+      
+      // 🔥 Prepare order data for API - Send only ONE ID
+      const orderData = {
+        productDescription: service?.description || '', // Pass description
+        productName: service?.name || service?.serviceName || 'Product', // Pass name
+        amount: totalPrice, // 🔥 Pass TOTAL payable amount
+        quantity: service?.quantity || 1, // Pass quantity
+        // 🔥 Send ONLY ONE: productId OR productPackageId
+        ...(hasProductPackageId 
+          ? { productPackageId: service.productPackageId } 
+          : { productId: service?.productId || null }
+        )
       };
 
-      console.log('📤 Sending to backend:', JSON.stringify(requestBody, null, 2));
+      console.log('📤 Sending order to API:');
+      console.log('🔗 API Endpoint: https://naushad.onrender.com/api/order/create-order');
+      console.log('📝 Order Data:', JSON.stringify(orderData, null, 2));
+      console.log('🔍 Sending:', hasProductPackageId ? 'productPackageId' : 'productId');
+      console.log('🔍 ID Value:', hasProductPackageId ? service.productPackageId : service?.productId);
 
-      // For now, use mock since the endpoint might not be ready
-      return await processMockOrder(services);
+      // 🔥 CALL THE CORRECT API ENDPOINT
+      const response = await fetch('https://naushad.onrender.com/api/order/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      const result = await response.json();
+      console.log('📥 API Response:', result);
+
+      if (result.success) {
+        console.log('✅ Order created successfully:', result);
+        return { 
+          success: true, 
+          data: result.data,
+          message: result.message || 'Order created successfully!'
+        };
+      } else {
+        console.log('❌ Order creation failed:', result);
+        return { 
+          success: false, 
+          error: result.message || 'Order creation failed',
+          data: result.data || null
+        };
+      }
 
     } catch (error) {
       console.error('❌ Order processing error:', error);
-      return await processMockOrder(services); // Fallback to mock
+      return { 
+        success: false, 
+        error: `Network error: ${error.message}` 
+      };
     }
-  };
+  }, [serviceList, totalPrice, hasSufficientBalance]);
 
-  // Mock order function for development
-  const processMockOrder = async (services) => {
-    console.log('🛒 MOCK: Processing order for development');
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Mock successful response
-    const mockResponse = {
-      success: true,
-      data: {
-        orderId: 'order_' + Date.now(),
-        status: 'confirmed',
-        transactionId: 'txn_' + Math.random().toString(36).substr(2, 9),
-        amount: totalPrice,
-        services: services,
-        message: 'Order confirmed successfully!'
-      }
-    };
-
-    console.log('✅ MOCK: Order processed successfully');
-    return { success: true, data: mockResponse };
-  };
-
-  // Handle order process
-  const handleOrder = async () => {
+  // 🔥 HANDLE ORDER CONFIRMATION
+  const handleOrder = useCallback(async () => {
     console.log('🔄 handleOrder - Starting order process');
 
     if (serviceList.length === 0) {
-      console.log('❌ handleOrder - No services found');
+      console.log('❌ No services found');
       showPopup('No Items', 'No items found for order.');
       return;
     }
 
-    if (method === 'wallet') {
-      console.log('ℹ️ handleOrder - Wallet method selected (not available)');
-      showPopup('Coming Soon', 'Wallet / Salon Credits payment option will be available soon.');
+    if (!hasSufficientBalance) {
+      console.log('❌ Insufficient wallet balance');
+      showPopup('Insufficient Balance', 
+        `You need ₹${totalPrice - walletBalance} more in your wallet.\n\nCurrent Balance: ₹${walletBalance}\nOrder Total: ₹${totalPrice}`);
       return;
     }
 
     try {
-      console.log('🛒 handleOrder - Starting order processing');
+      console.log('🛒 Starting order processing');
       setProcessingPayment(true);
 
-      // Process order
-      const servicesArray = serviceList.map(service => ({
-        name: service.serviceName,
-        price: service.price,
-        quantity: service.quantity,
-        type: service.type
-      }));
-
-      console.log('🛒 Final Order Data:');
-      console.log('   Services:', servicesArray);
-      console.log('   Total Amount:', totalPrice);
-      console.log('   Payment Method:', method);
-
-      const orderResult = await processOrder(servicesArray);
+      const orderResult = await processOrder();
 
       if (orderResult.success) {
-        console.log('✅ handleOrder - Order processed successfully');
-        // Clear stored payment services data
+        console.log('✅ Order processed successfully');
+        console.log('✅ Order Details:', orderResult.data);
+        
         await clearPaymentData();
-        // Show success popup with image
         showSuccessPopup('Order confirmed successfully!');
       } else {
-        console.log('❌ handleOrder - Order processing failed');
-        showPopup('Order Failed', `Order processing failed: ${orderResult.error}`);
+        console.log('❌ Order processing failed');
+        console.log('❌ Error:', orderResult.error);
+        
+        showPopup('Order Failed', 
+          orderResult.error || 'Order was not completed. Please try again.');
       }
     } catch (error) {
       console.log('❌ Order Error:', error);
@@ -289,22 +386,15 @@ const CartPaymentScreen = () => {
     } finally {
       setProcessingPayment(false);
     }
-  };
+  }, [serviceList, hasSufficientBalance, totalPrice, walletBalance, showPopup, processOrder, clearPaymentData, showSuccessPopup]);
 
-  const getServiceTypeLabel = (type) => {
-    const labelMap = {
-      'product': 'Product',
-      'package': 'Package',
-      'service': 'Service',
-      'cart': 'Cart Item'
-    };
-    const label = labelMap[type] || 'Item';
-    console.log(`🏷️ getServiceTypeLabel - ${type} -> ${label}`);
-    return label;
-  };
+  // Radio item handler
+  const handleRadioPress = useCallback(() => {
+    setMethod('wallet');
+  }, []);
 
   // Success Popup Component
-  const SuccessPopup = () => (
+  const SuccessPopup = useMemo(() => (
     <Modal
       visible={successPopupVisible}
       transparent={true}
@@ -325,15 +415,23 @@ const CartPaymentScreen = () => {
         </View>
       </View>
     </Modal>
-  );
+  ), [successPopupVisible, successMessage]);
 
-  // Log navigation state for debugging
-  useEffect(() => {
-    const state = navigation.getState();
-    console.log("📌 Full Navigation State:", state);
-    console.log("📌 All Routes:", state.routes);
-    console.log("📌 Current Route:", state.routes[state.index]);
-  }, []);
+  // Full screen loading
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+        <Head title="Payment" />
+        <ScrollView 
+          style={styles.loadingScroll}
+          contentContainerStyle={styles.loadingContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
@@ -343,12 +441,13 @@ const CartPaymentScreen = () => {
         contentContainerStyle={[styles.contentContainer, { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Services list */}
+       {/* Services list */}
         {serviceList.length > 0 ? (
           <View style={styles.serviceCard}>
             <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginBottom: hp('2%') }]}>
               Order Summary ({getTotalQuantity()} {getTotalQuantity() === 1 ? 'item' : 'items'})
             </Text>
+
 
             {serviceList.map((srv, i) => (
               <View key={i} style={styles.serviceBlock}>
@@ -368,6 +467,7 @@ const CartPaymentScreen = () => {
                   </Text>
                 </View>
 
+
                 <View style={styles.quantityRow}>
                   <Text style={[styles.quantityLabel, { color: theme.textSecondary }]}>
                     Quantity:
@@ -384,11 +484,13 @@ const CartPaymentScreen = () => {
                   )}
                 </View>
 
+
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailText, { color: theme.textSecondary }]}>
                     📱 From: {srv.source || 'Unknown'}
                   </Text>
                 </View>
+
 
                 <View style={styles.footerRow}>
                   <View style={styles.priceDetails}>
@@ -413,6 +515,7 @@ const CartPaymentScreen = () => {
                   </View>
                 </View>
 
+
                 {i < serviceList.length - 1 && (
                   <View style={styles.divider} />
                 )}
@@ -430,59 +533,85 @@ const CartPaymentScreen = () => {
           </View>
         )}
 
+
         {serviceList.length > 0 && (
           <>
+            {/* Wallet Balance Card */}
+            <View style={styles.walletCard}>
+              <View style={styles.walletHeader}>
+                <Image
+                  source={require('../../assets/wallet.png')}
+                  style={styles.walletIcon}
+                />
+                <Text style={styles.walletTitle}>Salon Wallet</Text>
+              </View>
+
+              {loadingWallet ? (
+                <ActivityIndicator size="small" color={COLORS.primary} style={styles.walletLoader} />
+              ) : (
+                <>
+                  <Text style={styles.walletBalanceLabel}>Available Balance</Text>
+                  <Text style={styles.walletBalanceAmount}>₹ {walletBalance.toLocaleString('en-IN')}</Text>
+
+                  <View style={styles.balanceStatus}>
+                    <View style={[
+                      styles.statusIndicator, 
+                      { backgroundColor: hasSufficientBalance ? '#4CAF50' : '#F44336' }
+                    ]} />
+                    <Text style={[
+                      styles.statusText, 
+                      { color: hasSufficientBalance ? '#4CAF50' : '#F44336' }
+                    ]}>
+                      {hasSufficientBalance ? 'Sufficient balance for order' : 'Insufficient balance'}
+                    </Text>
+                  </View>
+                </>
+              )}
+            </View>
+
             <Text style={[styles.sectionTitle, { color: theme.textPrimary, marginTop: hp('2%') }]}>
-              Select Payment Method
+              Payment Method
             </Text>
 
-            <RadioItem
-              label="Credit / Debit Card"
-              selected={method === 'card'}
-              onPress={() => setMethod('card')}
-              primary={COLORS.primary}
-              theme={theme}
-            />
-            <RadioItem
-              label="UPI / Google Pay / Paytm"
-              selected={method === 'upi'}
-              onPress={() => setMethod('upi')}
-              primary={COLORS.primary}
-              theme={theme}
-            />
+            {/* Only Wallet Payment Option */}
             <RadioItem
               label="Wallet / Salon Credits"
               selected={method === 'wallet'}
-              onPress={() => setMethod('wallet')}
+              onPress={handleRadioPress}
               primary={COLORS.primary}
               theme={theme}
             />
 
-            <View style={styles.totalBreakdown}>
-              <View style={styles.breakdownRow}>
-                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
-                  Subtotal ({getTotalQuantity()} items):
-                </Text>
-                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                  ₹{serviceList.reduce((acc, curr) => acc + getItemSubtotal(curr), 0).toLocaleString('en-IN')}
-                </Text>
-              </View>
-              <View style={styles.breakdownRow}>
-                <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
-                  GST (10%):
-                </Text>
-                <Text style={[styles.breakdownValue, { color: theme.textPrimary }]}>
-                  ₹{Math.round(totalPrice * 0.1).toLocaleString('en-IN')}
-                </Text>
-              </View>
-            </View>
-
+            {/* Total Amount */}
             <View style={styles.totalRow}>
               <Text style={[styles.totalLabel, { color: theme.textPrimary }]}>Total Payable:</Text>
               <Text style={[styles.totalValue, { color: theme.textPrimary }]}>
                 ₹ {totalPrice.toLocaleString('en-IN')}
               </Text>
             </View>
+
+            {/* Order Details for API */}
+            {/* <View style={styles.apiDetails}>
+              <Text style={[styles.apiTitle, { color: theme.textSecondary }]}>Order Data for API:</Text>
+              <Text style={[styles.apiText, { color: theme.textSecondary }]}>
+                • productName: {serviceList[0]?.name || serviceList[0]?.serviceName}
+              </Text>
+              <Text style={[styles.apiText, { color: theme.textSecondary }]}>
+                • amount: ₹{totalPrice} (Total Payable)
+              </Text>
+              <Text style={[styles.apiText, { color: theme.textSecondary }]}>
+                • quantity: {serviceList[0]?.quantity || 1}
+              </Text>
+              <Text style={[styles.apiText, { color: theme.textSecondary }]}>
+                • productId: {serviceList[0]?.productId || 'Not available'}
+              </Text>
+              <Text style={[styles.apiText, { color: theme.textSecondary }]}>
+                • productPackageId: {serviceList[0]?.productPackageId || 'Not available'}
+              </Text>
+              <Text style={[styles.apiText, { color: theme.textSecondary, fontWeight: 'bold' }]}>
+                • API will send: {serviceList[0]?.productPackageId ? 'productPackageId' : 'productId'}
+              </Text>
+            </View> */}
           </>
         )}
       </ScrollView>
@@ -492,15 +621,24 @@ const CartPaymentScreen = () => {
         <View style={[styles.footer, { backgroundColor: theme.background }]}>
           <TouchableOpacity
             activeOpacity={0.9}
-            style={[styles.payBtn, { backgroundColor: COLORS.primary }]}
+            style={[
+              styles.payBtn, 
+              { 
+                backgroundColor: hasSufficientBalance ? COLORS.primary : '#CCCCCC',
+                opacity: hasSufficientBalance ? 1 : 0.7
+              }
+            ]}
             onPress={handleOrder}
-            disabled={processingPayment}
+            disabled={processingPayment || !hasSufficientBalance}
           >
             {processingPayment ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.payText}>
-                Confirm Order - ₹{totalPrice.toLocaleString('en-IN')}
+                {hasSufficientBalance 
+                  ? `Confirm Order - ₹${totalPrice.toLocaleString('en-IN')}`
+                  : 'Insufficient Balance'
+                }
               </Text>
             )}
           </TouchableOpacity>
@@ -508,7 +646,7 @@ const CartPaymentScreen = () => {
       )}
 
       {/* Success Popup */}
-      <SuccessPopup />
+      {SuccessPopup}
 
       {/* Error Popup */}
       <Popup
@@ -521,8 +659,8 @@ const CartPaymentScreen = () => {
   );
 }
 
+// RadioItem Component
 function RadioItem({ label, selected, onPress, primary, theme }) {
-  console.log(`🔘 RadioItem - ${label}: ${selected ? 'selected' : 'not selected'}`);
   return (
     <TouchableOpacity style={styles.radioRow} activeOpacity={0.8} onPress={onPress}>
       <View
@@ -541,6 +679,26 @@ function RadioItem({ label, selected, onPress, primary, theme }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, paddingTop: Platform.OS === 'ios' ? hp('1.1%') : 0 },
   contentContainer: { paddingHorizontal: wp('5%'), paddingVertical: hp('1.5%') },
+
+  // Loading styles
+  loadingScroll: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: hp('20%'),
+  },
+
+  // Product Image
+  productImage: {
+    width: '100%',
+    height: hp('20%'),
+    borderRadius: wp('3%'),
+    marginBottom: hp('2%'),
+    backgroundColor: '#f5f5f5',
+  },
 
   serviceCard: {
     borderRadius: wp('3.5%'),
@@ -577,6 +735,17 @@ const styles = StyleSheet.create({
     paddingVertical: hp('0.3%'),
     borderRadius: wp('1%'),
   },
+
+  // Product Details (Simplified)
+  productDetails: {
+    marginVertical: hp('1%'),
+  },
+  productDescription: {
+    fontSize: wp('3.6%'),
+    marginBottom: hp('1%'),
+    lineHeight: hp('2.2%'),
+  },
+  
   quantityRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -599,12 +768,7 @@ const styles = StyleSheet.create({
     fontSize: wp('3.6%'),
     fontWeight: '700',
   },
-  quantityNote: {
-    fontSize: wp('3.2%'),
-    fontStyle: 'italic',
-  },
-  detailRow: { flexDirection: 'row', alignItems: 'center', marginTop: hp('0.3%') },
-  detailText: { fontSize: wp('3.6%') },
+
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -615,19 +779,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addOnText: { fontSize: wp('3.8%'), fontWeight: '500' },
-  unitPrice: {
-    fontSize: wp('3.2%'),
-    marginTop: hp('0.2%'),
-    fontStyle: 'italic',
-  },
   priceContainer: {
     alignItems: 'flex-end',
   },
   price: { fontSize: wp('4%'), fontWeight: '700' },
-  originalPrice: {
-    fontSize: wp('3%'),
-    marginTop: hp('0.2%'),
-  },
   divider: {
     height: 1,
     backgroundColor: '#EEE',
@@ -659,34 +814,36 @@ const styles = StyleSheet.create({
   },
   radioDot: { width: wp('3.6%'), height: wp('3.6%'), borderRadius: wp('1.8%') },
   radioText: { fontSize: wp('4%'), fontWeight: '700' },
-  totalBreakdown: {
-    marginTop: hp('2%'),
-    paddingTop: hp('1%'),
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-  },
-  breakdownRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: hp('0.5%'),
-  },
-  breakdownLabel: {
-    fontSize: wp('3.8%'),
-  },
-  breakdownValue: {
-    fontSize: wp('3.8%'),
-    fontWeight: '500',
-  },
   totalRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: hp('1%'),
+    marginTop: hp('2%'),
     paddingTop: hp('1%'),
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
   },
   totalLabel: { fontSize: wp('5%'), fontWeight: '900' },
   totalValue: { marginLeft: 'auto', fontSize: wp('5%'), fontWeight: '900' },
+  
+  // API Details
+  apiDetails: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: wp('3%'),
+    padding: wp('4%'),
+    marginTop: hp('2%'),
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  apiTitle: {
+    fontSize: wp('3.8%'),
+    fontWeight: '600',
+    marginBottom: hp('1%'),
+  },
+  apiText: {
+    fontSize: wp('3.5%'),
+    marginBottom: hp('0.5%'),
+  },
+  
   footer: {
     paddingHorizontal: wp('5%'),
     paddingVertical: hp('2%'),
@@ -713,6 +870,69 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: wp('3.8%'),
     textAlign: 'center',
+  },
+  // Wallet Card Styles
+  walletCard: {
+    backgroundColor: COLORS.primary,
+    borderRadius: wp('4%'),
+    padding: wp('5%'),
+    marginBottom: hp('2%'),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  walletHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp('1%'),
+  },
+  walletIcon: {
+    width: wp('7%'),
+    height: wp('7%'),
+    tintColor: '#fff',
+    marginRight: wp('3%'),
+  },
+  walletTitle: {
+    fontSize: wp('4.5%'),
+    color: '#fff',
+    fontWeight: '700',
+  },
+  walletLoader: {
+    marginVertical: hp('2%'),
+  },
+  walletBalanceLabel: {
+    color: '#fff',
+    fontSize: wp('3.8%'),
+    opacity: 0.9,
+    marginTop: hp('1%'),
+  },
+  walletBalanceAmount: {
+    color: '#fff',
+    fontSize: wp('8%'),
+    fontWeight: 'bold',
+    marginTop: hp('0.5%'),
+  },
+  balanceStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp('1%'),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: wp('3%'),
+    paddingVertical: hp('0.8%'),
+    borderRadius: wp('2%'),
+    alignSelf: 'flex-start',
+  },
+  statusIndicator: {
+    width: wp('2%'),
+    height: wp('2%'),
+    borderRadius: wp('1%'),
+    marginRight: wp('2%'),
+  },
+  statusText: {
+    fontSize: wp('3.5%'),
+    fontWeight: '600',
   },
   // Success Popup Styles
   successPopupOverlay: {

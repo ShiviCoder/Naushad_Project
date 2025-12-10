@@ -449,7 +449,7 @@
 // });
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -459,6 +459,8 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  BackHandler,
+  Platform,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -474,6 +476,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAppRegistrationCode } from '../../utils/appRegistrationCode/appRegistrationCode';
 
 export default function SignupScreen({ navigation }) {
+  // 🚀 Optimized state
   const [fullName, setFullName] = useState('');
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -490,178 +493,264 @@ export default function SignupScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
-  const [nextRoute, setNextRoute] = useState(null);
+  const [errorState, setErrorState] = useState({
+    fullName: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
+  const [errorMessages, setErrorMessages] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // 🔑 Fetch App Registration Code on component mount
+  // ⚡ Pre-fetch app registration code immediately
   useEffect(() => {
-    const fetchCode = () => {
-      const code = getAppRegistrationCode();
-      setAppRegistrationCode(code);
-      console.log('✅ App Registration Code fetched and set:', code);
-    };
-
-    fetchCode();
+    const code = getAppRegistrationCode();
+    setAppRegistrationCode(code);
   }, []);
 
-  // 📆 Format DOB
-  const handleChange = text => {
-    let cleaned = text.replace(/\D/g, '');
-    if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+  // 🔧 Fixed BackHandler
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backAction = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+      return () => backHandler.remove();
+    }
+  }, [navigation]);
+
+  // 🚀 Optimized DOB formatting
+  const handleChange = useCallback((text) => {
+    const cleaned = text.replace(/\D/g, '').slice(0, 8);
     let formatted = '';
     if (cleaned.length <= 2) formatted = cleaned;
-    else if (cleaned.length <= 4)
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    else
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(
-        2,
-        4,
-      )}/${cleaned.slice(4, 8)}`;
+    else if (cleaned.length <= 4) formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    else formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
     setDob(formatted);
-  };
+  }, []);
 
-  // 🖼️ Pick Image
-  const handleChoosePhoto = () => {
+  // ⚡ Fast image picker
+  const handleChoosePhoto = useCallback(() => {
     launchImageLibrary(
       { mediaType: 'photo', maxWidth: 300, maxHeight: 300, quality: 0.7 },
-      response => {
-        if (!response.didCancel && !response.errorMessage && response.assets) {
+      (response) => {
+        if (response?.assets?.[0]?.uri) {
           setPhoto({ uri: response.assets[0].uri });
         }
-      },
+      }
     );
-  };
+  }, []);
 
-  const handleSignup = async () => {
-    // Validate required fields
-    if (!fullName || !emailOrPhone || !password || !confirmPassword) {
-      setPopupMessage('Please fill all required fields.');
-      setPopupVisible(true);
-      return;
+  // 🚀 Professional validation with detailed error messages
+  const isFormValid = useMemo(() => {
+    const errors = { fullName: false, email: false, password: false, confirmPassword: false };
+    const messages = {
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    };
+
+    // Full Name validation
+    if ((hasSubmitted || fullName.trim()) && !fullName.trim()) {
+      errors.fullName = true;
+      messages.fullName = 'Full name is required';
+    } else if (hasSubmitted || fullName.trim()) {
+      const nameParts = fullName.trim().split(/\s+/);
+      if (nameParts.length < 2) {
+        errors.fullName = true;
+        messages.fullName = 'Please enter first name and last name';
+      }
     }
 
-    const nameParts = fullName.trim().split(/\s+/);
-    if (nameParts.length < 2) {
-      setPopupMessage('Please enter your full name (first and last).');
-      setPopupVisible(true);
-      return;
+    // Email validation
+    if ((hasSubmitted || emailOrPhone) && !emailOrPhone) {
+      errors.email = true;
+      messages.email = 'Email is required';
+    } else if ((hasSubmitted || emailOrPhone) && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
+      errors.email = true;
+      messages.email = 'Please enter a valid Gmail address';
     }
 
-    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailOrPhone)) {
-      setPopupMessage('Please enter a valid Gmail address.');
-      setPopupVisible(true);
-      return;
+    // Password validation
+    if ((hasSubmitted || password) && !password) {
+      errors.password = true;
+      messages.password = 'Password is required';
+    } else if ((hasSubmitted || password) && password.length < 8) {
+      errors.password = true;
+      messages.password = 'Password must be at least 8 characters';
     }
 
-    if (password.length < 8) {
-      setPopupMessage('Password must be at least 8 characters long.');
-      setPopupVisible(true);
-      return;
+    // Confirm Password validation
+    if ((hasSubmitted || confirmPassword) && !confirmPassword) {
+      errors.confirmPassword = true;
+      messages.confirmPassword = 'Please confirm your password';
+    } else if ((hasSubmitted || confirmPassword) && password !== confirmPassword) {
+      errors.confirmPassword = true;
+      messages.confirmPassword = 'Passwords do not match';
     }
 
-    if (password !== confirmPassword) {
-      setPopupMessage('Passwords do not match.');
+    setErrorState(errors);
+    setErrorMessages(messages);
+    return !Object.values(errors).some(Boolean);
+  }, [fullName, emailOrPhone, password, confirmPassword, hasSubmitted]);
+
+  // ✅ User-friendly server error messages
+  const getUserFriendlyError = useCallback((status: number, errorData: string) => {
+    console.log('🔍 Error analysis:', status, errorData);
+    
+    try {
+      const errorJson = JSON.parse(errorData);
+      const message = errorJson.message?.toLowerCase() || '';
+      
+      if (message.includes('email already in use') || message.includes('already exists')) {
+        return 'Email already registered. Please use a different email.';
+      }
+      if (status === 409) {
+        return 'Account already exists. Try signing in.';
+      }
+    } catch (e) {}
+
+    switch (status) {
+      case 400: return 'Please check your information and try again.';
+      case 500: return 'Server error. Try again later.';
+      default: return 'Something went wrong. Please try again.';
+    }
+  }, []);
+
+  // ✅ Success popup with auto-navigate
+  const showSuccessAndNavigate = useCallback(() => {
+    setPopupMessage('User Registered Successfully!');
+    setPopupVisible(true);
+    setTimeout(() => {
+      navigation.replace('Signin');
+    }, 1500);
+  }, [navigation]);
+
+  // ✅ Professional signup handler
+  const handleSignup = useCallback(async () => {
+    setHasSubmitted(true);
+
+    if (!isFormValid) {
+      setPopupMessage('Please fix all errors before submitting.');
       setPopupVisible(true);
       return;
     }
 
     setLoading(true);
+    setPopupVisible(false);
 
     try {
-      // ✅ Prepare FormData
       const formData = new FormData();
       formData.append('fullName', fullName);
       formData.append('email', emailOrPhone);
       formData.append('password', password);
       formData.append('confirmPassword', confirmPassword);
       formData.append('dob', dob);
-      formData.append('address', address);
-      formData.append('gender', gender);
-      formData.append('referal', referal);
-
-      // 🔑 Append App Registration Code
+      formData.append('address', address || '');
+      formData.append('gender', gender || '');
+      formData.append('referal', referal || '');
       formData.append('appRegistrationCode', appRegistrationCode);
-      console.log(
-        '🔑 Sending App Registration Code with request:',
-        appRegistrationCode,
-      );
 
-      // ✅ Append image only if selected
-      if (photo && photo.uri) {
+      if (photo?.uri) {
         formData.append('avatar', {
           uri: photo.uri,
           type: 'image/jpeg',
           name: 'profile.jpg',
-        });
+        } as any);
       }
 
-      console.log('📤 Sending registration request with data:');
-      console.log('- Full Name:', fullName);
-      console.log('- Email:', emailOrPhone);
-      console.log('- DOB:', dob);
-      console.log('- Address:', address);
-      console.log('- Gender:', gender);
-      console.log('- Referral:', referal);
-      console.log('- App Registration Code:', appRegistrationCode);
+      const response = await fetch('https://naushad.onrender.com/api/auth/register', {
+        method: 'POST',
+        body: formData,
+      });
 
-      const response = await fetch(
-        'https://naushad.onrender.com/api/auth/register',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          body: formData,
-        },
-      );
+      if (!response.ok) {
+        const errorData = await response.text();
+        const userError = getUserFriendlyError(response.status, errorData);
+        setPopupMessage(userError);
+        setPopupVisible(true);
+        setLoading(false);
+        return;
+      }
 
       const data = await response.json();
-      setLoading(false);
-
-      console.log('📥 Signup Response received:');
-      console.log('- Status:', response.status);
-      console.log('- Response Data:', JSON.stringify(data, null, 2));
-      console.log(
-        '- App Registration Code in response:',
-        data.appRegistrationCode || 'Not returned',
-      );
-
-      if (response.ok) {
-        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
-        await AsyncStorage.setItem('userId', data.user._id);
-        console.log('✅ User data saved to AsyncStorage');
-        console.log('✅ User ID:', data.user._id);
-        setPopupMessage('Signup successful! Please sign in.');
-        setNextRoute({ name: 'Signin' });
-        setPopupVisible(true);
-      } else {
-        console.error('❌ Signup failed:', data.message);
-        setPopupMessage(data.message || 'Signup failed. Try again.');
-        setPopupVisible(true);
+      
+      if (data?.user) {
+        await Promise.all([
+          AsyncStorage.setItem('userData', JSON.stringify(data.user)),
+          data.user._id ? AsyncStorage.setItem('userId', data.user._id) : Promise.resolve()
+        ]);
       }
-    } catch (error) {
-      console.error('❌ Signup Error:', error);
-      console.error('Error details:', error.message);
-      setLoading(false);
-      setPopupMessage('Unable to connect to the server.');
+
+      showSuccessAndNavigate();
+      
+    } catch (error: any) {
+      let errorMsg = 'Network error. Please check your connection.';
+      if (error.message.includes('timeout')) {
+        errorMsg = 'Request timeout. Please try again.';
+      } else if (error.message.includes('Network')) {
+        errorMsg = 'No internet connection.';
+      }
+      
+      setPopupMessage(errorMsg);
       setPopupVisible(true);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [isFormValid, fullName, emailOrPhone, password, confirmPassword, dob, address, gender, referal, photo, appRegistrationCode, navigation, getUserFriendlyError, showSuccessAndNavigate]);
 
-  const handlePopupClose = () => {
+  const handlePopupClose = useCallback(() => {
     setPopupVisible(false);
-    if (nextRoute) navigation.navigate(nextRoute.name);
-  };
+  }, []);
 
-  // Render required field label with asterisk
-  const RequiredLabel = ({ children }) => (
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  // Render required field label
+  const RequiredLabel = ({ children }: { children: React.ReactNode }) => (
     <Text style={styles.label}>
       {children} <Text style={styles.requiredStar}>*</Text>
     </Text>
   );
 
+  // Get border color - professional error display
+  const getBorderColor = (field: keyof typeof errorState, fieldValue: string) => {
+    return (errorState[field] && (hasSubmitted || fieldValue.trim())) ? '#FF4444' : COLORS.primary;
+  };
+
+  // Error message component
+  const ErrorMessage = ({ message, field }: { message: string; field: keyof typeof errorMessages }) => {
+    if (!errorState[field] || !(hasSubmitted || errorMessages[field])) return null;
+    return (
+      <Text style={styles.errorText}>{message}</Text>
+    );
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Back Button - COMMENTED OUT */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleBackPress}
+          activeOpacity={0.7}
+        >
+          {/* <Icon name="arrow-back" size={wp('6%')} color={COLORS.primary} /> */}
+        </TouchableOpacity>
+
         <Image
           source={require('../../assets/images/logo.png')}
           style={styles.logo}
@@ -670,25 +759,30 @@ export default function SignupScreen({ navigation }) {
 
         <RequiredLabel>Full Name</RequiredLabel>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: getBorderColor('fullName', fullName) }]}
           placeholder="Enter full name"
           placeholderTextColor="gray"
           value={fullName}
           onChangeText={setFullName}
+          maxLength={50}
         />
+        <ErrorMessage message={errorMessages.fullName} field="fullName" />
 
         <RequiredLabel>Email</RequiredLabel>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: getBorderColor('email', emailOrPhone) }]}
           placeholder="Enter your Gmail"
           placeholderTextColor="gray"
           value={emailOrPhone}
           onChangeText={setEmailOrPhone}
           keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
         />
+        <ErrorMessage message={errorMessages.email} field="email" />
 
         <RequiredLabel>Password</RequiredLabel>
-        <View style={styles.passwordContainer}>
+        <View style={[styles.passwordContainer, { borderColor: getBorderColor('password', password) }]}>
           <TextInput
             style={[styles.input, styles.passwordInput]}
             placeholder="Enter password"
@@ -696,21 +790,24 @@ export default function SignupScreen({ navigation }) {
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
+            maxLength={50}
           />
           <TouchableOpacity 
             onPress={() => setShowPassword(!showPassword)}
             style={styles.eyeIcon}
+            activeOpacity={0.7}
           >
             <FeatherIcon
-              name={showPassword ? 'eye-off' : 'eye'}
+              name={showPassword ? 'eye' : 'eye-off'}
               size={22}
               color={showPassword ? COLORS.primary : 'gray'}
             />
           </TouchableOpacity>
         </View>
+        <ErrorMessage message={errorMessages.password} field="password" />
 
         <RequiredLabel>Confirm Password</RequiredLabel>
-        <View style={styles.passwordContainer}>
+        <View style={[styles.passwordContainer, { borderColor: getBorderColor('confirmPassword', confirmPassword) }]}>
           <TextInput
             style={[styles.input, styles.passwordInput]}
             placeholder="Confirm password"
@@ -718,18 +815,21 @@ export default function SignupScreen({ navigation }) {
             secureTextEntry={!showConfirmPassword}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
+            maxLength={50}
           />
           <TouchableOpacity 
             onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             style={styles.eyeIcon}
+            activeOpacity={0.7}
           >
             <FeatherIcon
-              name={showConfirmPassword ? 'eye-off' : 'eye'}
+              name={showConfirmPassword ? 'eye' : 'eye-off'}
               size={22}
               color={showConfirmPassword ? COLORS.primary : 'gray'}
             />
           </TouchableOpacity>
         </View>
+        <ErrorMessage message={errorMessages.confirmPassword} field="confirmPassword" />
 
         <Text style={styles.label}>Date of Birth</Text>
         <TextInput
@@ -739,6 +839,7 @@ export default function SignupScreen({ navigation }) {
           value={dob}
           keyboardType="number-pad"
           onChangeText={handleChange}
+          maxLength={10}
         />
 
         <Text style={styles.label}>Address</Text>
@@ -748,6 +849,9 @@ export default function SignupScreen({ navigation }) {
           placeholderTextColor="gray"
           value={address}
           onChangeText={setAddress}
+          multiline
+          numberOfLines={2}
+          maxLength={200}
         />
 
         <Text style={styles.label}>Gender</Text>
@@ -757,6 +861,7 @@ export default function SignupScreen({ navigation }) {
               key={option}
               style={styles.radioOption}
               onPress={() => setGender(option)}
+              activeOpacity={0.7}
             >
               <View
                 style={[
@@ -775,9 +880,9 @@ export default function SignupScreen({ navigation }) {
         </View>
 
         <View style={styles.imageContainer}>
-          <TouchableOpacity onPress={handleChoosePhoto}>
+          <TouchableOpacity onPress={handleChoosePhoto} activeOpacity={0.7}>
             <Image
-              source={photo ? photo : require('../../assets/user.png')}
+              source={photo ? { uri: photo.uri } : require('../../assets/user.png')}
               style={styles.profileImage}
             />
             <View style={styles.editIcon}>
@@ -796,15 +901,23 @@ export default function SignupScreen({ navigation }) {
           placeholderTextColor="gray"
           value={referal}
           onChangeText={setReferal}
+          maxLength={20}
         />
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.primary }]}
+          style={[
+            styles.button, 
+            { 
+              backgroundColor: isFormValid ? COLORS.primary : '#ccc',
+              opacity: loading ? 0.7 : 1
+            }
+          ]}
           onPress={handleSignup}
-          disabled={loading}
+          disabled={!isFormValid || loading}
+          activeOpacity={0.8}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#fff" size="small" />
           ) : (
             <Text style={styles.buttonText}>Sign Up</Text>
           )}
@@ -814,8 +927,7 @@ export default function SignupScreen({ navigation }) {
           <Text style={styles.signinText}>Already have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
             <Text style={[styles.signinLink, { color: COLORS.primary }]}>
-              {' '}
-              Sign In
+              {' '}Sign In
             </Text>
           </TouchableOpacity>
         </View>
@@ -834,12 +946,21 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: wp('5%'),
+    paddingTop: hp('2%'),
+  },
+  backButton: {
+    position: 'absolute',
+    top: hp('1%'),
+    left: wp('3%'),
+    zIndex: 10,
+    padding: wp('2%'),
   },
   logo: {
     width: wp('70%'),
     height: hp('15%'),
     alignSelf: 'center',
-    marginTop: hp('1%'),
+    marginTop: hp('3%'),
+    marginBottom: hp('2%'),
   },
   label: {
     fontSize: wp('3.6%'),
@@ -855,7 +976,6 @@ const styles = StyleSheet.create({
   input: {
     height: hp('6%'),
     borderWidth: 0.5,
-    borderColor: COLORS.primary,
     borderRadius: wp('2%'),
     paddingHorizontal: wp('4%'),
     fontSize: wp('3.5%'),
@@ -866,7 +986,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 0.5,
-    borderColor: COLORS.primary,
     borderRadius: wp('2%'),
     backgroundColor: '#fff',
     marginBottom: hp('1%'),
@@ -879,6 +998,14 @@ const styles = StyleSheet.create({
   eyeIcon: {
     paddingHorizontal: wp('3%'),
     paddingVertical: hp('1%'),
+  },
+  // ✅ Professional error text style
+  errorText: {
+    fontSize: wp('3%'),
+    color: '#FF4444',
+    marginTop: hp('0.2%'),
+    marginBottom: hp('0.8%'),
+    fontWeight: '500',
   },
   button: {
     paddingVertical: hp('1.5%'),

@@ -21,17 +21,10 @@ import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
 
 type RootStackParamList = {
-<<<<<<< HEAD
-  BookAppointmentScreen: { 
-    image?: any; 
-    showTab?: boolean; 
-    from?: any; 
-=======
   BookAppointmentScreen: {
     image?: any;
     showTab?: boolean;
     from?: any;
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
     serviceName?: string;
     price?: string;
   };
@@ -39,18 +32,6 @@ type RootStackParamList = {
 
 export default function BookAppointmentScreen() {
   const { theme } = useTheme();
-<<<<<<< HEAD
-  const route = useRoute<RouteProp<RootStackParamList, 'BookAppointmentScreen'>>();
-  const navigation = useNavigation<any>();
-  
-  const { image, serviceName, price, from, showTab } = route.params || {};
-  
-  // Show back button only when NOT from bottom bar
-  const showBack = from !== 'bottomBar';
-  
-  console.log('🔍 BookAppointmentScreen - From:', from, 'ShowTab:', showTab);
-
-=======
   const route =
     useRoute<RouteProp<RootStackParamList, 'BookAppointmentScreen'>>();
   const navigation = useNavigation<any>();
@@ -62,7 +43,6 @@ export default function BookAppointmentScreen() {
 
   console.log('🔍 BookAppointmentScreen - From:', from, 'ShowTab:', showTab);
 
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -77,53 +57,6 @@ export default function BookAppointmentScreen() {
     'nextButton',
   ];
 
-<<<<<<< HEAD
-  const onNextPress = () => {
-  console.log("🧾 Service params:", route.params);
-  console.log("📅 Selected Date:", selectedDate?.toDateString());
-  console.log("🕒 Selected Time:", selectedTime);
-
-  if (!selectedDate) {
-    console.log("❌ No date selected yet");
-    setPopupMessage("Please select a date");
-    setPopupVisible(true);
-    return;
-  }
-
-  if (!selectedTime) {
-    console.log("❌ No time selected yet");
-    setPopupMessage("Please select a time");
-    setPopupVisible(true);
-    return;
-  }
-
-  // FIX: Format date without timezone conversion
-  const formatDateWithoutTimezone = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const formattedDate = formatDateWithoutTimezone(selectedDate);
-  const dateString = selectedDate.toDateString(); // Human readable format
-
-  console.log("✅ Formatted Date:", formattedDate);
-  console.log("✅ Date String:", dateString);
-  console.log("✅ Selected Time:", selectedTime);
-  console.log("📍 Navigation Source:", from);
-
-  // Always navigate to BookingSeats after BookAppointmentScreen
-  console.log('🚀 Navigating to BookingSeats');
-  navigation.navigate('BookingSeats', {
-    serviceName,
-    price,
-    date: formattedDate,
-    time: selectedTime,
-    from: from || 'regular' // Pass along the source
-  });
-};
-=======
   // Format date to YYYY-MM-DD (without timezone conversion)
   const formatDateForAPI = (date: Date): string => {
     const year = date.getFullYear();
@@ -207,7 +140,6 @@ export default function BookAppointmentScreen() {
       from: from || 'regular',
     });
   };
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
 
   const handlePopupClose = () => {
     setPopupVisible(false);
@@ -255,9 +187,6 @@ export default function BookAppointmentScreen() {
       case 'timeSelect':
         return (
           <View style={styles.timeContainer}>
-<<<<<<< HEAD
-            <TimeSelect selectedDate={selectedDate} onTimeSelect={setSelectedTime} />
-=======
             <TimeSelect
               selectedDate={selectedDate}
               onTimeSelect={time => {
@@ -269,7 +198,6 @@ export default function BookAppointmentScreen() {
                 setSelectedTime(time);
               }}
             />
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
           </View>
         );
       case 'nextButton':
@@ -277,9 +205,6 @@ export default function BookAppointmentScreen() {
           <View style={styles.nxt}>
             <TouchableOpacity
               onPress={onNextPress}
-<<<<<<< HEAD
-              style={[styles.nxtButton, { backgroundColor: COLORS.primary }]}
-=======
               style={[
                 styles.nxtButton,
                 {
@@ -287,7 +212,6 @@ export default function BookAppointmentScreen() {
                     selectedDate && selectedTime ? COLORS.primary : '#ccc',
                 },
               ]}
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
               disabled={!selectedDate || !selectedTime}
             >
               <Text style={[styles.nxtText, { color: '#fff' }]}>Next</Text>
@@ -309,26 +233,17 @@ export default function BookAppointmentScreen() {
         renderItem={renderItem}
         keyExtractor={item => item}
         contentContainerStyle={{
-<<<<<<< HEAD
-          paddingBottom: from === 'bottomBar' ? hp('25%') : hp('15%'), // Extra space when bottom navbar is visible
-          paddingHorizontal: wp('3%')
-=======
           paddingBottom: from === 'bottomBar' ? hp('25%') : hp('15%'),
           paddingHorizontal: wp('3%'),
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
         }}
         showsVerticalScrollIndicator={false}
       />
 
-<<<<<<< HEAD
-      <Popup visible={popupVisible} message={popupMessage} onClose={handlePopupClose} />
-=======
       <Popup
         visible={popupVisible}
         message={popupMessage}
         onClose={handlePopupClose}
       />
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
     </SafeAreaView>
   );
 }
@@ -371,26 +286,11 @@ const styles = StyleSheet.create({
     marginHorizontal: wp('1%'),
     marginBottom: hp('1%'),
   },
-<<<<<<< HEAD
-  calenderContainer: { 
-    marginHorizontal: wp('2%'), 
-    marginBottom: hp('0.5%') 
-  },
-  timeContainer: { 
-    marginHorizontal: wp('1%'), 
-    marginBottom: hp('1%') 
-  },
-=======
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
   nxt: {
     marginHorizontal: wp('2%'),
     marginTop: hp('2%'),
     width: '93%',
-<<<<<<< HEAD
-    alignSelf: 'center'
-=======
     alignSelf: 'center',
->>>>>>> 629b237fd847b07bcf79d2ea2286ee8a31fa70bb
   },
   nxtButton: {
     paddingVertical: hp('1%'),

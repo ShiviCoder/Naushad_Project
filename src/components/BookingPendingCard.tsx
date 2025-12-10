@@ -17,26 +17,22 @@ const BookingPendingCard = ({ item }) => {
     if (!services || services.length === 0) return 'No services';
     
     try {
-      // If services is a string that looks like JSON, parse it
       if (typeof services === 'string' && services.startsWith('[')) {
         const parsedServices = JSON.parse(services);
         console.log('✅ formatServices - Parsed JSON string:', parsedServices);
         return Array.isArray(parsedServices) ? parsedServices.join(', ') : String(parsedServices);
       }
       
-      // If services is already an array
       if (Array.isArray(services)) {
         console.log('✅ formatServices - Already an array:', services);
         return services.join(', ');
       }
       
-      // If it's a single service object with serviceName
       if (typeof services === 'object' && services.serviceName) {
         console.log('✅ formatServices - Single service object:', services.serviceName);
         return services.serviceName;
       }
       
-      // Default case - handle single string
       console.log('✅ formatServices - Default case:', String(services));
       return String(services);
     } catch (error) {
@@ -71,12 +67,11 @@ const BookingPendingCard = ({ item }) => {
     }
   };
 
-  // Get services from the item prop - UPDATED
+  // Get services from the item prop
   const getServices = () => {
     console.log('📋 BookingPendingCard - Item:', item);
     
-    // Try different possible properties where services might be stored
-    if (item.service) { // ADDED THIS - check for singular 'service'
+    if (item.service) {
       return formatServices(item.service);
     } else if (item.services) {
       return formatServices(item.services);
@@ -85,7 +80,6 @@ const BookingPendingCard = ({ item }) => {
     } else if (item.serviceList) {
       return formatServices(item.serviceList);
     } else if (item.bookedServices) {
-      // If bookedServices is an array of objects with serviceName
       if (Array.isArray(item.bookedServices) && item.bookedServices[0]?.serviceName) {
         return formatServices(item.bookedServices.map(service => service.serviceName));
       }
@@ -105,7 +99,8 @@ const BookingPendingCard = ({ item }) => {
       time: item.time,
       price: item.totalAmount || item.price,
       appointmentCode: item.appointmentCode,
-      status: item.status || 'pending'
+      status: item.status || 'pending',
+      chairNo: item.chairNo || 'Not assigned' // Added chairNo
     });
   };
 
@@ -152,6 +147,16 @@ const BookingPendingCard = ({ item }) => {
           Code: {item.appointmentCode || 'N/A'}
         </Text>
       </View>
+
+      {/* Chair Number - NEW SECTION */}
+      {item.chairNo && (
+        <View style={styles.content}>
+          <Image style={styles.icon} source={require('../assets/chair-icon.png')} /> {/* Add your chair icon */}
+          <Text style={[styles.text, { color: theme.textPrimary }]}>
+            Chair: {item.chairNo}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
