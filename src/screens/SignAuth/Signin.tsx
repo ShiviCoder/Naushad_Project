@@ -45,13 +45,13 @@ const Signin = ({ navigation }) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
-        }
+        },
       );
-      
+
       const data = await response.json();
       console.log('📥 Login API Response:', JSON.stringify(data, null, 2));
       console.log('🔑 Response Status:', response.status);
-      
+
       if (response.ok && data.token) {
         console.log('✅ Login successful!');
         console.log('🎯 User ID from response:', data.user?._id);
@@ -61,7 +61,7 @@ const Signin = ({ navigation }) => {
         // Store all necessary data in AsyncStorage
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data));
-        
+
         // Store userId separately for easy access
         if (data.user && data.user._id) {
           await AsyncStorage.setItem('userId', data.user._id);
@@ -74,7 +74,7 @@ const Signin = ({ navigation }) => {
         const storedToken = await AsyncStorage.getItem('userToken');
         const storedUserId = await AsyncStorage.getItem('userId');
         const storedUserData = await AsyncStorage.getItem('userData');
-        
+
         console.log('🔍 Verification - Stored Token:', storedToken);
         console.log('🔍 Verification - Stored User ID:', storedUserId);
         console.log('🔍 Verification - Stored User Data:', storedUserData);
@@ -133,7 +133,16 @@ const Signin = ({ navigation }) => {
         <Text style={styles.label}>Password</Text>
         <View style={styles.passwordContainer}>
           <TextInput
-            style={[styles.input, { flex: 1, borderWidth: 0.5, borderLeftWidth: 0, borderRightWidth: 0, marginBottom: 0 }]}
+            style={[
+              styles.input,
+              {
+                flex: 1,
+                borderWidth: 0.5,
+                borderLeftWidth: 0,
+                borderRightWidth: 0,
+                marginBottom: 0,
+              },
+            ]}
             placeholder="Enter password"
             placeholderTextColor="gray"
             secureTextEntry={!showPassword}
@@ -142,7 +151,7 @@ const Signin = ({ navigation }) => {
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Icon
-              name={showPassword ? 'eye-off' : 'eye'}
+              name={showPassword ? 'eye' : 'eye-off'}
               size={22}
               color={showPassword ? COLORS.primary : 'gray'}
               style={{ marginLeft: wp('2%') }}

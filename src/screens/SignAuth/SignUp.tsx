@@ -84,7 +84,7 @@
 //         gender,
 //         referal,
 //         photo,
-//       } 
+//       }
 //     await AsyncStorage.setItem("pendingUserData",JSON.stringify(userData));
 //     setLoading(false);
 //     console.log("User data :", userData);
@@ -272,7 +272,7 @@
 
 //           <View style={styles.nameRow}>
 //             <Text style={styles.nameText}>Upload your picture</Text>
-//           </View>  
+//           </View>
 //         </View>
 
 //         <Text style={styles.label}>Referal Code(Optional)</Text>
@@ -447,7 +447,6 @@
 //     color: "#000",
 //   },
 // });
-
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -697,12 +696,12 @@ export default function SignupScreen({ navigation }) {
             value={password}
             onChangeText={setPassword}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
             style={styles.eyeIcon}
           >
             <FeatherIcon
-              name={showPassword ? 'eye-off' : 'eye'}
+              name={showPassword ? 'eye' : 'eye-off'}
               size={22}
               color={showPassword ? COLORS.primary : 'gray'}
             />
@@ -719,12 +718,12 @@ export default function SignupScreen({ navigation }) {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             style={styles.eyeIcon}
           >
             <FeatherIcon
-              name={showConfirmPassword ? 'eye-off' : 'eye'}
+              name={showConfirmPassword ? 'eye' : 'eye-off'}
               size={22}
               color={showConfirmPassword ? COLORS.primary : 'gray'}
             />
