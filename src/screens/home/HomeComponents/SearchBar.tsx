@@ -1,3 +1,5 @@
+// src/screens/home/HomeComponents/SearchBar.js
+
 import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -10,7 +12,7 @@ const SearchBar = ({ theme }) => {
   return (
     <View style={styles.searchContainer}>
       <View style={[styles.searchBar, { borderColor: '#dddddd1d' }]}>
-        <Icon name="search" size={wp('5%')} color="#9E9E9E" />
+        <Icon name="search" size={wp('4.5%')} color="#9E9E9E" />
         <TextInput
           placeholder="Search"
           placeholderTextColor="#9E9E9E"
@@ -25,24 +27,24 @@ const styles = StyleSheet.create({
   searchContainer: {
     width: '97%',
     alignSelf: 'center',
-    paddingVertical: hp('1%'),
+    paddingVertical: hp('0.5%'), // Minimal padding
   },
   searchBar: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: wp('5%'),
-    paddingHorizontal: wp('5%'),
+    borderRadius: wp('4%'),
+    paddingHorizontal: wp('4%'),
     alignItems: 'center',
-    height: hp('5%'),
-    borderWidth: wp('0.3%'),
+    height: hp('4.5%'), // Reduced height
+    borderWidth: wp('0.2%'),
     elevation: 1,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: hp('0.1%'),
-    fontSize: wp('4%'),
+    paddingVertical: 0, // No vertical padding
+    fontSize: wp('3.8%'),
     fontFamily: 'Poppins-Medium',
-    marginLeft: wp('2%'),
+    marginLeft: wp('1.5%'),
   },
 });
 

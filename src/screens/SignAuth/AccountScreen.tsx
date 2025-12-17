@@ -7,13 +7,17 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import settingData from '../../components/EditProfileData';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import Head from '../../components/Head';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import { useTheme } from '../../context/ThemeContext';
@@ -21,59 +25,110 @@ import { useTheme } from '../../context/ThemeContext';
 const AccountScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<any>();
+
   const [showLogout, setShowLogout] = useState(false);
   const [user, setUser] = useState<any>(null);
 
+  const [isLoading, setIsLoading] = useState(false); // activity indicator
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // to avoid flicker on refocus
+
   // ✅ Fetch stored user data
-  useEffect(() => {
-    const fetchUserFromAPI = async () => {
-      try {
-        const token = await AsyncStorage.getItem("userToken");
-
-        if (!token) {
-          console.log("❌ No token found");
-          return;
-        }
-
-        const response = await fetch("https://naushad.onrender.com/api/auth/profile", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const json = await response.json();
-        console.log("📡 API User Response:", json);
-
-        const userData = json.data || json.user || json;
-
-        setUser(userData);
-
-        if (userData) {
-          await AsyncStorage.setItem("userData", JSON.stringify(userData));
-        } else {
-          console.log("⚠ No user data received from API");
-        }
-
-      } catch (error) {
-        console.log("❌ API Fetch Error:", error);
+  const fetchUserFromAPI = useCallback(async () => {
+    try {
+      // only show loader on first load, not every focus
+      if (isInitialLoad) {
+        setIsLoading(true);
       }
-    };
 
+      const token = await AsyncStorage.getItem('userToken');
+
+      if (!token) {
+        console.log('❌ No token found');
+        setUser(null);
+        return;
+      }
+
+      console.log('🔄 Refreshing user profile...');
+      const response = await fetch(
+        'https://naushad.onrender.com/api/auth/profile',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const json = await response.json();
+      console.log('📡 API User Response:', json);
+
+      const userData = json.data || json.user || json;
+      setUser(userData || null);
+
+      if (userData) {
+        await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      } else {
+        console.log('⚠ No user data received from API');
+      }
+    } catch (error) {
+      console.log('❌ API Fetch Error:', error);
+    } finally {
+      setIsLoading(false);
+      setIsInitialLoad(false);
+    }
+  }, [isInitialLoad]);
+
+  // ✅ Initial load only once
+  useEffect(() => {
     fetchUserFromAPI();
-  }, []);
+  }, [fetchUserFromAPI]);
 
+  // ✅ Refresh on focus WITHOUT extra loader (no flicker)
+  useFocusEffect(
+    useCallback(() => {
+      // on focus, refresh silently (no spinner because isInitialLoad is already false)
+      fetchUserFromAPI();
+    }, [fetchUserFromAPI]),
+  );
 
   const handleLogoutConfirm = async () => {
     setShowLogout(false);
-    await AsyncStorage.removeItem('userToken');
-    await AsyncStorage.removeItem('userData');
+
+    // ✅ Clear both token and user data completely
+    try {
+      await AsyncStorage.multiRemove(['userToken', 'userData']);
+    } catch (e) {
+      console.log('Error clearing storage on logout', e);
+    }
+
+    // ✅ Reset local user state as well
+    setUser(null);
+
+    // ✅ Go to Signin stack
     navigation.replace('Signin');
   };
 
+  // ✅ Show full-screen loader only on very first load
+  if (isLoading && isInitialLoad) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: theme.background || '#fff',
+        }}
+      >
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       {/* Header */}
       <Head title="Account" showBack={false} />
 
@@ -81,29 +136,27 @@ const AccountScreen = () => {
       <View style={styles.profileSection}>
         <View style={styles.con}>
           <View style={styles.imgSection}>
-           <Image
-  style={styles.userImg}
-  source={
-    user?.avatar && user?.avatar !== "" && user?.avatar !== "null"
-      ? { uri: user.avatar }
-      : user?.image && user?.image !== "" && user?.image !== "null"
-        ? { uri: user.image }
-        : require('../../assets/user.png')
-  }
-/>
-
+            <Image
+              style={styles.userImg}
+              source={
+                user?.avatar && user?.avatar !== '' && user?.avatar !== 'null'
+                  ? { uri: user.avatar }
+                  : user?.image && user?.image !== '' && user?.image !== 'null'
+                  ? { uri: user.image }
+                  : require('../../assets/user.png')
+              }
+            />
           </View>
 
           <View style={styles.profileText}>
             <Text style={[styles.name, { color: theme.textPrimary }]}>
               {user
-                ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User Name'
+                ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() ||
+                  'User Name'
                 : 'User Name'}
-              {/* Anchal Jain */}
             </Text>
             <Text style={[styles.email, { color: theme.textPrimary }]}>
               {user?.email || 'user@example.com'}
-              {/* anchal11@gmail.com */}
             </Text>
           </View>
         </View>
@@ -126,27 +179,51 @@ const AccountScreen = () => {
             <TouchableOpacity
               style={styles.detailsCon}
               onPress={() => {
-                if (item.title === 'Edit Profile') navigation.getParent()?.navigate('MyProfile');
-                else if (item.title === 'Cart') navigation.navigate('Cart');
-                else if (item.title === 'Catalog') navigation.navigate('Catelog');
-                else if (item.title === 'Refer a friend') navigation.navigate('ReferFriend');
-                else if (item.title === 'Wallet') navigation.navigate('WalletScreen');
-                else if (item.title === 'Settings') navigation.navigate('SettingScreen');
-                else if (item.title === 'About us') navigation.navigate('AboutUs');
-                else if (item.title === 'Privacy Policy') navigation.navigate('PrivacyPolicy');
-                else if (item.title === 'Terms & Conditions') navigation.navigate('TermsAndConditions');
-                else if (item.title === 'Logout') setShowLogout(true);
+                if (item.title === 'Edit Profile') {
+                  navigation.getParent()?.navigate('MyProfile');
+                } else if (item.title === 'Cart') {
+                  navigation.navigate('Cart');
+                } else if (item.title === 'Catalog') {
+                  navigation.navigate('Catelog');
+                } else if (item.title === 'Refer a friend') {
+                  navigation.navigate('ReferFriend');
+                } else if (item.title === 'Wallet') {
+                  navigation.navigate('WalletScreen');
+                } else if (item.title === 'Settings') {
+                  navigation.navigate('SettingScreen');
+                } else if (item.title === 'About us') {
+                  navigation.navigate('AboutUs');
+                } else if (item.title === 'Privacy Policy') {
+                  navigation.navigate('PrivacyPolicy');
+                } else if (item.title === 'Terms & Conditions') {
+                  navigation.navigate('TermsAndConditions');
+                } else if (item.title === 'Logout') {
+                  setShowLogout(true);
+                }
               }}
             >
-              <Image style={[styles.leftIcon, { tintColor: COLORS.primary }]} source={item.image} />
+              <Image
+                style={[styles.leftIcon, { tintColor: COLORS.primary }]}
+                source={item.image}
+              />
               <View style={styles.textCon}>
-                <Text style={[styles.text, { color: theme.textPrimary }]}>{item.title}</Text>
-                <Text style={[styles.subText, { color: theme.textPrimary }]}>{item.description}</Text>
+                <Text style={[styles.text, { color: theme.textPrimary }]}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.subText, { color: theme.textPrimary }]}>
+                  {item.description}
+                </Text>
               </View>
             </TouchableOpacity>
           )}
           ListFooterComponent={
-            <Text style={{ textAlign: 'center', color: theme.textPrimary, marginTop: hp('0.2%') }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                color: theme.textPrimary,
+                marginTop: hp('0.2%'),
+              }}
+            >
               App Version: v1.0.0
             </Text>
           }
@@ -163,12 +240,20 @@ const AccountScreen = () => {
         <View style={styles.overlay}>
           <View style={styles.popup}>
             <Text style={styles.popupTitle}>Confirm Logout</Text>
-            <Text style={styles.popupMessage}>Are you sure you want to logout?</Text>
+            <Text style={styles.popupMessage}>
+              Are you sure you want to logout?
+            </Text>
             <View style={styles.popupActions}>
-              <TouchableOpacity onPress={() => setShowLogout(false)} style={[styles.popupBtn, styles.cancelBtn]}>
+              <TouchableOpacity
+                onPress={() => setShowLogout(false)}
+                style={[styles.popupBtn, styles.cancelBtn]}
+              >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.popupBtn, styles.logoutBtn]} onPress={handleLogoutConfirm}>
+              <TouchableOpacity
+                style={[styles.popupBtn, styles.logoutBtn]}
+                onPress={handleLogoutConfirm}
+              >
                 <Text style={styles.logoutText}>Logout</Text>
               </TouchableOpacity>
             </View>

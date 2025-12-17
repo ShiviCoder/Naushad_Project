@@ -9,38 +9,40 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 
 const BookingAcceptCards = ({ item }) => {
-  const [isChecked, setIsChecked] = useState(true);
+  const [isChecked] = useState(true); // Always checked, no setter used
   const navigation = useNavigation();
   const { theme } = useTheme();
   const cardBackground = theme.background === '#121212' ? '#fff' : '#000';
   const textColor = theme.background === '#121212' ? '#000' : '#fff';
-  const inactiveColor = textColor;
-  const acceptedTextColor = isChecked ? theme.primary : textColor;
+  const acceptedTextColor = theme.primary;
 
   // Format services array
-  const formatServices = (services) => {
+  const formatServices = services => {
     console.log('🔄 formatServices - Input:', services);
-    
+
     if (!services || services.length === 0) return 'No services';
-    
+
     try {
       let serviceArray = services;
-      
+
       if (typeof services === 'string' && services.startsWith('[')) {
         serviceArray = JSON.parse(services);
         console.log('✅ formatServices - Parsed JSON string:', serviceArray);
       }
-      
+
       if (Array.isArray(serviceArray)) {
         console.log('✅ formatServices - Already an array:', serviceArray);
         return serviceArray.join(', ');
       }
-      
+
       if (typeof serviceArray === 'object' && serviceArray.serviceName) {
-        console.log('✅ formatServices - Single service object:', serviceArray.serviceName);
+        console.log(
+          '✅ formatServices - Single service object:',
+          serviceArray.serviceName,
+        );
         return serviceArray.serviceName;
       }
-      
+
       console.log('✅ formatServices - Default case:', String(serviceArray));
       return String(serviceArray);
     } catch (error) {
@@ -52,7 +54,7 @@ const BookingAcceptCards = ({ item }) => {
   // Get services for navigation
   const getServices = () => {
     console.log('📋 BookingAcceptCards - Item:', item);
-    
+
     if (item.service) {
       return formatServices(item.service);
     } else if (item.services) {
@@ -62,22 +64,27 @@ const BookingAcceptCards = ({ item }) => {
     } else if (item.serviceList) {
       return formatServices(item.serviceList);
     } else if (item.bookedServices) {
-      if (Array.isArray(item.bookedServices) && item.bookedServices[0]?.serviceName) {
-        return formatServices(item.bookedServices.map(service => service.serviceName));
+      if (
+        Array.isArray(item.bookedServices) &&
+        item.bookedServices[0]?.serviceName
+      ) {
+        return formatServices(
+          item.bookedServices.map(service => service.serviceName),
+        );
       }
       return formatServices(item.bookedServices);
     }
-    
+
     return 'No services';
   };
 
   // Format date
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     try {
       return new Date(dateString).toLocaleDateString('en-IN', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
       });
     } catch (error) {
       return dateString;
@@ -85,7 +92,7 @@ const BookingAcceptCards = ({ item }) => {
   };
 
   // Format time
-  const formatTime = (timeString) => {
+  const formatTime = timeString => {
     try {
       const [hours, minutes] = timeString.split(':');
       const hour = parseInt(hours);
@@ -99,19 +106,24 @@ const BookingAcceptCards = ({ item }) => {
 
   // Get price from item
   const getPrice = () => {
-    return item.totalAmount || 
-           item.price || 
-           item.amount || 
-           item.totalPrice || 
-           item.servicePrice || 
-           '500';
+    return (
+      item.totalAmount ||
+      item.price ||
+      item.amount ||
+      item.totalPrice ||
+      item.servicePrice ||
+      '500'
+    );
   };
 
   // Handle navigation to booking accepted screen
   const handlePress = () => {
-    console.log('📍 Navigation - Passing booking data to BookingAccepted:', item);
-    
-    navigation.navigate('BookingAccepted', { 
+    console.log(
+      '📍 Navigation - Passing booking data to BookingAccepted:',
+      item,
+    );
+
+    navigation.navigate('BookingAccepted', {
       booking: item,
       serviceName: getServices(),
       date: item.date,
@@ -119,7 +131,7 @@ const BookingAcceptCards = ({ item }) => {
       price: getPrice(),
       appointmentCode: item.appointmentCode,
       status: item.status || 'accepted',
-      chairNo: item.chairNo || 'Not assigned' // Added chairNo
+      chairNo: item.chairNo || 'Not assigned',
     });
   };
 
@@ -131,7 +143,10 @@ const BookingAcceptCards = ({ item }) => {
       {/* Service + Checkbox */}
       <View style={styles.acceptContainer}>
         <View style={[styles.content, { marginBottom: hp('-0.8%') }]}>
-          <Image source={require('../assets/hairCut.png')} style={styles.icon} />
+          <Image
+            source={require('../assets/hairCut.png')}
+            style={styles.icon}
+          />
           <Text style={[styles.text, { color: textColor }]}>
             {getServices()}
           </Text>
@@ -141,10 +156,13 @@ const BookingAcceptCards = ({ item }) => {
           <CheckBox
             value={isChecked}
             style={styles.checkBox}
-            onValueChange={setIsChecked}
-            tintColors={{ true: theme.primary, false: inactiveColor }}
+            onValueChange={() => {}} // No-op, prevents unchecking
+            tintColors={{ true: theme.primary, false: textColor }}
+            disabled={true} // Optional: fully disable interaction
           />
-          <Text style={[styles.text, { color: acceptedTextColor }]}>Accepted</Text>
+          <Text style={[styles.text, { color: acceptedTextColor }]}>
+            Accepted
+          </Text>
         </View>
       </View>
 
@@ -158,7 +176,10 @@ const BookingAcceptCards = ({ item }) => {
 
       {/* Time */}
       <View style={styles.content}>
-        <Image source={require('../assets/stopwatch-removebg-preview.png')} style={styles.icon} />
+        <Image
+          source={require('../assets/stopwatch-removebg-preview.png')}
+          style={styles.icon}
+        />
         <Text style={[styles.text, { color: textColor }]}>
           Time: {formatTime(item.time)}
         </Text>
@@ -166,7 +187,10 @@ const BookingAcceptCards = ({ item }) => {
 
       {/* Appointment Code */}
       <View style={styles.content}>
-        <Image source={require('../assets/moneyBag2.png')} style={styles.icon} />
+        <Image
+          source={require('../assets/moneyBag2.png')}
+          style={styles.icon}
+        />
         <Text style={[styles.text, { color: textColor }]}>
           Code: {item.appointmentCode || 'N/A'}
         </Text>
@@ -175,7 +199,10 @@ const BookingAcceptCards = ({ item }) => {
       {/* Chair Number - NEW SECTION */}
       {item.chairNo && (
         <View style={styles.content}>
-          <Image source={require('../assets/chair-icon.png')} style={styles.icon} /> {/* Add your chair icon */}
+          <Image
+            source={require('../assets/chair-icon.png')}
+            style={styles.icon}
+          />
           <Text style={[styles.text, { color: textColor }]}>
             Chair: {item.chairNo}
           </Text>

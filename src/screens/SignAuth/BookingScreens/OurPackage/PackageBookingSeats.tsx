@@ -9,13 +9,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import Head from '../../components/Head';
+import Head from '../../../../components/Head';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import COLORS from '../../utils/Colors';
-import { useTheme } from '../../context/ThemeContext';
+import COLORS from '../../../../utils/Colors';
+import { useTheme } from '../../../../context/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -79,7 +79,7 @@ const ensureHHmm = (timeStr: any): string => {
   return cleanTime;
 };
 
-const BookingSeats = () => {
+const PackageBookingSeats = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const route = useRoute();
@@ -156,7 +156,7 @@ const BookingSeats = () => {
     }
 
     navigation.navigate(
-      'BookAppoinment2' as never,
+      'BookingPackageScreen' as never,
       {
         selectedDate,
         selectedTime,
@@ -196,7 +196,7 @@ const BookingSeats = () => {
         style={{ alignItems: 'center', margin: wp('1%') }}
       >
         <Image
-          source={require('../../assets/seats.png')}
+          source={require('../../../../assets/seats.png')}
           style={{
             width: wp('15%'),
             height: wp('15%'),
@@ -221,7 +221,7 @@ const BookingSeats = () => {
   if (loading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <Head title="Booking" showBack={true} />
+        <Head title="Select Seat" showBack={true} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator
             size="large"
@@ -236,7 +236,7 @@ const BookingSeats = () => {
   if (error) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <Head title="Booking" showBack={true} />
+        <Head title="Select Seat" showBack={true} />
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText]}>{error}</Text>
         </View>
@@ -247,9 +247,8 @@ const BookingSeats = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Head title="Booking" showBack={true} />
-
-        <View style={styles.contentContainer}>
+        <Head title="Select Seat" showBack={true} />
+        <View style={{ padding: wp('3%') }}>
           <Text style={[styles.text, { color: theme.textPrimary }]}>
             Please confirm your seat
           </Text>
@@ -284,7 +283,11 @@ const BookingSeats = () => {
             renderItem={renderItem}
             keyExtractor={item => item._id}
             numColumns={5}
-            contentContainerStyle={styles.flatListContent}
+            contentContainerStyle={{
+              paddingBottom: hp('15%'),
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={() => (
               <View style={styles.emptyContainer}>
@@ -297,7 +300,7 @@ const BookingSeats = () => {
             )}
           />
 
-          <View style={styles.nextButtonContainer}>
+          <View style={styles.nxt}>
             <TouchableOpacity
               onPress={onNextPress}
               style={[
@@ -315,21 +318,28 @@ const BookingSeats = () => {
   );
 };
 
-export default BookingSeats;
+export default PackageBookingSeats;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  contentContainer: {
-    flex: 1,
-    padding: wp('3%'),
-    justifyContent: 'space-between',
-  },
   text: {
     marginBottom: hp('2%'),
     fontSize: wp('5%'),
     fontFamily: 'Poppins-Medium',
     alignSelf: 'center',
     textAlign: 'center',
+  },
+  infoContainer: {
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    padding: wp('3%'),
+    borderRadius: wp('2%'),
+    marginBottom: hp('2%'),
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: wp('4%'),
+    fontFamily: 'Poppins-Regular',
+    marginVertical: hp('0.3%'),
   },
   loadingContainer: {
     flex: 1,
@@ -373,11 +383,6 @@ const styles = StyleSheet.create({
     fontSize: wp('3.5%'),
     fontFamily: 'Poppins-Regular',
   },
-  flatListContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   emptyContainer: {
     padding: wp('5%'),
     alignItems: 'center',
@@ -387,20 +392,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     textAlign: 'center',
   },
-  nextButtonContainer: {
-    paddingHorizontal: wp('2%'),
-    paddingBottom: wp('5%'),
-    paddingTop: hp('2%'),
+  nxt: {
+    marginHorizontal: wp('2%'),
+    marginTop: hp('5%'),
+    width: '93%',
+    alignSelf: 'center',
   },
   nxtButton: {
-    paddingVertical: hp('2%'),
+    paddingVertical: hp('1%'),
     paddingHorizontal: wp('4%'),
     borderRadius: wp('2%'),
-    alignItems: 'center',
   },
   nxtText: {
     fontSize: wp('5%'),
     fontWeight: '700',
     fontFamily: 'Poppins-Medium',
+    alignSelf: 'center',
   },
 });

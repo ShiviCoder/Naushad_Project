@@ -1,3 +1,5 @@
+// src/screens/home/HomeScreen.js
+
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -5,9 +7,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   BackHandler,
-  SafeAreaView,
   Animated,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import {
@@ -83,12 +85,25 @@ const HomeScreen = () => {
     return () => subscription.remove();
   }, [isFocused]);
 
+  // whenever gender changes AND token already loaded, refetch all gender‑based data
+  useEffect(() => {
+    if (!tokenRef.current) {
+      return;
+    }
+    // lightweight loader for gender switch
+    setLoading(true);
+    fetchAllData().finally(() => {
+      setLoading(false);
+    });
+  }, [gender]);
+
   const initializeApp = async () => {
     try {
       // Load token and user data in parallel
-      const [token, userData] = await Promise.all([
+      const [token, userData, savedGender] = await Promise.all([
         AsyncStorage.getItem('userToken'),
         AsyncStorage.getItem('userData'),
+        AsyncStorage.getItem('userGender'), // Get gender from sign-in
       ]);
 
       tokenRef.current = token;
@@ -100,29 +115,43 @@ const HomeScreen = () => {
         setUser(userInfo);
       }
 
-      // Get gender from storage or user data
+      // Get gender - Priority: 1. Saved selectedGender 2. userGender from sign-in 3. User data gender 4. Default 'male'
       let selectedGender = await AsyncStorage.getItem('selectedGender');
 
       if (!selectedGender) {
-        // Try to get gender from user data
-        if (userData) {
+        // First priority: Check if gender was saved during sign-in
+        if (savedGender) {
+          selectedGender = savedGender.toLowerCase().trim();
+          await AsyncStorage.setItem('selectedGender', selectedGender);
+        }
+        // Second priority: Check user data from API
+        else if (userData) {
           const parsed = JSON.parse(userData);
           const userInfo = parsed?.user ? parsed.user : parsed;
           if (userInfo?.gender) {
             selectedGender = userInfo.gender.toLowerCase().trim();
+            await AsyncStorage.setItem('selectedGender', selectedGender);
           }
         }
-        // Default to male if still not found
-        selectedGender = selectedGender || 'male';
+      }
+
+      // If still no gender, default to 'male'
+      selectedGender = selectedGender || 'male';
+
+      // Make sure gender is stored
+      if (!(await AsyncStorage.getItem('selectedGender'))) {
         await AsyncStorage.setItem('selectedGender', selectedGender);
       }
 
       setGender(selectedGender);
 
-      // Fetch all data without loading indicator for initial load
-      fetchAllData();
+      // Fetch all data (initial load)
+      setLoading(true);
+      await fetchAllData();
+      setLoading(false);
     } catch (error) {
-      console.log('Error initializing app');
+      console.log('Error initializing app', error);
+      setLoading(false);
     }
   };
 
@@ -165,7 +194,7 @@ const HomeScreen = () => {
       setOffers(offersData);
       setHomeService(homeServicesData);
     } catch (error) {
-      // Silently handle errors
+      console.log('Error in fetchAllData', error);
     }
   };
 
@@ -182,6 +211,7 @@ const HomeScreen = () => {
 
     Animated.timing(translateY, {
       toValue: 0,
+      duration: 300,
       useNativeDriver: true,
     }).start();
 
@@ -254,6 +284,7 @@ const HomeScreen = () => {
         },
       });
       const data = await res.json();
+      // assuming API already filters or returns all; no gender field used here
       return data;
     } catch (err) {
       return { data: [] };
@@ -311,7 +342,7 @@ const HomeScreen = () => {
   const fetchProductPackages = async token => {
     try {
       const response = await fetch(
-        `https://naushad.onrender.com/api/product-packages`,
+        'https://naushad.onrender.com/api/product-packages',
         {
           method: 'GET',
           headers: {
@@ -339,8 +370,9 @@ const HomeScreen = () => {
 
   const fetchSpecialOffers = async token => {
     try {
+      // FIXED DOMAIN TYPO: onnder -> onrender
       const response = await fetch(
-        `https://naushad.onnder.com/api/offers?gender=${gender}`,
+        `https://naushad.onrender.com/api/offers?gender=${gender}`,
         {
           method: 'GET',
           headers: {
@@ -420,17 +452,8 @@ const HomeScreen = () => {
     // Save to AsyncStorage
     await AsyncStorage.setItem('selectedGender', formatted);
 
-    // Update state
+    // Update state (useEffect on [gender] will refetch)
     setGender(formatted);
-
-    // Show loading indicator
-    setLoading(true);
-
-    // Fetch new data
-    await fetchAllData();
-
-    // Hide loading indicator
-    setLoading(false);
   };
 
   const handleSectionNavigation = section => {
@@ -474,9 +497,7 @@ const HomeScreen = () => {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {loading && (
         <View style={styles.overlayLoader}>
           <ActivityIndicator size="large" color={COLORS.primary} />
@@ -502,75 +523,81 @@ const HomeScreen = () => {
           }
           contentContainerStyle={styles.scrollContent}
         >
-          <Header user={user} theme={theme} navigation={navigation} />
+          {/* Header with proper safe area handling */}
+          <View style={styles.safeAreaHeader}>
+            <Header user={user} theme={theme} navigation={navigation} />
+          </View>
 
-          <GenderToggle
-            gender={gender}
-            onGenderChange={handleGenderChange}
-            style={styles.genderToggleContainer}
-          />
+          <View style={styles.contentContainer}>
+            <GenderToggle
+              gender={gender}
+              onGenderChange={handleGenderChange}
+              style={styles.genderToggleContainer}
+            />
 
-          <SearchBar theme={theme} />
+            {/* Commented out SearchBar for now */}
+            <SearchBar theme={theme} />
 
-          <PendingBookingMessage />
+            <PendingBookingMessage />
 
-          <SpecialOffers
-            offers={offers}
-            navigation={navigation}
-            theme={theme}
-          />
+            <SpecialOffers
+              offers={offers}
+              navigation={navigation}
+              theme={theme}
+            />
 
-          <OurServices
-            services={services}
-            gender={gender}
-            navigation={navigation}
-            handleSectionNavigation={handleSectionNavigation}
-          />
+            <OurServices
+              services={services}
+              gender={gender}
+              navigation={navigation}
+              handleSectionNavigation={handleSectionNavigation}
+            />
 
-          <AppointmentBanner
-            gender={gender}
-            navigation={navigation}
-            theme={theme}
-          />
+            <AppointmentBanner
+              gender={gender}
+              navigation={navigation}
+              theme={theme}
+            />
 
-          <OurProducts
-            products={products}
-            gender={gender}
-            navigation={navigation}
-            handleSectionNavigation={handleSectionNavigation}
-          />
+            <OurProducts
+              products={products}
+              gender={gender}
+              navigation={navigation}
+              handleSectionNavigation={handleSectionNavigation}
+            />
 
-          <VideosSection
-            videos={videos}
-            handleSectionNavigation={handleSectionNavigation}
-          />
+            <VideosSection
+              videos={videos}
+              handleSectionNavigation={handleSectionNavigation}
+            />
 
-          <OurCertificates
-            certificates={certificates}
-            handleSectionNavigation={handleSectionNavigation}
-          />
+            <OurCertificates
+              certificates={certificates}
+              handleSectionNavigation={handleSectionNavigation}
+            />
 
-          <AboutSalon aboutData={aboutData} theme={theme} />
+            <AboutSalon aboutData={aboutData} theme={theme} />
 
-          <OurPackages
-            packages={packages}
-            navigation={navigation}
-            handleSectionNavigation={handleSectionNavigation}
-          />
+            <OurPackages
+              packages={packages}
+              navigation={navigation}
+              handleSectionNavigation={handleSectionNavigation}
+            />
 
-          <ProductPackages
-            productPackages={productPackages}
-            navigation={navigation}
-            handleSectionNavigation={handleSectionNavigation}
-            theme={theme}
-          />
+            <ProductPackages
+              productPackages={productPackages}
+              navigation={navigation}
+              handleSectionNavigation={handleSectionNavigation}
+              theme={theme}
+            />
 
-          <HomeServices
-            homeServices={homeServices}
-            gender={gender}
-            navigation={navigation}
-            handleSectionNavigation={handleSectionNavigation}
-          />
+            <HomeServices
+              homeServices={homeServices}
+              gender={gender}
+              navigation={navigation}
+              handleSectionNavigation={handleSectionNavigation}
+            />
+          </View>
         </ScrollView>
       </Animated.View>
 
@@ -579,7 +606,7 @@ const HomeScreen = () => {
         onClose={() => setExitPopup(false)}
         onExit={() => BackHandler.exitApp()}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -587,13 +614,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? hp('2%') : 0,
+  },
+  safeAreaHeader: {
+    paddingTop: Platform.OS === 'ios' ? hp('1%') : hp('2%'),
+    backgroundColor: '#fff',
   },
   scrollContent: {
-    paddingBottom: hp('10%'),
+    flexGrow: 1,
+    paddingBottom: Platform.OS === 'ios' ? hp('10%') : hp('12%'),
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: wp('2%'),
+    marginTop: 0, // Removed margin
   },
   genderToggleContainer: {
-    marginHorizontal: wp('4%'),
-    marginVertical: hp('1%'),
+    marginBottom: 0, // Removed margin
+    marginTop: 0, // Removed margin
   },
   loaderContainer: {
     flex: 1,

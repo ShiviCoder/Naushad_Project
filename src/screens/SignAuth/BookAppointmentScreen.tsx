@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Calender from '../../components/Calender';
 import TimeSelect from '../../components/TImeSelect';
 import {
@@ -30,6 +30,23 @@ type RootStackParamList = {
   };
 };
 
+interface Chair {
+  _id: string;
+  chairNumber: number;
+  isChairAvailable: boolean;
+  subAdminId: string;
+  subAdminEmail: string;
+  __v: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ChairsResponse {
+  success: boolean;
+  message: string;
+  data: Chair[];
+}
+
 export default function BookAppointmentScreen() {
   const { theme } = useTheme();
   const route =
@@ -37,16 +54,37 @@ export default function BookAppointmentScreen() {
   const navigation = useNavigation<any>();
 
   const { image, serviceName, price, from, showTab } = route.params || {};
-
-  // Show back button only when NOT from bottom bar
   const showBack = from !== 'bottomBar';
-
-  console.log('🔍 BookAppointmentScreen - From:', from, 'ShowTab:', showTab);
 
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
+  const [loadingTimes, setLoadingTimes] = useState(false);
+  const [unavailableTimes, setUnavailableTimes] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // IMPORTANT: Define your fixed slots here (same as you show in TimeSelect)
+  // If your TimeSelect uses different slots, replace this list with that exact list.
+  const TIME_SLOTS = useMemo(
+    () => [
+      '09:00',
+      '10:00',
+      '11:00',
+      '12:00',
+      '13:00',
+      '14:00',
+      '15:00',
+      '16:00',
+      '17:00',
+      '18:00',
+      '19:00',
+      '20:00',
+    ],
+    [],
+  );
 
   const data = [
     'image',
@@ -57,7 +95,6 @@ export default function BookAppointmentScreen() {
     'nextButton',
   ];
 
-  // Format date to YYYY-MM-DD (without timezone conversion)
   const formatDateForAPI = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -65,10 +102,10 @@ export default function BookAppointmentScreen() {
     return `${year}-${month}-${day}`;
   };
 
-  // Format time to HH:mm (24-hour format with colon)
   const formatTimeForAPI = (time: string): string => {
-    // If time is already in correct format (HH:mm), return as is
-    if (time && time.includes(':')) {
+    if (!time) return time;
+
+    if (time.includes(':')) {
       const parts = time.split(':');
       if (parts.length >= 2) {
         const hours = parts[0].padStart(2, '0');
@@ -77,8 +114,7 @@ export default function BookAppointmentScreen() {
       }
     }
 
-    // If time has period instead of colon (e.g., "09.00")
-    if (time && time.includes('.')) {
+    if (time.includes('.')) {
       const parts = time.split('.');
       if (parts.length >= 2) {
         const hours = parts[0].padStart(2, '0');
@@ -87,62 +123,135 @@ export default function BookAppointmentScreen() {
       }
     }
 
-    // Default return
     return time;
   };
 
-  const onNextPress = () => {
-    console.log('🧾 Service params:', route.params);
-    console.log('📅 Selected Date:', selectedDate?.toDateString());
-    console.log('🕒 Selected Time (raw):', selectedTime);
+  const checkTimeAvailability = useCallback(
+    async (date: Date, time: string) => {
+      try {
+        const formattedDate = formatDateForAPI(date);
+        const formattedTime = formatTimeForAPI(time);
 
+        const apiUrl = `https://naushad.onrender.com/api/appointments/chairs/${formattedDate}/${formattedTime}`;
+        const response = await fetch(apiUrl);
+        const json: ChairsResponse = await response.json();
+
+        // available if ANY chair is available
+        return (
+          json?.success === true &&
+          Array.isArray(json.data) &&
+          json.data.some(ch => ch.isChairAvailable)
+        );
+      } catch (e) {
+        console.error('❌ checkTimeAvailability error:', e);
+        // If API fails, better to treat as unavailable (so user doesn’t book wrongly)
+        return false;
+      }
+    },
+    [],
+  );
+
+  // ✅ This is the missing piece: build unavailable times for the whole selected date.
+  const checkDateAvailability = useCallback(
+    async (date: Date) => {
+      setLoadingTimes(true);
+      try {
+        const checks = TIME_SLOTS.map(async slot => {
+          const ok = await checkTimeAvailability(date, slot);
+          return { slot: formatTimeForAPI(slot), ok };
+        });
+
+        // Run in parallel (fast) [web:18]
+        const results = await Promise.all(checks);
+
+        const nextUnavailable = new Set<string>();
+        results.forEach(r => {
+          if (!r.ok) nextUnavailable.add(r.slot);
+        });
+
+        setUnavailableTimes(nextUnavailable);
+
+        // If previously selected time becomes unavailable, reset it
+        if (selectedTime) {
+          const formattedSelected = formatTimeForAPI(selectedTime);
+          if (nextUnavailable.has(formattedSelected)) {
+            setSelectedTime(null);
+          }
+        }
+      } catch (e) {
+        console.error('❌ checkDateAvailability error:', e);
+        setUnavailableTimes(new Set(TIME_SLOTS.map(t => formatTimeForAPI(t))));
+      } finally {
+        setLoadingTimes(false);
+      }
+    },
+    [TIME_SLOTS, checkTimeAvailability, selectedTime],
+  );
+
+  useEffect(() => {
+    if (selectedDate) checkDateAvailability(selectedDate);
+  }, [selectedDate, checkDateAvailability]);
+
+  const onNextPress = async () => {
     if (!selectedDate) {
-      console.log('❌ No date selected yet');
       setPopupMessage('Please select a date');
       setPopupVisible(true);
       return;
     }
-
     if (!selectedTime) {
-      console.log('❌ No time selected yet');
       setPopupMessage('Please select a time');
       setPopupVisible(true);
       return;
     }
 
-    // Format date for API (YYYY-MM-DD)
     const formattedDate = formatDateForAPI(selectedDate);
-    // Format time for API (HH:mm with colon)
     const formattedTime = formatTimeForAPI(selectedTime);
-    const dateString = selectedDate.toDateString(); // Human readable format
 
-    console.log('✅ Formatted Date for API:', formattedDate);
-    console.log('✅ Formatted Time for API:', formattedTime);
-    console.log('✅ Date String:', dateString);
-    console.log('📍 Navigation Source:', from);
-    console.log('🌐 Final API URL will be:');
-    console.log(
-      `   https://naushad.onrender.com/api/appointments/chairs/${formattedDate}/${formattedTime}`,
-    );
+    // quick local guard: if already known unavailable, block
+    if (unavailableTimes.has(formattedTime)) {
+      setPopupMessage(
+        'No chairs available for selected time. Please choose another time.',
+      );
+      setPopupVisible(true);
+      return;
+    }
 
-    // Navigate to BookingSeats with formatted date and time
-    console.log('🚀 Navigating to BookingSeats with:');
-    console.log('   📅 date:', formattedDate);
-    console.log('   🕒 time:', formattedTime);
-    console.log('   🎯 serviceName:', serviceName);
-    console.log('   💰 price:', price);
+    // server guard: double check latest availability
+    const ok = await checkTimeAvailability(selectedDate, selectedTime);
+    if (!ok) {
+      setPopupMessage(
+        'No chairs available for selected time. Please choose another time.',
+      );
+      setPopupVisible(true);
+      // refresh list
+      checkDateAvailability(selectedDate);
+      return;
+    }
 
     navigation.navigate('BookingSeats', {
       serviceName,
       price,
-      date: formattedDate, // Pass formatted date (YYYY-MM-DD)
-      time: formattedTime, // Pass formatted time (HH:mm with colon)
+      date: formattedDate,
+      time: formattedTime,
       from: from || 'regular',
     });
   };
 
-  const handlePopupClose = () => {
-    setPopupVisible(false);
+  const handlePopupClose = () => setPopupVisible(false);
+
+  const handleTimeSelect = async (time: string) => {
+    const formatted = formatTimeForAPI(time);
+
+    // If already marked unavailable, just block instantly (no API call)
+    if (unavailableTimes.has(formatted)) {
+      setPopupMessage(
+        'No chairs available for this time. Please select another time.',
+      );
+      setPopupVisible(true);
+      return;
+    }
+
+    setSelectedTime(time);
   };
 
   const renderItem = ({ item }: { item: string }) => {
@@ -160,46 +269,48 @@ export default function BookAppointmentScreen() {
             )}
           </View>
         );
+
       case 'selectMonth':
         return (
           <Text style={[styles.Text, { color: theme.textPrimary }]}>
-            Select Month
+            Select Date
           </Text>
         );
+
       case 'calendar':
         return (
           <View style={styles.calenderContainer}>
             <Calender
               onDateSelect={date => {
-                console.log('📅 Received from Calender:', date.toDateString());
-                console.log('📅 Formatted for API:', formatDateForAPI(date));
                 setSelectedDate(date);
+                setSelectedTime(null);
+                setUnavailableTimes(new Set());
               }}
             />
           </View>
         );
+
       case 'selectTime':
         return (
           <Text style={[styles.Text, { color: theme.textPrimary }]}>
-            Select Time
+            Select Time {loadingTimes ? '(Checking...)' : ''}
           </Text>
         );
+
       case 'timeSelect':
         return (
           <View style={styles.timeContainer}>
             <TimeSelect
               selectedDate={selectedDate}
-              onTimeSelect={time => {
-                console.log('🕒 Time selected (raw):', time);
-                console.log(
-                  '🕒 Time formatted for API:',
-                  formatTimeForAPI(time),
-                );
-                setSelectedTime(time);
-              }}
+              selectedTime={selectedTime}
+              times={TIME_SLOTS}
+              unavailableTimes={Array.from(unavailableTimes)}
+              onTimeSelect={handleTimeSelect}
+              loading={loadingTimes}
             />
           </View>
         );
+
       case 'nextButton':
         return (
           <View style={styles.nxt}>
@@ -212,12 +323,15 @@ export default function BookAppointmentScreen() {
                     selectedDate && selectedTime ? COLORS.primary : '#ccc',
                 },
               ]}
-              disabled={!selectedDate || !selectedTime}
+              disabled={!selectedDate || !selectedTime || loadingTimes}
             >
-              <Text style={[styles.nxtText, { color: '#fff' }]}>Next</Text>
+              <Text style={[styles.nxtText, { color: '#fff' }]}>
+                {loadingTimes ? 'Checking...' : 'Next'}
+              </Text>
             </TouchableOpacity>
           </View>
         );
+
       default:
         return null;
     }
@@ -249,20 +363,7 @@ export default function BookAppointmentScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-  },
-  headContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: wp('5%'),
-    paddingVertical: hp('2%'),
-    justifyContent: 'center',
-  },
-  headText: {
-    fontSize: wp('5%'),
-    fontWeight: 'bold',
-  },
+  mainContainer: { flex: 1 },
   img: {
     width: wp('85%'),
     height: hp('20%'),

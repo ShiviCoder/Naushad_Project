@@ -1,3 +1,5 @@
+// src/screens/home/HomeComponents/Header.js
+
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import {
@@ -74,8 +76,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: wp('3%'),
-    paddingVertical: hp('1%'),
+    paddingHorizontal: wp('3%'), // increased
+    paddingVertical: hp('1%'), // increased
   },
   leftSection: {
     flexDirection: 'row',
@@ -84,30 +86,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationBtn: {
-    width: wp('7%'),
-    height: wp('7%'),
+    width: wp('7%'), // was 5%
+    height: wp('7%'), // was 5%
   },
   userInfo: {
     flexDirection: 'column',
-    marginLeft: wp('3%'),
-    maxWidth: wp('30%'),
+    marginLeft: wp('2%'), // was 1%
+    maxWidth: wp('40%'), // was 30%
   },
   welcomeText: {
-    fontSize: wp('3%'),
+    fontSize: wp('4%'), // was 3.2%
     fontWeight: '700',
     fontFamily: 'Poppins-Medium',
   },
   locationText: {
-    fontSize: wp('4%'),
+    fontSize: wp('3.6%'), // was 3%
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
   },
   logo: {
-    width: wp('40%'),
-    height: hp('10%'),
+    width: wp('40%'), // was 35%
+    height: hp('8%'), // was 7%
     resizeMode: 'contain',
-    flex: 1,
-    marginHorizontal: wp('2%'),
+    marginHorizontal: wp('2%'), // was 1%
   },
   rightIcons: {
     flexDirection: 'row',
@@ -116,8 +117,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   icon: {
-    width: wp('7%'),
-    height: wp('7%'),
+    width: wp('7%'), // was 5%
+    height: wp('7%'), // was 5%
   },
 });
 

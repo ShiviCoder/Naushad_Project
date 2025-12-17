@@ -460,6 +460,8 @@ import {
   ActivityIndicator,
   BackHandler,
   Platform,
+  Modal,
+  Linking,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -468,15 +470,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
 import Popup from '../../components/PopUp';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAppRegistrationCode } from '../../utils/appRegistrationCode/appRegistrationCode';
+import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import { PermissionsAndroid } from 'react-native';
 
 export default function SignupScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
   const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [dob, setDob] = useState('');
@@ -494,16 +499,19 @@ export default function SignupScreen({ navigation }) {
   const [errorState, setErrorState] = useState({
     fullName: false,
     email: false,
+    phoneNumber: false,
     password: false,
     confirmPassword: false,
   });
   const [errorMessages, setErrorMessages] = useState({
     fullName: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
   });
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [imageSourceModal, setImageSourceModal] = useState(false);
 
   useEffect(() => {
     const code = getAppRegistrationCode();
@@ -525,6 +533,16 @@ export default function SignupScreen({ navigation }) {
     }
   }, [navigation]);
 
+  // Custom popup function
+  const showCustomPopup = (
+    title: string,
+    message: string,
+    type: 'info' | 'success' | 'error' = 'info',
+  ) => {
+    setPopupMessage(message);
+    setPopupVisible(true);
+  };
+
   const handleChange = useCallback(text => {
     const cleaned = text.replace(/\D/g, '').slice(0, 8);
     let formatted = '';
@@ -539,31 +557,191 @@ export default function SignupScreen({ navigation }) {
     setDob(formatted);
   }, []);
 
-  const handleChoosePhoto = useCallback(() => {
-    launchImageLibrary(
-      { mediaType: 'photo', maxWidth: 300, maxHeight: 300, quality: 0.7 },
-      response => {
-        if (response?.assets?.[0]?.uri) {
-          setPhoto({ uri: response.assets[0].uri });
-        }
-      },
-    );
-  }, []);
+  // Permission check functions
+  const checkCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'App needs camera permission to take photos',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else {
+      const permission =
+        Platform.Version >= 29
+          ? PERMISSIONS.IOS.CAMERA
+          : PERMISSIONS.IOS.CAMERA;
+      const result = await check(permission);
+
+      if (result === RESULTS.DENIED) {
+        const requestResult = await request(permission);
+        return requestResult === RESULTS.GRANTED;
+      }
+
+      return result === RESULTS.GRANTED;
+    }
+  };
+
+  const checkGalleryPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'App needs storage permission to access photos',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else {
+      const permission = PERMISSIONS.IOS.PHOTO_LIBRARY;
+      const result = await check(permission);
+
+      if (result === RESULTS.DENIED) {
+        const requestResult = await request(permission);
+        return requestResult === RESULTS.GRANTED;
+      }
+
+      return result === RESULTS.GRANTED;
+    }
+  };
+
+  const showImageSourceOptions = () => {
+    setImageSourceModal(true);
+  };
+
+  const openCamera = async () => {
+    setImageSourceModal(false);
+    const hasPermission = await checkCameraPermission();
+    if (!hasPermission) {
+      showCustomPopup(
+        'Permission Required',
+        'Camera permission is required to take photos. Please enable it in settings.',
+        'error',
+      );
+      return;
+    }
+
+    const options: any = {
+      mediaType: 'photo',
+      quality: 0.8,
+      maxWidth: 800,
+      maxHeight: 800,
+      saveToPhotos: true,
+      cameraType: 'front',
+      presentationStyle: 'fullScreen',
+      includeBase64: false,
+    };
+
+    launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled camera');
+      } else if (response.errorCode) {
+        console.log('Camera Error Code: ', response.errorCode);
+        console.log('Camera Error Message: ', response.errorMessage);
+        showCustomPopup(
+          'Error',
+          `Failed to take photo: ${response.errorMessage}`,
+          'error',
+        );
+      } else if (response.assets && response.assets[0]?.uri) {
+        const selectedImage = response.assets[0];
+        setPhoto({ uri: selectedImage.uri });
+      } else {
+        console.log('Camera: No image returned');
+        showCustomPopup(
+          'Error',
+          'No image captured. Please try again.',
+          'error',
+        );
+      }
+    });
+  };
+
+  const openImageLibraryPicker = async () => {
+    setImageSourceModal(false);
+    const hasPermission = await checkGalleryPermission();
+    if (!hasPermission) {
+      showCustomPopup(
+        'Permission Required',
+        'Storage permission is required to access photos. Please enable it in settings.',
+        'error',
+      );
+      return;
+    }
+
+    const options: any = {
+      mediaType: 'photo',
+      quality: 0.8,
+      maxWidth: 800,
+      maxHeight: 800,
+      selectionLimit: 1,
+      includeBase64: false,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error Code: ', response.errorCode);
+        console.log('ImagePicker Error Message: ', response.errorMessage);
+        showCustomPopup(
+          'Error',
+          `Failed to select image: ${response.errorMessage}`,
+          'error',
+        );
+      } else if (response.assets && response.assets[0]?.uri) {
+        const selectedImage = response.assets[0];
+        setPhoto({ uri: selectedImage.uri });
+      } else {
+        console.log('ImagePicker: No image returned');
+        showCustomPopup(
+          'Error',
+          'No image selected. Please try again.',
+          'error',
+        );
+      }
+    });
+  };
+
+  const handleChoosePhoto = () => {
+    showImageSourceOptions();
+  };
 
   const isFormValid = useMemo(() => {
     const errors = {
       fullName: false,
       email: false,
+      phoneNumber: false,
       password: false,
       confirmPassword: false,
     };
     const messages = {
       fullName: '',
       email: '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
     };
 
+    // Full name
     if ((hasSubmitted || fullName.trim()) && !fullName.trim()) {
       errors.fullName = true;
       messages.fullName = 'Full name is required';
@@ -575,6 +753,7 @@ export default function SignupScreen({ navigation }) {
       }
     }
 
+    // Email
     if ((hasSubmitted || emailOrPhone) && !emailOrPhone) {
       errors.email = true;
       messages.email = 'Email is required';
@@ -586,6 +765,16 @@ export default function SignupScreen({ navigation }) {
       messages.email = 'Please enter a valid Gmail address';
     }
 
+    // Phone number (required)
+    if ((hasSubmitted || phoneNumber) && !phoneNumber) {
+      errors.phoneNumber = true;
+      messages.phoneNumber = 'Phone number is required';
+    } else if ((hasSubmitted || phoneNumber) && phoneNumber.length < 10) {
+      errors.phoneNumber = true;
+      messages.phoneNumber = 'Please enter a valid phone number';
+    }
+
+    // Password
     if ((hasSubmitted || password) && !password) {
       errors.password = true;
       messages.password = 'Password is required';
@@ -594,6 +783,7 @@ export default function SignupScreen({ navigation }) {
       messages.password = 'Password must be at least 8 characters';
     }
 
+    // Confirm password
     if ((hasSubmitted || confirmPassword) && !confirmPassword) {
       errors.confirmPassword = true;
       messages.confirmPassword = 'Please confirm your password';
@@ -608,7 +798,14 @@ export default function SignupScreen({ navigation }) {
     setErrorState(errors);
     setErrorMessages(messages);
     return !Object.values(errors).some(Boolean);
-  }, [fullName, emailOrPhone, password, confirmPassword, hasSubmitted]);
+  }, [
+    fullName,
+    emailOrPhone,
+    phoneNumber,
+    password,
+    confirmPassword,
+    hasSubmitted,
+  ]);
 
   const getUserFriendlyError = useCallback(
     (status: number, errorData: string) => {
@@ -665,6 +862,7 @@ export default function SignupScreen({ navigation }) {
       const formData = new FormData();
       formData.append('fullName', fullName);
       formData.append('email', emailOrPhone);
+      formData.append('phoneNumber', phoneNumber);
       formData.append('password', password);
       formData.append('confirmPassword', confirmPassword);
       formData.append('dob', dob);
@@ -727,6 +925,7 @@ export default function SignupScreen({ navigation }) {
     isFormValid,
     fullName,
     emailOrPhone,
+    phoneNumber,
     password,
     confirmPassword,
     dob,
@@ -786,7 +985,9 @@ export default function SignupScreen({ navigation }) {
           style={styles.backButton}
           onPress={handleBackPress}
           activeOpacity={0.7}
-        />
+        >
+          <Icon name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
 
         <Image
           source={require('../../assets/images/logo.png')}
@@ -794,6 +995,7 @@ export default function SignupScreen({ navigation }) {
           resizeMode="contain"
         />
 
+        {/* Full Name */}
         <RequiredLabel>Full Name</RequiredLabel>
         <TextInput
           style={[
@@ -808,6 +1010,7 @@ export default function SignupScreen({ navigation }) {
         />
         <ErrorMessage message={errorMessages.fullName} field="fullName" />
 
+        {/* Email */}
         <RequiredLabel>Email</RequiredLabel>
         <TextInput
           style={[
@@ -824,6 +1027,23 @@ export default function SignupScreen({ navigation }) {
         />
         <ErrorMessage message={errorMessages.email} field="email" />
 
+        {/* Phone Number */}
+        <RequiredLabel>Phone Number</RequiredLabel>
+        <TextInput
+          style={[
+            styles.input,
+            { borderColor: getBorderColor('phoneNumber', phoneNumber) },
+          ]}
+          placeholder="Enter phone number"
+          placeholderTextColor="gray"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+          maxLength={15}
+        />
+        <ErrorMessage message={errorMessages.phoneNumber} field="phoneNumber" />
+
+        {/* Password */}
         <RequiredLabel>Password</RequiredLabel>
         <View
           style={[
@@ -855,6 +1075,7 @@ export default function SignupScreen({ navigation }) {
         </View>
         <ErrorMessage message={errorMessages.password} field="password" />
 
+        {/* Confirm Password */}
         <RequiredLabel>Confirm Password</RequiredLabel>
         <View
           style={[
@@ -891,6 +1112,7 @@ export default function SignupScreen({ navigation }) {
           field="confirmPassword"
         />
 
+        {/* DOB */}
         <Text style={styles.label}>Date of Birth</Text>
         <TextInput
           style={styles.input}
@@ -902,6 +1124,7 @@ export default function SignupScreen({ navigation }) {
           maxLength={10}
         />
 
+        {/* Address */}
         <Text style={styles.label}>Address</Text>
         <TextInput
           style={[
@@ -917,6 +1140,7 @@ export default function SignupScreen({ navigation }) {
           maxLength={200}
         />
 
+        {/* Gender */}
         <Text style={styles.label}>Gender</Text>
         <View style={styles.radioContainer}>
           {['male', 'female', 'other'].map(option => (
@@ -942,6 +1166,7 @@ export default function SignupScreen({ navigation }) {
           ))}
         </View>
 
+        {/* Profile Image */}
         <View style={styles.imageContainer}>
           <TouchableOpacity onPress={handleChoosePhoto} activeOpacity={0.7}>
             <Image
@@ -959,6 +1184,7 @@ export default function SignupScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Referral */}
         <Text style={styles.label}>Referral Code (Optional)</Text>
         <TextInput
           style={styles.input}
@@ -969,6 +1195,7 @@ export default function SignupScreen({ navigation }) {
           maxLength={20}
         />
 
+        {/* Button */}
         <TouchableOpacity
           style={[
             styles.button,
@@ -988,6 +1215,7 @@ export default function SignupScreen({ navigation }) {
           )}
         </TouchableOpacity>
 
+        {/* Signin link */}
         <View style={styles.signinContainer}>
           <Text style={styles.signinText}>Already have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
@@ -998,6 +1226,57 @@ export default function SignupScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Image Source Selection Modal (like system alert) */}
+      <Modal
+        visible={imageSourceModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setImageSourceModal(false)}
+      >
+        <View style={styles.imageSourceOverlay}>
+          <View style={styles.imageSourceContainer}>
+            <View style={styles.imageSourceContent}>
+              <Text style={styles.imageSourceTitle}>Select Image</Text>
+              <Text style={styles.imageSourceMessage}>Choose an option</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.imageSourceButton}
+              onPress={openCamera}
+            >
+              <Text style={styles.imageSourceButtonText}>Take Photo</Text>
+            </TouchableOpacity>
+
+            <View style={styles.imageSourceSeparator} />
+
+            <TouchableOpacity
+              style={styles.imageSourceButton}
+              onPress={openImageLibraryPicker}
+            >
+              <Text style={styles.imageSourceButtonText}>
+                Choose from Gallery
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.imageSourceSeparator} />
+
+            <TouchableOpacity
+              style={[styles.imageSourceButton, styles.imageSourceCancelButton]}
+              onPress={() => setImageSourceModal(false)}
+            >
+              <Text
+                style={[
+                  styles.imageSourceButtonText,
+                  styles.imageSourceCancelButtonText,
+                ]}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Popup
         visible={popupVisible}
@@ -1040,7 +1319,6 @@ const styles = StyleSheet.create({
     fontSize: wp('4%'),
   },
   input: {
-    // base input used for normal fields
     height: hp('6%'),
     borderWidth: 0.5,
     borderRadius: wp('2%'),
@@ -1155,5 +1433,68 @@ const styles = StyleSheet.create({
     fontSize: wp('4%'),
     fontWeight: '600',
     color: '#000',
+  },
+  // Image Source Modal Styles (like system alert)
+  imageSourceOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: wp('8%'),
+  },
+  imageSourceContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: Platform.OS === 'ios' ? 14 : 4,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  imageSourceContent: {
+    padding: wp('6%'),
+    alignItems: 'center',
+  },
+  imageSourceTitle: {
+    fontSize: wp('4.5%'),
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: hp('0.5%'),
+    textAlign: 'center',
+  },
+  imageSourceMessage: {
+    fontSize: wp('4%'),
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: hp('2.2%'),
+  },
+  imageSourceButton: {
+    paddingVertical: hp('2%'),
+    paddingHorizontal: wp('5%'),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  imageSourceButtonText: {
+    fontSize: wp('4.2%'),
+    fontWeight: Platform.OS === 'ios' ? '500' : '400',
+    color: '#007AFF',
+    textAlign: 'center',
+  },
+  imageSourceCancelButton: {
+    backgroundColor: Platform.OS === 'ios' ? '#fff' : '#f5f5f5',
+    borderTopWidth: Platform.OS === 'ios' ? 0 : 1,
+    borderTopColor: '#ddd',
+  },
+  imageSourceCancelButtonText: {
+    color: Platform.OS === 'ios' ? '#007AFF' : '#FF3B30',
+    fontWeight: Platform.OS === 'ios' ? '600' : '500',
+  },
+  imageSourceSeparator: {
+    height: 1,
+    backgroundColor: '#ddd',
+    width: '100%',
   },
 });

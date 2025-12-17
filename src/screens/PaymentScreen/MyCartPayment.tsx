@@ -298,45 +298,26 @@ const MyCartPayment = () => {
         };
       }
 
-      console.log('🛒 [MyCart] Processing order for services:', serviceList);
+      console.log('🛒 [MyCart] Processing payment for services:', serviceList);
 
-      const service = serviceList[0];
-      const hasProductPackageId =
-        service?.productPackageId && service.productPackageId !== null;
-
-      const orderData: any = {
-        productDescription: service?.description || '',
-        productName: service?.name || service?.serviceName || 'Product',
-        amount: totalPrice,
-        quantity: service?.quantity || 1,
-        ...(hasProductPackageId
-          ? { productPackageId: service.productPackageId }
-          : { productId: service?.productId || null }),
-      };
-
-      console.log('📤 [MyCart] Sending order to API:');
+      console.log('📤 [MyCart] Sending payment to API:');
       console.log(
-        '🔗 API Endpoint: https://naushad.onrender.com/api/order/create-order',
-      );
-      console.log('📝 Order Data:', JSON.stringify(orderData, null, 2));
-      console.log(
-        '🔍 Sending:',
-        hasProductPackageId ? 'productPackageId' : 'productId',
+        '🔗 API Endpoint: https://naushad.onrender.com/api/cart/make-payment',
       );
       console.log(
-        '🔍 ID Value:',
-        hasProductPackageId ? service.productPackageId : service?.productId,
+        '📝 Payment Data:',
+        JSON.stringify({ amount: totalPrice }, null, 2),
       );
 
       const response = await fetch(
-        'https://naushad.onrender.com/api/order/create-order',
+        'https://naushad.onrender.com/api/cart/make-payment',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(orderData),
+          body: JSON.stringify({ amount: totalPrice }),
         },
       );
 
@@ -344,22 +325,23 @@ const MyCartPayment = () => {
       console.log('📥 [MyCart] API Response:', result);
 
       if (result.success) {
-        console.log('✅ [MyCart] Order created successfully:', result);
+        console.log('✅ [MyCart] Payment processed successfully:', result);
         return {
           success: true,
           data: result.data,
-          message: result.message || 'Order created successfully!',
+          message: result.message || 'Payment processed successfully!',
         };
       } else {
-        console.log('❌ [MyCart] Order creation failed:', result);
+        console.log('❌ [MyCart] Payment failed:', result);
         return {
           success: false,
-          error: result.message || 'Order creation failed',
+          error: result.message || 'Payment failed',
           data: result.data || null,
         };
       }
     } catch (error: any) {
-      console.error('❌ [MyCart] Order processing error:', error);
+      console.error('❌ [MyCart] Payment processing error:', error);
+      // Don't show network error popup for empty cart - just log it
       return {
         success: false,
         error: `Network error: ${error.message}`,
@@ -368,11 +350,11 @@ const MyCartPayment = () => {
   }, [serviceList, totalPrice, hasSufficientBalance]);
 
   const handleOrder = useCallback(async () => {
-    console.log('🔄 [MyCart] handleOrder - Starting order process');
+    console.log('🔄 [MyCart] handleOrder - Starting payment process');
 
     if (serviceList.length === 0) {
       console.log('❌ [MyCart] No services found');
-      showPopup('No Items', 'No items found for order.');
+      // Don't show popup for empty cart, just return silently
       return;
     }
 
@@ -388,29 +370,32 @@ const MyCartPayment = () => {
     }
 
     try {
-      console.log('🛒 [MyCart] Starting order processing');
+      console.log('🛒 [MyCart] Starting payment processing');
       setProcessingPayment(true);
 
-      const orderResult = await processOrder();
+      const paymentResult = await processOrder();
 
-      if (orderResult.success) {
-        console.log('✅ [MyCart] Order processed successfully');
-        console.log('✅ [MyCart] Order Details:', orderResult.data);
+      if (paymentResult.success) {
+        console.log('✅ [MyCart] Payment processed successfully');
+        console.log('✅ [MyCart] Payment Details:', paymentResult.data);
 
         await clearPaymentData();
-        showSuccessPopup('Order confirmed successfully!');
+        showSuccessPopup('Payment confirmed successfully!');
       } else {
-        console.log('❌ [MyCart] Order processing failed');
-        console.log('❌ [MyCart] Error:', orderResult.error);
+        console.log('❌ [MyCart] Payment processing failed');
+        console.log('❌ [MyCart] Error:', paymentResult.error);
 
         showPopup(
-          'Order Failed',
-          orderResult.error || 'Order was not completed. Please try again.',
+          'Payment Failed',
+          paymentResult.error || 'Payment was not completed. Please try again.',
         );
       }
     } catch (error) {
-      console.log('❌ [MyCart] Order Error:', error);
-      showPopup('Order Failed', 'Order was not completed. Please try again.');
+      console.log('❌ [MyCart] Payment Error:', error);
+      showPopup(
+        'Payment Failed',
+        'Payment was not completed. Please try again.',
+      );
     } finally {
       setProcessingPayment(false);
     }

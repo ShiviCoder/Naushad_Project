@@ -3,7 +3,7 @@
  * This file contains the app registration code that is sent with every user registration
  */
 
-export const APP_REGISTRATION_CODE = 'NAUJAPAZWP'; //NAUJAPAZWP  NAU7D5-XDZ
+export const APP_REGISTRATION_CODE = 'NAU4YIKQCT'; //NAUJAPAZWP  NAU7D5-XDZ // NAU6XZIKQZ //NAU4YIKQCT
 
 /**
  * Get the app registration code

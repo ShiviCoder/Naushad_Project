@@ -10,9 +10,13 @@ import {
   Dimensions,
   ActivityIndicator,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import COLORS from '../../utils/Colors';
 import Head from '../../components/Head';
 
@@ -25,10 +29,12 @@ const moderateScale = (size, factor = 0.5) =>
 const WalletScreen = ({ navigation }) => {
   const [walletData, setWalletData] = useState({
     transactions: [],
-    totalWalletAmount: 0
+    totalWalletAmount: 0,
   });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchWalletData = async () => {
     try {
@@ -39,17 +45,20 @@ const WalletScreen = ({ navigation }) => {
           'Content-Type': 'application/json',
         },
       });
-      
+
       const data = await response.json();
-      
+      console.log('API Response:', JSON.stringify(data, null, 2)); // Log full API response
+
       if (data.success) {
-        const sortedTransactions = (data.data.transactions || []).sort((a, b) => {
-          return new Date(b.date) - new Date(a.date);
-        });
-        
+        const sortedTransactions = (data.data.transactions || []).sort(
+          (a, b) => {
+            return new Date(b.date) - new Date(a.date);
+          },
+        );
+
         setWalletData({
           transactions: sortedTransactions,
-          totalWalletAmount: data.data.totalWalletAmount || 0
+          totalWalletAmount: data.data.totalWalletAmount || 0,
         });
       }
     } catch (error) {
@@ -71,30 +80,34 @@ const WalletScreen = ({ navigation }) => {
     };
 
     const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
+      'hardwareBackPress',
+      backAction,
     );
 
     return () => backHandler.remove();
   }, [navigation]);
 
-  const formatDateTime = (dateString) => {
+  const formatDateTime = dateString => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString().slice(-2);
-    const time = date.toLocaleTimeString('en-IN', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-    
-    return `${day}/${month}/${year}, ${time}`;
+    const year = date.getFullYear().toString();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+
+    return `${day}/${month}/${year}, ${formattedHours}:${minutes} ${ampm}`;
   };
 
-  // UPDATED: read API color key directly
-  const getPriceColor = (color) => {
-    if (color === "green") return COLORS.green;
+  const truncateText = (text, maxWords = 5) => {
+    const words = text.split(' ');
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(' ') + '...';
+  };
+
+  const getPriceColor = color => {
+    if (color === 'green') return COLORS.green;
     return COLORS.red;
   };
 
@@ -103,11 +116,21 @@ const WalletScreen = ({ navigation }) => {
     fetchWalletData();
   };
 
+  const handleTransactionPress = transaction => {
+    setSelectedTransaction(transaction);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedTransaction(null);
+  };
+
   if (loading && walletData.transactions.length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <Head title="Wallet" />
-        <ScrollView 
+        <ScrollView
           style={styles.loadingScroll}
           contentContainerStyle={styles.loadingContainer}
           showsVerticalScrollIndicator={false}
@@ -122,7 +145,7 @@ const WalletScreen = ({ navigation }) => {
     <SafeAreaView style={styles.safeArea}>
       <Head title="Wallet" />
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -133,7 +156,6 @@ const WalletScreen = ({ navigation }) => {
         onRefresh={handleRefresh}
       >
         <View style={styles.container}>
-          
           <View style={styles.card}>
             <View style={styles.cardTop}>
               <Image
@@ -144,11 +166,13 @@ const WalletScreen = ({ navigation }) => {
             </View>
 
             <Text style={styles.balanceLabel}>Available Balance</Text>
-            <Text style={styles.balanceAmount}>₹ {walletData.totalWalletAmount.toLocaleString()}</Text>
+            <Text style={styles.balanceAmount}>
+              ₹ {walletData.totalWalletAmount.toLocaleString()}
+            </Text>
 
-            <TouchableOpacity 
-              style={styles.addButton} 
-              onPress={() => navigation.navigate("WalletAddMoneyScreen")}
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate('WalletAddMoneyScreen')}
               activeOpacity={0.8}
             >
               <Text style={styles.addText}>+ Add Money</Text>
@@ -156,7 +180,7 @@ const WalletScreen = ({ navigation }) => {
           </View>
 
           <Text style={styles.sectionTitle}>Transaction History</Text>
-          
+
           {walletData.transactions.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Image
@@ -164,22 +188,32 @@ const WalletScreen = ({ navigation }) => {
                 style={styles.emptyIcon}
               />
               <Text style={styles.emptyText}>No transactions yet</Text>
-              <Text style={styles.emptySubText}>Add money to see your transaction history</Text>
+              <Text style={styles.emptySubText}>
+                Add money to see your transaction history
+              </Text>
             </View>
           ) : (
             <FlatList
               data={walletData.transactions}
               keyExtractor={item => item._id}
               renderItem={({ item }) => (
-                <View style={styles.transactionItem}>
+                <TouchableOpacity
+                  style={styles.transactionItem}
+                  onPress={() => handleTransactionPress(item)}
+                  activeOpacity={0.7}
+                >
                   <View style={styles.leftRow}>
                     <Image
                       source={require('../../assets/wallet.png')}
                       style={styles.transactionIcon}
                     />
-                    <View>
-                      <Text style={styles.transactionTitle}>{item.title}</Text>
-                      <Text style={styles.transactionDate}>{formatDateTime(item.date)}</Text>
+                    <View style={styles.transactionTextContainer}>
+                      <Text style={styles.transactionTitle} numberOfLines={2}>
+                        {truncateText(item.title, 5)}
+                      </Text>
+                      <Text style={styles.transactionDate}>
+                        {formatDateTime(item.date)}
+                      </Text>
                     </View>
                   </View>
 
@@ -191,7 +225,7 @@ const WalletScreen = ({ navigation }) => {
                   >
                     {item.price}
                   </Text>
-                </View>
+                </TouchableOpacity>
               )}
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
@@ -199,6 +233,96 @@ const WalletScreen = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
+
+      {/* Transaction Details Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Close button inside primary color box */}
+            <View style={styles.modalHeader}>
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                <Image
+                  source={require('../../assets/close.png')}
+                  style={styles.closeIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              style={styles.modalScrollView}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollContent}
+            >
+              {selectedTransaction && (
+                <>
+                  <View style={styles.modalIconContainer}>
+                    <Image
+                      source={require('../../assets/wallet.png')}
+                      style={styles.modalTransactionIcon}
+                    />
+                  </View>
+
+                  <Text style={styles.modalTransactionTitle}>
+                    {selectedTransaction.title}
+                  </Text>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Transaction ID</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedTransaction._id || 'N/A'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Amount</Text>
+                    <Text style={styles.modalTransactionPrice}>
+                      {selectedTransaction.price}
+                    </Text>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Date & Time</Text>
+                    <Text style={styles.detailValue}>
+                      {formatDateTime(selectedTransaction.date)}
+                    </Text>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Status</Text>
+                    <View style={styles.statusBadge}>
+                      <Text style={styles.statusSuccess}>Success</Text>
+                    </View>
+                  </View>
+
+                  {/* Optional Additional Details */}
+                  {selectedTransaction.description && (
+                    <View style={styles.detailSection}>
+                      <Text style={styles.detailLabel}>Description</Text>
+                      <Text style={styles.modalDescription}>
+                        {selectedTransaction.description}
+                      </Text>
+                    </View>
+                  )}
+
+                  {selectedTransaction.reference && (
+                    <View style={styles.detailSection}>
+                      <Text style={styles.detailLabel}>Reference</Text>
+                      <Text style={styles.detailValue}>
+                        {selectedTransaction.reference}
+                      </Text>
+                    </View>
+                  )}
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -226,12 +350,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: hp('20%'),
-  },
-  loadingText: {
-    fontSize: wp('4%'),
-    color: '#666',
-    fontWeight: '500',
-    marginTop: hp('2%'),
   },
   card: {
     backgroundColor: COLORS.primary,
@@ -292,6 +410,7 @@ const styles = StyleSheet.create({
   transactionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: '#fdfdfd',
     borderRadius: 20,
     padding: wp('4%'),
@@ -302,25 +421,33 @@ const styles = StyleSheet.create({
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+  },
+  transactionTextContainer: {
+    flex: 1,
+    marginLeft: 10,
+    flexShrink: 1,
   },
   transactionIcon: {
     width: wp('7%'),
     height: wp('7%'),
     tintColor: COLORS.primary,
-    marginRight: 10,
   },
   transactionTitle: {
     fontSize: wp('4%'),
     fontWeight: '600',
     color: '#333',
+    lineHeight: wp('5%'),
   },
   transactionDate: {
     fontSize: wp('3.2%'),
     color: '#888',
+    marginTop: 2,
   },
   transactionAmount: {
     fontSize: wp('4%'),
     fontWeight: '700',
+    marginLeft: wp('2%'),
   },
   emptyContainer: {
     alignItems: 'center',
@@ -342,6 +469,117 @@ const styles = StyleSheet.create({
     fontSize: wp('3.5%'),
     color: '#999',
     textAlign: 'center',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 25,
+    marginHorizontal: wp('4%'),
+    width: wp('92%'),
+    height: hp('85%'),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    paddingHorizontal: wp('5%'),
+    paddingTop: hp('2%'),
+    paddingBottom: hp('1%'),
+    alignItems: 'flex-end',
+  },
+  closeButton: {
+    width: wp('10%'),
+    height: wp('10%'),
+    borderRadius: wp('5%'),
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeIcon: {
+    width: wp('5%'),
+    height: wp('5%'),
+    tintColor: '#fff',
+  },
+  closeButtonText: {
+    fontSize: wp('5%'),
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  modalScrollView: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  modalScrollContent: {
+    paddingHorizontal: wp('6%'),
+    paddingBottom: hp('5%'),
+    paddingTop: hp('1%'),
+  },
+  modalIconContainer: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 50,
+    padding: wp('4%'),
+    marginBottom: hp('3%'),
+    alignSelf: 'center',
+  },
+  modalTransactionIcon: {
+    width: wp('12%'),
+    height: wp('12%'),
+    tintColor: '#fff',
+  },
+  modalTransactionTitle: {
+    fontSize: wp('5%'),
+    fontWeight: '700',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: hp('3%'),
+    lineHeight: wp('6%'),
+  },
+  detailSection: {
+    marginBottom: hp('3%'),
+  },
+  detailLabel: {
+    fontSize: wp('3.8%'),
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: hp('0.5%'),
+  },
+  detailValue: {
+    fontSize: wp('4%'),
+    fontWeight: '600',
+    color: '#fff',
+  },
+  modalTransactionPrice: {
+    fontSize: wp('7%'),
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: hp('0.5%'),
+  },
+  statusBadge: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: wp('4%'),
+    paddingVertical: hp('0.8%'),
+    borderRadius: 15,
+    alignSelf: 'flex-start',
+  },
+  statusSuccess: {
+    fontSize: wp('3.5%'),
+    color: '#fff',
+    fontWeight: '700',
+  },
+  modalDescription: {
+    fontSize: wp('3.8%'),
+    color: '#fff',
+    lineHeight: wp('5.5%'),
+    opacity: 0.9,
   },
 });
 

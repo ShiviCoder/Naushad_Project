@@ -1,3 +1,4 @@
+// src/components/OurProducts.js
 import React, { useState } from 'react';
 import {
   View,
@@ -7,7 +8,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -50,41 +51,60 @@ const OurProducts = ({
 }) => {
   const renderProductItem = ({ item }) => (
     <TouchableOpacity
+      style={styles.productCard}
+      activeOpacity={1}
       onPress={() =>
         navigation.navigate('ProductDetails', {
           product: { ...item, image: item.image },
         })
       }
-      activeOpacity={0.7}
     >
-      <View style={styles.productCard}>
-        <ProductImage uri={item.image} />
+      <ProductImage uri={item.image} />
 
-        <Text style={styles.productName} numberOfLines={2}>
+      <View style={styles.productInfo}>
+        <Text style={styles.productName} numberOfLines={2} ellipsizeMode="tail">
           {item.name || 'Product Name'}
         </Text>
 
-        <Text style={styles.productPrice}>
-          ₹{item.price || '0'}{' '}
-          <Text style={styles.offerText}>({item.offer || '0% off'})</Text>
-        </Text>
+        <View style={styles.priceContainer}>
+          <Text
+            style={styles.productPrice}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            ₹{item.price || '0'}
+          </Text>
 
-        <View style={styles.tagsContainer}>
-          {item.rating && (
-            <View style={styles.ratingPill}>
-              <Icon name="star" size={wp('3.2%')} color="#29A244" />
-              <Text style={styles.ratingText}>{item.rating}</Text>
-            </View>
-          )}
-
-          {item.tag && (
-            <View style={styles.tagPill}>
-              <Text style={styles.tagText} numberOfLines={1}>
-                {item.tag}
-              </Text>
-            </View>
+          {item.offer && (
+            <Text style={styles.productOffer}>{item.offer}% off</Text>
           )}
         </View>
+
+        {/* RATING - 5 Stars */}
+        {item.rating && (
+          <View style={styles.ratingContainer}>
+            <View style={styles.starsContainer}>
+              {[1, 2, 3, 4, 5].map(star => (
+                <Icon
+                  key={star}
+                  name="star"
+                  size={wp('3.2%')}
+                  color={star <= (item.rating || 0) ? '#F6B745' : '#DDD'}
+                />
+              ))}
+            </View>
+            <Text style={styles.ratingText}>({item.reviews || 0} reviews)</Text>
+          </View>
+        )}
+
+        {/* TAG */}
+        {item.tag && (
+          <View style={styles.tagContainer}>
+            <Text style={styles.tagText} numberOfLines={1} ellipsizeMode="tail">
+              {item.tag}
+            </Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -95,7 +115,7 @@ const OurProducts = ({
         <Text style={styles.sectionTitle}>Get our products</Text>
         <TouchableOpacity
           onPress={() => handleSectionNavigation('products')}
-          activeOpacity={0.7}
+          activeOpacity={1}
         >
           <Text style={styles.seeAll}>See all</Text>
         </TouchableOpacity>
@@ -138,80 +158,97 @@ const styles = StyleSheet.create({
     fontSize: wp('3.8%'),
   },
   listContainer: {
-    paddingHorizontal: wp('2%'),
+    paddingHorizontal: wp('4%'),
     paddingVertical: hp('1%'),
   },
+
+  // ✅ REFERENCE UI - Perfect card layout
   productCard: {
     width: wp('45%'),
-    marginHorizontal: wp('2%'),
+    height: hp('38%'),
+    marginHorizontal: wp('1%'),
     marginVertical: hp('1%'),
-    borderRadius: wp('4%'),
+    borderRadius: wp('3%'),
     backgroundColor: '#fff',
-    elevation: 5,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    paddingVertical: hp('1.5%'),
-    paddingHorizontal: wp('3%'),
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    overflow: 'hidden', // ✅ Ensures rounded corners on image
   },
+
   productImage: {
     width: '100%',
-    height: hp('15%'),
-    borderRadius: wp('3%'),
-    marginBottom: hp('1%'),
+    height: hp('18%'),
+    borderTopLeftRadius: wp('3%'),
+    borderTopRightRadius: wp('3%'),
   },
+
+  productInfo: {
+    flex: 1,
+    padding: wp('3%'),
+    justifyContent: 'space-between',
+  },
+
   productName: {
-    marginTop: hp('0.5%'),
-    fontWeight: '700',
-    fontFamily: 'Poppins-Medium',
     fontSize: wp('3.8%'),
-    lineHeight: wp('4.5%'),
-    height: hp('4.5%'),
-  },
-  productPrice: {
-    color: '#777',
-    marginTop: hp('0.5%'),
+    fontWeight: '600',
     fontFamily: 'Poppins-Medium',
-    fontSize: wp('3.8%'),
+    color: '#000',
+    minHeight: hp('4%'),
+    marginBottom: hp('0.5%'),
   },
-  offerText: {
-    color: '#29A244',
-    fontSize: wp('3.5%'),
-  },
-  tagsContainer: {
-    flexDirection: 'column',
-    gap: wp('2%'),
-    marginTop: hp('1.5%'),
-  },
-  ratingPill: {
+
+  priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: wp('3%'),
-    paddingVertical: hp('0.5%'),
-    borderRadius: wp('3%'),
-    backgroundColor: '#F0F0F0',
-    alignSelf: 'flex-start',
+    marginBottom: hp('1%'),
   },
-  ratingText: {
-    fontSize: wp('3.2%'),
-    marginLeft: wp('1%'),
-    color: '#333',
-    fontFamily: 'Poppins-Medium',
+  productPrice: {
+    fontSize: wp('4.2%'),
+    fontWeight: '700',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#000',
+    flex: 1,
   },
-  tagPill: {
-    paddingHorizontal: wp('3%'),
-    paddingVertical: hp('0.5%'),
-    borderRadius: wp('3%'),
-    backgroundColor: '#E8F6EF',
-    alignSelf: 'flex-start',
-    maxWidth: wp('35%'),
-  },
-  tagText: {
+  productOffer: {
     fontSize: wp('3.2%'),
     color: '#29A244',
+    fontWeight: '600',
+    marginLeft: wp('1%'),
+  },
+
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp('0.8%'),
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    marginRight: wp('2%'),
+  },
+  ratingText: {
+    fontSize: wp('3%'),
+    color: '#666',
     fontFamily: 'Poppins-Medium',
   },
+
+  tagContainer: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: wp('3%'),
+    paddingVertical: hp('0.5%'),
+    borderRadius: wp('2%'),
+    backgroundColor: '#F0F0F0',
+    marginBottom: hp('1%'),
+  },
+  tagText: {
+    fontSize: wp('3%'),
+    fontWeight: '500',
+    color: '#000',
+    fontFamily: 'Poppins-Medium',
+  },
+
   emptyContainer: {
     width: wp('90%'),
     alignItems: 'center',
@@ -221,6 +258,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#666',
     fontSize: wp('3.8%'),
+    fontFamily: 'Poppins-Medium',
   },
 });
 

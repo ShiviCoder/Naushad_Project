@@ -1,108 +1,154 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native'
-import React from 'react'
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import React from 'react';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { Rating } from 'react-native-ratings';
 import Head from '../../components/Head';
 import { PackageData } from '../../components/PackageData';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import COLORS from '../../utils/Colors';
-type RootStackParamList = {
-  OurPackages: undefined,
-  PackageDetails: { item: PackageData }
-}
 
-type PackageDetailsRouteProp = RouteProp<RootStackParamList, 'PackageDetails'>
+type RootStackParamList = {
+  OurPackages: undefined;
+  PackageDetails: { item: PackageData };
+};
+
+type PackageDetailsRouteProp = RouteProp<RootStackParamList, 'PackageDetails'>;
 
 const PackageDetails = () => {
-  const route = useRoute<PackageDetailsRouteProp>()
-  const navigation = useNavigation<any>()
-  const { item } = route.params
+  const route = useRoute<PackageDetailsRouteProp>();
+  const navigation = useNavigation<any>();
+  const { item } = route.params;
   const { theme } = useTheme();
-  console.log("Hello")
+  console.log('Hello');
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <Head title='Our Packages' />
-      <Image style={styles.img} source={{ uri: item.image }} />
-      <View style={styles.detail}>
-        <View style={styles.titleContain}>
-          <Text style={[styles.titleTxt, { color: theme.textPrimary }]}>{item.title}</Text>
-          <Text style={[styles.priceTxt, { color: theme.textPrimary }]}>₹{item.price}</Text>
-        </View>
-        <Text style={[styles.aboutTxt, { color: theme.textPrimary }]}>"{item.about}"</Text>
-        <Text style={[styles.discountTxt, { color: theme.textPrimary }]}>🔖 Save Upto {item.discount}%</Text>
-      </View>
-      <View style={styles.serviceListContain}>
-        <Text style={[styles.serviceListHeadTxt, { color: theme.textPrimary }]}>Service List</Text>
-    {(() => {
-  let services = [];
-
-  try {
-    // If string is like: "Haircut , Haircolor"
-    if (typeof item.services === "string") {
-      services = item.services
-        .split(",")           // Separate by comma
-        .map(s => s.trim())   // Remove spaces
-        .filter(s => s);      // Remove empty values
-    } else {
-      services = JSON.parse(item.services);
-    }
-  } catch (e) {
-    services = [];
-  }
-
-  return services.length > 0 ? (
-    <View style={{ flexDirection: "column", alignItems : 'flex-start' }}>
-      {services.map((service, index) => (
-        <View key={index} style={styles.ServiceListTxtContain}>
-            <Text style={[styles.serviceListTxt, { color: theme.textPrimary }]}>
-            ✅  {service}
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <Head title="Our Packages" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Image style={styles.img} source={{ uri: item.image }} />
+        <View style={styles.detail}>
+          <View style={styles.titleContain}>
+            <Text style={[styles.titleTxt, { color: theme.textPrimary }]}>
+              {item.title}
+            </Text>
+            <Text style={[styles.priceTxt, { color: theme.textPrimary }]}>
+              ₹{item.price}
+            </Text>
+          </View>
+          <Text style={[styles.aboutTxt, { color: theme.textPrimary }]}>
+            "{item.about}"
+          </Text>
+          <Text style={[styles.discountTxt, { color: theme.textPrimary }]}>
+            🔖 Save Upto {item.discount}%
           </Text>
         </View>
-      ))}
-    </View>
-  ) : (
-    <Text style={{ color: theme.textPrimary }}>No services available</Text>
-  );
-})()}
+        <View style={styles.serviceListContain}>
+          <Text
+            style={[styles.serviceListHeadTxt, { color: theme.textPrimary }]}
+          >
+            Service List
+          </Text>
+          {(() => {
+            let services = [];
 
-      </View>
+            try {
+              // If string is like: "Haircut , Haircolor"
+              if (typeof item.services === 'string') {
+                services = item.services
+                  .split(',') // Separate by comma
+                  .map(s => s.trim()) // Remove spaces
+                  .filter(s => s); // Remove empty values
+              } else {
+                services = JSON.parse(item.services);
+              }
+            } catch (e) {
+              services = [];
+            }
 
-      <View style={styles.ratContain}>
-        <Rating
-          type="star"
-          ratingCount={5}
-          imageSize={wp('5%')}
-          startingValue={item.rating}
-          tintColor={theme.dark ? '#111' : '#fff'}
-          readonly
-        />
-        <Text style={[styles.ratTxt, { color: theme.textPrimary }]}>({item.review} reviews)</Text>
-      </View>
+            return services.length > 0 ? (
+              <View
+                style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+              >
+                {services.map((service, index) => (
+                  <View key={index} style={styles.ServiceListTxtContain}>
+                    <Text
+                      style={[
+                        styles.serviceListTxt,
+                        { color: theme.textPrimary },
+                      ]}
+                    >
+                      ✅ {service}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={{ color: theme.textPrimary }}>
+                No services available
+              </Text>
+            );
+          })()}
+        </View>
 
-      <TouchableOpacity
-        style={[styles.bookAppoint, { backgroundColor: COLORS.primary }]}
-        onPress={() => {
-          navigation.navigate('BookAppointmentScreen',{
-            serviceName: item.title,
-            price: item.price,
-            from : 'PackageDetails'
-          });
-        }}
-      >
-        <Text style={styles.bookAppointTxt}>Book Appointment</Text>
-      </TouchableOpacity>
+        <View style={styles.ratContain}>
+          <Rating
+            type="star"
+            ratingCount={5}
+            imageSize={wp('5%')}
+            startingValue={item.rating}
+            tintColor={theme.dark ? '#111' : '#fff'}
+            readonly
+          />
+          <Text style={[styles.ratTxt, { color: theme.textPrimary }]}>
+            ({item.review} reviews)
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.bookAppoint, { backgroundColor: COLORS.primary }]}
+          onPress={() => {
+            navigation.navigate('BookAppointmentScreen', {
+              serviceName: item.title,
+              price: item.price,
+              from: 'PackageDetails',
+            });
+          }}
+        >
+          <Text style={styles.bookAppointTxt}>Book Appointment</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
+  );
+};
 
-  )
-}
-
-export default PackageDetails
+export default PackageDetails;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: hp('10%'),
   },
   img: {
     width: '90%',
@@ -110,66 +156,65 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: wp('4%'),
     resizeMode: 'cover',
-    marginBottom: hp('3%')
+    marginBottom: hp('3%'),
   },
   titleTxt: {
     fontWeight: '600',
     fontSize: wp('6%'),
-    color: '#000'
+    color: '#000',
   },
   priceTxt: {
     fontSize: wp('5.5%'),
     fontWeight: '600',
-    color: '#000'
+    color: '#000',
   },
   titleContain: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: hp('2%')
+    marginBottom: hp('2%'),
   },
   aboutTxt: {
     color: '#4b484875',
     fontSize: wp('4.5%'),
     fontWeight: '500',
-    marginBottom: hp('0.5%')
+    marginBottom: hp('0.5%'),
   },
   discountTxt: {
     fontSize: wp('3.9%'),
     color: '#42BA86',
-    fontWeight: '600'
+    fontWeight: '600',
   },
   detail: {
     width: '85%',
     alignSelf: 'center',
     gap: hp('0.5%'),
     marginBottom: hp('2%'),
-
   },
   serviceListHeadTxt: {
     fontSize: wp('6%'),
     fontWeight: '600',
-    marginBottom: hp('1%')
+    marginBottom: hp('1%'),
   },
   serviceListTxt: {
     fontSize: wp('4%'),
     color: '#00000075',
-    fontWeight: '400'
+    fontWeight: '400',
   },
   ServiceListTxtContain: {
     flexDirection: 'column',
     gap: wp('2%'),
     alignItems: 'center',
-    marginBottom: hp('0.8%')
+    marginBottom: hp('0.8%'),
   },
   serviceListContain: {
     width: '85%',
     alignSelf: 'center',
-    marginBottom: hp('2%')
+    marginBottom: hp('2%'),
   },
   ratTxt: {
     fontSize: wp('4%'),
     fontWeight: '500',
-    color: '#6863636e'
+    color: '#6863636e',
   },
   ratContain: {
     flexDirection: 'row',
@@ -177,7 +222,7 @@ const styles = StyleSheet.create({
     width: '85%',
     alignSelf: 'center',
     alignItems: 'center',
-    marginBottom: hp('3%')
+    marginBottom: hp('3%'),
   },
   bookAppoint: {
     height: hp('6%'),
@@ -186,11 +231,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: wp('3%'),
-    marginVertical: hp('3%')
+    marginVertical: hp('3%'),
   },
   bookAppointTxt: {
     fontSize: wp('4%'),
     fontWeight: '600',
     color: '#FFFFFF',
   },
-})
+});

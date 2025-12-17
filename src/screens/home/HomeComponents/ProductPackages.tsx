@@ -81,7 +81,7 @@ const ProductPackages = ({
             onPress={() => navigation.navigate('ProductPakage', { item })}
             style={styles.bookButton}
           >
-            <Text style={styles.bookButtonText}>Book now</Text>
+            <Text style={styles.bookButtonText}>Buy now</Text>
           </TouchableOpacity>
         </View>
       </Shadow>

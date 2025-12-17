@@ -43,7 +43,10 @@ const Signin = ({ navigation }) => {
     if ((hasSubmitted || email) && !email.trim()) {
       errors.email = true;
       messages.email = 'Email is required';
-    } else if ((hasSubmitted || email.trim()) && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+    } else if (
+      (hasSubmitted || email.trim()) &&
+      !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)
+    ) {
       errors.email = true;
       messages.email = 'Please enter a valid Gmail address';
     }
@@ -58,34 +61,106 @@ const Signin = ({ navigation }) => {
     return !Object.values(errors).some(Boolean);
   }, [email, password, hasSubmitted]);
 
-  const getUserFriendlyError = useCallback((status: number, errorData: string) => {
-    console.log('🔍 Server error analysis:', status, errorData);
-    
-    try {
-      const errorJson = JSON.parse(errorData);
-      const message = errorJson.message?.toLowerCase() || '';
-      
-      if (message.includes('invalid') || message.includes('incorrect')) {
-        return { message: 'Invalid email or password', emailError: true, passwordError: true };
-      }
-      if (message.includes('email') || message.includes('account')) {
-        return { message: 'Email not registered', emailError: true, passwordError: false };
-      }
-      if (message.includes('password')) {
-        return { message: 'Incorrect password', emailError: false, passwordError: true };
-      }
-    } catch (e) {}
+  const getUserFriendlyError = useCallback(
+    (status: number, errorData: string) => {
+      console.log('🔍 Server error analysis:', status, errorData);
 
-    switch (status) {
-      case 400: return { message: 'Invalid credentials', emailError: true, passwordError: true };
-      case 401: return { message: 'Invalid email or password', emailError: true, passwordError: true };
-      case 403: return { message: 'Account access denied', emailError: true, passwordError: true };
-      case 404: return { message: 'Account not found', emailError: true, passwordError: false };
-      case 429: return { message: 'Too many login attempts', emailError: false, passwordError: false };
-      case 500: return { message: 'Server error. Try again later', emailError: false, passwordError: false };
-      default: return { message: 'Login failed. Please try again', emailError: true, passwordError: true };
-    }
-  }, []);
+      // Try parse API JSON to read custom message
+      try {
+        const errorJson = JSON.parse(errorData);
+        const rawMessage: string = errorJson.message || '';
+        const message = rawMessage.toLowerCase();
+
+        // 🔥 SPECIAL CASE: blocked by sub admin
+        if (rawMessage === 'You have been blocked by sub admin') {
+          return {
+            message: rawMessage, // show exact API message
+            emailError: false,
+            passwordError: false,
+          };
+        }
+
+        if (message.includes('invalid') || message.includes('incorrect')) {
+          return {
+            message: 'Invalid email or password',
+            emailError: true,
+            passwordError: true,
+          };
+        }
+        if (message.includes('blocked')) {
+          // generic block handling if message wording changes
+          return {
+            message: rawMessage || 'Your account has been blocked',
+            emailError: false,
+            passwordError: false,
+          };
+        }
+        if (message.includes('email') || message.includes('account')) {
+          return {
+            message: 'Email not registered',
+            emailError: true,
+            passwordError: false,
+          };
+        }
+        if (message.includes('password')) {
+          return {
+            message: 'Incorrect password',
+            emailError: false,
+            passwordError: true,
+          };
+        }
+      } catch (e) {
+        // ignore JSON parse issues, fall back to status handler
+      }
+
+      // Fallback based on HTTP status
+      switch (status) {
+        case 400:
+          return {
+            message: 'Invalid credentials',
+            emailError: true,
+            passwordError: true,
+          };
+        case 401:
+          return {
+            message: 'Invalid email or password',
+            emailError: true,
+            passwordError: true,
+          };
+        case 403:
+          return {
+            message: 'Account access denied',
+            emailError: true,
+            passwordError: true,
+          };
+        case 404:
+          return {
+            message: 'Account not found',
+            emailError: true,
+            passwordError: false,
+          };
+        case 429:
+          return {
+            message: 'Too many login attempts',
+            emailError: false,
+            passwordError: false,
+          };
+        case 500:
+          return {
+            message: 'Server error. Try again later',
+            emailError: false,
+            passwordError: false,
+          };
+        default:
+          return {
+            message: 'Login failed. Please try again',
+            emailError: true,
+            passwordError: true,
+          };
+      }
+    },
+    [],
+  );
 
   const showSuccessAndNavigate = useCallback(() => {
     setPopupMessage('Login Successful!');
@@ -111,8 +186,8 @@ const Signin = ({ navigation }) => {
 
     try {
       console.log('📤 Fast login request...');
-      
-      const response = await Promise.race([
+
+      const response: any = await Promise.race([
         fetch('https://naushad.onrender.com/api/auth/login', {
           method: 'POST',
           headers: {
@@ -120,23 +195,24 @@ const Signin = ({ navigation }) => {
           },
           body: JSON.stringify({ email, password }),
         }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 10000)
-        )
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 10000),
+        ),
       ]);
 
       if (!response.ok) {
         const errorData = await response.text();
         console.log('❌ Login failed:', response.status, errorData);
-        
+
         const userError = getUserFriendlyError(response.status, errorData);
-        
+
+        // Set field error flags according to mapping
         setErrorState(prev => ({
           ...prev,
           email: userError.emailError,
-          password: userError.passwordError
+          password: userError.passwordError,
         }));
-        
+
         setPopupMessage(userError.message);
         setPopupVisible(true);
         setLoading(false);
@@ -155,19 +231,22 @@ const Signin = ({ navigation }) => {
         await Promise.all([
           AsyncStorage.setItem('userToken', data.token),
           AsyncStorage.setItem('userData', JSON.stringify(data)),
-          data.user?._id ? AsyncStorage.setItem('userId', data.user._id) : Promise.resolve()
+          data.user?._id
+            ? AsyncStorage.setItem('userId', data.user._id)
+            : Promise.resolve(),
         ]);
         console.log('✅ Login data saved successfully');
-        
-        // 🔥 NEW: Save user's gender to AsyncStorage if available
+
         if (data.user?.gender) {
-          await AsyncStorage.setItem('userGender', data.user.gender.toLowerCase());
+          await AsyncStorage.setItem(
+            'userGender',
+            data.user.gender.toLowerCase(),
+          );
           console.log('✅ User gender saved:', data.user.gender);
         }
       }
 
       showSuccessAndNavigate();
-      
     } catch (error: any) {
       console.error('❌ Login error:', error);
       setErrorState({ email: false, password: false });
@@ -182,18 +261,36 @@ const Signin = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  }, [isFormValid, email, password, navigation, showSuccessAndNavigate, getUserFriendlyError]);
+  }, [
+    isFormValid,
+    email,
+    password,
+    navigation,
+    showSuccessAndNavigate,
+    getUserFriendlyError,
+  ]);
 
   const handlePopupClose = useCallback(() => {
     setPopupVisible(false);
     setServerError('');
   }, []);
 
-  const getBorderColor = (field: keyof typeof errorState, fieldValue: string) => {
-    return (errorState[field] && (hasSubmitted || fieldValue.trim())) ? '#FF4444' : COLORS.primary;
+  const getBorderColor = (
+    field: keyof typeof errorState,
+    fieldValue: string,
+  ) => {
+    return errorState[field] && (hasSubmitted || fieldValue.trim())
+      ? '#FF4444'
+      : COLORS.primary;
   };
 
-  const ErrorMessage = ({ message, field }: { message: string; field: keyof typeof errorMessages }) => {
+  const ErrorMessage = ({
+    message,
+    field,
+  }: {
+    message: string;
+    field: keyof typeof errorMessages;
+  }) => {
     if (!errorState[field] || !(hasSubmitted || message)) return null;
     return <Text style={styles.errorText}>{message}</Text>;
   };
@@ -209,7 +306,10 @@ const Signin = ({ navigation }) => {
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
-          style={[styles.input, { borderColor: getBorderColor('email', email) }]}
+          style={[
+            styles.input,
+            { borderColor: getBorderColor('email', email) },
+          ]}
           placeholder="Enter your email"
           placeholderTextColor="gray"
           value={email}
@@ -223,7 +323,12 @@ const Signin = ({ navigation }) => {
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
-        <View style={[styles.passwordContainer, { borderColor: getBorderColor('password', password) }]}>
+        <View
+          style={[
+            styles.passwordContainer,
+            { borderColor: getBorderColor('password', password) },
+          ]}
+        >
           <TextInput
             style={styles.passwordInput}
             placeholder="Enter password"
@@ -232,7 +337,10 @@ const Signin = ({ navigation }) => {
             value={password}
             onChangeText={setPassword}
           />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            activeOpacity={0.7}
+          >
             <Icon
               name={showPassword ? 'eye' : 'eye-off'}
               size={22}
@@ -254,11 +362,11 @@ const Signin = ({ navigation }) => {
 
       <TouchableOpacity
         style={[
-          styles.signinButton, 
-          { 
+          styles.signinButton,
+          {
             backgroundColor: isFormValid ? COLORS.primary : '#ccc',
-            opacity: loading ? 0.7 : 1
-          }
+            opacity: loading ? 0.7 : 1,
+          },
         ]}
         onPress={handleSignIn}
         disabled={!isFormValid || loading}
@@ -273,9 +381,13 @@ const Signin = ({ navigation }) => {
 
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('SignUp')} activeOpacity={0.7}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('SignUp')}
+          activeOpacity={0.7}
+        >
           <Text style={[styles.signupLink, { color: COLORS.primary }]}>
-            {' '}Sign Up
+            {' '}
+            Sign Up
           </Text>
         </TouchableOpacity>
       </View>

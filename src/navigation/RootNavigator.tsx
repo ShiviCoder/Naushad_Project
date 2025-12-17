@@ -60,6 +60,12 @@ import CartPaymentSuccess from '../screens/PaymentScreen/CartPaymentSuccess';
 import MyCartPayment from '../screens/PaymentScreen/MyCartPayment';
 import FundAddScreen from '../screens/PaymentScreen/FundAddScreen';
 import BookAppoinementFundAdd from '../screens/PaymentScreen/BookAppoinementFundAdd';
+import BookingPackageScreen from '../screens/SignAuth/BookingScreens/OurPackage/BookingPackageScreen';
+import PackageBookingSeats from '../screens/SignAuth/BookingScreens/OurPackage/PackageBookingSeats';
+import OurPackageTime from '../screens/SignAuth/BookingScreens/OurPackage/OurPackageTime';
+import PackagePayementScreen from '../screens/SignAuth/BookingScreens/OurPackage/PackagePayementScreen';
+import HomeServiceSelectionScreen from '../screens/home/HomeComponents/HomeService/HomeServiceSelectionScreen';
+import BookingSummaryScreen from '../screens/home/HomeComponents/HomeService/BookingSummaryScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -236,6 +242,27 @@ export default function RootNavigator({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Stack.Screen
           name="BookAppoinementFundAdd"
           component={BookAppoinementFundAdd}
+        />
+        <Stack.Screen
+          name="BookingPackageScreen"
+          component={BookingPackageScreen}
+        />
+        <Stack.Screen
+          name="PackageBookingSeats"
+          component={PackageBookingSeats}
+        />
+        <Stack.Screen name="OurPackageTime" component={OurPackageTime} />
+        <Stack.Screen
+          name="PackagePayementScreen"
+          component={PackagePayementScreen}
+        />
+        <Stack.Screen
+          name="HomeServiceSelectionScreen"
+          component={HomeServiceSelectionScreen}
+        />
+        <Stack.Screen
+          name="BookingSummaryScreen"
+          component={BookingSummaryScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

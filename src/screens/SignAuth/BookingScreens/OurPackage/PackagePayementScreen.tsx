@@ -18,10 +18,10 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import COLORS from '../../utils/Colors';
-import Popup from '../../components/PopUp';
-import Head from '../../components/Head';
-import { useTheme } from '../../context/ThemeContext';
+import COLORS from '../../../../utils/Colors';
+import Popup from '../../../../components/PopUp';
+import Head from '../../../../components/Head';
+import { useTheme } from '../../../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Utility function to ensure date is in YYYY-MM-DD format
@@ -174,7 +174,7 @@ function formatTo12Hour(timeStr) {
   }
 }
 
-const PaymentScreen = () => {
+const PackagePayementScreen = () => {
   const [method, setMethod] = useState('wallet');
   const [serviceList, setServiceList] = useState([]);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -379,7 +379,7 @@ const PaymentScreen = () => {
     });
   }, [navigation, totalPrice, walletBalance, params]);
 
-  // Process incoming services - memoized with useCallback
+  // Process incoming services - FIXED VERSION
   const processIncomingData = useCallback(async () => {
     console.log('🔄 processIncomingData - Starting data processing');
     console.log(
@@ -400,22 +400,40 @@ const PaymentScreen = () => {
 
     console.log('🔄 processIncomingData - Processing params:', params);
 
-    // Handle different parameter structures
+    // Handle different parameter structures - FIXED SERVICE NAME EXTRACTION
     if (params.services && Array.isArray(params.services)) {
       console.log('✅ processIncomingData - Processing services array');
-      processedServices = params.services.map(service => ({
-        type: service.type || 'cart',
-        serviceName: service.serviceName || service.name,
-        name: service.serviceName || service.name,
-        price: service.price,
-        quantity: service.quantity || 1,
-        image: service.image,
-        date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null,
-        time: hasDateTime ? formatTo12Hour(incomingTime) : null,
-        backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null,
-        chairNumber: incomingChairNumber,
-        source: service.source || 'Cart',
-      }));
+      console.log('Number of services in array:', params.services.length);
+
+      processedServices = params.services.map(service => {
+        console.log('Processing service object:', service);
+
+        // Extract service name from multiple possible fields
+        const serviceName =
+          service.serviceName ||
+          service.name ||
+          service.title ||
+          'Unnamed Service';
+        console.log('Extracted service name:', serviceName);
+
+        return {
+          type: service.type || 'package',
+          serviceName: serviceName,
+          name: serviceName,
+          price: service.price,
+          quantity: service.quantity || 1,
+          image: service.image,
+          date: hasDateTime ? ensureYYYYMMDD(incomingDate) : null,
+          time: hasDateTime ? formatTo12Hour(incomingTime) : null,
+          backendTime: hasDateTime ? ensure24HourTime(incomingTime) : null,
+          chairNumber: incomingChairNumber,
+          source: service.source || 'Package Booking',
+          // Include additional fields for debugging
+          _id: service._id || service.serviceId,
+          estimatedTime: service.estimatedTime,
+          originalData: service, // Store original for debugging
+        };
+      });
     } else if (params.serviceName && params.price) {
       console.log('✅ processIncomingData - Processing single service');
       processedServices = [
@@ -468,7 +486,11 @@ const PaymentScreen = () => {
 
     console.log(
       '📋 processIncomingData - Processed Services:',
-      processedServices,
+      processedServices.map(s => ({
+        name: s.serviceName,
+        price: s.price,
+        quantity: s.quantity,
+      })),
     );
 
     // Storage update
@@ -693,14 +715,23 @@ const PaymentScreen = () => {
         console.log('   User ID:', bookingUserId);
         console.log('   Total Amount:', totalPrice);
 
+        // Prepare services array for backend
+        const servicesArray = serviceList.map(service => ({
+          serviceId: service._id || service.serviceId,
+          serviceName: service.serviceName,
+          price: service.price,
+          quantity: service.quantity || 1,
+          type: service.type || 'package',
+        }));
+
         // Enhanced request body with proper structure including userId
         const requestBody = {
           date: date,
           time: time,
-          services: services,
+          services: servicesArray, // Send full service objects, not just names
           totalAmount: totalPrice,
-          chairNo: incomingChairNumber, // CHANGED: chairNumber to chairNo
-          userId: bookingUserId, // ADDED: userId field for notifications
+          chairNo: incomingChairNumber,
+          userId: bookingUserId,
           // Add these common required fields
           serviceType: 'appointment',
           status: 'pending',
@@ -770,7 +801,7 @@ const PaymentScreen = () => {
         };
       }
     },
-    [totalPrice, incomingChairNumber, userId, getUserId],
+    [totalPrice, incomingChairNumber, userId, getUserId, serviceList],
   );
 
   // Handle booking process
@@ -951,7 +982,7 @@ const PaymentScreen = () => {
         <View style={styles.successPopupOverlay}>
           <View style={styles.successPopupContainer}>
             <Image
-              source={require('../../assets/images/success.png')}
+              source={require('../../../../assets/images/success.png')}
               style={styles.successImage}
               resizeMode="contain"
             />
@@ -1021,7 +1052,7 @@ const PaymentScreen = () => {
                   <Text
                     style={[styles.serviceTitle, { color: theme.textPrimary }]}
                   >
-                    {srv.serviceName || srv.name || 'Unnamed'}
+                    {srv.serviceName || srv.name || 'Unnamed Service'}
                   </Text>
                   <Text
                     style={[
@@ -1138,19 +1169,6 @@ const PaymentScreen = () => {
                         </Text>
                       </View>
                     )}
-
-                    {/* Display raw formats for debugging - Only show if date/time available */}
-                    {/* <View style={styles.debugRow}>
-                      <Text
-                        style={[
-                          styles.debugText,
-                          { color: theme.textSecondary },
-                        ]}
-                      >
-                        📋 Backend Date: {srv.date || 'Not set'} | Backend Time:{' '}
-                        {srv.backendTime || 'Not set'}
-                      </Text>
-                    </View> */}
                   </>
                 )}
 
@@ -1158,8 +1176,18 @@ const PaymentScreen = () => {
                   <Text
                     style={[styles.detailText, { color: theme.textSecondary }]}
                   >
-                    📱 From: {srv.source || 'Unknown'}
+                    📱 From: {srv.source || 'Package Booking'}
                   </Text>
+                  {srv.estimatedTime && (
+                    <Text
+                      style={[
+                        styles.detailText,
+                        { color: theme.textSecondary },
+                      ]}
+                    >
+                      ⏱️ Duration: {srv.estimatedTime} mins
+                    </Text>
+                  )}
                 </View>
 
                 <View style={styles.footerRow}>
@@ -1220,7 +1248,7 @@ const PaymentScreen = () => {
             <View style={styles.walletCard}>
               <View style={styles.walletHeader}>
                 <Image
-                  source={require('../../assets/wallet.png')}
+                  source={require('../../../../assets/wallet.png')}
                   style={styles.walletIcon}
                 />
                 <Text style={styles.walletTitle}>Salon Wallet</Text>
@@ -1392,7 +1420,7 @@ const PaymentScreen = () => {
                 onPress={navigateToAddFunds}
               >
                 <Image
-                  source={require('../../assets/wallet.png')}
+                  source={require('../../../../assets/wallet.png')}
                   style={styles.addFundsIcon}
                 />
                 <Text style={styles.addFundsBtnText}>
@@ -1573,9 +1601,10 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: hp('0.3%'),
   },
-  detailText: { fontSize: wp('3.6%') },
+  detailText: { fontSize: wp('3.2%') },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1870,4 +1899,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PaymentScreen;
+export default PackagePayementScreen;

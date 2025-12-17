@@ -1,16 +1,19 @@
 // File: Certificates.js
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  FlatList, 
-  Image, 
-  Animated, 
-  ScrollView, 
-  RefreshControl, 
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Image,
+  Animated,
+  ScrollView,
+  RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
-  Dimensions 
+  Dimensions,
+  Modal,
+  TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Head from '../../components/Head';
@@ -18,10 +21,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import COLORS from '../../utils/Colors';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 // ✅ Create a separate component for Certificate Card to use hooks properly
 const CertificateCard = ({ item, index, theme, onPress }) => {
@@ -43,19 +49,21 @@ const CertificateCard = ({ item, index, theme, onPress }) => {
           backgroundColor: theme.card,
           transform: [
             { scale: itemAnim },
-            { translateY: itemAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [50, 0],
-            })}
+            {
+              translateY: itemAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [50, 0],
+              }),
+            },
           ],
           opacity: itemAnim,
           shadowColor: theme.dark ? '#000' : COLORS.primary,
         },
       ]}
     >
-      <TouchableOpacity 
-        activeOpacity={0.9} 
-        onPress={onPress}
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => onPress(item)}
         style={styles.cardTouchable}
       >
         {/* Certificate Badge */}
@@ -66,13 +74,18 @@ const CertificateCard = ({ item, index, theme, onPress }) => {
 
         {/* Certificate Image with Gradient Overlay */}
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: item.imageUrl }} 
-            style={styles.image} 
-            resizeMode="cover" 
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.image}
+            resizeMode="cover"
           />
-          <View style={[styles.imageOverlay, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
-          
+          <View
+            style={[
+              styles.imageOverlay,
+              { backgroundColor: 'rgba(0,0,0,0.3)' },
+            ]}
+          />
+
           {/* View Full Button */}
           <View style={styles.viewButton}>
             <Icon name="zoom-in" size={wp('4%')} color="#fff" />
@@ -83,20 +96,31 @@ const CertificateCard = ({ item, index, theme, onPress }) => {
         {/* Certificate Content */}
         <View style={styles.content}>
           <View style={styles.titleRow}>
-            <Icon name="workspace-premium" size={wp('5%')} color={COLORS.primary} />
-            <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>
+            <Icon
+              name="workspace-premium"
+              size={wp('5%')}
+              color={COLORS.primary}
+            />
+            <Text
+              style={[styles.title, { color: theme.text }]}
+              numberOfLines={2}
+            >
               {item.title}
             </Text>
           </View>
-          
+
           <View style={styles.detailsRow}>
             <View style={styles.detailItem}>
-              <Icon name="date-range" size={wp('3.5%')} color={theme.textSecondary} />
+              <Icon
+                name="date-range"
+                size={wp('3.5%')}
+                color={theme.textSecondary}
+              />
               <Text style={[styles.detailText, { color: theme.textSecondary }]}>
                 {new Date().toLocaleDateString()}
               </Text>
             </View>
-            
+
             <View style={styles.detailItem}>
               <Icon name="star" size={wp('3.5%')} color="#FFD700" />
               <Text style={[styles.detailText, { color: theme.textSecondary }]}>
@@ -107,14 +131,153 @@ const CertificateCard = ({ item, index, theme, onPress }) => {
 
           {/* Progress/Status Bar */}
           <View style={styles.statusContainer}>
-            <View style={[styles.statusBar, { backgroundColor: theme.dark ? '#333' : '#e2e8f0' }]}>
-              <View style={[styles.statusProgress, { backgroundColor: COLORS.primary }]} />
+            <View
+              style={[
+                styles.statusBar,
+                { backgroundColor: theme.dark ? '#333' : '#e2e8f0' },
+              ]}
+            >
+              <View
+                style={[
+                  styles.statusProgress,
+                  { backgroundColor: COLORS.primary },
+                ]}
+              />
             </View>
-            <Text style={[styles.statusText, { color: COLORS.primary }]}>Completed</Text>
+            <Text style={[styles.statusText, { color: COLORS.primary }]}>
+              Completed
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
     </Animated.View>
+  );
+};
+
+// Full Screen Image Modal Component
+const FullScreenImageModal = ({ visible, imageUri, title, theme, onClose }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 60,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible]);
+
+  const handleClose = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 0.8,
+        tension: 60,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onClose();
+    });
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="none"
+      statusBarTranslucent={true}
+      onRequestClose={handleClose}
+    >
+      <StatusBar backgroundColor="rgba(0,0,0,0.9)" barStyle="light-content" />
+      <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
+        <TouchableWithoutFeedback onPress={handleClose}>
+          <View style={styles.modalBackground}>
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleClose}
+              activeOpacity={0.7}
+            >
+              <Icon name="close" size={wp('6%')} color="#fff" />
+            </TouchableOpacity>
+
+            {/* Image Container */}
+            <Animated.View
+              style={[
+                styles.modalImageContainer,
+                {
+                  transform: [{ scale: scaleAnim }],
+                },
+              ]}
+            >
+              <Image
+                source={{ uri: imageUri }}
+                style={styles.fullScreenImage}
+                resizeMode="contain"
+              />
+
+              {/* Image Title */}
+              <View style={styles.imageTitleContainer}>
+                <Icon
+                  name="workspace-premium"
+                  size={wp('4%')}
+                  color="#FFD700"
+                />
+                <Text style={styles.imageTitle} numberOfLines={2}>
+                  {title}
+                </Text>
+              </View>
+            </Animated.View>
+
+            {/* Action Buttons */}
+            {/* <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.downloadButton]}
+              >
+                <Icon name="file-download" size={wp('4.5%')} color="#fff" />
+                <Text style={styles.actionButtonText}>Download</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.actionButton, styles.shareButton]}
+              >
+                <Icon name="share" size={wp('4.5%')} color="#fff" />
+                <Text style={styles.actionButtonText}>Share</Text>
+              </TouchableOpacity>
+            </View> */}
+
+            {/* Instructions */}
+            {/* <View style={styles.instructions}>
+              <Icon name="info" size={wp('4%')} color="rgba(255,255,255,0.7)" />
+              <Text style={styles.instructionsText}>
+                Pinch to zoom • Double tap to reset • Tap anywhere to close
+              </Text>
+            </View> */}
+          </View>
+        </TouchableWithoutFeedback>
+      </Animated.View>
+    </Modal>
   );
 };
 
@@ -124,6 +287,7 @@ const Certificates = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -138,13 +302,16 @@ const Certificates = () => {
     try {
       setLoading(true);
       const token = await getToken();
-      const response = await fetch('https://naushad.onrender.com/api/certificates', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://naushad.onrender.com/api/certificates',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
       const json = await response.json();
       console.log('Certificate Response:', json);
       console.log('Certificate tokens ', token);
@@ -174,7 +341,7 @@ const Certificates = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    
+
     Animated.spring(translateY, {
       toValue: 60,
       useNativeDriver: true,
@@ -204,46 +371,53 @@ const Certificates = () => {
     setRefreshing(false);
   };
 
-  const openCertificateModal = (item) => {
+  const openCertificateModal = item => {
     setSelectedCertificate(item);
+    setModalVisible(true);
   };
 
   const closeCertificateModal = () => {
-    setSelectedCertificate(null);
+    setModalVisible(false);
+    setTimeout(() => {
+      setSelectedCertificate(null);
+    }, 300);
   };
 
   // ✅ Fixed renderItem function without hooks
   const renderItem = ({ item, index }) => (
-    <CertificateCard 
-      item={item} 
-      index={index} 
-      theme={theme} 
-      onPress={() => openCertificateModal(item)}
+    <CertificateCard
+      item={item}
+      index={index}
+      theme={theme}
+      onPress={openCertificateModal}
     />
   );
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+      <SafeAreaView
+        style={[styles.loadingContainer, { backgroundColor: theme.background }]}
+      >
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
           <ActivityIndicator size="large" color={COLORS.primary} />
         </Animated.View>
-        <Text style={[styles.loadingText, { color: theme.text }]}>Loading your achievements...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       <Head title="🏆 My Certificates" />
-      
-      <Animated.View 
+
+      <Animated.View
         style={[
-          styles.animatedContainer, 
-          { 
+          styles.animatedContainer,
+          {
             transform: [{ translateY }],
-            opacity: fadeAnim 
-          }
+            opacity: fadeAnim,
+          },
         ]}
       >
         {/* Header Stats */}
@@ -291,25 +465,34 @@ const Certificates = () => {
         >
           {certificates.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Animated.View 
+              <Animated.View
                 style={[
                   styles.emptyIcon,
-                  { 
+                  {
                     backgroundColor: theme.dark ? '#333' : '#f1f5f9',
-                    transform: [{ scale: scaleAnim }]
-                  }
+                    transform: [{ scale: scaleAnim }],
+                  },
                 ]}
               >
-                <Icon name="workspace-premium" size={wp('20%')} color={theme.textSecondary} />
+                <Icon
+                  name="workspace-premium"
+                  size={wp('20%')}
+                  color={theme.textSecondary}
+                />
               </Animated.View>
               <Text style={[styles.emptyTitle, { color: theme.text }]}>
                 No Certificates Yet
               </Text>
-              <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
+              <Text
+                style={[styles.emptySubtitle, { color: theme.textSecondary }]}
+              >
                 Your achievements and certificates will appear here
               </Text>
-              <TouchableOpacity 
-                style={[styles.refreshButton, { backgroundColor: COLORS.primary }]}
+              <TouchableOpacity
+                style={[
+                  styles.refreshButton,
+                  { backgroundColor: COLORS.primary },
+                ]}
                 onPress={fetchCertificates}
               >
                 <Text style={styles.refreshButtonText}>Check Again</Text>
@@ -319,7 +502,9 @@ const Certificates = () => {
           ) : (
             <FlatList
               data={certificates}
-              keyExtractor={(item, index) => item.id?.toString() || `cert-${index}`}
+              keyExtractor={(item, index) =>
+                item.id?.toString() || `cert-${index}`
+              }
               renderItem={renderItem}
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
@@ -329,13 +514,14 @@ const Certificates = () => {
         </ScrollView>
       </Animated.View>
 
-      {/* Certificate Modal (You can implement this later) */}
-      {/* {selectedCertificate && (
-        <CertificateModal 
-          certificate={selectedCertificate}
-          onClose={closeCertificateModal}
-        />
-      )} */}
+      {/* Full Screen Image Modal */}
+      <FullScreenImageModal
+        visible={modalVisible}
+        imageUri={selectedCertificate?.imageUrl}
+        title={selectedCertificate?.title}
+        theme={theme}
+        onClose={closeCertificateModal}
+      />
     </SafeAreaView>
   );
 };
@@ -552,5 +738,109 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     marginRight: wp('2%'),
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: wp('4%'),
+  },
+  closeButton: {
+    position: 'absolute',
+    top: hp('5%'),
+    right: wp('6%'),
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    width: wp('10%'),
+    height: wp('10%'),
+    borderRadius: wp('5%'),
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  modalImageContainer: {
+    width: width - wp('8%'),
+    height: height - hp('25%'),
+    backgroundColor: '#000',
+    borderRadius: wp('2%'),
+    overflow: 'hidden',
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+  },
+  fullScreenImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageTitleContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingVertical: hp('2%'),
+    paddingHorizontal: wp('4%'),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageTitle: {
+    color: '#fff',
+    fontSize: wp('4%'),
+    fontFamily: 'Poppins-SemiBold',
+    marginLeft: wp('2%'),
+    flex: 1,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    marginTop: hp('3%'),
+    width: '100%',
+    justifyContent: 'center',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: wp('6%'),
+    paddingVertical: hp('1.8%'),
+    borderRadius: wp('10%'),
+    marginHorizontal: wp('2%'),
+    minWidth: wp('35%'),
+    justifyContent: 'center',
+  },
+  downloadButton: {
+    backgroundColor: COLORS.primary,
+  },
+  shareButton: {
+    backgroundColor: '#10b981',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: wp('3.8%'),
+    fontFamily: 'Poppins-SemiBold',
+    marginLeft: wp('2%'),
+  },
+  instructions: {
+    position: 'absolute',
+    bottom: hp('3%'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: wp('4%'),
+    paddingVertical: hp('1%'),
+    borderRadius: wp('10%'),
+  },
+  instructionsText: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: wp('3%'),
+    fontFamily: 'Poppins-Medium',
+    marginLeft: wp('2%'),
   },
 });

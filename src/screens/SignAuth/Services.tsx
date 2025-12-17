@@ -6,12 +6,14 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
-  RefreshControl,
   Animated,
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import { useTheme } from '../../context/ThemeContext';
 import Head from '../../components/Head';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,124 +32,178 @@ export default function ServicesScreen() {
   const [storySelect, setStorySelect] = useState<number | null>(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [services, setServices] = useState<any[]>([]);
-  const [allServices, setAllServices] = useState<any[]>([]); // Store all services for filtering
+  const [allServices, setAllServices] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
-
-  const [gender, setGender] = useState("male");
+  const [gender, setGender] = useState('male');
 
   const getToken = async () => {
     const token = await AsyncStorage.getItem('userToken');
+    console.log('API Token: ', token);
+    console.log('token accept');
     return token;
-  }
+  };
 
-  // Load gender from AsyncStorage
+  // ✅ PROPER GENDER LOGIC - EXACT FROM PACKAGES REFERENCE
   useEffect(() => {
     const loadGender = async () => {
-      const savedGender = await AsyncStorage.getItem("selectedGender");
-      console.log("📱 Loaded Gender from Storage:", savedGender);
+      try {
+        const savedGender = await AsyncStorage.getItem('selectedGender');
+        console.log('Loaded Gender:', savedGender);
 
-      // Fallback to male if null/undefined/"null"
-      if (!savedGender || savedGender === "null") {
-        setGender("male");
-      } else {
-        setGender(savedGender);
+        // ✅ PROPER GENDER LOGIC: saved > default
+        if (savedGender && savedGender !== 'null') {
+          const normalizedGender = savedGender.toLowerCase().trim();
+          setGender(
+            normalizedGender === 'male' || normalizedGender === 'female'
+              ? normalizedGender
+              : 'male',
+          );
+          console.log('✅ Valid Gender Set:', normalizedGender);
+        } else {
+          console.log('⚠️ No valid saved gender, using default: male');
+        }
+
+        // ⭐ Clear saved gender after use for fresh value next time
+        await AsyncStorage.removeItem('selectedGender');
+        console.log('🗑️ Old gender cleared from AsyncStorage');
+      } catch (error) {
+        console.log('❌ Gender load error:', error);
+        setGender('male'); // Fallback to default
       }
-
-      // Remove saved gender so next time fresh value will be used
-      await AsyncStorage.removeItem("selectedGender");
-      console.log("🗑️ Old gender removed from AsyncStorage");
     };
 
     loadGender();
   }, []);
 
-  // Fetch all services
-  const fetchServices = async () => {
+  // 🔥 PROPER FETCH SERVICES - EXACT FROM PACKAGES REFERENCE
+  const fetchServices = async (selectedGender = null) => {
     try {
       setLoading(true);
       const token = await getToken();
-      console.log("🔍 Fetching services with gender:", gender);
-      
+      if (!token) {
+        console.log('❌ No token available');
+        return;
+      }
+
+      // 🔥 PROPER GENDER PRIORITY: selectedGender > state > default
+      let finalGender = 'male';
+      if (selectedGender) {
+        finalGender = selectedGender.toLowerCase().trim();
+      } else if (gender && gender !== 'null') {
+        finalGender = gender.toLowerCase().trim();
+      }
+
+      // ✅ Validate gender value
+      if (!['male', 'female'].includes(finalGender)) {
+        finalGender = 'male';
+      }
+
+      console.log('🔍 Fetching services for gender:', finalGender);
+
       const res = await fetch('https://naushad.onrender.com/api/ourservice', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
       const data = await res.json();
-      
-      console.log("📦 Full API Response:", data);
-      
-      if (data.success && data.data) {
-        // Store all services
-        setAllServices(data.data);
-        
-        // Apply gender filter
-        const genderFilteredServices = data.data.filter((service: any) =>
-          String(service.gender || "").trim().toLowerCase() === gender.toLowerCase()
+      console.log('📦 Services Full Response:', data);
+
+      if (!data?.success || !data.data) {
+        console.log('❌ API response not successful');
+        return;
+      }
+
+      let rawServices = data.data || [];
+
+      // 🔥 FILTER BY VALIDATED GENDER - EXACT FROM PACKAGES
+      const genderFilteredServices = rawServices.filter(
+        (service: any) =>
+          String(service.gender || '')
+            .trim()
+            .toLowerCase() === finalGender,
+      );
+
+      console.log(
+        '✅ Gender Filtered Services for',
+        finalGender,
+        ':',
+        genderFilteredServices.length,
+        'items',
+      );
+
+      // Store GENDER FILTERED services as allServices
+      setAllServices(genderFilteredServices);
+
+      // Extract unique categories from GENDER FILTERED services
+      const uniqueCategories = Array.from(
+        new Set(
+          genderFilteredServices.map((service: any) => service.serviceName),
+        ),
+      ).map((serviceName, index) => {
+        const service = genderFilteredServices.find(
+          (s: any) => s.serviceName === serviceName,
         );
-        
-        console.log(`👤 Gender Filtered Services (${gender}):`, genderFilteredServices);
-        
-        setServices(genderFilteredServices);
-        
-        // Extract unique categories from gender-filtered services
-        const uniqueCategories = Array.from(
-          new Set(genderFilteredServices.map((service: any) => service.serviceName))
-        ).map((serviceName, index) => {
-          const service = genderFilteredServices.find((s: any) => s.serviceName === serviceName);
-          return {
-            id: index.toString(),
-            name: serviceName,
-            imageUrl: service?.imageUrl,
-            gender: service?.gender
-          };
-        });
-        
-        console.log("🏷️ Unique Categories:", uniqueCategories);
-        setCategories(uniqueCategories);
-        
-        // Set first category as selected by default if categories exist
-        if (uniqueCategories.length > 0) {
-          setSelectedCategory(uniqueCategories[0].name);
-          // Filter services for the first category
-          const firstCategoryServices = genderFilteredServices.filter((service: any) => 
-            service.serviceName === uniqueCategories[0].name
-          );
-          setServices(firstCategoryServices);
-          console.log("✅ First category services:", firstCategoryServices);
-        } else {
-          setSelectedCategory(null);
-          console.log("❌ No categories found for this gender");
-        }
+        return {
+          id: index.toString(),
+          name: serviceName,
+          imageUrl: service?.imageUrl,
+          gender: service?.gender,
+        };
+      });
+
+      console.log(
+        '🏷️ Unique Categories for',
+        finalGender,
+        ':',
+        uniqueCategories,
+      );
+      setCategories(uniqueCategories);
+
+      // Set services to ALL gender-filtered services initially
+      setServices(genderFilteredServices);
+
+      // Set first category as selected if exists
+      if (uniqueCategories.length > 0) {
+        setSelectedCategory(uniqueCategories[0].name);
+        console.log('✅ First category selected:', uniqueCategories[0].name);
+      } else {
+        setSelectedCategory(null);
+        console.log('❌ No categories found for this gender');
       }
     } catch (err) {
-      console.log('❌ Fetch error:', err);
+      console.log('🔥 Services fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter services by category
+  // ✅ Fetch services whenever gender changes
+  useEffect(() => {
+    if (gender) {
+      fetchServices(gender);
+    }
+  }, [gender]);
+
+  // Filter services by category - ALWAYS GENDER FILTERED FIRST
   const filterServicesByCategory = (categoryName: string) => {
     try {
       setCategoryLoading(true);
-      
-      // First apply gender filter to all services
-      const genderFiltered = allServices.filter((service: any) =>
-        String(service.gender || "").trim().toLowerCase() === gender.toLowerCase()
+
+      // allServices is already GENDER FILTERED from fetchServices
+      const categoryFiltered = allServices.filter(
+        (service: any) => service.serviceName === categoryName,
       );
-      
-      // Then apply category filter
-      const categoryFiltered = genderFiltered.filter((service: any) => 
-        service.serviceName === categoryName
+
+      console.log(
+        `🔍 Filtered by Category "${categoryName}" (gender: ${gender}):`,
+        categoryFiltered,
       );
-      
-      console.log(`🔍 Filtered by Category "${categoryName}":`, categoryFiltered);
       setServices(categoryFiltered);
+      setSelectedCategory(categoryName);
     } catch (err) {
       console.log('❌ Filter category error:', err);
     } finally {
@@ -155,13 +211,15 @@ export default function ServicesScreen() {
     }
   };
 
-  // Refetch services when gender changes
-  useEffect(() => {
-    if (gender) {
-      console.log("🔄 Gender changed, refetching services:", gender);
-      fetchServices();
-    }
-  }, [gender]);
+  const handleCategoryPress = (category: any, index: number) => {
+    console.log(`🎯 Category selected: ${category.name}, Index: ${index}`);
+    setStorySelect(index);
+    filterServicesByCategory(category.name);
+  };
+
+  // 👇 COMMENTED OUT: RefreshControl functionality
+  /*
+  const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -170,36 +228,22 @@ export default function ServicesScreen() {
     Animated.timing(translateY, { toValue: 0, duration: 400, useNativeDriver: true }).start();
     setRefreshing(false);
   };
-
-  const handleCategoryPress = (category: any, index: number) => {
-    console.log(`🎯 Category selected: ${category.name}, Index: ${index}`);
-    setStorySelect(index);
-    setSelectedCategory(category.name);
-    setCategoryLoading(true);
-    filterServicesByCategory(category.name);
-  };
-
-  // Filter services based on selected category and gender
-  const filteredServices = services.filter(service => 
-    String(service.gender || "").trim().toLowerCase() === gender.toLowerCase() &&
-    (!selectedCategory || service.serviceName === selectedCategory)
-  );
-
-  console.log("🎯 Final Filtered Services:", filteredServices);
+  */
 
   // Render category image with fallback
   const renderCategoryImage = (category: any) => {
     if (category.imageUrl) {
       return (
-        <Image 
-          source={{ uri: category.imageUrl }} 
-          style={styles.categoryImage} 
+        <Image
+          source={{ uri: category.imageUrl }}
+          style={styles.categoryImage}
         />
       );
     }
-    // Fallback to a simple colored circle with first letter
     return (
-      <View style={[styles.categoryFallback, { backgroundColor: COLORS.primary }]}>
+      <View
+        style={[styles.categoryFallback, { backgroundColor: COLORS.primary }]}
+      >
         <Text style={styles.fallbackText}>
           {category.name ? category.name.charAt(0).toUpperCase() : 'S'}
         </Text>
@@ -210,23 +254,30 @@ export default function ServicesScreen() {
   // Show full screen loading indicator
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <Head title="Services" />
         <View style={styles.fullScreenLoading}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
+          {/* <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
             Loading services for {gender}...
-          </Text>
+          </Text> */}
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         style={{ transform: [{ translateY }] }}
+        contentContainerStyle={{ paddingBottom: hp('4%') }}
+        // 👇 REMOVED: refreshControl prop
+        /*
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -235,16 +286,17 @@ export default function ServicesScreen() {
             tintColor={COLORS.primary}
           />
         }
-        contentContainerStyle={{ paddingBottom: hp('4%') }}
+        */
       >
         {/* 🔹 Header */}
         <Head title="Services" />
+
         {/* 🔹 Categories */}
         {categories.length > 0 ? (
           <FlatList
             horizontal
             data={categories}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
               paddingVertical: hp('2%'),
@@ -267,7 +319,9 @@ export default function ServicesScreen() {
                 >
                   {renderCategoryImage(item)}
                 </View>
-                <Text style={[styles.categoryText, { color: theme.textPrimary }]}>
+                <Text
+                  style={[styles.categoryText, { color: theme.textPrimary }]}
+                >
                   {item.name}
                 </Text>
               </TouchableOpacity>
@@ -275,7 +329,9 @@ export default function ServicesScreen() {
           />
         ) : (
           <View style={styles.noCategoriesContainer}>
-            <Text style={[styles.noCategoriesText, { color: theme.textSecondary }]}>
+            <Text
+              style={[styles.noCategoriesText, { color: theme.textSecondary }]}
+            >
               No categories available for {gender}
             </Text>
           </View>
@@ -289,10 +345,10 @@ export default function ServicesScreen() {
         )}
 
         {/* 🔹 Services */}
-        {!categoryLoading && filteredServices.length > 0 ? (
+        {!categoryLoading && services.length > 0 ? (
           <FlatList
-            data={filteredServices}
-            keyExtractor={(item) => item._id}
+            data={services}
+            keyExtractor={item => item._id}
             scrollEnabled={false}
             renderItem={({ item }) => (
               <View style={[styles.MainView, { backgroundColor: theme.card }]}>
@@ -304,7 +360,9 @@ export default function ServicesScreen() {
                 </View>
                 <View style={styles.rightContainer}>
                   <View style={styles.serviceHeader}>
-                    <Text style={[styles.mainText, { color: theme.textPrimary }]}>
+                    <Text
+                      style={[styles.mainText, { color: theme.textPrimary }]}
+                    >
                       {item.serviceName}
                     </Text>
                   </View>
@@ -331,13 +389,16 @@ export default function ServicesScreen() {
           />
         ) : !categoryLoading && !loading ? (
           <View style={styles.centerLoadingContainer}>
-            <Text style={[styles.noServicesText, { color: theme.textSecondary }]}>
-              {selectedCategory 
+            <Text
+              style={[styles.noServicesText, { color: theme.textSecondary }]}
+            >
+              {selectedCategory
                 ? `No ${selectedCategory} services found for ${gender}.`
-                : `No services available for ${gender}.`
-              }
+                : `No services available for ${gender}.`}
             </Text>
-            <Text style={[styles.noServicesSubtext, { color: theme.textSecondary }]}>
+            <Text
+              style={[styles.noServicesSubtext, { color: theme.textSecondary }]}
+            >
               Try changing gender or check back later.
             </Text>
           </View>
@@ -348,23 +409,14 @@ export default function ServicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1,
   },
   fullScreenLoading: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: wp('5%'),
-  },
-  genderIndicator: {
-    paddingHorizontal: wp('5%'),
-    paddingVertical: hp('1%'),
-  },
-  genderText: {
-    fontSize: wp('3.8%'),
-    fontFamily: 'Poppins-Medium',
-    textAlign: 'center',
   },
   categoryItem: {
     alignItems: 'center',
@@ -415,11 +467,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     flexDirection: 'row',
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 4,
-    // elevation: 3,
   },
   imgContainer: {
     height: hp('20%'),
@@ -454,16 +501,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: wp('2%'),
   },
-  genderBadge: {
-    paddingHorizontal: wp('2%'),
-    paddingVertical: hp('0.3%'),
-    borderRadius: wp('1%'),
-  },
-  genderBadgeText: {
-    fontSize: wp('2.8%'),
-    fontWeight: '600',
-    fontFamily: 'Poppins-Medium',
-  },
   price: {
     fontSize: wp('4%'),
     fontFamily: 'Poppins-Medium',
@@ -475,11 +512,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     marginTop: hp('0.5%'),
     lineHeight: hp('2%'),
-  },
-  timeText: {
-    fontSize: wp('3.2%'),
-    fontFamily: 'Poppins-Medium',
-    marginTop: hp('0.5%'),
   },
   bookButton: {
     paddingVertical: hp('1%'),

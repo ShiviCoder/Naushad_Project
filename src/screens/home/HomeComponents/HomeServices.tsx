@@ -1,3 +1,5 @@
+// src/screens/home/components/HomeServices.js
+
 import React, { useState } from 'react';
 import {
   View,
@@ -6,6 +8,7 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
+  ImageBackground,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -13,14 +16,17 @@ import {
 } from 'react-native-responsive-screen';
 import COLORS from '../../../utils/Colors';
 
-// Local placeholder
+// Assets
 const PLACEHOLDER_IMAGE = require('../../../assets/placeholder.jpg');
+const HOME_BG = require('../../../assets/homebg.png');
 
-// Reusable image with fallback
+/* -------------------------------------------------------------------------- */
+/*                               Helper Image                                 */
+/* -------------------------------------------------------------------------- */
+
 const ServiceImage = ({ uri }) => {
   const [error, setError] = useState(false);
 
-  // If no uri or error occurred, always show local placeholder
   if (!uri || error) {
     return (
       <Image
@@ -37,18 +43,16 @@ const ServiceImage = ({ uri }) => {
       style={styles.serviceImage}
       resizeMode="cover"
       onError={() => setError(true)}
-      // defaultSource is mainly for iOS / loading state; error handled via state
       defaultSource={PLACEHOLDER_IMAGE}
     />
   );
 };
 
-const HomeServices = ({
-  homeServices,
-  gender,
-  navigation,
-  handleSectionNavigation,
-}) => {
+/* -------------------------------------------------------------------------- */
+/*                               Main Component                                */
+/* -------------------------------------------------------------------------- */
+
+const HomeServices = ({ homeServices, navigation }) => {
   const renderHomeServiceItem = ({ item }) => (
     <View style={styles.serviceCard}>
       <ServiceImage uri={item.image} />
@@ -67,9 +71,7 @@ const HomeServices = ({
       <TouchableOpacity
         style={styles.bookBtn}
         onPress={() =>
-          navigation.navigate('ServiceDetails', {
-            item: { ...item, image: item.image },
-          })
+          navigation.navigate('HomeServiceSelectionScreen', { item })
         }
       >
         <Text style={styles.bookBtnText}>Book now</Text>
@@ -79,16 +81,36 @@ const HomeServices = ({
 
   return (
     <>
+      {/* ---------------------------- SECTION TITLE FIRST ---------------------------- */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Home services</Text>
-        <TouchableOpacity
-          onPress={() => handleSectionNavigation('homeServices')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.seeAll}>See all</Text>
-        </TouchableOpacity>
       </View>
 
+      {/* ---------------------------- HERO BANNER ---------------------------- */}
+      <ImageBackground
+        source={HOME_BG}
+        style={styles.banner}
+        imageStyle={styles.bannerImage}
+      >
+        <View style={styles.bannerOverlay} />
+
+        <View style={styles.bannerContent}>
+          <Text style={styles.bannerText}>
+            Book your appointment today{'\n'}
+            and take your look to the next level
+          </Text>
+
+          <TouchableOpacity
+            style={styles.bannerBtn}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('HomeServiceSelectionScreen')}
+          >
+            <Text style={styles.bannerBtnText}>Book Appointment</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+
+      {/* ------------------------------ SERVICES LIST ------------------------------ */}
       <FlatList
         data={homeServices}
         horizontal
@@ -98,9 +120,7 @@ const HomeServices = ({
         renderItem={renderHomeServiceItem}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              No home services found for {gender}
-            </Text>
+            {/* <Text style={styles.emptyText}>No home services available</Text> */}
           </View>
         }
       />
@@ -108,29 +128,70 @@ const HomeServices = ({
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/*                                   Styles                                   */
+/* -------------------------------------------------------------------------- */
+
 const styles = StyleSheet.create({
+  /* Section */
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginHorizontal: wp('4%'),
     marginTop: hp('2%'),
-    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: wp('4.5%'),
-    fontWeight: '700',
     fontFamily: 'Poppins-Medium',
+    fontWeight: '700',
     color: '#000',
   },
-  seeAll: {
-    color: COLORS.primary,
-    fontWeight: '600',
-    fontSize: wp('3.8%'),
+
+  /* Banner */
+  banner: {
+    height: hp('26%'),
+    marginHorizontal: wp('4%'),
+    marginTop: hp('1.5%'),
+    borderRadius: wp('4%'),
+    overflow: 'hidden',
+    justifyContent: 'center',
   },
+  bannerImage: {
+    resizeMode: 'cover',
+  },
+  bannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  bannerContent: {
+    alignItems: 'center',
+    paddingHorizontal: wp('6%'),
+  },
+  bannerText: {
+    color: '#fff',
+    fontSize: wp('4.5%'),
+    fontFamily: 'Poppins-Medium',
+    textAlign: 'center',
+    lineHeight: wp('6%'),
+    marginBottom: hp('2%'),
+  },
+  bannerBtn: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: hp('1.3%'),
+    paddingHorizontal: wp('10%'),
+    borderRadius: wp('10%'),
+  },
+  bannerBtnText: {
+    color: '#fff',
+    fontSize: wp('3.8%'),
+    fontFamily: 'Poppins-Medium',
+  },
+
+  /* List */
   listContainer: {
     paddingHorizontal: wp('2%'),
     paddingVertical: hp('1%'),
   },
+
+  /* Card */
   serviceCard: {
     width: wp('42%'),
     marginHorizontal: wp('2%'),
@@ -155,22 +216,17 @@ const styles = StyleSheet.create({
   nameItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     width: '100%',
     marginBottom: hp('0.5%'),
   },
   serviceName: {
     fontSize: wp('3.8%'),
-    fontWeight: 'bold',
-    color: '#060505',
     fontFamily: 'Poppins-Medium',
     flex: 1,
     marginRight: wp('2%'),
   },
   servicePrice: {
     fontSize: wp('3.8%'),
-    fontWeight: '500',
-    color: '#0a0909',
     fontFamily: 'Poppins-Medium',
   },
   serviceDesc: {
@@ -178,31 +234,27 @@ const styles = StyleSheet.create({
     fontSize: wp('3.2%'),
     marginBottom: hp('1%'),
     alignSelf: 'flex-start',
-    lineHeight: wp('4%'),
     height: hp('4%'),
   },
   bookBtn: {
     backgroundColor: COLORS.primary,
     paddingVertical: hp('1%'),
     borderRadius: wp('5%'),
-    alignItems: 'center',
-    justifyContent: 'center',
     width: '100%',
-    marginTop: hp('1%'),
+    alignItems: 'center',
   },
   bookBtnText: {
     color: '#fff',
-    fontWeight: '500',
     fontSize: wp('3.5%'),
     fontFamily: 'Poppins-Medium',
   },
+
   emptyContainer: {
     width: wp('90%'),
     alignItems: 'center',
     padding: wp('5%'),
   },
   emptyText: {
-    textAlign: 'center',
     color: '#666',
     fontSize: wp('3.8%'),
   },

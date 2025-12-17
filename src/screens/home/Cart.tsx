@@ -22,6 +22,34 @@ import COLORS from '../../utils/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Popup from '../../components/PopUp';
 
+// Local placeholder – adjust path if needed
+const PLACEHOLDER_IMAGE = require('../../assets/placeholder.jpg');
+
+// Reusable image with fallback (same idea as OurProducts)
+const CartItemImage = ({ uri }) => {
+  const [error, setError] = useState(false);
+
+  if (!uri || error) {
+    return (
+      <Image
+        source={PLACEHOLDER_IMAGE}
+        style={styles.image}
+        resizeMode="cover"
+      />
+    );
+  }
+
+  return (
+    <Image
+      source={{ uri }}
+      style={styles.image}
+      resizeMode="cover"
+      onError={() => setError(true)}
+      defaultSource={PLACEHOLDER_IMAGE}
+    />
+  );
+};
+
 const CartScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
@@ -48,7 +76,7 @@ const CartScreen = () => {
     );
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   // Fetch userId from AsyncStorage
   useEffect(() => {
@@ -81,7 +109,17 @@ const CartScreen = () => {
       }
 
       setLoading(true);
-      const response = await fetch(`https://naushad.onrender.com/api/cart`);
+
+      // Call cart API
+      const response = await fetch('https://naushad.onrender.com/api/cart', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // if backend uses this like cookies:
+          'x-user-id': freshUserId,
+        },
+      });
+
       const data = await response.json();
       console.log(
         '📥 CartScreen - Full API Response:',
@@ -91,11 +129,10 @@ const CartScreen = () => {
       console.log('🔍 CartScreen - Success:', data.success);
 
       if (response.ok && data.success) {
-        // Cart items are in data.data array
         const allCartItems = data.data || [];
         console.log('📦 CartScreen - All cart items from API:', allCartItems);
 
-        // Filter items for current user
+        // Filter items for current user (extra safety)
         const filteredItems = allCartItems.filter(item => {
           const matchesUser = item.userId === freshUserId;
           console.log(
@@ -110,7 +147,24 @@ const CartScreen = () => {
         );
         console.log('👤 CartScreen - Current userId:', freshUserId);
         console.log('📊 CartScreen - Found items count:', filteredItems.length);
-        setCartItems(filteredItems);
+
+        // Normalize to match UI keys: amount -> price, productName -> name, etc.
+        const normalizedItems = filteredItems.map(item => {
+          const productImage =
+            item.productPackageId?.image || item.productId?.image || null;
+
+          return {
+            ...item,
+            // UI expects name, price, image, quantity
+            name: item.productName,
+            price: item.amount,
+            image: productImage || null,
+            description: item.productDescription,
+            quantity: Number(item.quantity || 1),
+          };
+        });
+
+        setCartItems(normalizedItems);
       } else {
         showPopup('Unable to load your cart. Please try again');
         setCartItems([]);
@@ -144,6 +198,10 @@ const CartScreen = () => {
         `https://naushad.onrender.com/api/cart/${itemId}`,
         {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': freshUserId,
+          },
         },
       );
       const data = await response.json();
@@ -199,7 +257,6 @@ const CartScreen = () => {
       return;
     }
 
-    // Prepare cart items for payment screen
     const checkoutItems = cartItems.map(item => ({
       type: 'cart',
       serviceName: item.name,
@@ -208,6 +265,8 @@ const CartScreen = () => {
       quantity: item.quantity || 1,
       image: item.image,
       source: 'Cart',
+      orderCode: item.orderCode,
+      cartId: item._id,
     }));
 
     console.log('🛒 Checkout Items:', checkoutItems);
@@ -218,7 +277,7 @@ const CartScreen = () => {
     });
   };
 
-  // ✅ Calculations (only total, no GST / discount)
+  // ✅ Calculations (only total, no GST / discount) – use amount/price
   const total = cartItems.reduce(
     (acc, item) => acc + Number(item.price || 0) * Number(item.quantity || 0),
     0,
@@ -302,17 +361,8 @@ const CartScreen = () => {
                   },
                 ]}
               >
-                {/* Premium Badge */}
-                <View style={styles.premiumBadge}>
-                  <Text style={styles.premiumText}>Premium</Text>
-                </View>
-
-                <Image
-                  source={{
-                    uri: item.image || 'https://via.placeholder.com/150',
-                  }}
-                  style={styles.image}
-                />
+                {/* Image with placeholder fallback */}
+                <CartItemImage uri={item.image} />
 
                 <View style={styles.itemDetails}>
                   <View style={styles.headerRow}>
@@ -321,6 +371,7 @@ const CartScreen = () => {
                         styles.itemName,
                         { color: theme.dark ? '#fff' : '#000' },
                       ]}
+                      numberOfLines={2}
                     >
                       {item.name}
                     </Text>
@@ -337,14 +388,17 @@ const CartScreen = () => {
                     </TouchableOpacity>
                   </View>
 
-                  <Text
-                    style={[
-                      styles.itemDescription,
-                      { color: theme.dark ? '#bbb' : '#6c757d' },
-                    ]}
-                  >
-                    Premium service with expert care
-                  </Text>
+                  {!!item.description && (
+                    <Text
+                      style={[
+                        styles.itemDescription,
+                        { color: theme.dark ? '#bbb' : '#6c757d' },
+                      ]}
+                      numberOfLines={2}
+                    >
+                      {item.description}
+                    </Text>
+                  )}
 
                   <View style={styles.bottomRow}>
                     <View style={styles.priceContainer}>
@@ -364,7 +418,7 @@ const CartScreen = () => {
                           },
                         ]}
                       >
-                        ₹{Math.round(item.price * 1.2)}
+                        ₹{Math.round(Number(item.price || 0) * 1.2)}
                       </Text>
                     </View>
 
@@ -563,22 +617,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.05)',
-  },
-  premiumBadge: {
-    position: 'absolute',
-    top: wp('3%'),
-    left: wp('3%'),
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: wp('3%'),
-    paddingVertical: wp('1%'),
-    borderRadius: wp('2%'),
-    zIndex: 2,
-  },
-  premiumText: {
-    color: '#fff',
-    fontSize: wp('2.8%'),
-    fontWeight: '700',
-    letterSpacing: 0.5,
   },
   image: {
     width: wp('28%'),

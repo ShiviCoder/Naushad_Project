@@ -1,3 +1,5 @@
+// src/screens/home/HomeComponents/GenderToggle.js
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import RadioButton from '../../../components/RadioButton';
@@ -22,7 +24,8 @@ const GenderToggle = ({ gender, onGenderChange, style }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: hp('1%'),
+    paddingVertical: hp('1%'), // Reduced padding
+    paddingHorizontal: wp('2%'), // Reduced padding
   },
 });
 
